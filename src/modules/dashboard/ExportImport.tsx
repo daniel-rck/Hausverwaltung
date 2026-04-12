@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { exportDatabase, importDatabase, downloadJson } from '../../db/export-import';
+import { exportDatabase, importDatabase, downloadJson, exportAsUrl } from '../../db/export-import';
 import { Card } from '../../components/shared/Card';
 import { ConfirmDialog } from '../../components/shared/ConfirmDialog';
 
@@ -9,6 +9,7 @@ export function ExportImport() {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingFile, setPendingFile] = useState<string | null>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [shareUrl, setShareUrl] = useState<string | null>(null);
 
   const handleExport = async () => {
     try {
@@ -58,6 +59,17 @@ export function ExportImport() {
     }
   };
 
+  const handleShareUrl = async () => {
+    try {
+      const url = await exportAsUrl();
+      setShareUrl(url);
+      await navigator.clipboard.writeText(url);
+      setMessage({ type: 'success', text: 'Transfer-Link in Zwischenablage kopiert.' });
+    } catch {
+      setMessage({ type: 'error', text: 'Link-Erstellung fehlgeschlagen.' });
+    }
+  };
+
   return (
     <>
       <Card title="Daten-Backup">
@@ -82,6 +94,29 @@ export function ExportImport() {
             onChange={handleFileSelect}
             className="hidden"
           />
+        </div>
+
+        <div className="mt-3 pt-3 border-t border-stone-100">
+          <button
+            onClick={handleShareUrl}
+            className="w-full px-4 py-2 text-sm border border-stone-300 text-stone-700 rounded-lg hover:bg-stone-50 transition-colors"
+          >
+            Transfer-Link erstellen (zum Teilen per URL)
+          </button>
+          {shareUrl && (
+            <div className="mt-2">
+              <input
+                type="text"
+                readOnly
+                value={shareUrl}
+                className="w-full border border-stone-200 rounded-lg px-3 py-1.5 text-xs font-mono bg-stone-50 text-stone-600"
+                onClick={(e) => (e.target as HTMLInputElement).select()}
+              />
+              <p className="text-xs text-stone-400 mt-1">
+                Link auf dem anderen Gerät im Browser öffnen, um die Daten zu importieren.
+              </p>
+            </div>
+          )}
         </div>
 
         {message && (

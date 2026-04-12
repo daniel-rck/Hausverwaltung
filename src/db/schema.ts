@@ -50,6 +50,7 @@ export interface CostType {
 
 export interface Cost {
   id?: number;
+  propertyId: number;
   year: number;
   costTypeId: number;
   totalAmount: number;
@@ -96,6 +97,7 @@ export interface MeterReading {
 
 export interface SupplierBill {
   id?: number;
+  propertyId: number;
   year: number;
   type: 'water' | 'gas' | 'electricity';
   supplier: string;

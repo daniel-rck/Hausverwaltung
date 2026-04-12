@@ -10,6 +10,7 @@ import { FinanzenPage } from './modules/finanzen/FinanzenPage';
 import { InstandhaltungPage } from './modules/instandhaltung/InstandhaltungPage';
 import { UebergabePage } from './modules/uebergabe/UebergabePage';
 import { RenditePage } from './modules/rendite/RenditePage';
+import { ImportPage } from './modules/dashboard/ImportPage';
 
 export function App() {
   return (
@@ -26,6 +27,7 @@ export function App() {
             <Route path="/instandhaltung" element={<InstandhaltungPage />} />
             <Route path="/uebergabe" element={<UebergabePage />} />
             <Route path="/rendite" element={<RenditePage />} />
+            <Route path="/import/:payload" element={<ImportPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </AppShell>

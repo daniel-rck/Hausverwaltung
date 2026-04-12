@@ -1,3 +1,4 @@
+import { deflate } from 'pako';
 import { db } from './index';
 
 interface ExportData {
@@ -75,4 +76,21 @@ export function downloadJson(content: string, filename: string): void {
   a.download = filename;
   a.click();
   URL.revokeObjectURL(url);
+}
+
+/**
+ * Compress export data into a base64url string for embedding in a URL.
+ * Flow: JSON string → deflate → base64url
+ */
+export async function exportAsUrl(): Promise<string> {
+  const json = await exportDatabase();
+  const compressed = deflate(json);
+  // Convert to base64url (URL-safe base64)
+  const base64 = btoa(String.fromCharCode(...compressed))
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
+
+  const baseUrl = window.location.origin + window.location.pathname;
+  return `${baseUrl}#/import/${base64}`;
 }

@@ -6,9 +6,11 @@ import { seedDatabase } from '../../db/seed';
 import { useProperty } from '../../hooks/useProperty';
 import { Card } from '../../components/shared/Card';
 import { EmptyState } from '../../components/shared/EmptyState';
+import { ConfirmDialog } from '../../components/shared/ConfirmDialog';
 import { QuickStats } from './QuickStats';
 import { AlertsList } from './AlertsList';
 import { ExportImport } from './ExportImport';
+import { formatEuro } from '../../utils/format';
 import type { LandlordInfo } from '../../db/schema';
 
 const moduleLinks = [
@@ -23,7 +25,7 @@ const moduleLinks = [
 ];
 
 export function DashboardPage() {
-  const { activeProperty, addProperty } = useProperty();
+  const { activeProperty, properties, addProperty } = useProperty();
 
   // Seed DB on first load
   useEffect(() => {
@@ -46,9 +48,7 @@ export function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-xl font-bold text-stone-800">
-        {activeProperty.name}
-      </h1>
+      <PropertyCard />
 
       <QuickStats />
 
@@ -74,7 +74,202 @@ export function DashboardPage() {
           <SettingsCard />
         </div>
       </div>
+
+      {/* Portfolio-Übersicht wenn mehrere Objekte */}
+      {properties.length > 1 && <PortfolioOverview />}
     </div>
+  );
+}
+
+/** Objekt anzeigen / bearbeiten / löschen */
+function PropertyCard() {
+  const { activeProperty, updateProperty, deleteProperty, properties } = useProperty();
+  const [editing, setEditing] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [form, setForm] = useState({ name: '', address: '' });
+
+  useEffect(() => {
+    if (activeProperty) {
+      setForm({ name: activeProperty.name, address: activeProperty.address });
+    }
+  }, [activeProperty]);
+
+  if (!activeProperty) return null;
+
+  const handleSave = async () => {
+    await updateProperty({
+      ...activeProperty,
+      name: form.name.trim() || activeProperty.name,
+      address: form.address,
+    });
+    setEditing(false);
+  };
+
+  const handleDelete = async () => {
+    setConfirmDelete(false);
+    await deleteProperty(activeProperty.id!);
+  };
+
+  if (!editing) {
+    return (
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-xl font-bold text-stone-800">{activeProperty.name}</h1>
+          {activeProperty.address && (
+            <p className="text-sm text-stone-500">{activeProperty.address}</p>
+          )}
+        </div>
+        <button
+          onClick={() => setEditing(true)}
+          className="text-xs text-stone-400 hover:text-stone-600 mt-1"
+        >
+          Bearbeiten
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <Card title="Objekt bearbeiten">
+        <div className="space-y-3">
+          <div>
+            <label className="block text-xs font-medium text-stone-500 mb-1">Name</label>
+            <input
+              type="text"
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              className="w-full border border-stone-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-stone-500 mb-1">Adresse</label>
+            <input
+              type="text"
+              value={form.address}
+              onChange={(e) => setForm({ ...form, address: e.target.value })}
+              className="w-full border border-stone-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400"
+            />
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={handleSave}
+              className="px-4 py-1.5 text-sm bg-stone-800 text-white rounded-lg hover:bg-stone-900 transition-colors"
+            >
+              Speichern
+            </button>
+            <button
+              onClick={() => setEditing(false)}
+              className="px-4 py-1.5 text-sm border border-stone-300 text-stone-600 rounded-lg hover:bg-stone-50 transition-colors"
+            >
+              Abbrechen
+            </button>
+            {properties.length > 1 && (
+              <button
+                onClick={() => setConfirmDelete(true)}
+                className="px-4 py-1.5 text-sm text-red-600 hover:text-red-700 ml-auto"
+              >
+                Objekt löschen
+              </button>
+            )}
+          </div>
+        </div>
+      </Card>
+
+      <ConfirmDialog
+        open={confirmDelete}
+        title="Objekt löschen?"
+        message={`"${activeProperty.name}" und alle zugehörigen Daten (Wohnungen, Mieter, etc.) werden gelöscht. Diese Aktion kann nicht rückgängig gemacht werden.`}
+        confirmLabel="Endgültig löschen"
+        onConfirm={handleDelete}
+        onCancel={() => setConfirmDelete(false)}
+        danger
+      />
+    </>
+  );
+}
+
+/** Objektübergreifende Übersicht */
+function PortfolioOverview() {
+  const { properties } = useProperty();
+
+  const portfolioData = useLiveQuery(async () => {
+    const now = new Date().toISOString().slice(0, 7);
+    let totalUnits = 0;
+    let totalOccupied = 0;
+    let totalMonthlyRent = 0;
+
+    for (const prop of properties) {
+      const units = await db.units
+        .where('propertyId')
+        .equals(prop.id!)
+        .toArray();
+
+      const unitIds = units.map((u) => u.id!);
+      totalUnits += units.length;
+
+      const occupancies = await db.occupancies.toArray();
+      const active = occupancies.filter(
+        (o) =>
+          unitIds.includes(o.unitId) &&
+          o.from <= now &&
+          (o.to === null || o.to >= now),
+      );
+
+      const occupied = new Set(active.map((o) => o.unitId)).size;
+      totalOccupied += occupied;
+      totalMonthlyRent += active.reduce(
+        (s, o) => s + o.rentCold + o.rentUtilities,
+        0,
+      );
+    }
+
+    return {
+      totalProperties: properties.length,
+      totalUnits,
+      totalOccupied,
+      totalVacant: totalUnits - totalOccupied,
+      totalMonthlyRent,
+    };
+  }, [properties]);
+
+  if (!portfolioData) return null;
+
+  return (
+    <Card title="Portfolio-Übersicht (alle Objekte)">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-center">
+        <div>
+          <p className="text-xs text-stone-500">Objekte</p>
+          <p className="text-lg font-semibold font-mono font-tabular text-stone-700">
+            {portfolioData.totalProperties}
+          </p>
+        </div>
+        <div>
+          <p className="text-xs text-stone-500">Wohneinheiten</p>
+          <p className="text-lg font-semibold font-mono font-tabular text-stone-700">
+            {portfolioData.totalUnits}
+          </p>
+        </div>
+        <div>
+          <p className="text-xs text-stone-500">Vermietet</p>
+          <p className="text-lg font-semibold font-mono font-tabular text-green-600">
+            {portfolioData.totalOccupied}
+          </p>
+        </div>
+        <div>
+          <p className="text-xs text-stone-500">Leerstand</p>
+          <p className={`text-lg font-semibold font-mono font-tabular ${portfolioData.totalVacant > 0 ? 'text-amber-600' : 'text-stone-400'}`}>
+            {portfolioData.totalVacant}
+          </p>
+        </div>
+        <div>
+          <p className="text-xs text-stone-500">Monatsmiete gesamt</p>
+          <p className="text-lg font-semibold font-mono font-tabular text-emerald-600">
+            {formatEuro(portfolioData.totalMonthlyRent)}
+          </p>
+        </div>
+      </div>
+    </Card>
   );
 }
 
