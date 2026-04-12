@@ -111,6 +111,27 @@ export function UnitList({ onSelectUnit }: UnitListProps) {
           <StatusBadge status="yellow" label="Leerstand" />
         ),
     },
+    {
+      key: 'actions',
+      header: '',
+      render: (r) => (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            setEditUnit(r.unit);
+            setForm({
+              name: r.unit.name,
+              area: String(r.unit.area),
+              floor: r.unit.floor ?? '',
+            });
+            setShowForm(true);
+          }}
+          className="text-xs text-stone-400 hover:text-stone-700"
+        >
+          Bearbeiten
+        </button>
+      ),
+    },
   ];
 
   if (!activeProperty) return null;
