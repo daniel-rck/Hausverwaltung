@@ -1,73 +1,55 @@
-# React + TypeScript + Vite
+# Hausverwaltung
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Kostenlose Web-App für private Vermieter kleiner Mehrfamilienhäuser.
 
-Currently, two official plugins are available:
+**[Direkt starten](https://daniel-rck.github.io/hausverwaltung/)**
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+---
 
-## React Compiler
+## Was ist das?
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Hausverwaltung hilft Ihnen, Ihr Mietobjekt einfach und übersichtlich zu verwalten — direkt im Browser, ohne Installation, ohne Registrierung, ohne monatliche Kosten.
 
-## Expanding the ESLint configuration
+Die App ist gemacht für Vermieter mit 3 bis 10 Wohneinheiten, die ihre Verwaltung unkompliziert selbst erledigen möchten.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Funktionen
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- **Mieterverwaltung** — Wohnungen, Mieter und Belegungszeiträume auf einen Blick
+- **Nebenkostenabrechnung** — Jährliche Abrechnung mit Verteilungsschlüsseln, druckfertig für Ihre Mieter
+- **Zählerstand-Erfassung** — Alle Zähler (Wasser, Strom, Gas, Heizung) an einem Ort, mit Eichfrist-Erinnerung
+- **Wasseranalyse** — Verbrauch prüfen, Versorger- und Messdienstleister-Daten vergleichen, Auffälligkeiten erkennen
+- **Mieteinnahmen** — Soll/Ist-Vergleich, offene Posten, Jahresübersicht
+- **Instandhaltung** — Reparaturen, Wartungen und wiederkehrende Aufgaben verwalten
+- **Übergabeprotokoll** — Ein- und Auszugsprotokolle mit Raumzustand, Zählerständen und Unterschrift
+- **Renditeberechnung** — Brutto-/Nettomietrendite, Cashflow und Eigenkapitalrendite
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## Ihre Daten gehören Ihnen
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+- Alle Daten bleiben **lokal in Ihrem Browser** gespeichert — es werden keine Daten an einen Server gesendet
+- Kein Account, keine Registrierung, keine E-Mail-Adresse nötig
+- **Backup per JSON-Datei** — jederzeit exportieren und auf einem anderen Gerät importieren
+- **Transfer per Link** — Daten komprimiert als URL teilen, z.B. vom PC aufs Tablet
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## So funktioniert's
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+1. Öffnen Sie **[daniel-rck.github.io/hausverwaltung](https://daniel-rck.github.io/hausverwaltung/)**
+2. Legen Sie Ihr erstes Mietobjekt an (Name, Adresse)
+3. Fügen Sie Wohnungen und Mieter hinzu
+4. Fertig — alle weiteren Module (Nebenkosten, Zähler, Finanzen, ...) greifen automatisch auf diese Daten zu
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+**Tipp:** Machen Sie regelmäßig ein Backup über den Export-Button auf dem Dashboard.
+
+## Drucken
+
+Abrechnungen und Übergabeprotokolle können direkt aus der App als saubere A4-Seiten gedruckt oder als PDF gespeichert werden (über die Druckfunktion Ihres Browsers).
+
+## Technische Hinweise
+
+- Funktioniert in allen modernen Browsern (Chrome, Firefox, Safari, Edge)
+- Responsive — nutzbar auf Handy, Tablet und Desktop
+- Nach dem ersten Laden auch **offline** nutzbar
+- Kostenlos und quelloffen (MIT-Lizenz)
+
+## Fragen oder Probleme?
+
+Erstellen Sie ein [Issue](https://github.com/daniel-rck/hausverwaltung/issues) hier auf GitHub.
