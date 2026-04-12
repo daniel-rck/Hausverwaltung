@@ -52,7 +52,7 @@ export function DataTable<T>({
 
   if (data.length === 0) {
     return (
-      <p className="text-sm text-stone-500 py-4 text-center">{emptyMessage}</p>
+      <p className="text-sm text-stone-500 dark:text-stone-400 py-4 text-center">{emptyMessage}</p>
     );
   }
 
@@ -60,13 +60,13 @@ export function DataTable<T>({
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-stone-200">
+          <tr className="border-b border-stone-200 dark:border-stone-700">
             {columns.map((col) => (
               <th
                 key={col.key}
                 onClick={() => toggleSort(col.key)}
-                className={`py-2 px-3 font-medium text-stone-500 text-${col.align ?? 'left'} ${
-                  col.sortValue ? 'cursor-pointer select-none hover:text-stone-700' : ''
+                className={`py-2 px-3 font-medium text-stone-500 dark:text-stone-400 text-${col.align ?? 'left'} ${
+                  col.sortValue ? 'cursor-pointer select-none hover:text-stone-700 dark:hover:text-stone-200' : ''
                 }`}
               >
                 {col.header}
@@ -82,8 +82,8 @@ export function DataTable<T>({
             <tr
               key={keyFn(row)}
               onClick={() => onRowClick?.(row)}
-              className={`border-b border-stone-100 ${
-                onRowClick ? 'cursor-pointer hover:bg-stone-50' : ''
+              className={`border-b border-stone-100 dark:border-stone-700/50 ${
+                onRowClick ? 'cursor-pointer hover:bg-stone-50 dark:hover:bg-stone-700/50' : ''
               }`}
             >
               {columns.map((col) => (

@@ -30,8 +30,8 @@ export function SidebarNav() {
           className={({ isActive }) =>
             `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
               isActive
-                ? 'bg-stone-200 text-stone-900'
-                : 'text-stone-600 hover:bg-stone-100 hover:text-stone-800'
+                ? 'bg-stone-200 dark:bg-stone-700 text-stone-900 dark:text-stone-100'
+                : 'text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-stone-800 dark:hover:text-stone-200'
             }`
           }
         >
@@ -45,7 +45,7 @@ export function SidebarNav() {
 
 export function BottomNav() {
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-stone-200 z-50 no-print">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-stone-800 border-t border-stone-200 dark:border-stone-700 z-50 no-print">
       <div className="flex justify-around py-1">
         {navItems.slice(0, 5).map((item) => (
           <NavLink
@@ -54,7 +54,7 @@ export function BottomNav() {
             end={item.path === '/'}
             className={({ isActive }) =>
               `flex flex-col items-center gap-0.5 px-2 py-1 text-xs ${
-                isActive ? 'text-stone-900 font-semibold' : 'text-stone-500'
+                isActive ? 'text-stone-900 dark:text-stone-100 font-semibold' : 'text-stone-500 dark:text-stone-400'
               }`
             }
           >
@@ -66,7 +66,7 @@ export function BottomNav() {
           to="/finanzen"
           className={({ isActive }) =>
             `flex flex-col items-center gap-0.5 px-2 py-1 text-xs ${
-              isActive ? 'text-stone-900 font-semibold' : 'text-stone-500'
+              isActive ? 'text-stone-900 dark:text-stone-100 font-semibold' : 'text-stone-500 dark:text-stone-400'
             }`
           }
         >
