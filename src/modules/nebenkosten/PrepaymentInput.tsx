@@ -136,33 +136,33 @@ export function PrepaymentInput({ propertyId, year }: PrepaymentInputProps) {
 
   return (
     <Card title={`Vorauszahlungen ${year}`}>
-      <p className="text-xs text-stone-500 mb-4">
+      <p className="text-xs text-stone-500 dark:text-stone-400 mb-4">
         Automatisch berechnet: NK-Vorauszahlung &times; Monate. Bei Bedarf
         k\u00F6nnen Sie den Betrag manuell \u00FCberschreiben.
       </p>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-stone-200">
-              <th className="py-2 px-3 text-left font-medium text-stone-500">
+            <tr className="border-b border-stone-200 dark:border-stone-700">
+              <th className="py-2 px-3 text-left font-medium text-stone-500 dark:text-stone-400">
                 Wohnung
               </th>
-              <th className="py-2 px-3 text-left font-medium text-stone-500">
+              <th className="py-2 px-3 text-left font-medium text-stone-500 dark:text-stone-400">
                 Mieter
               </th>
-              <th className="py-2 px-3 text-right font-medium text-stone-500">
+              <th className="py-2 px-3 text-right font-medium text-stone-500 dark:text-stone-400">
                 NK/Monat
               </th>
-              <th className="py-2 px-3 text-center font-medium text-stone-500">
+              <th className="py-2 px-3 text-center font-medium text-stone-500 dark:text-stone-400">
                 Monate
               </th>
-              <th className="py-2 px-3 text-right font-medium text-stone-500">
+              <th className="py-2 px-3 text-right font-medium text-stone-500 dark:text-stone-400">
                 Automatisch
               </th>
-              <th className="py-2 px-3 text-right font-medium text-stone-500">
+              <th className="py-2 px-3 text-right font-medium text-stone-500 dark:text-stone-400">
                 Vorauszahlung
               </th>
-              <th className="py-2 px-3 text-center font-medium text-stone-500" />
+              <th className="py-2 px-3 text-center font-medium text-stone-500 dark:text-stone-400" />
             </tr>
           </thead>
           <tbody>
@@ -173,21 +173,21 @@ export function PrepaymentInput({ propertyId, year }: PrepaymentInputProps) {
               return (
                 <tr
                   key={row.occupancy.id}
-                  className="border-b border-stone-100"
+                  className="border-b border-stone-100 dark:border-stone-700"
                 >
-                  <td className="py-2 px-3 text-stone-700">
+                  <td className="py-2 px-3 text-stone-700 dark:text-stone-200">
                     {row.unit?.name ?? '\u2013'}
                   </td>
-                  <td className="py-2 px-3 text-stone-700">
+                  <td className="py-2 px-3 text-stone-700 dark:text-stone-200">
                     {row.tenant?.name ?? '\u2013'}
                   </td>
-                  <td className="py-2 px-3 text-right font-mono font-tabular text-stone-600">
+                  <td className="py-2 px-3 text-right font-mono font-tabular text-stone-600 dark:text-stone-300">
                     {formatEuro(row.occupancy.rentUtilities)}
                   </td>
-                  <td className="py-2 px-3 text-center text-stone-600">
+                  <td className="py-2 px-3 text-center text-stone-600 dark:text-stone-300">
                     {row.months}
                   </td>
-                  <td className="py-2 px-3 text-right font-mono font-tabular text-stone-500">
+                  <td className="py-2 px-3 text-right font-mono font-tabular text-stone-500 dark:text-stone-400">
                     {formatEuro(row.autoAmount)}
                   </td>
                   <td className="py-2 px-3">
@@ -203,7 +203,7 @@ export function PrepaymentInput({ propertyId, year }: PrepaymentInputProps) {
                     {isOverridden && (
                       <button
                         onClick={() => handleReset(row.occupancy.id!)}
-                        className="text-xs text-stone-400 hover:text-stone-700"
+                        className="text-xs text-stone-400 dark:text-stone-500 hover:text-stone-700 dark:hover:text-stone-200"
                         title="Auf automatischen Wert zur\u00FCcksetzen"
                       >
                         Zur\u00FCcksetzen
@@ -215,14 +215,14 @@ export function PrepaymentInput({ propertyId, year }: PrepaymentInputProps) {
             })}
           </tbody>
           <tfoot>
-            <tr className="border-t border-stone-200">
+            <tr className="border-t border-stone-200 dark:border-stone-700">
               <td
                 colSpan={5}
-                className="py-2 px-3 text-sm font-semibold text-stone-600"
+                className="py-2 px-3 text-sm font-semibold text-stone-600 dark:text-stone-300"
               >
                 Gesamt Vorauszahlungen
               </td>
-              <td className="py-2 px-3 text-right font-mono font-tabular font-semibold text-stone-800">
+              <td className="py-2 px-3 text-right font-mono font-tabular font-semibold text-stone-800 dark:text-stone-100">
                 {formatEuro(totalPrepayments)}
               </td>
               <td />

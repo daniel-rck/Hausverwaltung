@@ -127,10 +127,10 @@ export function CostEntry({ propertyId, year }: CostEntryProps) {
                   className="flex items-center gap-4"
                 >
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-stone-800 truncate">
+                    <p className="text-sm font-medium text-stone-800 dark:text-stone-100 truncate">
                       {row.costType.name}
                     </p>
-                    <p className="text-xs text-stone-400">
+                    <p className="text-xs text-stone-400 dark:text-stone-500">
                       {DISTRIBUTION_LABELS[row.costType.distribution]}
                     </p>
                   </div>
@@ -143,11 +143,11 @@ export function CostEntry({ propertyId, year }: CostEntryProps) {
                   />
                 </div>
               ))}
-              <div className="flex items-center justify-between pt-2 border-t border-stone-100">
-                <span className="text-sm font-semibold text-stone-600">
+              <div className="flex items-center justify-between pt-2 border-t border-stone-100 dark:border-stone-700">
+                <span className="text-sm font-semibold text-stone-600 dark:text-stone-300">
                   Zwischensumme
                 </span>
-                <span className="text-sm font-semibold font-mono font-tabular text-stone-800">
+                <span className="text-sm font-semibold font-mono font-tabular text-stone-800 dark:text-stone-100">
                   {formatEuro(subtotal)}
                 </span>
               </div>
@@ -158,10 +158,10 @@ export function CostEntry({ propertyId, year }: CostEntryProps) {
 
       <Card>
         <div className="flex items-center justify-between">
-          <span className="text-base font-bold text-stone-800">
+          <span className="text-base font-bold text-stone-800 dark:text-stone-100">
             Gesamtkosten {year}
           </span>
-          <span className="text-base font-bold font-mono font-tabular text-stone-800">
+          <span className="text-base font-bold font-mono font-tabular text-stone-800 dark:text-stone-100">
             {formatEuro(totalAll)}
           </span>
         </div>

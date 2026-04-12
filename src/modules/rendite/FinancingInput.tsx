@@ -123,10 +123,10 @@ export function FinancingInput({ propertyId }: FinancingInputProps) {
           step={0.1}
         />
         <div>
-          <label className="block text-xs font-medium text-stone-500 mb-1">
+          <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">
             Jährliche Kreditrate
           </label>
-          <div className="w-full border border-stone-200 bg-stone-50 rounded-lg px-3 py-1.5 text-sm text-right font-mono text-stone-600">
+          <div className="w-full border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800/50 rounded-lg px-3 py-1.5 text-sm text-right font-mono text-stone-600 dark:text-stone-300">
             {formatEuro(data.jaehrlicheKreditrate)}
           </div>
         </div>

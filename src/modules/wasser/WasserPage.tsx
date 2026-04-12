@@ -25,7 +25,7 @@ export function WasserPage() {
   if (!activeProperty) {
     return (
       <div>
-        <h1 className="text-xl font-bold text-stone-800 mb-4">Wasseranalyse</h1>
+        <h1 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-4">Wasseranalyse</h1>
         <Card>
           <EmptyState
             icon="💧"
@@ -42,11 +42,11 @@ export function WasserPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-xl font-bold text-stone-800">Wasseranalyse</h1>
+        <h1 className="text-xl font-bold text-stone-800 dark:text-stone-100">Wasseranalyse</h1>
         <div className="flex items-center gap-2">
           <label
             htmlFor="year-select"
-            className="text-sm font-medium text-stone-600"
+            className="text-sm font-medium text-stone-600 dark:text-stone-300"
           >
             Jahr:
           </label>
@@ -54,7 +54,7 @@ export function WasserPage() {
             id="year-select"
             value={year}
             onChange={(e) => setYear(Number(e.target.value))}
-            className="border border-stone-300 rounded-lg px-3 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-stone-400"
+            className="border border-stone-300 dark:border-stone-600 rounded-lg px-3 py-1.5 text-sm bg-white dark:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-500"
           >
             {yearOptions.map((y) => (
               <option key={y} value={y}>

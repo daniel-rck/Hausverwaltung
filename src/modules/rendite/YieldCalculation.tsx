@@ -18,14 +18,14 @@ interface MetricCardProps {
 function MetricCard({ label, value, positive }: MetricCardProps) {
   const colorClass =
     positive === null
-      ? 'text-stone-800'
+      ? 'text-stone-800 dark:text-stone-100'
       : positive
         ? 'text-green-600'
         : 'text-red-600';
 
   return (
-    <div className="bg-white rounded-xl border border-stone-200 shadow-sm px-4 py-3 text-center">
-      <p className="text-xs font-medium text-stone-500 mb-1">{label}</p>
+    <div className="bg-white dark:bg-stone-800 rounded-xl border border-stone-200 dark:border-stone-700 shadow-sm px-4 py-3 text-center">
+      <p className="text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">{label}</p>
       <p className={`text-lg font-bold font-mono font-tabular ${colorClass}`}>
         {value}
       </p>

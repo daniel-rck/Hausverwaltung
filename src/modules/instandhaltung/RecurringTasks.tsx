@@ -92,7 +92,7 @@ export function RecurringTasks() {
       key: 'unit',
       header: 'Wohnung',
       render: (r) => (
-        <span className={r.item.unitId === null ? 'text-stone-500 italic' : ''}>
+        <span className={r.item.unitId === null ? 'text-stone-500 dark:text-stone-400 italic' : ''}>
           {r.unitName}
         </span>
       ),
@@ -110,7 +110,7 @@ export function RecurringTasks() {
       render: (r) =>
         r.item.recurringInterval
           ? `${r.item.recurringInterval} Monat${r.item.recurringInterval > 1 ? 'e' : ''}`
-          : <span className="text-stone-400">–</span>,
+          : <span className="text-stone-400 dark:text-stone-500">–</span>,
       sortValue: (r) => r.item.recurringInterval ?? 0,
       align: 'center',
     },
@@ -124,7 +124,7 @@ export function RecurringTasks() {
       key: 'nextDue',
       header: 'Nächste Fälligkeit',
       render: (r) => {
-        if (!r.item.nextDue) return <span className="text-stone-400">–</span>;
+        if (!r.item.nextDue) return <span className="text-stone-400 dark:text-stone-500">–</span>;
         return (
           <span className={r.isOverdue ? 'text-red-600 font-semibold' : ''}>
             {formatDate(r.item.nextDue)}
@@ -167,7 +167,7 @@ export function RecurringTasks() {
       ) : (
         <>
           {rows.some((r) => r.isOverdue) && (
-            <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+            <div className="mb-3 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-700 dark:text-red-400">
               {rows.filter((r) => r.isOverdue).length} Aufgabe(n) überfällig
             </div>
           )}

@@ -71,7 +71,7 @@ export function ConsumptionChart({ meterId }: ConsumptionChartProps) {
   return (
     <Card title="Verbrauchsverlauf">
       <div className="mb-3">
-        <p className="text-xs text-stone-500">
+        <p className="text-xs text-stone-500 dark:text-stone-400">
           Verbrauch zwischen aufeinanderfolgenden Ablesungen
           {unitLabel ? ` (${unitLabel})` : ''}
         </p>
@@ -89,19 +89,19 @@ export function ConsumptionChart({ meterId }: ConsumptionChartProps) {
       <div className="mt-3 overflow-x-auto">
         <table className="w-full text-xs">
           <thead>
-            <tr className="border-b border-stone-200">
-              <th className="py-1.5 px-2 text-left font-medium text-stone-500">
+            <tr className="border-b border-stone-200 dark:border-stone-700">
+              <th className="py-1.5 px-2 text-left font-medium text-stone-500 dark:text-stone-400">
                 Zeitraum
               </th>
-              <th className="py-1.5 px-2 text-right font-medium text-stone-500">
+              <th className="py-1.5 px-2 text-right font-medium text-stone-500 dark:text-stone-400">
                 Verbrauch
               </th>
             </tr>
           </thead>
           <tbody>
             {chartData.labels.map((label, i) => (
-              <tr key={label} className="border-b border-stone-100">
-                <td className="py-1.5 px-2 text-stone-600">{label}</td>
+              <tr key={label} className="border-b border-stone-100 dark:border-stone-700">
+                <td className="py-1.5 px-2 text-stone-600 dark:text-stone-300">{label}</td>
                 <td className="py-1.5 px-2 text-right font-mono">
                   {formatNumber(chartData.data[i])} {unitLabel}
                 </td>

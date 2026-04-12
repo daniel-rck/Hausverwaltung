@@ -77,7 +77,7 @@ export function CostDonut({ propertyId }: CostDonutProps) {
   if (!hasData) {
     return (
       <Card title="Kostenverteilung">
-        <p className="text-sm text-stone-500 text-center py-8">
+        <p className="text-sm text-stone-500 dark:text-stone-400 text-center py-8">
           Noch keine Daten zur Kostenverteilung vorhanden.
         </p>
       </Card>

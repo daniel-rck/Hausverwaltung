@@ -81,7 +81,7 @@ export function AlertsList() {
   if (!alerts || alerts.length === 0) {
     return (
       <Card title="Hinweise">
-        <p className="text-sm text-stone-500">Keine aktuellen Hinweise.</p>
+        <p className="text-sm text-stone-500 dark:text-stone-400">Keine aktuellen Hinweise.</p>
       </Card>
     );
   }
@@ -93,7 +93,7 @@ export function AlertsList() {
           <li
             key={i}
             className={`flex items-start gap-2 text-sm ${
-              alert.type === 'warning' ? 'text-amber-700' : 'text-blue-700'
+              alert.type === 'warning' ? 'text-amber-700 dark:text-amber-400' : 'text-blue-700 dark:text-blue-400'
             }`}
           >
             <span>{alert.type === 'warning' ? '⚠' : 'ℹ'}</span>

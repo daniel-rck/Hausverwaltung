@@ -1,5 +1,6 @@
 import { Doughnut } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import { useChartTheme } from './useChartTheme';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -28,6 +29,8 @@ export function DonutChart({
   colors = defaultColors,
   height = 250,
 }: DonutChartProps) {
+  const theme = useChartTheme();
+
   return (
     <Doughnut
       height={height}
@@ -38,7 +41,7 @@ export function DonutChart({
             data,
             backgroundColor: colors.slice(0, data.length),
             borderWidth: 2,
-            borderColor: '#fff',
+            borderColor: theme.border,
           },
         ],
       }}
@@ -46,7 +49,7 @@ export function DonutChart({
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: { position: 'bottom' },
+          legend: { position: 'bottom', labels: { color: theme.text } },
         },
       }}
     />

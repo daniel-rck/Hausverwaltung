@@ -185,7 +185,7 @@ export function MeterList() {
         r.unit ? (
           r.unit.name
         ) : (
-          <span className="text-stone-500 italic">Hauptzähler</span>
+          <span className="text-stone-500 dark:text-stone-400 italic">Hauptzähler</span>
         ),
       sortValue: (r) => r.unit?.name ?? '',
     },
@@ -196,12 +196,12 @@ export function MeterList() {
         r.lastReading ? (
           <span className="font-mono text-xs">
             {formatNumber(r.lastReading.value)} {r.meterType.unit}
-            <span className="text-stone-400 ml-1">
+            <span className="text-stone-400 dark:text-stone-500 ml-1">
               ({formatDate(r.lastReading.date)})
             </span>
           </span>
         ) : (
-          <span className="text-stone-400">–</span>
+          <span className="text-stone-400 dark:text-stone-500">–</span>
         ),
       sortValue: (r) => r.lastReading?.value ?? 0,
       align: 'right',
@@ -214,7 +214,7 @@ export function MeterList() {
         return (
           <div className="flex items-center gap-2">
             {r.meter.calibrationDue && (
-              <span className="text-xs text-stone-500">
+              <span className="text-xs text-stone-500 dark:text-stone-400">
                 {formatDate(r.meter.calibrationDue)}
               </span>
             )}
@@ -234,7 +234,7 @@ export function MeterList() {
               e.stopPropagation();
               handleOpenEdit(r.meter);
             }}
-            className="text-xs text-stone-400 hover:text-stone-700"
+            className="text-xs text-stone-400 dark:text-stone-500 hover:text-stone-700 dark:hover:text-stone-200"
           >
             Bearbeiten
           </button>
@@ -253,19 +253,19 @@ export function MeterList() {
   ];
 
   const formContent = (
-    <div className="mb-4 p-4 bg-stone-50 rounded-lg border border-stone-200">
-      <h3 className="text-sm font-semibold text-stone-700 mb-3">
+    <div className="mb-4 p-4 bg-stone-50 dark:bg-stone-800/50 rounded-lg border border-stone-200 dark:border-stone-700">
+      <h3 className="text-sm font-semibold text-stone-700 dark:text-stone-200 mb-3">
         {editMeter ? 'Zähler bearbeiten' : 'Neuer Zähler'}
       </h3>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         <div>
-          <label className="block text-xs font-medium text-stone-500 mb-1">
+          <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">
             Zählertyp *
           </label>
           <select
             value={form.meterTypeId}
             onChange={(e) => setForm({ ...form, meterTypeId: e.target.value })}
-            className="w-full border border-stone-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400"
+            className="w-full border border-stone-300 dark:border-stone-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-500"
           >
             <option value="">– Typ wählen –</option>
             {meterTypes.map((mt) => (
@@ -276,7 +276,7 @@ export function MeterList() {
           </select>
         </div>
         <div>
-          <label className="block text-xs font-medium text-stone-500 mb-1">
+          <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">
             Seriennummer *
           </label>
           <input
@@ -284,17 +284,17 @@ export function MeterList() {
             value={form.serialNumber}
             onChange={(e) => setForm({ ...form, serialNumber: e.target.value })}
             placeholder="z.B. WZ-2024-001"
-            className="w-full border border-stone-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400"
+            className="w-full border border-stone-300 dark:border-stone-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-500"
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-stone-500 mb-1">
+          <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">
             Zuordnung
           </label>
           <select
             value={form.unitId}
             onChange={(e) => setForm({ ...form, unitId: e.target.value })}
-            className="w-full border border-stone-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400"
+            className="w-full border border-stone-300 dark:border-stone-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-500"
           >
             <option value="">Hauptzähler (kein Wohnungsbezug)</option>
             {units.map((u) => (
@@ -305,29 +305,29 @@ export function MeterList() {
           </select>
         </div>
         <div>
-          <label className="block text-xs font-medium text-stone-500 mb-1">
+          <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">
             Einbaudatum
           </label>
           <input
             type="date"
             value={form.installDate}
             onChange={(e) => setForm({ ...form, installDate: e.target.value })}
-            className="w-full border border-stone-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400"
+            className="w-full border border-stone-300 dark:border-stone-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-500"
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-stone-500 mb-1">
+          <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">
             Eichfrist bis
           </label>
           <input
             type="date"
             value={form.calibrationDue}
             onChange={(e) => setForm({ ...form, calibrationDue: e.target.value })}
-            className="w-full border border-stone-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400"
+            className="w-full border border-stone-300 dark:border-stone-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-500"
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-stone-500 mb-1">
+          <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">
             Notizen
           </label>
           <input
@@ -335,7 +335,7 @@ export function MeterList() {
             value={form.notes}
             onChange={(e) => setForm({ ...form, notes: e.target.value })}
             placeholder="Optionale Bemerkungen"
-            className="w-full border border-stone-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400"
+            className="w-full border border-stone-300 dark:border-stone-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-500"
           />
         </div>
       </div>
@@ -352,7 +352,7 @@ export function MeterList() {
             setShowForm(false);
             setEditMeter(null);
           }}
-          className="px-4 py-1.5 text-sm border border-stone-300 text-stone-600 rounded-lg hover:bg-stone-50 transition-colors"
+          className="px-4 py-1.5 text-sm border border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-300 rounded-lg hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors"
         >
           Abbrechen
         </button>
@@ -377,7 +377,7 @@ export function MeterList() {
 
         {hauptzaehler.length > 0 && (
           <div className="mb-4">
-            <h3 className="text-xs font-semibold text-stone-500 uppercase tracking-wide mb-2">
+            <h3 className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide mb-2">
               Hauptzähler
             </h3>
             <DataTable
@@ -390,7 +390,7 @@ export function MeterList() {
 
         {wohnungszaehler.length > 0 && (
           <div>
-            <h3 className="text-xs font-semibold text-stone-500 uppercase tracking-wide mb-2">
+            <h3 className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide mb-2">
               Wohnungszähler
             </h3>
             <DataTable

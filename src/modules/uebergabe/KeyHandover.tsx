@@ -37,7 +37,7 @@ export function KeyHandover({ keys, onChange }: KeyHandoverProps) {
     <Card title="Schlüsselübergabe">
       <div className="space-y-2">
         {/* Header */}
-        <div className="grid grid-cols-[1fr_80px_40px] gap-2 text-xs font-medium text-stone-500 px-1">
+        <div className="grid grid-cols-[1fr_80px_40px] gap-2 text-xs font-medium text-stone-500 dark:text-stone-400 px-1">
           <span>Schlüsselart</span>
           <span className="text-center">Anzahl</span>
           <span />
@@ -54,7 +54,7 @@ export function KeyHandover({ keys, onChange }: KeyHandoverProps) {
               value={key.type}
               onChange={(e) => updateKey(index, { type: e.target.value })}
               placeholder="Schlüsselart"
-              className="border border-stone-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400"
+              className="border border-stone-300 dark:border-stone-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-500"
             />
             <input
               type="number"
@@ -63,7 +63,7 @@ export function KeyHandover({ keys, onChange }: KeyHandoverProps) {
               onChange={(e) =>
                 updateKey(index, { count: parseInt(e.target.value) || 0 })
               }
-              className="border border-stone-300 rounded-lg px-3 py-1.5 text-sm text-center font-mono focus:outline-none focus:ring-2 focus:ring-stone-400"
+              className="border border-stone-300 dark:border-stone-600 rounded-lg px-3 py-1.5 text-sm text-center font-mono focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-500"
             />
             <button
               type="button"
@@ -80,7 +80,7 @@ export function KeyHandover({ keys, onChange }: KeyHandoverProps) {
         <button
           type="button"
           onClick={addKey}
-          className="text-sm text-stone-600 hover:text-stone-800 px-3 py-1.5 border border-dashed border-stone-300 rounded-lg hover:bg-stone-50 transition-colors w-full"
+          className="text-sm text-stone-600 dark:text-stone-300 hover:text-stone-800 dark:hover:text-stone-100 px-3 py-1.5 border border-dashed border-stone-300 dark:border-stone-600 rounded-lg hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors w-full"
         >
           + Weiteren Schlüssel hinzufügen
         </button>

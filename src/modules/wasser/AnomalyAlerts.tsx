@@ -238,9 +238,9 @@ export function AnomalyAlerts({ year }: AnomalyAlertsProps) {
   if (anomalies.length === 0) {
     return (
       <Card title="Hinweise / Anomalien">
-        <div className="flex items-center gap-3 p-4 bg-green-50 rounded-lg">
+        <div className="flex items-center gap-3 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
           <StatusBadge status="green" label="Alles in Ordnung" />
-          <p className="text-sm text-green-700">
+          <p className="text-sm text-green-700 dark:text-green-400">
             Es wurden keine Anomalien im Wasserverbrauch festgestellt.
           </p>
         </div>
@@ -256,8 +256,8 @@ export function AnomalyAlerts({ year }: AnomalyAlertsProps) {
             key={`${anomaly.type}-${anomaly.unitName ?? ''}-${index}`}
             className={`p-4 rounded-lg border ${
               anomaly.severity === 'red'
-                ? 'bg-red-50 border-red-200'
-                : 'bg-amber-50 border-amber-200'
+                ? 'bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800'
+                : 'bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800'
             }`}
           >
             <div className="flex items-start gap-3">
@@ -270,10 +270,10 @@ export function AnomalyAlerts({ year }: AnomalyAlertsProps) {
                 />
               </div>
               <div>
-                <h4 className="text-sm font-semibold text-stone-800 mb-1">
+                <h4 className="text-sm font-semibold text-stone-800 dark:text-stone-100 mb-1">
                   {anomaly.title}
                 </h4>
-                <p className="text-sm text-stone-600">{anomaly.description}</p>
+                <p className="text-sm text-stone-600 dark:text-stone-300">{anomaly.description}</p>
               </div>
             </div>
           </div>

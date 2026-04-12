@@ -72,7 +72,7 @@ export function CashflowChart({ propertyId }: CashflowChartProps) {
   if (!chartData || chartData.labels.length === 0) {
     return (
       <Card title="Cashflow-Entwicklung">
-        <p className="text-sm text-stone-500 text-center py-8">
+        <p className="text-sm text-stone-500 dark:text-stone-400 text-center py-8">
           Noch keine Zahlungsdaten vorhanden.
         </p>
       </Card>

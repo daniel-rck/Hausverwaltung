@@ -46,9 +46,9 @@ export function QuickStats() {
   if (!stats) return null;
 
   const items = [
-    { label: 'Wohneinheiten', value: String(stats.totalUnits), color: 'text-stone-700' },
+    { label: 'Wohneinheiten', value: String(stats.totalUnits), color: 'text-stone-700 dark:text-stone-200' },
     { label: 'Vermietet', value: String(stats.occupied), color: 'text-green-600' },
-    { label: 'Leerstand', value: String(stats.vacant), color: stats.vacant > 0 ? 'text-amber-600' : 'text-stone-400' },
+    { label: 'Leerstand', value: String(stats.vacant), color: stats.vacant > 0 ? 'text-amber-600' : 'text-stone-400 dark:text-stone-500' },
     { label: 'Monatsmiete', value: formatEuro(stats.monthlyRent), color: 'text-emerald-600' },
   ];
 
@@ -57,7 +57,7 @@ export function QuickStats() {
       {items.map((item) => (
         <Card key={item.label}>
           <div className="text-center">
-            <p className="text-xs text-stone-500 mb-1">{item.label}</p>
+            <p className="text-xs text-stone-500 dark:text-stone-400 mb-1">{item.label}</p>
             <p className={`text-xl font-semibold font-mono font-tabular ${item.color}`}>
               {item.value}
             </p>

@@ -34,18 +34,18 @@ export function InstandhaltungPage() {
 
   return (
     <div>
-      <h1 className="text-xl font-bold text-stone-800 mb-4">Instandhaltung</h1>
+      <h1 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-4">Instandhaltung</h1>
 
       {/* Tab Navigation */}
-      <div className="flex gap-1 mb-4 border-b border-stone-200">
+      <div className="flex gap-1 mb-4 border-b border-stone-200 dark:border-stone-700">
         {TABS.map((tab) => (
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
             className={`px-4 py-2 text-sm font-medium transition-colors rounded-t-lg ${
               activeTab === tab.key
-                ? 'bg-white text-stone-800 border border-stone-200 border-b-white -mb-px'
-                : 'text-stone-500 hover:text-stone-700 hover:bg-stone-50'
+                ? 'bg-white dark:bg-stone-800 text-stone-800 dark:text-stone-100 border border-stone-200 dark:border-stone-700 border-b-white dark:border-b-stone-800 -mb-px'
+                : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-700'
             }`}
           >
             {tab.label}

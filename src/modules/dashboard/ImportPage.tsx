@@ -58,12 +58,12 @@ export function ImportPage() {
     <div className="max-w-md mx-auto mt-12">
       <Card title="Daten importieren">
         {status === 'loading' && (
-          <p className="text-sm text-stone-500">Daten werden gelesen...</p>
+          <p className="text-sm text-stone-500 dark:text-stone-400">Daten werden gelesen...</p>
         )}
 
         {status === 'confirm' && (
           <div className="space-y-4">
-            <p className="text-sm text-stone-600">
+            <p className="text-sm text-stone-600 dark:text-stone-300">
               Es wurden Daten in der URL gefunden. Alle vorhandenen Daten werden
               durch den Import <strong>überschrieben</strong>.
             </p>
@@ -76,7 +76,7 @@ export function ImportPage() {
               </button>
               <button
                 onClick={() => navigate('/')}
-                className="px-4 py-2 text-sm border border-stone-300 text-stone-600 rounded-lg hover:bg-stone-50 transition-colors"
+                className="px-4 py-2 text-sm border border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-300 rounded-lg hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors"
               >
                 Abbrechen
               </button>
@@ -85,7 +85,7 @@ export function ImportPage() {
         )}
 
         {status === 'importing' && (
-          <p className="text-sm text-stone-500">Import läuft...</p>
+          <p className="text-sm text-stone-500 dark:text-stone-400">Import läuft...</p>
         )}
 
         {status === 'success' && (
@@ -99,7 +99,7 @@ export function ImportPage() {
             <p className="text-sm text-red-600">{error}</p>
             <button
               onClick={() => navigate('/')}
-              className="px-4 py-2 text-sm border border-stone-300 text-stone-600 rounded-lg hover:bg-stone-50 transition-colors"
+              className="px-4 py-2 text-sm border border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-300 rounded-lg hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors"
             >
               Zum Dashboard
             </button>

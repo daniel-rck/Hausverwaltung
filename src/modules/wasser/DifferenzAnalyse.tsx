@@ -195,31 +195,31 @@ export function DifferenzAnalyse({ year }: DifferenzAnalyseProps) {
   return (
     <Card title="Differenzanalyse">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-stone-50 rounded-lg p-3">
-          <p className="text-xs text-stone-500">Versorger gesamt</p>
-          <p className="text-lg font-semibold text-stone-800">
+        <div className="bg-stone-50 dark:bg-stone-800/50 rounded-lg p-3">
+          <p className="text-xs text-stone-500 dark:text-stone-400">Versorger gesamt</p>
+          <p className="text-lg font-semibold text-stone-800 dark:text-stone-100">
             {formatNumber(analysis.supplierTotal)} m³
           </p>
         </div>
-        <div className="bg-stone-50 rounded-lg p-3">
-          <p className="text-xs text-stone-500">{messdienstName ?? 'Messdienstleister'} gesamt</p>
-          <p className="text-lg font-semibold text-stone-800">
+        <div className="bg-stone-50 dark:bg-stone-800/50 rounded-lg p-3">
+          <p className="text-xs text-stone-500 dark:text-stone-400">{messdienstName ?? 'Messdienstleister'} gesamt</p>
+          <p className="text-lg font-semibold text-stone-800 dark:text-stone-100">
             {formatNumber(analysis.messdienstTotal)} m³
           </p>
         </div>
-        <div className="bg-stone-50 rounded-lg p-3">
-          <p className="text-xs text-stone-500">Differenz</p>
-          <p className="text-lg font-semibold text-stone-800">
+        <div className="bg-stone-50 dark:bg-stone-800/50 rounded-lg p-3">
+          <p className="text-xs text-stone-500 dark:text-stone-400">Differenz</p>
+          <p className="text-lg font-semibold text-stone-800 dark:text-stone-100">
             {formatNumber(analysis.difference)} m³ ({formatNumber(analysis.differencePercent)} %)
           </p>
         </div>
-        <div className="bg-stone-50 rounded-lg p-3 flex flex-col justify-center">
-          <p className="text-xs text-stone-500 mb-1">Bewertung</p>
+        <div className="bg-stone-50 dark:bg-stone-800/50 rounded-lg p-3 flex flex-col justify-center">
+          <p className="text-xs text-stone-500 dark:text-stone-400 mb-1">Bewertung</p>
           <StatusBadge status={analysis.status} label={analysis.statusLabel} />
         </div>
       </div>
 
-      <p className="text-xs text-stone-500 mb-2">
+      <p className="text-xs text-stone-500 dark:text-stone-400 mb-2">
         Schwellwerte: &lt;{WATER_DIFF_THRESHOLD_OK} % = im Rahmen,{' '}
         {WATER_DIFF_THRESHOLD_OK}–{WATER_DIFF_THRESHOLD_WARN} % = auffällig,{' '}
         &gt;{WATER_DIFF_THRESHOLD_WARN} % = kritisch

@@ -84,10 +84,10 @@ export function RevenueChart({ year }: RevenueChartProps) {
       title="Jahresübersicht"
       action={
         hasData ? (
-          <div className="flex gap-4 text-xs text-stone-500">
+          <div className="flex gap-4 text-xs text-stone-500 dark:text-stone-400">
             <span>
               Soll:{' '}
-              <strong className="text-stone-700">
+              <strong className="text-stone-700 dark:text-stone-200">
                 {formatEuro(chartData.totalExpected)}
               </strong>
             </span>

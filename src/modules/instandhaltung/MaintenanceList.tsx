@@ -20,10 +20,10 @@ const CATEGORY_LABELS: Record<Category, string> = {
 };
 
 const CATEGORY_COLORS: Record<Category, string> = {
-  repair: 'text-red-600 bg-red-50',
-  maintenance: 'text-amber-600 bg-amber-50',
-  inspection: 'text-blue-600 bg-blue-50',
-  modernization: 'text-purple-600 bg-purple-50',
+  repair: 'text-red-600 bg-red-50 dark:bg-red-900/30 dark:text-red-400',
+  maintenance: 'text-amber-600 bg-amber-50 dark:bg-amber-900/30 dark:text-amber-400',
+  inspection: 'text-blue-600 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400',
+  modernization: 'text-purple-600 bg-purple-50 dark:bg-purple-900/30 dark:text-purple-400',
 };
 
 interface MaintenanceRow {
@@ -182,7 +182,7 @@ export function MaintenanceList() {
       key: 'unit',
       header: 'Wohnung',
       render: (r) => (
-        <span className={r.item.unitId === null ? 'text-stone-500 italic' : ''}>
+        <span className={r.item.unitId === null ? 'text-stone-500 dark:text-stone-400 italic' : ''}>
           {r.unitName}
         </span>
       ),
@@ -216,7 +216,7 @@ export function MaintenanceList() {
     {
       key: 'contractor',
       header: 'Handwerker',
-      render: (r) => r.item.contractor ?? <span className="text-stone-400">–</span>,
+      render: (r) => r.item.contractor ?? <span className="text-stone-400 dark:text-stone-500">–</span>,
       sortValue: (r) => r.item.contractor ?? '',
     },
     {
@@ -229,7 +229,7 @@ export function MaintenanceList() {
               e.stopPropagation();
               openEdit(r);
             }}
-            className="text-xs text-stone-400 hover:text-stone-700"
+            className="text-xs text-stone-400 dark:text-stone-500 hover:text-stone-700 dark:hover:text-stone-200"
           >
             Bearbeiten
           </button>
@@ -248,7 +248,7 @@ export function MaintenanceList() {
   ];
 
   const inputCls =
-    'w-full border border-stone-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400';
+    'w-full border border-stone-300 dark:border-stone-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-500';
 
   return (
     <>
@@ -259,7 +259,7 @@ export function MaintenanceList() {
             <select
               value={filterCategory}
               onChange={(e) => setFilterCategory(e.target.value as Category | '')}
-              className="text-sm border border-stone-300 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-stone-400"
+              className="text-sm border border-stone-300 dark:border-stone-600 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-500"
             >
               <option value="">Alle Kategorien</option>
               {(Object.entries(CATEGORY_LABELS) as [Category, string][]).map(([k, v]) => (
@@ -276,13 +276,13 @@ export function MaintenanceList() {
         }
       >
         {showForm && (
-          <div className="mb-4 p-4 bg-stone-50 rounded-lg border border-stone-200">
-            <h3 className="text-sm font-semibold text-stone-700 mb-3">
+          <div className="mb-4 p-4 bg-stone-50 dark:bg-stone-800/50 rounded-lg border border-stone-200 dark:border-stone-700">
+            <h3 className="text-sm font-semibold text-stone-700 dark:text-stone-200 mb-3">
               {editItem ? 'Maßnahme bearbeiten' : 'Neue Maßnahme'}
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               <div>
-                <label className="block text-xs font-medium text-stone-500 mb-1">Titel *</label>
+                <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">Titel *</label>
                 <input
                   type="text"
                   value={form.title}
@@ -292,7 +292,7 @@ export function MaintenanceList() {
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-stone-500 mb-1">Datum *</label>
+                <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">Datum *</label>
                 <input
                   type="date"
                   value={form.date}
@@ -301,7 +301,7 @@ export function MaintenanceList() {
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-stone-500 mb-1">Kategorie</label>
+                <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">Kategorie</label>
                 <select
                   value={form.category}
                   onChange={(e) => setForm({ ...form, category: e.target.value as Category })}
@@ -313,7 +313,7 @@ export function MaintenanceList() {
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-medium text-stone-500 mb-1">Wohnung</label>
+                <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">Wohnung</label>
                 <select
                   value={form.unitId}
                   onChange={(e) => setForm({ ...form, unitId: e.target.value })}
@@ -332,7 +332,7 @@ export function MaintenanceList() {
                 min={0}
               />
               <div>
-                <label className="block text-xs font-medium text-stone-500 mb-1">Handwerker</label>
+                <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">Handwerker</label>
                 <input
                   type="text"
                   value={form.contractor}
@@ -342,7 +342,7 @@ export function MaintenanceList() {
                 />
               </div>
               <div className="sm:col-span-2 lg:col-span-3">
-                <label className="block text-xs font-medium text-stone-500 mb-1">Beschreibung</label>
+                <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">Beschreibung</label>
                 <textarea
                   value={form.description}
                   onChange={(e) => setForm({ ...form, description: e.target.value })}
@@ -351,12 +351,12 @@ export function MaintenanceList() {
                 />
               </div>
               <div className="flex items-end">
-                <label className="flex items-center gap-2 text-sm text-stone-600 pb-1.5">
+                <label className="flex items-center gap-2 text-sm text-stone-600 dark:text-stone-300 pb-1.5">
                   <input
                     type="checkbox"
                     checked={form.recurring}
                     onChange={(e) => setForm({ ...form, recurring: e.target.checked })}
-                    className="rounded border-stone-300"
+                    className="rounded border-stone-300 dark:border-stone-600"
                   />
                   Wiederkehrend
                 </label>
@@ -364,7 +364,7 @@ export function MaintenanceList() {
               {form.recurring && (
                 <>
                   <div>
-                    <label className="block text-xs font-medium text-stone-500 mb-1">
+                    <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">
                       Intervall (Monate)
                     </label>
                     <input
@@ -377,7 +377,7 @@ export function MaintenanceList() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-stone-500 mb-1">
+                    <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">
                       Nächste Fälligkeit
                     </label>
                     <input
@@ -390,7 +390,7 @@ export function MaintenanceList() {
                 </>
               )}
               <div className="sm:col-span-2 lg:col-span-3">
-                <label className="block text-xs font-medium text-stone-500 mb-1">Notizen</label>
+                <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">Notizen</label>
                 <textarea
                   value={form.notes}
                   onChange={(e) => setForm({ ...form, notes: e.target.value })}
@@ -411,7 +411,7 @@ export function MaintenanceList() {
                   setShowForm(false);
                   setEditItem(null);
                 }}
-                className="px-4 py-1.5 text-sm border border-stone-300 text-stone-600 rounded-lg hover:bg-stone-50 transition-colors"
+                className="px-4 py-1.5 text-sm border border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-300 rounded-lg hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors"
               >
                 Abbrechen
               </button>

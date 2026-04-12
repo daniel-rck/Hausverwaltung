@@ -138,7 +138,7 @@ export function SupplierInput({ year }: SupplierInputProps) {
     <Card title="Versorger-Daten eingeben">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
         <div>
-          <label className="block text-xs font-medium text-stone-500 mb-1">
+          <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">
             Versorger
           </label>
           <input
@@ -146,7 +146,7 @@ export function SupplierInput({ year }: SupplierInputProps) {
             value={form.supplier}
             onChange={(e) => setForm((f) => ({ ...f, supplier: e.target.value }))}
             placeholder="z.B. Stadtwerke"
-            className="w-full border border-stone-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400"
+            className="w-full border border-stone-300 dark:border-stone-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-500"
           />
         </div>
         <NumInput
@@ -164,29 +164,29 @@ export function SupplierInput({ year }: SupplierInputProps) {
           min={0}
         />
         <div>
-          <label className="block text-xs font-medium text-stone-500 mb-1">
+          <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">
             Abrechnungszeitraum von
           </label>
           <input
             type="date"
             value={form.billingFrom}
             onChange={(e) => setForm((f) => ({ ...f, billingFrom: e.target.value }))}
-            className="w-full border border-stone-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400"
+            className="w-full border border-stone-300 dark:border-stone-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-500"
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-stone-500 mb-1">
+          <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">
             Abrechnungszeitraum bis
           </label>
           <input
             type="date"
             value={form.billingTo}
             onChange={(e) => setForm((f) => ({ ...f, billingTo: e.target.value }))}
-            className="w-full border border-stone-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400"
+            className="w-full border border-stone-300 dark:border-stone-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-500"
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-stone-500 mb-1">
+          <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">
             Hinweise
           </label>
           <input
@@ -194,7 +194,7 @@ export function SupplierInput({ year }: SupplierInputProps) {
             value={form.notes}
             onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
             placeholder="optional"
-            className="w-full border border-stone-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400"
+            className="w-full border border-stone-300 dark:border-stone-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-500"
           />
         </div>
       </div>
@@ -208,7 +208,7 @@ export function SupplierInput({ year }: SupplierInputProps) {
         </button>
       </div>
 
-      <h3 className="text-sm font-medium text-stone-600 mb-2">
+      <h3 className="text-sm font-medium text-stone-600 dark:text-stone-300 mb-2">
         Erfasste Rechnungen ({year})
       </h3>
       <DataTable

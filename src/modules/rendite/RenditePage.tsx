@@ -22,7 +22,7 @@ export function RenditePage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-xl font-bold text-stone-800">Rendite</h1>
+      <h1 className="text-xl font-bold text-stone-800 dark:text-stone-100">Rendite</h1>
 
       <FinancingInput propertyId={propertyId} />
 

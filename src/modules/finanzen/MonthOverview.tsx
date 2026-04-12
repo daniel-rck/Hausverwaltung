@@ -253,19 +253,19 @@ export function MonthOverview({ year }: MonthOverviewProps) {
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
             <thead>
-              <tr className="border-b border-stone-200">
-                <th className="py-2 px-2 text-left font-medium text-stone-500 sticky left-0 bg-white min-w-[120px]">
+              <tr className="border-b border-stone-200 dark:border-stone-700">
+                <th className="py-2 px-2 text-left font-medium text-stone-500 dark:text-stone-400 sticky left-0 bg-white dark:bg-stone-800 min-w-[120px]">
                   Einheit / Mieter
                 </th>
                 {shortMonths.map((m, i) => (
                   <th
                     key={i}
-                    className="py-2 px-1 text-center font-medium text-stone-500 min-w-[56px]"
+                    className="py-2 px-1 text-center font-medium text-stone-500 dark:text-stone-400 min-w-[56px]"
                   >
                     {m}
                   </th>
                 ))}
-                <th className="py-2 px-2 text-right font-medium text-stone-500 min-w-[80px]">
+                <th className="py-2 px-2 text-right font-medium text-stone-500 dark:text-stone-400 min-w-[80px]">
                   Summe
                 </th>
               </tr>
@@ -275,12 +275,12 @@ export function MonthOverview({ year }: MonthOverviewProps) {
                 const first = row[0];
                 const yearTotal = row.reduce((s, c) => s + c.received, 0);
                 return (
-                  <tr key={ri} className="border-b border-stone-100">
-                    <td className="py-1.5 px-2 sticky left-0 bg-white">
-                      <div className="font-medium text-stone-700">
+                  <tr key={ri} className="border-b border-stone-100 dark:border-stone-700">
+                    <td className="py-1.5 px-2 sticky left-0 bg-white dark:bg-stone-800">
+                      <div className="font-medium text-stone-700 dark:text-stone-200">
                         {first.unit.name}
                       </div>
-                      <div className="text-stone-500 truncate max-w-[110px]">
+                      <div className="text-stone-500 dark:text-stone-400 truncate max-w-[110px]">
                         {first.tenant.name}
                       </div>
                     </td>
@@ -296,7 +296,7 @@ export function MonthOverview({ year }: MonthOverviewProps) {
                                 ? 'bg-amber-100 text-amber-700 hover:bg-amber-200'
                                 : cell.status === 'red'
                                   ? 'bg-red-100 text-red-700 hover:bg-red-200'
-                                  : 'bg-stone-50 text-stone-300 cursor-default'
+                                  : 'bg-stone-50 dark:bg-stone-800/50 text-stone-300 cursor-default'
                           }`}
                           title={
                             cell.status === 'gray'
@@ -312,7 +312,7 @@ export function MonthOverview({ year }: MonthOverviewProps) {
                         </button>
                       </td>
                     ))}
-                    <td className="py-1.5 px-2 text-right font-mono font-medium text-stone-700">
+                    <td className="py-1.5 px-2 text-right font-mono font-medium text-stone-700 dark:text-stone-200">
                       {formatEuro(yearTotal)}
                     </td>
                   </tr>
@@ -323,7 +323,7 @@ export function MonthOverview({ year }: MonthOverviewProps) {
         </div>
 
         {/* Legende */}
-        <div className="flex flex-wrap gap-4 mt-4 text-xs text-stone-500">
+        <div className="flex flex-wrap gap-4 mt-4 text-xs text-stone-500 dark:text-stone-400">
           <span className="flex items-center gap-1">
             <span className="w-3 h-3 rounded bg-green-100 border border-green-300" />
             Vollständig bezahlt
@@ -337,7 +337,7 @@ export function MonthOverview({ year }: MonthOverviewProps) {
             Offen
           </span>
           <span className="flex items-center gap-1">
-            <span className="w-3 h-3 rounded bg-stone-50 border border-stone-200" />
+            <span className="w-3 h-3 rounded bg-stone-50 dark:bg-stone-800/50 border border-stone-200 dark:border-stone-700" />
             Kein Mietverhältnis
           </span>
         </div>
@@ -346,11 +346,11 @@ export function MonthOverview({ year }: MonthOverviewProps) {
       {/* Payment Editor Dialog */}
       {editingCell && editingCellData && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-lg max-w-md w-full p-5">
-            <h3 className="text-base font-semibold text-stone-800 mb-1">
+          <div className="bg-white dark:bg-stone-800 rounded-xl shadow-lg max-w-md w-full p-5">
+            <h3 className="text-base font-semibold text-stone-800 dark:text-stone-100 mb-1">
               Zahlung erfassen
             </h3>
-            <p className="text-sm text-stone-500 mb-4">
+            <p className="text-sm text-stone-500 dark:text-stone-400 mb-4">
               {editingCellData.unit.name} &middot;{' '}
               {editingCellData.tenant.name} &middot;{' '}
               {MONTH_NAMES[parseInt(editingCell.month.slice(5)) - 1]}{' '}
@@ -358,11 +358,11 @@ export function MonthOverview({ year }: MonthOverviewProps) {
             </p>
 
             <div className="space-y-3">
-              <div className="p-2 bg-stone-50 rounded-lg text-xs text-stone-500">
+              <div className="p-2 bg-stone-50 dark:bg-stone-800/50 rounded-lg text-xs text-stone-500 dark:text-stone-400">
                 Soll-Miete: {formatEuro(editingCellData.occupancy.rentCold)}{' '}
                 Kaltmiete + {formatEuro(editingCellData.occupancy.rentUtilities)}{' '}
                 Nebenkosten ={' '}
-                <strong className="text-stone-700">
+                <strong className="text-stone-700 dark:text-stone-200">
                   {formatEuro(editingCellData.expected)}
                 </strong>
               </div>
@@ -387,7 +387,7 @@ export function MonthOverview({ year }: MonthOverviewProps) {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-stone-500 mb-1">
+                <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">
                   Eingangsdatum
                 </label>
                 <input
@@ -396,12 +396,12 @@ export function MonthOverview({ year }: MonthOverviewProps) {
                   onChange={(e) =>
                     setForm((f) => ({ ...f, receivedDate: e.target.value }))
                   }
-                  className="w-full border border-stone-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400"
+                  className="w-full border border-stone-300 dark:border-stone-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-500"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-stone-500 mb-1">
+                <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">
                   Zahlungsart
                 </label>
                 <select
@@ -412,7 +412,7 @@ export function MonthOverview({ year }: MonthOverviewProps) {
                       method: e.target.value as Payment['method'],
                     }))
                   }
-                  className="w-full border border-stone-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400"
+                  className="w-full border border-stone-300 dark:border-stone-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-500"
                 >
                   {(
                     Object.entries(METHOD_LABELS) as [
@@ -428,7 +428,7 @@ export function MonthOverview({ year }: MonthOverviewProps) {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-stone-500 mb-1">
+                <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">
                   Bemerkung
                 </label>
                 <input
@@ -438,7 +438,7 @@ export function MonthOverview({ year }: MonthOverviewProps) {
                     setForm((f) => ({ ...f, notes: e.target.value }))
                   }
                   placeholder="Optional"
-                  className="w-full border border-stone-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400"
+                  className="w-full border border-stone-300 dark:border-stone-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-500"
                 />
               </div>
             </div>
@@ -459,7 +459,7 @@ export function MonthOverview({ year }: MonthOverviewProps) {
                 <button
                   onClick={() => setEditingCell(null)}
                   disabled={saving}
-                  className="px-4 py-2 text-sm rounded-lg border border-stone-300 text-stone-600 hover:bg-stone-50 transition-colors disabled:opacity-50"
+                  className="px-4 py-2 text-sm rounded-lg border border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors disabled:opacity-50"
                 >
                   Abbrechen
                 </button>

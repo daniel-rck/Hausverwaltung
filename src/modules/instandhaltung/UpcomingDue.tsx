@@ -147,7 +147,7 @@ export function UpcomingDue() {
       key: 'unit',
       header: 'Wohnung',
       render: (r) => (
-        <span className={r.item.unitId === null ? 'text-stone-500 italic' : ''}>
+        <span className={r.item.unitId === null ? 'text-stone-500 dark:text-stone-400 italic' : ''}>
           {r.unitName}
         </span>
       ),
@@ -178,7 +178,7 @@ export function UpcomingDue() {
         />
       ) : (
         <>
-          <div className="mb-3 flex gap-3 text-sm text-stone-600">
+          <div className="mb-3 flex gap-3 text-sm text-stone-600 dark:text-stone-300">
             <span>
               {rows.filter((r) => r.status === 'red').length} überfällig
             </span>

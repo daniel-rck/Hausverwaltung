@@ -8,6 +8,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
+import { useChartTheme } from './useChartTheme';
 
 ChartJS.register(
   CategoryScale,
@@ -36,6 +37,7 @@ export function BarChart({
   height = 250,
 }: BarChartProps) {
   const colors = ['#78716c', '#d97706', '#0891b2', '#16a34a', '#7c3aed'];
+  const theme = useChartTheme();
 
   return (
     <Bar
@@ -52,10 +54,12 @@ export function BarChart({
       options={{
         responsive: true,
         maintainAspectRatio: false,
-        plugins: { legend: { position: 'bottom' } },
+        plugins: {
+          legend: { position: 'bottom', labels: { color: theme.text } },
+        },
         scales: {
-          x: { stacked },
-          y: { stacked, beginAtZero: true },
+          x: { stacked, ticks: { color: theme.text }, grid: { color: theme.grid } },
+          y: { stacked, beginAtZero: true, ticks: { color: theme.text }, grid: { color: theme.grid } },
         },
       }}
     />

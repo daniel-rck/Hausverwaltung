@@ -108,7 +108,7 @@ export function CalibrationAlerts() {
         r.unit ? (
           r.unit.name
         ) : (
-          <span className="text-stone-500 italic">Hauptzähler</span>
+          <span className="text-stone-500 dark:text-stone-400 italic">Hauptzähler</span>
         ),
     },
     {

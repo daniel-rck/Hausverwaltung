@@ -52,7 +52,7 @@ export function AbrechnungPrint({
 
   if (!occupancies) {
     return (
-      <div className="text-center py-8 text-sm text-stone-500">
+      <div className="text-center py-8 text-sm text-stone-500 dark:text-stone-400">
         Lade Abrechnungen...
       </div>
     );
@@ -74,7 +74,7 @@ export function AbrechnungPrint({
       <div className="no-print mb-6 flex items-center gap-4">
         <button
           onClick={onBack}
-          className="text-sm text-stone-500 hover:text-stone-700 flex items-center gap-1"
+          className="text-sm text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 flex items-center gap-1"
         >
           \u2190 Zur\u00FCck
         </button>
@@ -94,7 +94,7 @@ export function AbrechnungPrint({
             className={idx > 0 ? 'page-break' : ''}
           >
             <div className="no-print mb-2 px-2">
-              <p className="text-xs text-stone-400">
+              <p className="text-xs text-stone-400 dark:text-stone-500">
                 Abrechnung {idx + 1} von {occupancies.length}:{' '}
                 {info.tenant?.name ?? '\u2013'} ({info.unit.name})
               </p>

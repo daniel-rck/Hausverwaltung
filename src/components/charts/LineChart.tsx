@@ -9,6 +9,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
+import { useChartTheme } from './useChartTheme';
 
 ChartJS.register(
   CategoryScale,
@@ -32,6 +33,7 @@ interface LineChartProps {
 
 export function LineChart({ labels, datasets, height = 250 }: LineChartProps) {
   const colors = ['#78716c', '#d97706', '#0891b2', '#16a34a', '#7c3aed'];
+  const theme = useChartTheme();
 
   return (
     <Line
@@ -50,9 +52,12 @@ export function LineChart({ labels, datasets, height = 250 }: LineChartProps) {
       options={{
         responsive: true,
         maintainAspectRatio: false,
-        plugins: { legend: { position: 'bottom' } },
+        plugins: {
+          legend: { position: 'bottom', labels: { color: theme.text } },
+        },
         scales: {
-          y: { beginAtZero: true },
+          x: { ticks: { color: theme.text }, grid: { color: theme.grid } },
+          y: { beginAtZero: true, ticks: { color: theme.text }, grid: { color: theme.grid } },
         },
       }}
     />

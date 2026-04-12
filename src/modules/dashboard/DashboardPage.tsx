@@ -58,11 +58,11 @@ export function DashboardPage() {
           <Link
             key={m.path}
             to={m.path}
-            className={`block bg-white rounded-xl border-2 ${m.color} p-4 transition-colors`}
+            className={`block bg-white dark:bg-stone-800 rounded-xl border-2 ${m.color} p-4 transition-colors`}
           >
             <span className="text-2xl">{m.icon}</span>
-            <p className="text-sm font-semibold text-stone-800 mt-2">{m.label}</p>
-            <p className="text-xs text-stone-500 mt-0.5">{m.desc}</p>
+            <p className="text-sm font-semibold text-stone-800 dark:text-stone-100 mt-2">{m.label}</p>
+            <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">{m.desc}</p>
           </Link>
         ))}
       </div>
@@ -113,14 +113,14 @@ function PropertyCard() {
     return (
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-xl font-bold text-stone-800">{activeProperty.name}</h1>
+          <h1 className="text-xl font-bold text-stone-800 dark:text-stone-100">{activeProperty.name}</h1>
           {activeProperty.address && (
-            <p className="text-sm text-stone-500">{activeProperty.address}</p>
+            <p className="text-sm text-stone-500 dark:text-stone-400">{activeProperty.address}</p>
           )}
         </div>
         <button
           onClick={startEditing}
-          className="text-xs text-stone-400 hover:text-stone-600 mt-1"
+          className="text-xs text-stone-400 dark:text-stone-500 hover:text-stone-600 mt-1"
         >
           Bearbeiten
         </button>
@@ -133,21 +133,21 @@ function PropertyCard() {
       <Card title="Objekt bearbeiten">
         <div className="space-y-3">
           <div>
-            <label className="block text-xs font-medium text-stone-500 mb-1">Name</label>
+            <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">Name</label>
             <input
               type="text"
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
-              className="w-full border border-stone-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400"
+              className="w-full border border-stone-300 dark:border-stone-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-500"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-stone-500 mb-1">Adresse</label>
+            <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">Adresse</label>
             <input
               type="text"
               value={form.address}
               onChange={(e) => setForm({ ...form, address: e.target.value })}
-              className="w-full border border-stone-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400"
+              className="w-full border border-stone-300 dark:border-stone-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-500"
             />
           </div>
           <div className="flex gap-2">
@@ -159,7 +159,7 @@ function PropertyCard() {
             </button>
             <button
               onClick={() => setEditing(false)}
-              className="px-4 py-1.5 text-sm border border-stone-300 text-stone-600 rounded-lg hover:bg-stone-50 transition-colors"
+              className="px-4 py-1.5 text-sm border border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-300 rounded-lg hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors"
             >
               Abbrechen
             </button>
@@ -238,31 +238,31 @@ function PortfolioOverview() {
     <Card title="Portfolio-Übersicht (alle Objekte)">
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-center">
         <div>
-          <p className="text-xs text-stone-500">Objekte</p>
-          <p className="text-lg font-semibold font-mono font-tabular text-stone-700">
+          <p className="text-xs text-stone-500 dark:text-stone-400">Objekte</p>
+          <p className="text-lg font-semibold font-mono font-tabular text-stone-700 dark:text-stone-200">
             {portfolioData.totalProperties}
           </p>
         </div>
         <div>
-          <p className="text-xs text-stone-500">Wohneinheiten</p>
-          <p className="text-lg font-semibold font-mono font-tabular text-stone-700">
+          <p className="text-xs text-stone-500 dark:text-stone-400">Wohneinheiten</p>
+          <p className="text-lg font-semibold font-mono font-tabular text-stone-700 dark:text-stone-200">
             {portfolioData.totalUnits}
           </p>
         </div>
         <div>
-          <p className="text-xs text-stone-500">Vermietet</p>
+          <p className="text-xs text-stone-500 dark:text-stone-400">Vermietet</p>
           <p className="text-lg font-semibold font-mono font-tabular text-green-600">
             {portfolioData.totalOccupied}
           </p>
         </div>
         <div>
-          <p className="text-xs text-stone-500">Leerstand</p>
-          <p className={`text-lg font-semibold font-mono font-tabular ${portfolioData.totalVacant > 0 ? 'text-amber-600' : 'text-stone-400'}`}>
+          <p className="text-xs text-stone-500 dark:text-stone-400">Leerstand</p>
+          <p className={`text-lg font-semibold font-mono font-tabular ${portfolioData.totalVacant > 0 ? 'text-amber-600' : 'text-stone-400 dark:text-stone-500'}`}>
             {portfolioData.totalVacant}
           </p>
         </div>
         <div>
-          <p className="text-xs text-stone-500">Monatsmiete gesamt</p>
+          <p className="text-xs text-stone-500 dark:text-stone-400">Monatsmiete gesamt</p>
           <p className="text-lg font-semibold font-mono font-tabular text-emerald-600">
             {formatEuro(portfolioData.totalMonthlyRent)}
           </p>
@@ -306,7 +306,7 @@ function SettingsCard() {
         !editing ? (
           <button
             onClick={startEditing}
-            className="text-xs text-stone-500 hover:text-stone-700"
+            className="text-xs text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200"
           >
             Bearbeiten
           </button>
@@ -314,7 +314,7 @@ function SettingsCard() {
       }
     >
       {!editing ? (
-        <div className="text-sm text-stone-600 space-y-1">
+        <div className="text-sm text-stone-600 dark:text-stone-300 space-y-1">
           <p><strong>Vermieter:</strong> {landlord?.name || '–'}</p>
           <p><strong>Adresse:</strong> {landlord?.address || '–'}</p>
           <p><strong>IBAN:</strong> {landlord?.iban || '–'}</p>
@@ -330,19 +330,19 @@ function SettingsCard() {
             { key: 'taxId', label: 'Steuer-ID' },
           ] as const).map((field) => (
             <div key={field.key}>
-              <label className="block text-xs font-medium text-stone-500 mb-1">
+              <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">
                 {field.label}
               </label>
               <input
                 type="text"
                 value={form[field.key] ?? ''}
                 onChange={(e) => setForm({ ...form, [field.key]: e.target.value })}
-                className="w-full border border-stone-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400"
+                className="w-full border border-stone-300 dark:border-stone-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-500"
               />
             </div>
           ))}
           <div>
-            <label className="block text-xs font-medium text-stone-500 mb-1">
+            <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">
               Messdienstleister
             </label>
             <input
@@ -350,7 +350,7 @@ function SettingsCard() {
               value={messdienstName}
               onChange={(e) => setMessdienstName(e.target.value)}
               placeholder="z.B. Brunata, Techem, Ista"
-              className="w-full border border-stone-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400"
+              className="w-full border border-stone-300 dark:border-stone-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-500"
             />
           </div>
           <div className="flex gap-2 pt-1">
@@ -362,7 +362,7 @@ function SettingsCard() {
             </button>
             <button
               onClick={() => setEditing(false)}
-              className="px-4 py-1.5 text-sm border border-stone-300 text-stone-600 rounded-lg hover:bg-stone-50 transition-colors"
+              className="px-4 py-1.5 text-sm border border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-300 rounded-lg hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors"
             >
               Abbrechen
             </button>

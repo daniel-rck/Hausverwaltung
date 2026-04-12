@@ -84,7 +84,7 @@ export function RoomInspection({ rooms, onChange }: RoomInspectionProps) {
       {rooms.map((room, index) => (
         <Card key={index}>
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold text-stone-800">{room.name}</h3>
+            <h3 className="text-sm font-semibold text-stone-800 dark:text-stone-100">{room.name}</h3>
             <button
               type="button"
               onClick={() => removeRoom(index)}
@@ -97,7 +97,7 @@ export function RoomInspection({ rooms, onChange }: RoomInspectionProps) {
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-3">
             {ASPECTS.map((aspect) => (
               <div key={aspect.key}>
-                <label className="block text-xs font-medium text-stone-500 mb-1">
+                <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">
                   {aspect.label}
                 </label>
                 <select
@@ -107,7 +107,7 @@ export function RoomInspection({ rooms, onChange }: RoomInspectionProps) {
                       [aspect.key]: e.target.value as Rating,
                     })
                   }
-                  className={`w-full border rounded-lg px-2 py-1.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-stone-400 ${ratingColor(room[aspect.key])}`}
+                  className={`w-full border rounded-lg px-2 py-1.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-500 ${ratingColor(room[aspect.key])}`}
                 >
                   {RATING_OPTIONS.map((opt) => (
                     <option key={opt.value} value={opt.value}>
@@ -120,7 +120,7 @@ export function RoomInspection({ rooms, onChange }: RoomInspectionProps) {
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-stone-500 mb-1">
+            <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">
               Bemerkungen
             </label>
             <input
@@ -128,7 +128,7 @@ export function RoomInspection({ rooms, onChange }: RoomInspectionProps) {
               value={room.notes ?? ''}
               onChange={(e) => updateRoom(index, { notes: e.target.value })}
               placeholder="z.B. Kratzer an der Tür"
-              className="w-full border border-stone-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400"
+              className="w-full border border-stone-300 dark:border-stone-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-500"
             />
           </div>
         </Card>
@@ -146,7 +146,7 @@ export function RoomInspection({ rooms, onChange }: RoomInspectionProps) {
             }
           }}
           placeholder="Weiteren Raum hinzufügen..."
-          className="flex-1 border border-stone-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400"
+          className="flex-1 border border-stone-300 dark:border-stone-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-500"
         />
         <button
           type="button"

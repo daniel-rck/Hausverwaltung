@@ -107,14 +107,14 @@ export function NebenkostenPage() {
 
   return (
     <div>
-      <h1 className="text-xl font-bold text-stone-800 mb-4">
+      <h1 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-4">
         Nebenkostenabrechnung
       </h1>
 
       {/* Year selector and controls */}
       <div className="no-print flex flex-wrap items-center gap-4 mb-4">
         <div>
-          <label className="block text-xs font-medium text-stone-500 mb-1">
+          <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">
             Abrechnungsjahr
           </label>
           <select
@@ -123,7 +123,7 @@ export function NebenkostenPage() {
               setYear(Number(e.target.value));
               setSelectedOccupancyId(null);
             }}
-            className="border border-stone-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400"
+            className="border border-stone-300 dark:border-stone-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-500"
           >
             {yearOptions.map((y) => (
               <option key={y} value={y}>
@@ -132,14 +132,14 @@ export function NebenkostenPage() {
             ))}
           </select>
         </div>
-        <div className="text-sm text-stone-500 self-end pb-1">
+        <div className="text-sm text-stone-500 dark:text-stone-400 self-end pb-1">
           {activeProperty.name}
           {activeProperty.address && ` \u2013 ${activeProperty.address}`}
         </div>
       </div>
 
       {/* Tab navigation */}
-      <div className="no-print flex border-b border-stone-200 mb-4 overflow-x-auto">
+      <div className="no-print flex border-b border-stone-200 dark:border-stone-700 mb-4 overflow-x-auto">
         {(Object.keys(TAB_LABELS) as Tab[]).map((tab) => (
           <button
             key={tab}
@@ -152,7 +152,7 @@ export function NebenkostenPage() {
             className={`px-4 py-2 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
               activeTab === tab
                 ? 'border-amber-600 text-amber-700'
-                : 'border-transparent text-stone-500 hover:text-stone-700 hover:border-stone-300'
+                : 'border-transparent text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 hover:border-stone-300'
             }`}
           >
             {TAB_LABELS[tab]}
@@ -179,7 +179,7 @@ export function NebenkostenPage() {
           <Card>
             <div className="flex flex-wrap items-end gap-4">
               <div className="flex-1 min-w-[200px]">
-                <label className="block text-xs font-medium text-stone-500 mb-1">
+                <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">
                   Mieter ausw\u00E4hlen
                 </label>
                 <select
@@ -189,7 +189,7 @@ export function NebenkostenPage() {
                       e.target.value ? Number(e.target.value) : null,
                     )
                   }
-                  className="w-full border border-stone-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400"
+                  className="w-full border border-stone-300 dark:border-stone-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-500"
                 >
                   <option value="">Bitte w\u00E4hlen...</option>
                   {occupancies?.map((info) => (
@@ -209,7 +209,7 @@ export function NebenkostenPage() {
               {selectedOccupancyId && (
                 <button
                   onClick={() => window.print()}
-                  className="px-4 py-1.5 text-sm border border-stone-300 text-stone-600 rounded-lg hover:bg-stone-50 transition-colors"
+                  className="px-4 py-1.5 text-sm border border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-300 rounded-lg hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors"
                 >
                   Diese Abrechnung drucken
                 </button>

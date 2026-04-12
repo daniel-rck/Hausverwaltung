@@ -25,7 +25,7 @@ export function MieterPage() {
 
   return (
     <div>
-      <h1 className="text-xl font-bold text-stone-800 mb-4">Mieterverwaltung</h1>
+      <h1 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-4">Mieterverwaltung</h1>
 
       {selectedUnit ? (
         <TenantForm

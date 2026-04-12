@@ -99,7 +99,7 @@ export function UnitList({ onSelectUnit }: UnitListProps) {
     {
       key: 'tenant',
       header: 'Mieter',
-      render: (r) => r.tenant?.name ?? <span className="text-stone-400">–</span>,
+      render: (r) => r.tenant?.name ?? <span className="text-stone-400 dark:text-stone-500">–</span>,
     },
     {
       key: 'status',
@@ -126,7 +126,7 @@ export function UnitList({ onSelectUnit }: UnitListProps) {
             });
             setShowForm(true);
           }}
-          className="text-xs text-stone-400 hover:text-stone-700"
+          className="text-xs text-stone-400 dark:text-stone-500 hover:text-stone-700 dark:hover:text-stone-200"
         >
           Bearbeiten
         </button>
@@ -153,13 +153,13 @@ export function UnitList({ onSelectUnit }: UnitListProps) {
       }
     >
       {showForm && (
-        <div className="mb-4 p-4 bg-stone-50 rounded-lg border border-stone-200">
-          <h3 className="text-sm font-semibold text-stone-700 mb-3">
+        <div className="mb-4 p-4 bg-stone-50 dark:bg-stone-800/50 rounded-lg border border-stone-200 dark:border-stone-700">
+          <h3 className="text-sm font-semibold text-stone-700 dark:text-stone-200 mb-3">
             {editUnit ? 'Wohnung bearbeiten' : 'Neue Wohnung'}
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
-              <label className="block text-xs font-medium text-stone-500 mb-1">
+              <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">
                 Bezeichnung *
               </label>
               <input
@@ -167,11 +167,11 @@ export function UnitList({ onSelectUnit }: UnitListProps) {
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 placeholder="z.B. EG, OG, KG"
-                className="w-full border border-stone-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400"
+                className="w-full border border-stone-300 dark:border-stone-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-500"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-stone-500 mb-1">
+              <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">
                 Fläche (m²)
               </label>
               <input
@@ -180,11 +180,11 @@ export function UnitList({ onSelectUnit }: UnitListProps) {
                 value={form.area}
                 onChange={(e) => setForm({ ...form, area: e.target.value })}
                 placeholder="z.B. 65,5"
-                className="w-full border border-stone-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400"
+                className="w-full border border-stone-300 dark:border-stone-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-500"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-stone-500 mb-1">
+              <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">
                 Stockwerk
               </label>
               <input
@@ -192,7 +192,7 @@ export function UnitList({ onSelectUnit }: UnitListProps) {
                 value={form.floor}
                 onChange={(e) => setForm({ ...form, floor: e.target.value })}
                 placeholder="z.B. Erdgeschoss"
-                className="w-full border border-stone-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400"
+                className="w-full border border-stone-300 dark:border-stone-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-500"
               />
             </div>
           </div>
@@ -208,7 +208,7 @@ export function UnitList({ onSelectUnit }: UnitListProps) {
                 setShowForm(false);
                 setEditUnit(null);
               }}
-              className="px-4 py-1.5 text-sm border border-stone-300 text-stone-600 rounded-lg hover:bg-stone-50 transition-colors"
+              className="px-4 py-1.5 text-sm border border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-300 rounded-lg hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors"
             >
               Abbrechen
             </button>

@@ -83,7 +83,7 @@ export function MeterSnapshot({ unitId, readings, onChange }: MeterSnapshotProps
   if (!snapshots) {
     return (
       <Card>
-        <p className="text-sm text-stone-500">Zähler werden geladen...</p>
+        <p className="text-sm text-stone-500 dark:text-stone-400">Zähler werden geladen...</p>
       </Card>
     );
   }
@@ -91,7 +91,7 @@ export function MeterSnapshot({ unitId, readings, onChange }: MeterSnapshotProps
   if (snapshots.length === 0) {
     return (
       <Card>
-        <p className="text-sm text-stone-500">
+        <p className="text-sm text-stone-500 dark:text-stone-400">
           Keine Zähler für diese Wohnung vorhanden. Sie können diesen Schritt
           überspringen oder zuerst Zähler in der Zählerverwaltung anlegen.
         </p>
@@ -106,18 +106,18 @@ export function MeterSnapshot({ unitId, readings, onChange }: MeterSnapshotProps
           <div className="flex flex-col sm:flex-row sm:items-center gap-3">
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-1">
-                <span className="text-sm font-semibold text-stone-800">
+                <span className="text-sm font-semibold text-stone-800 dark:text-stone-100">
                   {snapshot.typeName}
                 </span>
-                <span className="text-xs px-2 py-0.5 bg-stone-100 text-stone-500 rounded-full">
+                <span className="text-xs px-2 py-0.5 bg-stone-100 dark:bg-stone-700 text-stone-500 dark:text-stone-400 rounded-full">
                   {snapshot.typeUnit}
                 </span>
               </div>
-              <p className="text-xs text-stone-500">
+              <p className="text-xs text-stone-500 dark:text-stone-400">
                 Zähler-Nr.: {snapshot.serialNumber}
               </p>
               {snapshot.lastReading !== null && (
-                <p className="text-xs text-stone-400">
+                <p className="text-xs text-stone-400 dark:text-stone-500">
                   Letzter Stand: {snapshot.lastReading.toLocaleString('de-DE')}{' '}
                   {snapshot.typeUnit}
                 </p>
@@ -125,7 +125,7 @@ export function MeterSnapshot({ unitId, readings, onChange }: MeterSnapshotProps
             </div>
 
             <div className="sm:w-48">
-              <label className="block text-xs font-medium text-stone-500 mb-1">
+              <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">
                 Aktueller Stand
               </label>
               <div className="flex items-center gap-1">
@@ -140,9 +140,9 @@ export function MeterSnapshot({ unitId, readings, onChange }: MeterSnapshotProps
                       parseFloat(e.target.value) || 0,
                     )
                   }
-                  className="w-full border border-stone-300 rounded-lg px-3 py-1.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-stone-400"
+                  className="w-full border border-stone-300 dark:border-stone-600 rounded-lg px-3 py-1.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-500"
                 />
-                <span className="text-xs text-stone-500 whitespace-nowrap">
+                <span className="text-xs text-stone-500 dark:text-stone-400 whitespace-nowrap">
                   {snapshot.typeUnit}
                 </span>
               </div>

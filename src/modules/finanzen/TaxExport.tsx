@@ -116,23 +116,23 @@ export function TaxExport({ year }: TaxExportProps) {
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b-2 border-stone-300">
-            <th className="py-2 px-3 text-left font-medium text-stone-600">
+          <tr className="border-b-2 border-stone-300 dark:border-stone-600">
+            <th className="py-2 px-3 text-left font-medium text-stone-600 dark:text-stone-300">
               Einheit
             </th>
-            <th className="py-2 px-3 text-left font-medium text-stone-600">
+            <th className="py-2 px-3 text-left font-medium text-stone-600 dark:text-stone-300">
               Mieter
             </th>
-            <th className="py-2 px-3 text-left font-medium text-stone-600">
+            <th className="py-2 px-3 text-left font-medium text-stone-600 dark:text-stone-300">
               Zeitraum
             </th>
-            <th className="py-2 px-3 text-right font-medium text-stone-600">
+            <th className="py-2 px-3 text-right font-medium text-stone-600 dark:text-stone-300">
               Kaltmiete
             </th>
-            <th className="py-2 px-3 text-right font-medium text-stone-600">
+            <th className="py-2 px-3 text-right font-medium text-stone-600 dark:text-stone-300">
               Nebenkosten
             </th>
-            <th className="py-2 px-3 text-right font-medium text-stone-600">
+            <th className="py-2 px-3 text-right font-medium text-stone-600 dark:text-stone-300">
               Gesamt
             </th>
           </tr>
@@ -144,23 +144,23 @@ export function TaxExport({ year }: TaxExportProps) {
               ? formatPeriod(row.occupancyTo)
               : 'laufend';
             return (
-              <tr key={row.id} className="border-b border-stone-100">
-                <td className="py-2.5 px-3 font-medium text-stone-700">
+              <tr key={row.id} className="border-b border-stone-100 dark:border-stone-700">
+                <td className="py-2.5 px-3 font-medium text-stone-700 dark:text-stone-200">
                   {row.unitName}
                 </td>
-                <td className="py-2.5 px-3 text-stone-600">
+                <td className="py-2.5 px-3 text-stone-600 dark:text-stone-300">
                   {row.tenantName}
                 </td>
-                <td className="py-2.5 px-3 text-stone-500 text-xs">
+                <td className="py-2.5 px-3 text-stone-500 dark:text-stone-400 text-xs">
                   {fromDisplay} – {toDisplay}
                 </td>
-                <td className="py-2.5 px-3 text-right font-mono text-stone-700">
+                <td className="py-2.5 px-3 text-right font-mono text-stone-700 dark:text-stone-200">
                   {formatEuro(row.totalCold)}
                 </td>
-                <td className="py-2.5 px-3 text-right font-mono text-stone-700">
+                <td className="py-2.5 px-3 text-right font-mono text-stone-700 dark:text-stone-200">
                   {formatEuro(row.totalUtilities)}
                 </td>
-                <td className="py-2.5 px-3 text-right font-mono font-medium text-stone-800">
+                <td className="py-2.5 px-3 text-right font-mono font-medium text-stone-800 dark:text-stone-100">
                   {formatEuro(row.totalReceived)}
                 </td>
               </tr>
@@ -168,17 +168,17 @@ export function TaxExport({ year }: TaxExportProps) {
           })}
         </tbody>
         <tfoot>
-          <tr className="border-t-2 border-stone-300">
+          <tr className="border-t-2 border-stone-300 dark:border-stone-600">
             <td
               colSpan={3}
-              className="py-3 px-3 font-semibold text-stone-800"
+              className="py-3 px-3 font-semibold text-stone-800 dark:text-stone-100"
             >
               Summe {year}
             </td>
-            <td className="py-3 px-3 text-right font-mono font-semibold text-stone-800">
+            <td className="py-3 px-3 text-right font-mono font-semibold text-stone-800 dark:text-stone-100">
               {formatEuro(grandTotalCold)}
             </td>
-            <td className="py-3 px-3 text-right font-mono font-semibold text-stone-800">
+            <td className="py-3 px-3 text-right font-mono font-semibold text-stone-800 dark:text-stone-100">
               {formatEuro(grandTotalUtilities)}
             </td>
             <td className="py-3 px-3 text-right font-mono font-bold text-stone-900">
@@ -224,7 +224,7 @@ export function TaxExport({ year }: TaxExportProps) {
       ) : (
         <>
           {tableContent}
-          <p className="text-xs text-stone-400 mt-4">
+          <p className="text-xs text-stone-400 dark:text-stone-500 mt-4">
             Alle Beträge in Euro. Nur tatsächlich eingegangene Zahlungen.
             Geeignet als Anlage zur Steuererklärung (Anlage V).
           </p>

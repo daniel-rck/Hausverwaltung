@@ -31,11 +31,11 @@ export function FinanzenPage() {
     <div className="space-y-6">
       {/* Header mit Jahresauswahl */}
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-stone-800">Mieteinnahmen</h1>
+        <h1 className="text-xl font-bold text-stone-800 dark:text-stone-100">Mieteinnahmen</h1>
         <div className="flex items-center gap-2">
           <button
             onClick={() => setYear((y) => y - 1)}
-            className="px-2 py-1 text-sm border border-stone-300 rounded-lg hover:bg-stone-50 transition-colors"
+            className="px-2 py-1 text-sm border border-stone-300 dark:border-stone-600 rounded-lg hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors"
             aria-label="Vorheriges Jahr"
           >
             ‹
@@ -43,7 +43,7 @@ export function FinanzenPage() {
           <select
             value={year}
             onChange={(e) => setYear(Number(e.target.value))}
-            className="border border-stone-300 rounded-lg px-3 py-1.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-stone-400"
+            className="border border-stone-300 dark:border-stone-600 rounded-lg px-3 py-1.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-500"
           >
             {yearOptions.map((y) => (
               <option key={y} value={y}>
@@ -53,7 +53,7 @@ export function FinanzenPage() {
           </select>
           <button
             onClick={() => setYear((y) => y + 1)}
-            className="px-2 py-1 text-sm border border-stone-300 rounded-lg hover:bg-stone-50 transition-colors"
+            className="px-2 py-1 text-sm border border-stone-300 dark:border-stone-600 rounded-lg hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors"
             aria-label="Nächstes Jahr"
           >
             ›

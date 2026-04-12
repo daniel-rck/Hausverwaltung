@@ -166,7 +166,7 @@ export function WarmKaltRatio({ year }: WarmKaltRatioProps) {
 
   return (
     <Card title="Warm/Kalt-Verhältnis">
-      <p className="text-sm text-stone-600 mb-4">
+      <p className="text-sm text-stone-600 dark:text-stone-300 mb-4">
         Anteil Warmwasser am Gesamtverbrauch pro Einheit. Normalbereich:{' '}
         <span className="font-semibold">
           {WARM_WATER_RATIO_MIN}–{WARM_WATER_RATIO_MAX} %
@@ -196,30 +196,30 @@ export function WarmKaltRatio({ year }: WarmKaltRatioProps) {
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-stone-200">
-              <th className="py-2 px-3 text-left font-medium text-stone-500">
+            <tr className="border-b border-stone-200 dark:border-stone-700">
+              <th className="py-2 px-3 text-left font-medium text-stone-500 dark:text-stone-400">
                 Einheit
               </th>
-              <th className="py-2 px-3 text-right font-medium text-stone-500">
+              <th className="py-2 px-3 text-right font-medium text-stone-500 dark:text-stone-400">
                 Warmwasser (m³)
               </th>
-              <th className="py-2 px-3 text-right font-medium text-stone-500">
+              <th className="py-2 px-3 text-right font-medium text-stone-500 dark:text-stone-400">
                 Kaltwasser (m³)
               </th>
-              <th className="py-2 px-3 text-right font-medium text-stone-500">
+              <th className="py-2 px-3 text-right font-medium text-stone-500 dark:text-stone-400">
                 Gesamt (m³)
               </th>
-              <th className="py-2 px-3 text-right font-medium text-stone-500">
+              <th className="py-2 px-3 text-right font-medium text-stone-500 dark:text-stone-400">
                 Warmanteil
               </th>
-              <th className="py-2 px-3 text-center font-medium text-stone-500">
+              <th className="py-2 px-3 text-center font-medium text-stone-500 dark:text-stone-400">
                 Bewertung
               </th>
             </tr>
           </thead>
           <tbody>
             {unitRatios.map((ur) => (
-              <tr key={ur.unitName} className="border-b border-stone-100">
+              <tr key={ur.unitName} className="border-b border-stone-100 dark:border-stone-700">
                 <td className="py-2.5 px-3">{ur.unitName}</td>
                 <td className="py-2.5 px-3 text-right font-mono">
                   {formatNumber(ur.warmM3)}

@@ -122,7 +122,7 @@ export function OpenItems({ year }: OpenItemsProps) {
       key: 'unit',
       header: 'Einheit',
       render: (row) => (
-        <span className="font-medium text-stone-700">{row.unit.name}</span>
+        <span className="font-medium text-stone-700 dark:text-stone-200">{row.unit.name}</span>
       ),
       sortValue: (row) => row.unit.name,
     },

@@ -169,13 +169,13 @@ export function MessdienstInput({ propertyId, year }: MessdienstInputProps) {
             title={`${costType.name} \u2013 ${messdienstName}-Anteil`}
           >
             {!cost ? (
-              <p className="text-sm text-stone-500">
+              <p className="text-sm text-stone-500 dark:text-stone-400">
                 Bitte erfassen Sie zuerst den Gesamtbetrag unter
                 &quot;Kosten erfassen&quot;.
               </p>
             ) : (
               <div className="space-y-3">
-                <p className="text-xs text-stone-500">
+                <p className="text-xs text-stone-500 dark:text-stone-400">
                   Gesamtbetrag: {formatEuro(cost.totalAmount)} | Verteilt:{' '}
                   {formatEuro(sharesTotal)}{' '}
                   {Math.abs(cost.totalAmount - sharesTotal) > 0.01 && (
@@ -187,14 +187,14 @@ export function MessdienstInput({ propertyId, year }: MessdienstInputProps) {
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b border-stone-200">
-                        <th className="py-2 px-3 text-left font-medium text-stone-500">
+                      <tr className="border-b border-stone-200 dark:border-stone-700">
+                        <th className="py-2 px-3 text-left font-medium text-stone-500 dark:text-stone-400">
                           Wohnung
                         </th>
-                        <th className="py-2 px-3 text-left font-medium text-stone-500">
+                        <th className="py-2 px-3 text-left font-medium text-stone-500 dark:text-stone-400">
                           Mieter
                         </th>
-                        <th className="py-2 px-3 text-right font-medium text-stone-500">
+                        <th className="py-2 px-3 text-right font-medium text-stone-500 dark:text-stone-400">
                           Betrag
                         </th>
                       </tr>
@@ -207,12 +207,12 @@ export function MessdienstInput({ propertyId, year }: MessdienstInputProps) {
                         return (
                           <tr
                             key={occupancy.id}
-                            className="border-b border-stone-100"
+                            className="border-b border-stone-100 dark:border-stone-700"
                           >
-                            <td className="py-2 px-3 text-stone-700">
+                            <td className="py-2 px-3 text-stone-700 dark:text-stone-200">
                               {unit?.name ?? '\u2013'}
                             </td>
-                            <td className="py-2 px-3 text-stone-700">
+                            <td className="py-2 px-3 text-stone-700 dark:text-stone-200">
                               {tenant?.name ?? '\u2013'}
                             </td>
                             <td className="py-2 px-3">
@@ -235,14 +235,14 @@ export function MessdienstInput({ propertyId, year }: MessdienstInputProps) {
                       })}
                     </tbody>
                     <tfoot>
-                      <tr className="border-t border-stone-200">
+                      <tr className="border-t border-stone-200 dark:border-stone-700">
                         <td
                           colSpan={2}
-                          className="py-2 px-3 text-sm font-semibold text-stone-600"
+                          className="py-2 px-3 text-sm font-semibold text-stone-600 dark:text-stone-300"
                         >
                           Summe Anteile
                         </td>
-                        <td className="py-2 px-3 text-right font-mono font-tabular font-semibold text-stone-800">
+                        <td className="py-2 px-3 text-right font-mono font-tabular font-semibold text-stone-800 dark:text-stone-100">
                           {formatEuro(sharesTotal)}
                         </td>
                       </tr>

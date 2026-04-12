@@ -83,7 +83,7 @@ export function ExportImport() {
           <button
             onClick={() => fileInput.current?.click()}
             disabled={importing}
-            className="flex-1 px-4 py-2 text-sm border border-stone-300 text-stone-700 rounded-lg hover:bg-stone-50 transition-colors disabled:opacity-50"
+            className="flex-1 px-4 py-2 text-sm border border-stone-300 dark:border-stone-600 text-stone-700 dark:text-stone-200 rounded-lg hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors disabled:opacity-50"
           >
             {importing ? 'Importiert...' : 'Import (JSON)'}
           </button>
@@ -96,10 +96,10 @@ export function ExportImport() {
           />
         </div>
 
-        <div className="mt-3 pt-3 border-t border-stone-100">
+        <div className="mt-3 pt-3 border-t border-stone-100 dark:border-stone-700">
           <button
             onClick={handleShareUrl}
-            className="w-full px-4 py-2 text-sm border border-stone-300 text-stone-700 rounded-lg hover:bg-stone-50 transition-colors"
+            className="w-full px-4 py-2 text-sm border border-stone-300 dark:border-stone-600 text-stone-700 dark:text-stone-200 rounded-lg hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors"
           >
             Transfer-Link erstellen (zum Teilen per URL)
           </button>
@@ -109,10 +109,10 @@ export function ExportImport() {
                 type="text"
                 readOnly
                 value={shareUrl}
-                className="w-full border border-stone-200 rounded-lg px-3 py-1.5 text-xs font-mono bg-stone-50 text-stone-600"
+                className="w-full border border-stone-200 dark:border-stone-700 rounded-lg px-3 py-1.5 text-xs font-mono bg-stone-50 dark:bg-stone-800/50 text-stone-600 dark:text-stone-300"
                 onClick={(e) => (e.target as HTMLInputElement).select()}
               />
-              <p className="text-xs text-stone-400 mt-1">
+              <p className="text-xs text-stone-400 dark:text-stone-500 mt-1">
                 Link auf dem anderen Gerät im Browser öffnen, um die Daten zu importieren.
               </p>
             </div>

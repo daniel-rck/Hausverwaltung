@@ -125,13 +125,13 @@ export function UebergabePage() {
   if (step !== 'list') {
     return (
       <div className="space-y-4">
-        <button onClick={resetForm} className="text-sm text-stone-500 dark:text-stone-400 hover:text-stone-700">
+        <button onClick={resetForm} className="text-sm text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200">
           ← Abbrechen
         </button>
         <h1 className="text-xl font-bold text-stone-800 dark:text-stone-100">Neues Übergabeprotokoll</h1>
 
         {/* Progress */}
-        <div className="flex gap-2 text-xs text-stone-400">
+        <div className="flex gap-2 text-xs text-stone-400 dark:text-stone-500">
           {(['setup', 'rooms', 'meters', 'keys', 'signatures'] as Step[]).map((s, i) => (
             <span key={s} className={step === s ? 'text-blue-600 dark:text-blue-400 font-semibold' : ''}>
               {i + 1}. {s === 'setup' ? 'Grunddaten' : s === 'rooms' ? 'Räume' : s === 'meters' ? 'Zähler' : s === 'keys' ? 'Schlüssel' : 'Unterschriften'}
@@ -347,13 +347,13 @@ function ProtocolPreview({ protocolId, onBack }: { protocolId: number; onBack: (
   }, [protocolId]);
 
   if (!data) {
-    return <p className="text-sm text-stone-500">Lade Protokoll...</p>;
+    return <p className="text-sm text-stone-500 dark:text-stone-400">Lade Protokoll...</p>;
   }
 
   return (
     <div>
       <div className="flex items-center justify-between mb-4 no-print">
-        <button onClick={onBack} className="text-sm text-stone-500 dark:text-stone-400 hover:text-stone-700">
+        <button onClick={onBack} className="text-sm text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200">
           ← Zurück zur Übersicht
         </button>
         <button
