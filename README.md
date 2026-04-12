@@ -2,7 +2,7 @@
 
 Kostenlose Web-App für private Vermieter kleiner Mehrfamilienhäuser.
 
-**[Direkt starten](https://daniel-rck.github.io/hausverwaltung/)**
+**[Direkt starten](https://daniel-rck.github.io/Hausverwaltung/)**
 
 ---
 
@@ -32,7 +32,7 @@ Die App ist gemacht für Vermieter mit 3 bis 10 Wohneinheiten, die ihre Verwaltu
 
 ## So funktioniert's
 
-1. Öffnen Sie **[daniel-rck.github.io/hausverwaltung](https://daniel-rck.github.io/hausverwaltung/)**
+1. Öffnen Sie **[daniel-rck.github.io/Hausverwaltung](https://daniel-rck.github.io/Hausverwaltung/)**
 2. Legen Sie Ihr erstes Mietobjekt an (Name, Adresse)
 3. Fügen Sie Wohnungen und Mieter hinzu
 4. Fertig — alle weiteren Module (Nebenkosten, Zähler, Finanzen, ...) greifen automatisch auf diese Daten zu
@@ -52,4 +52,4 @@ Abrechnungen und Übergabeprotokolle können direkt aus der App als saubere A4-S
 
 ## Fragen oder Probleme?
 
-Erstellen Sie ein [Issue](https://github.com/daniel-rck/hausverwaltung/issues) hier auf GitHub.
+Erstellen Sie ein [Issue](https://github.com/daniel-rck/Hausverwaltung/issues) hier auf GitHub.
