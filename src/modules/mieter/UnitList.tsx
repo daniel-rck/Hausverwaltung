@@ -1,0 +1,228 @@
+import { useState } from 'react';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { db } from '../../db';
+import { useProperty } from '../../hooks/useProperty';
+import { Card } from '../../components/shared/Card';
+import { DataTable, type Column } from '../../components/shared/DataTable';
+import { EmptyState } from '../../components/shared/EmptyState';
+import { StatusBadge } from '../../components/shared/StatusBadge';
+import { formatArea } from '../../utils/format';
+import type { Unit, Occupancy, Tenant } from '../../db/schema';
+
+interface UnitRow {
+  unit: Unit;
+  occupancy: Occupancy | null;
+  tenant: Tenant | null;
+}
+
+interface UnitListProps {
+  onSelectUnit: (unit: Unit) => void;
+}
+
+export function UnitList({ onSelectUnit }: UnitListProps) {
+  const { activeProperty } = useProperty();
+  const [showForm, setShowForm] = useState(false);
+  const [editUnit, setEditUnit] = useState<Unit | null>(null);
+  const [form, setForm] = useState({ name: '', area: '', floor: '' });
+
+  const rows = useLiveQuery(async () => {
+    if (!activeProperty?.id) return [];
+
+    const units = await db.units
+      .where('propertyId')
+      .equals(activeProperty.id)
+      .toArray();
+
+    const now = new Date().toISOString().slice(0, 7);
+    const result: UnitRow[] = [];
+
+    for (const unit of units) {
+      const occupancies = await db.occupancies
+        .where('unitId')
+        .equals(unit.id!)
+        .toArray();
+
+      const active = occupancies.find(
+        (o) => o.from <= now && (o.to === null || o.to >= now),
+      );
+
+      let tenant: Tenant | null = null;
+      if (active) {
+        tenant = (await db.tenants.get(active.tenantId)) ?? null;
+      }
+
+      result.push({ unit, occupancy: active ?? null, tenant });
+    }
+
+    return result;
+  }, [activeProperty?.id]);
+
+  const handleSave = async () => {
+    if (!activeProperty?.id || !form.name.trim()) return;
+
+    const data = {
+      propertyId: activeProperty.id,
+      name: form.name.trim(),
+      area: parseFloat(form.area.replace(',', '.')) || 0,
+      floor: form.floor || undefined,
+    };
+
+    if (editUnit?.id) {
+      await db.units.put({ ...data, id: editUnit.id });
+    } else {
+      await db.units.add(data);
+    }
+
+    setShowForm(false);
+    setEditUnit(null);
+    setForm({ name: '', area: '', floor: '' });
+  };
+
+  const handleDelete = async (id: number) => {
+    await db.units.delete(id);
+  };
+
+  const columns: Column<UnitRow>[] = [
+    {
+      key: 'name',
+      header: 'Wohnung',
+      render: (r) => <span className="font-medium">{r.unit.name}</span>,
+      sortValue: (r) => r.unit.name,
+    },
+    {
+      key: 'area',
+      header: 'Fläche',
+      render: (r) => <span className="font-mono font-tabular">{formatArea(r.unit.area)}</span>,
+      sortValue: (r) => r.unit.area,
+      align: 'right',
+    },
+    {
+      key: 'tenant',
+      header: 'Mieter',
+      render: (r) => r.tenant?.name ?? <span className="text-stone-400">–</span>,
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      render: (r) =>
+        r.occupancy ? (
+          <StatusBadge status="green" label="Vermietet" />
+        ) : (
+          <StatusBadge status="yellow" label="Leerstand" />
+        ),
+    },
+  ];
+
+  if (!activeProperty) return null;
+
+  return (
+    <Card
+      title="Wohneinheiten"
+      action={
+        <button
+          onClick={() => {
+            setEditUnit(null);
+            setForm({ name: '', area: '', floor: '' });
+            setShowForm(true);
+          }}
+          className="text-sm px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+        >
+          + Wohnung
+        </button>
+      }
+    >
+      {showForm && (
+        <div className="mb-4 p-4 bg-stone-50 rounded-lg border border-stone-200">
+          <h3 className="text-sm font-semibold text-stone-700 mb-3">
+            {editUnit ? 'Wohnung bearbeiten' : 'Neue Wohnung'}
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-stone-500 mb-1">
+                Bezeichnung *
+              </label>
+              <input
+                type="text"
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                placeholder="z.B. EG, OG, KG"
+                className="w-full border border-stone-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-stone-500 mb-1">
+                Fläche (m²)
+              </label>
+              <input
+                type="text"
+                inputMode="decimal"
+                value={form.area}
+                onChange={(e) => setForm({ ...form, area: e.target.value })}
+                placeholder="z.B. 65,5"
+                className="w-full border border-stone-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-stone-500 mb-1">
+                Stockwerk
+              </label>
+              <input
+                type="text"
+                value={form.floor}
+                onChange={(e) => setForm({ ...form, floor: e.target.value })}
+                placeholder="z.B. Erdgeschoss"
+                className="w-full border border-stone-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400"
+              />
+            </div>
+          </div>
+          <div className="flex gap-2 mt-3">
+            <button
+              onClick={handleSave}
+              className="px-4 py-1.5 text-sm bg-stone-800 text-white rounded-lg hover:bg-stone-900 transition-colors"
+            >
+              Speichern
+            </button>
+            <button
+              onClick={() => {
+                setShowForm(false);
+                setEditUnit(null);
+              }}
+              className="px-4 py-1.5 text-sm border border-stone-300 text-stone-600 rounded-lg hover:bg-stone-50 transition-colors"
+            >
+              Abbrechen
+            </button>
+            {editUnit?.id && (
+              <button
+                onClick={() => {
+                  handleDelete(editUnit.id!);
+                  setShowForm(false);
+                  setEditUnit(null);
+                }}
+                className="px-4 py-1.5 text-sm text-red-600 hover:text-red-700 ml-auto"
+              >
+                Löschen
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {!rows || rows.length === 0 ? (
+        <EmptyState
+          icon="🏠"
+          title="Keine Wohnungen"
+          description="Legen Sie die Wohneinheiten Ihres Objekts an."
+        />
+      ) : (
+        <DataTable
+          columns={columns}
+          data={rows}
+          keyFn={(r) => r.unit.id!}
+          onRowClick={(r) => {
+            if (!showForm) onSelectUnit(r.unit);
+          }}
+        />
+      )}
+    </Card>
+  );
+}

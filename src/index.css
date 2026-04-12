@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  /* Modul-Akzentfarben */
+  --color-modul-nebenkosten: #d97706;
+  --color-modul-wasser: #0891b2;
+  --color-modul-mieter: #16a34a;
+  --color-modul-finanzen: #059669;
+  --color-modul-instandhaltung: #e11d48;
+  --color-modul-zaehler: #7c3aed;
+  --color-modul-uebergabe: #2563eb;
+  --color-modul-rendite: #ca8a04;
+}
+
+body {
+  @apply bg-stone-50 text-stone-800 font-sans antialiased;
+  margin: 0;
+}
+
+.font-tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Print styles */
+@media print {
+  body {
+    @apply bg-white text-black text-sm;
+  }
+
+  .no-print,
+  nav,
+  aside,
+  .sidebar,
+  .bottom-nav {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  .print-container {
+    @apply w-full max-w-none m-0 p-0;
+  }
+
+  table {
+    page-break-inside: auto;
+  }
+
+  tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+
+  .page-break {
+    page-break-before: always;
+  }
+
+  @page {
+    margin: 15mm;
+    size: A4;
+  }
+}
+
+.print-only {
+  display: none;
+}
