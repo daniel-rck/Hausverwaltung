@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../db';
 import { Card } from '../../components/shared/Card';
@@ -21,7 +21,6 @@ export function TenantForm({ unit, onBack }: TenantFormProps) {
   const [showTenantForm, setShowTenantForm] = useState(false);
   const [showOccForm, setShowOccForm] = useState(false);
   const [tenantForm, setTenantForm] = useState({ name: '', email: '', phone: '', notes: '' });
-  const [selectedTenantId, setSelectedTenantId] = useState<number | null>(null);
 
   const tenants = useLiveQuery(
     () => db.tenants.where('unitId').equals(unit.id!).toArray(),
@@ -70,11 +69,6 @@ export function TenantForm({ unit, onBack }: TenantFormProps) {
     depositPaid: false,
   });
 
-  useEffect(() => {
-    if (selectedTenantId) {
-      setOccForm((f) => ({ ...f, tenantId: String(selectedTenantId) }));
-    }
-  }, [selectedTenantId]);
 
   const handleSaveOccupancy = async () => {
     const tenantId = parseInt(occForm.tenantId);
@@ -103,7 +97,6 @@ export function TenantForm({ unit, onBack }: TenantFormProps) {
       depositPaid: false,
     });
     setShowOccForm(false);
-    setSelectedTenantId(null);
   };
 
   const handleDeleteOccupancy = async (id: number) => {
@@ -274,7 +267,7 @@ export function TenantForm({ unit, onBack }: TenantFormProps) {
                 </div>
                 <button
                   onClick={() => {
-                    setSelectedTenantId(t.id!);
+                    setOccForm((f) => ({ ...f, tenantId: String(t.id!) }));
                     setShowOccForm(true);
                   }}
                   className="text-xs px-2 py-1 bg-stone-100 text-stone-600 rounded hover:bg-stone-200 transition-colors"
@@ -389,7 +382,6 @@ export function TenantForm({ unit, onBack }: TenantFormProps) {
             <button
               onClick={() => {
                 setShowOccForm(false);
-                setSelectedTenantId(null);
               }}
               className="px-4 py-1.5 text-sm border border-stone-300 text-stone-600 rounded-lg hover:bg-stone-50 transition-colors"
             >

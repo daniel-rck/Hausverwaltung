@@ -1,8 +1,9 @@
+/* eslint-disable react-refresh/only-export-components */
 import {
   createContext,
   useContext,
   useState,
-  useEffect,
+  useMemo,
   useCallback,
   type ReactNode,
 } from 'react';
@@ -21,18 +22,21 @@ interface PropertyContextValue {
 
 const PropertyContext = createContext<PropertyContextValue | null>(null);
 
+const EMPTY_PROPERTIES: Property[] = [];
+
 export function PropertyProvider({ children }: { children: ReactNode }) {
-  const properties = useLiveQuery(() => db.properties.toArray()) ?? [];
+  const properties = useLiveQuery(() => db.properties.toArray()) ?? EMPTY_PROPERTIES;
   const [activeId, setActiveId] = useState<number | null>(null);
 
-  // Auto-select first property
-  useEffect(() => {
-    if (activeId === null && properties.length > 0) {
-      setActiveId(properties[0].id!);
+  // Auto-select first property via useMemo to avoid setState in effect
+  const resolvedActiveId = useMemo(() => {
+    if (activeId !== null && properties.some((p) => p.id === activeId)) {
+      return activeId;
     }
+    return properties.length > 0 ? properties[0].id! : null;
   }, [activeId, properties]);
 
-  const activeProperty = properties.find((p) => p.id === activeId) ?? null;
+  const activeProperty = properties.find((p) => p.id === resolvedActiveId) ?? null;
 
   const addProperty = useCallback(async (p: Omit<Property, 'id'>) => {
     const id = await db.properties.add(p as Property);
@@ -59,7 +63,7 @@ export function PropertyProvider({ children }: { children: ReactNode }) {
       value={{
         properties,
         activeProperty,
-        setActivePropertyId: setActiveId,
+        setActivePropertyId: (id: number) => setActiveId(id),
         addProperty,
         updateProperty,
         deleteProperty,

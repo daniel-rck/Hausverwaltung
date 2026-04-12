@@ -88,13 +88,12 @@ function PropertyCard() {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [form, setForm] = useState({ name: '', address: '' });
 
-  useEffect(() => {
-    if (activeProperty) {
-      setForm({ name: activeProperty.name, address: activeProperty.address });
-    }
-  }, [activeProperty]);
-
   if (!activeProperty) return null;
+
+  const startEditing = () => {
+    setForm({ name: activeProperty.name, address: activeProperty.address });
+    setEditing(true);
+  };
 
   const handleSave = async () => {
     await updateProperty({
@@ -120,7 +119,7 @@ function PropertyCard() {
           )}
         </div>
         <button
-          onClick={() => setEditing(true)}
+          onClick={startEditing}
           className="text-xs text-stone-400 hover:text-stone-600 mt-1"
         >
           Bearbeiten
@@ -288,13 +287,11 @@ function SettingsCard() {
   const [form, setForm] = useState<LandlordInfo>({ name: '', address: '', iban: '', taxId: '' });
   const [messdienstName, setMessdienstName] = useState('');
 
-  useEffect(() => {
+  const startEditing = () => {
     if (landlord) setForm(landlord);
-  }, [landlord]);
-
-  useEffect(() => {
     if (messdienst) setMessdienstName(messdienst);
-  }, [messdienst]);
+    setEditing(true);
+  };
 
   const handleSave = async () => {
     await db.settings.put({ key: 'landlord', value: form });
@@ -308,7 +305,7 @@ function SettingsCard() {
       action={
         !editing ? (
           <button
-            onClick={() => setEditing(true)}
+            onClick={startEditing}
             className="text-xs text-stone-500 hover:text-stone-700"
           >
             Bearbeiten

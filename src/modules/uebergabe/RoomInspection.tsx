@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { useState } from 'react';
 import { Card } from '../../components/shared/Card';
 import type { RoomCondition, Rating } from '../../db/schema';
