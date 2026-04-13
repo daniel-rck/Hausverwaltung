@@ -10,6 +10,7 @@ import { ConfirmDialog } from '../../components/shared/ConfirmDialog';
 import { QuickStats } from './QuickStats';
 import { AlertsList } from './AlertsList';
 import { ExportImport } from './ExportImport';
+import { AnnualReport } from './AnnualReport';
 import { formatEuro } from '../../utils/format';
 import type { LandlordInfo } from '../../db/schema';
 
@@ -74,6 +75,9 @@ export function DashboardPage() {
           <SettingsCard />
         </div>
       </div>
+
+      {/* Jahresabschluss */}
+      <AnnualReport propertyId={activeProperty.id!} />
 
       {/* Portfolio-Übersicht wenn mehrere Objekte */}
       {properties.length > 1 && <PortfolioOverview />}

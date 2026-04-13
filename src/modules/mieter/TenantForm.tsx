@@ -8,6 +8,7 @@ import { formatEuro, formatMonth } from '../../utils/format';
 import { RentHistory } from './RentHistory';
 import { DepositManager } from './DepositManager';
 import { DocumentStore } from './DocumentStore';
+import { ContractTemplate } from './ContractTemplate';
 import type { Unit, Tenant, Occupancy } from '../../db/schema';
 
 interface TenantFormProps {
@@ -23,6 +24,7 @@ interface OccupancyRow {
 export function TenantForm({ unit, onBack }: TenantFormProps) {
   const [showTenantForm, setShowTenantForm] = useState(false);
   const [showOccForm, setShowOccForm] = useState(false);
+  const [contractOcc, setContractOcc] = useState<{ occupancy: Occupancy; tenant: Tenant } | null>(null);
   const [tenantForm, setTenantForm] = useState({ name: '', email: '', phone: '', notes: '' });
 
   const tenants = useLiveQuery(
@@ -161,18 +163,45 @@ export function TenantForm({ unit, onBack }: TenantFormProps) {
       key: 'actions',
       header: '',
       render: (r) => (
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            handleDeleteOccupancy(r.occupancy.id!);
-          }}
-          className="text-xs text-red-500 hover:text-red-700"
-        >
-          Löschen
-        </button>
+        <div className="flex gap-2">
+          {r.tenant && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setContractOcc({ occupancy: r.occupancy, tenant: r.tenant! });
+              }}
+              className="text-xs text-blue-500 hover:text-blue-700"
+            >
+              Vertrag
+            </button>
+          )}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDeleteOccupancy(r.occupancy.id!);
+            }}
+            className="text-xs text-red-500 hover:text-red-700"
+          >
+            Löschen
+          </button>
+        </div>
       ),
     },
   ];
+
+  if (contractOcc) {
+    return (
+      <div className="space-y-4">
+        <button
+          onClick={() => setContractOcc(null)}
+          className="text-sm text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200"
+        >
+          ← Zurück zur Wohnung
+        </button>
+        <ContractTemplate occupancy={contractOcc.occupancy} unit={unit} tenant={contractOcc.tenant} />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">

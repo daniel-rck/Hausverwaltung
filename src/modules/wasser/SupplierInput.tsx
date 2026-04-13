@@ -8,8 +8,11 @@ import { NumInput } from '../../components/shared/NumInput';
 import { formatEuro, formatNumber, formatDate } from '../../utils/format';
 import { useProperty } from '../../hooks/useProperty';
 
+type SupplierType = 'water' | 'gas' | 'electricity' | 'heating';
+
 interface SupplierInputProps {
   year: number;
+  type: SupplierType;
 }
 
 interface BillForm {
@@ -22,21 +25,31 @@ interface BillForm {
   notes: string;
 }
 
-const emptyForm: BillForm = {
-  supplier: '',
-  totalAmount: 0,
-  totalConsumption: 0,
-  unit: 'm³',
-  billingFrom: '',
-  billingTo: '',
-  notes: '',
+const typeConfig: Record<SupplierType, { label: string; defaultUnit: string; units: string[] }> = {
+  water: { label: 'Wasserversorger', defaultUnit: 'm³', units: ['m³'] },
+  gas: { label: 'Gasversorger', defaultUnit: 'm³', units: ['m³', 'kWh'] },
+  electricity: { label: 'Stromversorger', defaultUnit: 'kWh', units: ['kWh'] },
+  heating: { label: 'Fernwärme/Heizung', defaultUnit: 'kWh', units: ['kWh', 'MWh'] },
 };
 
-export function SupplierInput({ year }: SupplierInputProps) {
+function makeEmptyForm(type: SupplierType): BillForm {
+  return {
+    supplier: '',
+    totalAmount: 0,
+    totalConsumption: 0,
+    unit: typeConfig[type].defaultUnit,
+    billingFrom: '',
+    billingTo: '',
+    notes: '',
+  };
+}
+
+export function SupplierInput({ year, type }: SupplierInputProps) {
   const { activeProperty } = useProperty();
-  const [form, setForm] = useState<BillForm>({ ...emptyForm });
+  const [form, setForm] = useState<BillForm>(() => makeEmptyForm(type));
   const [saving, setSaving] = useState(false);
 
+  const config = typeConfig[type];
   const propertyId = activeProperty?.id;
 
   const bills = useLiveQuery(
@@ -44,11 +57,11 @@ export function SupplierInput({ year }: SupplierInputProps) {
       propertyId != null
         ? db.supplierBills
             .where('[year+type]')
-            .equals([year, 'water'])
+            .equals([year, type])
             .filter((b) => b.propertyId === propertyId)
             .toArray()
         : Promise.resolve([] as SupplierBill[]),
-    [year, propertyId],
+    [year, type, propertyId],
   );
 
   const handleSave = useCallback(async () => {
@@ -58,7 +71,7 @@ export function SupplierInput({ year }: SupplierInputProps) {
       const bill: Omit<SupplierBill, 'id'> = {
         propertyId,
         year,
-        type: 'water',
+        type,
         supplier: form.supplier.trim(),
         totalAmount: form.totalAmount,
         totalConsumption: form.totalConsumption,
@@ -68,11 +81,11 @@ export function SupplierInput({ year }: SupplierInputProps) {
         notes: form.notes.trim() || undefined,
       };
       await db.supplierBills.add(bill as SupplierBill);
-      setForm({ ...emptyForm });
+      setForm(makeEmptyForm(type));
     } finally {
       setSaving(false);
     }
-  }, [propertyId, year, form]);
+  }, [propertyId, year, type, form]);
 
   const handleDelete = useCallback(async (id: number) => {
     await db.supplierBills.delete(id);
@@ -135,11 +148,11 @@ export function SupplierInput({ year }: SupplierInputProps) {
     form.billingTo.length > 0;
 
   return (
-    <Card title="Versorger-Daten eingeben">
+    <Card title={`${config.label} \u2013 Daten eingeben`}>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
         <div>
           <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">
-            Versorger
+            {config.label}
           </label>
           <input
             type="text"
@@ -156,13 +169,28 @@ export function SupplierInput({ year }: SupplierInputProps) {
           onChange={(v) => setForm((f) => ({ ...f, totalAmount: v }))}
           min={0}
         />
-        <NumInput
-          label="Gesamtverbrauch"
-          suffix="m³"
-          value={form.totalConsumption}
-          onChange={(v) => setForm((f) => ({ ...f, totalConsumption: v }))}
-          min={0}
-        />
+        <div>
+          <NumInput
+            label="Gesamtverbrauch"
+            suffix={form.unit}
+            value={form.totalConsumption}
+            onChange={(v) => setForm((f) => ({ ...f, totalConsumption: v }))}
+            min={0}
+          />
+          {config.units.length > 1 && (
+            <select
+              value={form.unit}
+              onChange={(e) => setForm((f) => ({ ...f, unit: e.target.value }))}
+              className="mt-1 border border-stone-300 dark:border-stone-600 rounded-lg px-2 py-1 text-xs bg-white dark:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-500"
+            >
+              {config.units.map((u) => (
+                <option key={u} value={u}>
+                  {u}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
         <div>
           <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">
             Abrechnungszeitraum von

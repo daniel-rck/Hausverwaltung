@@ -5,6 +5,7 @@ import { MonthOverview } from './MonthOverview';
 import { OpenItems } from './OpenItems';
 import { RevenueChart } from './RevenueChart';
 import { TaxExport } from './TaxExport';
+import { PaymentReminder } from './PaymentReminder';
 
 const currentYear = new Date().getFullYear();
 
@@ -69,6 +70,9 @@ export function FinanzenPage() {
 
       {/* Jahresübersicht / Chart */}
       <RevenueChart year={year} />
+
+      {/* Mahnwesen */}
+      <PaymentReminder year={year} />
 
       {/* Steuer-Export */}
       <TaxExport year={year} />
