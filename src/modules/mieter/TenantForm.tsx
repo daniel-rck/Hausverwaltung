@@ -5,6 +5,9 @@ import { Card } from '../../components/shared/Card';
 import { DataTable, type Column } from '../../components/shared/DataTable';
 import { StatusBadge } from '../../components/shared/StatusBadge';
 import { formatEuro, formatMonth } from '../../utils/format';
+import { RentHistory } from './RentHistory';
+import { DepositManager } from './DepositManager';
+import { DocumentStore } from './DocumentStore';
 import type { Unit, Tenant, Occupancy } from '../../db/schema';
 
 interface TenantFormProps {
@@ -403,6 +406,24 @@ export function TenantForm({ unit, onBack }: TenantFormProps) {
           <p className="text-sm text-stone-500 dark:text-stone-400">Noch keine Belegungen vorhanden.</p>
         )}
       </Card>
+
+      {/* Miethistorie & Kaution für aktuelle Belegung */}
+      {rows && rows.length > 0 && (() => {
+        const now = new Date().toISOString().slice(0, 7);
+        const current = rows.find(
+          (r) => r.occupancy.from <= now && (r.occupancy.to === null || r.occupancy.to >= now),
+        );
+        if (!current) return null;
+        return (
+          <>
+            <RentHistory occupancy={current.occupancy} unit={unit} />
+            <DepositManager occupancy={current.occupancy} />
+          </>
+        );
+      })()}
+
+      {/* Dokumente */}
+      <DocumentStore entityType="unit" entityId={unit.id!} title="Dokumente zur Wohnung" />
     </div>
   );
 }

@@ -1,9 +1,38 @@
 import { useState } from 'react';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { db } from '../../db';
 import { useProperty } from '../../hooks/useProperty';
 import { EmptyState } from '../../components/shared/EmptyState';
 import { UnitList } from './UnitList';
 import { TenantForm } from './TenantForm';
+import { RentBenchmark } from './RentBenchmark';
 import type { Unit } from '../../db/schema';
+
+function MieterOverview({ propertyId, onSelectUnit }: { propertyId: number; onSelectUnit: (u: Unit) => void }) {
+  const units = useLiveQuery(
+    () => db.units.where('propertyId').equals(propertyId).toArray(),
+    [propertyId],
+  );
+  const occupancies = useLiveQuery(async () => {
+    if (!units) return [];
+    const unitIds = units.map((u) => u.id!);
+    const all = await db.occupancies.toArray();
+    return all.filter((o) => unitIds.includes(o.unitId));
+  }, [units]);
+
+  return (
+    <div className="space-y-6">
+      <UnitList onSelectUnit={onSelectUnit} />
+      {units && units.length > 0 && occupancies && (
+        <RentBenchmark
+          propertyId={propertyId}
+          units={units}
+          occupancies={occupancies}
+        />
+      )}
+    </div>
+  );
+}
 
 export function MieterPage() {
   const { activeProperty, addProperty } = useProperty();
@@ -33,7 +62,7 @@ export function MieterPage() {
           onBack={() => setSelectedUnit(null)}
         />
       ) : (
-        <UnitList onSelectUnit={setSelectedUnit} />
+        <MieterOverview propertyId={activeProperty.id!} onSelectUnit={setSelectedUnit} />
       )}
     </div>
   );
