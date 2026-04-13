@@ -1,4 +1,5 @@
-import { NavLink } from 'react-router-dom';
+import { useState } from 'react';
+import { NavLink, useLocation } from 'react-router-dom';
 
 interface NavItem {
   path: string;
@@ -44,6 +45,11 @@ export function SidebarNav() {
 }
 
 export function BottomNav() {
+  const [showMore, setShowMore] = useState(false);
+  const location = useLocation();
+  const moreItems = navItems.slice(5);
+  const isMoreActive = moreItems.some((item) => location.pathname === item.path);
+
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-stone-800 border-t border-stone-200 dark:border-stone-700 z-50 no-print">
       <div className="flex justify-around py-1">
@@ -62,17 +68,43 @@ export function BottomNav() {
             {item.label}
           </NavLink>
         ))}
-        <NavLink
-          to="/finanzen"
-          className={({ isActive }) =>
-            `flex flex-col items-center gap-0.5 px-2 py-1 text-xs ${
-              isActive ? 'text-stone-900 dark:text-stone-100 font-semibold' : 'text-stone-500 dark:text-stone-400'
-            }`
-          }
-        >
-          <span className="text-lg">⋯</span>
-          Mehr
-        </NavLink>
+
+        {/* Mehr-Dropdown */}
+        <div className="relative">
+          <button
+            onClick={() => setShowMore(!showMore)}
+            className={`flex flex-col items-center gap-0.5 px-2 py-1 text-xs ${
+              isMoreActive ? 'text-stone-900 dark:text-stone-100 font-semibold' : 'text-stone-500 dark:text-stone-400'
+            }`}
+          >
+            <span className="text-lg">⋯</span>
+            Mehr
+          </button>
+          {showMore && (
+            <>
+              <div className="fixed inset-0 z-40" onClick={() => setShowMore(false)} />
+              <div className="absolute bottom-full right-0 mb-2 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-xl shadow-lg z-50 py-1 min-w-[160px]">
+                {moreItems.map((item) => (
+                  <NavLink
+                    key={item.path}
+                    to={item.path}
+                    onClick={() => setShowMore(false)}
+                    className={({ isActive }) =>
+                      `flex items-center gap-3 px-4 py-2.5 text-sm ${
+                        isActive
+                          ? 'bg-stone-100 dark:bg-stone-700 text-stone-900 dark:text-stone-100 font-medium'
+                          : 'text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700'
+                      }`
+                    }
+                  >
+                    <span>{item.icon}</span>
+                    {item.label}
+                  </NavLink>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </nav>
   );

@@ -79,6 +79,29 @@ export function UnitList({ onSelectUnit }: UnitListProps) {
   };
 
   const handleDelete = async (id: number) => {
+    // Cascade: delete all dependent records
+    const occupancies = await db.occupancies.where('unitId').equals(id).toArray();
+    const occIds = occupancies.map((o) => o.id!);
+
+    if (occIds.length > 0) {
+      const allPayments = await db.payments.toArray();
+      const allCostShares = await db.costShares.toArray();
+      const allPrepayments = await db.prepayments.toArray();
+      const allHandovers = await db.handoverProtocols.toArray();
+
+      await db.payments.bulkDelete(allPayments.filter((p) => occIds.includes(p.occupancyId)).map((p) => p.id!));
+      await db.costShares.bulkDelete(allCostShares.filter((s) => occIds.includes(s.occupancyId)).map((s) => s.id!));
+      await db.prepayments.bulkDelete(allPrepayments.filter((p) => occIds.includes(p.occupancyId)).map((p) => p.id!));
+      await db.handoverProtocols.bulkDelete(allHandovers.filter((h) => occIds.includes(h.occupancyId)).map((h) => h.id!));
+      await db.occupancies.bulkDelete(occIds);
+    }
+
+    const meters = await db.meters.where('unitId').equals(id).toArray();
+    for (const meter of meters) {
+      await db.meterReadings.where('meterId').equals(meter.id!).delete();
+    }
+    await db.meters.where('unitId').equals(id).delete();
+    await db.tenants.where('unitId').equals(id).delete();
     await db.units.delete(id);
   };
 

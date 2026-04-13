@@ -8,23 +8,43 @@ interface OccupancyWithUnit {
 /**
  * Verteilungsschlüssel: Anteil einer Belegung an den Gesamtkosten.
  * Gibt den Bruchteil (0–1) zurück.
+ * Mit year-Parameter: zeitanteilige Gewichtung nach Belegungsmonaten.
  */
 export function getDistributionShare(
   key: 'area' | 'persons' | 'units',
   current: OccupancyWithUnit,
   all: OccupancyWithUnit[],
+  year?: number,
 ): number {
+  const getMonths = (o: OccupancyWithUnit): number => {
+    if (!year) return 12;
+    const yearStart = `${year}-01`;
+    const yearEnd = `${year}-12`;
+    const start = o.occupancy.from < yearStart ? yearStart : o.occupancy.from;
+    const end = o.occupancy.to === null || o.occupancy.to > yearEnd ? yearEnd : o.occupancy.to;
+    const [y1, m1] = start.split('-').map(Number);
+    const [y2, m2] = end.split('-').map(Number);
+    return Math.max(0, (y2 - y1) * 12 + (m2 - m1) + 1);
+  };
+
   switch (key) {
     case 'area': {
-      const total = all.reduce((sum, o) => sum + o.unit.area, 0);
-      return total > 0 ? current.unit.area / total : 0;
+      const weighted = all.map((o) => o.unit.area * (getMonths(o) / 12));
+      const total = weighted.reduce((sum, w) => sum + w, 0);
+      const currentWeight = current.unit.area * (getMonths(current) / 12);
+      return total > 0 ? currentWeight / total : 0;
     }
     case 'persons': {
-      const total = all.reduce((sum, o) => sum + o.occupancy.persons, 0);
-      return total > 0 ? current.occupancy.persons / total : 0;
+      const weighted = all.map((o) => o.occupancy.persons * (getMonths(o) / 12));
+      const total = weighted.reduce((sum, w) => sum + w, 0);
+      const currentWeight = current.occupancy.persons * (getMonths(current) / 12);
+      return total > 0 ? currentWeight / total : 0;
     }
     case 'units': {
-      return all.length > 0 ? 1 / all.length : 0;
+      const weighted = all.map((o) => getMonths(o) / 12);
+      const total = weighted.reduce((sum, w) => sum + w, 0);
+      const currentWeight = getMonths(current) / 12;
+      return total > 0 ? currentWeight / total : 0;
     }
   }
 }

@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../db';
 import { Card } from '../../components/shared/Card';
@@ -37,17 +37,17 @@ export function FinancingInput({ propertyId }: FinancingInputProps) {
     [settingKey],
   );
 
-  const initialData = stored?.value ? (stored.value as FinancingData) : defaultFinancing;
   const [data, setData] = useState<FinancingData>(defaultFinancing);
   const [dirty, setDirty] = useState(false);
-  const [loadedKey, setLoadedKey] = useState('');
 
-  // Sync from DB when stored data changes (new property selected or first load)
-  if (stored !== undefined && settingKey !== loadedKey) {
-    setData(initialData);
-    setDirty(false);
-    setLoadedKey(settingKey);
-  }
+  /* eslint-disable react-hooks/set-state-in-effect */
+  useEffect(() => {
+    if (stored !== undefined) {
+      setData(stored?.value ? (stored.value as FinancingData) : defaultFinancing);
+      setDirty(false);
+    }
+  }, [stored]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const update = useCallback(
     (field: keyof FinancingData, value: number) => {

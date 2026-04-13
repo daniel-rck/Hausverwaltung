@@ -167,6 +167,7 @@ export function AbrechnungView({
           costType.distribution,
           currentOccWithUnit,
           allOccupancies,
+          year,
         );
         share = cost.totalAmount * fraction;
         distributionLabel = `${DISTRIBUTION_LABELS[costType.distribution]} (${(fraction * 100).toFixed(1)}%)`;
