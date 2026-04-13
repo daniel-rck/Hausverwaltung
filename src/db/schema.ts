@@ -99,7 +99,7 @@ export interface SupplierBill {
   id?: number;
   propertyId: number;
   year: number;
-  type: 'water' | 'gas' | 'electricity';
+  type: 'water' | 'gas' | 'electricity' | 'heating';
   supplier: string;
   totalAmount: number;
   totalConsumption: number;

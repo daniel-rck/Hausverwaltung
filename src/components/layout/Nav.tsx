@@ -13,7 +13,7 @@ const navItems: NavItem[] = [
   { path: '/mieter', label: 'Mieter', icon: '👤', color: 'text-green-600' },
   { path: '/nebenkosten', label: 'Nebenkosten', icon: '📋', color: 'text-amber-600' },
   { path: '/zaehler', label: 'Zähler', icon: '🔢', color: 'text-violet-600' },
-  { path: '/wasser', label: 'Wasser', icon: '💧', color: 'text-cyan-600' },
+  { path: '/wasser', label: 'Versorger', icon: '💧', color: 'text-cyan-600' },
   { path: '/finanzen', label: 'Finanzen', icon: '💶', color: 'text-emerald-600' },
   { path: '/instandhaltung', label: 'Instandhaltung', icon: '🔧', color: 'text-rose-600' },
   { path: '/uebergabe', label: 'Übergabe', icon: '🔑', color: 'text-blue-600' },
