@@ -148,7 +148,7 @@ export function SupplierInput({ year, type }: SupplierInputProps) {
     form.billingTo.length > 0;
 
   return (
-    <Card title={`${config.label} \u2013 Daten eingeben`}>
+    <Card title={`${config.label} – Daten eingeben`}>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
         <div>
           <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">

@@ -76,7 +76,7 @@ export function AbrechnungPrint({
           onClick={onBack}
           className="text-sm text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 flex items-center gap-1"
         >
-          \u2190 Zur\u00FCck
+          ← Zurück
         </button>
         <button
           onClick={() => window.print()}
@@ -96,7 +96,7 @@ export function AbrechnungPrint({
             <div className="no-print mb-2 px-2">
               <p className="text-xs text-stone-400 dark:text-stone-500">
                 Abrechnung {idx + 1} von {occupancies.length}:{' '}
-                {info.tenant?.name ?? '\u2013'} ({info.unit.name})
+                {info.tenant?.name ?? '–'} ({info.unit.name})
               </p>
             </div>
             <div className="border border-stone-200 rounded-xl p-6 mb-6 print:border-0 print:p-0 print:mb-0 print:rounded-none">

@@ -134,7 +134,7 @@ export function NebenkostenPage() {
         </div>
         <div className="text-sm text-stone-500 dark:text-stone-400 self-end pb-1">
           {activeProperty.name}
-          {activeProperty.address && ` \u2013 ${activeProperty.address}`}
+          {activeProperty.address && ` – ${activeProperty.address}`}
         </div>
       </div>
 
@@ -180,7 +180,7 @@ export function NebenkostenPage() {
             <div className="flex flex-wrap items-end gap-4">
               <div className="flex-1 min-w-[200px]">
                 <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">
-                  Mieter ausw\u00E4hlen
+                  Mieter auswählen
                 </label>
                 <select
                   value={selectedOccupancyId ?? ''}
@@ -191,10 +191,10 @@ export function NebenkostenPage() {
                   }
                   className="w-full border border-stone-300 dark:border-stone-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-500"
                 >
-                  <option value="">Bitte w\u00E4hlen...</option>
+                  <option value="">Bitte wählen...</option>
                   {occupancies?.map((info) => (
                     <option key={info.occupancy.id} value={info.occupancy.id}>
-                      {info.unit.name} \u2013{' '}
+                      {info.unit.name} –{' '}
                       {info.tenant?.name ?? 'Unbekannt'}
                     </option>
                   ))}
@@ -237,8 +237,8 @@ export function NebenkostenPage() {
               ) : (
                 <EmptyState
                   icon="📋"
-                  title="Mieter ausw\u00E4hlen"
-                  description="W\u00E4hlen Sie einen Mieter aus, um die Abrechnung anzuzeigen."
+                  title="Mieter auswählen"
+                  description="Wählen Sie einen Mieter aus, um die Abrechnung anzuzeigen."
                 />
               )}
             </Card>

@@ -137,7 +137,7 @@ export function CostEntry({ propertyId, year }: CostEntryProps) {
                   <NumInput
                     value={row.cost?.totalAmount ?? 0}
                     onChange={(v) => handleAmountChange(row.costType.id!, v)}
-                    suffix="\u20AC"
+                    suffix="€"
                     min={0}
                     className="w-40"
                   />

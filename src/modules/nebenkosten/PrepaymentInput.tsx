@@ -138,7 +138,7 @@ export function PrepaymentInput({ propertyId, year }: PrepaymentInputProps) {
     <Card title={`Vorauszahlungen ${year}`}>
       <p className="text-xs text-stone-500 dark:text-stone-400 mb-4">
         Automatisch berechnet: NK-Vorauszahlung &times; Monate. Bei Bedarf
-        k\u00F6nnen Sie den Betrag manuell \u00FCberschreiben.
+        können Sie den Betrag manuell überschreiben.
       </p>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
@@ -176,10 +176,10 @@ export function PrepaymentInput({ propertyId, year }: PrepaymentInputProps) {
                   className="border-b border-stone-100 dark:border-stone-700"
                 >
                   <td className="py-2 px-3 text-stone-700 dark:text-stone-200">
-                    {row.unit?.name ?? '\u2013'}
+                    {row.unit?.name ?? '–'}
                   </td>
                   <td className="py-2 px-3 text-stone-700 dark:text-stone-200">
-                    {row.tenant?.name ?? '\u2013'}
+                    {row.tenant?.name ?? '–'}
                   </td>
                   <td className="py-2 px-3 text-right font-mono font-tabular text-stone-600 dark:text-stone-300">
                     {formatEuro(row.occupancy.rentUtilities)}
@@ -194,7 +194,7 @@ export function PrepaymentInput({ propertyId, year }: PrepaymentInputProps) {
                     <NumInput
                       value={effectiveAmount}
                       onChange={(v) => handleChange(row.occupancy.id!, v)}
-                      suffix="\u20AC"
+                      suffix="€"
                       min={0}
                       className="w-32 ml-auto"
                     />
@@ -204,9 +204,9 @@ export function PrepaymentInput({ propertyId, year }: PrepaymentInputProps) {
                       <button
                         onClick={() => handleReset(row.occupancy.id!)}
                         className="text-xs text-stone-400 dark:text-stone-500 hover:text-stone-700 dark:hover:text-stone-200"
-                        title="Auf automatischen Wert zur\u00FCcksetzen"
+                        title="Auf automatischen Wert zurücksetzen"
                       >
-                        Zur\u00FCcksetzen
+                        Zurücksetzen
                       </button>
                     )}
                   </td>

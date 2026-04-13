@@ -166,7 +166,7 @@ export function MessdienstInput({ propertyId, year }: MessdienstInputProps) {
         return (
           <Card
             key={costType.id}
-            title={`${costType.name} \u2013 ${messdienstName}-Anteil`}
+            title={`${costType.name} – ${messdienstName}-Anteil`}
           >
             {!cost ? (
               <p className="text-sm text-stone-500 dark:text-stone-400">
@@ -210,10 +210,10 @@ export function MessdienstInput({ propertyId, year }: MessdienstInputProps) {
                             className="border-b border-stone-100 dark:border-stone-700"
                           >
                             <td className="py-2 px-3 text-stone-700 dark:text-stone-200">
-                              {unit?.name ?? '\u2013'}
+                              {unit?.name ?? '–'}
                             </td>
                             <td className="py-2 px-3 text-stone-700 dark:text-stone-200">
-                              {tenant?.name ?? '\u2013'}
+                              {tenant?.name ?? '–'}
                             </td>
                             <td className="py-2 px-3">
                               <NumInput
@@ -225,7 +225,7 @@ export function MessdienstInput({ propertyId, year }: MessdienstInputProps) {
                                     v,
                                   )
                                 }
-                                suffix="\u20AC"
+                                suffix="€"
                                 min={0}
                                 className="w-32 ml-auto"
                               />

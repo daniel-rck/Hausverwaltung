@@ -251,7 +251,7 @@ export function AbrechnungView({
 
         <div className="text-sm text-stone-600 mb-4">
           <p>
-            {tenant?.name ?? '\u2013'} | {unit.name},{' '}
+            {tenant?.name ?? '–'} | {unit.name},{' '}
             {property.address}
           </p>
         </div>
@@ -373,7 +373,7 @@ export function AbrechnungView({
       {result > 0 && landlord.iban && (
         <div className="mt-4 p-3 bg-stone-50 rounded-lg text-xs text-stone-600">
           <p>
-            Bitte \u00FCberweisen Sie den Betrag von{' '}
+            Bitte überweisen Sie den Betrag von{' '}
             <strong>{formatEuro(result)}</strong> auf folgendes Konto:
           </p>
           <p className="mt-1 font-mono">IBAN: {landlord.iban}</p>
@@ -385,8 +385,8 @@ export function AbrechnungView({
         <div className="mt-4 p-3 bg-green-50 rounded-lg text-xs text-green-800">
           <p>
             Ihr Guthaben von <strong>{formatEuro(Math.abs(result))}</strong>{' '}
-            wird mit der n\u00E4chsten Mietzahlung verrechnet oder auf Ihr
-            Konto \u00FCberwiesen.
+            wird mit der nächsten Mietzahlung verrechnet oder auf Ihr
+            Konto überwiesen.
           </p>
         </div>
       )}
