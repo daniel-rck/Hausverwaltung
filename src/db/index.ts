@@ -47,3 +47,7 @@ db.version(2).stores({
   depositEvents: '++id, occupancyId',
   documents: '++id, [entityType+entityId]',
 });
+
+db.version(3).stores({
+  costTypes: '++id, sortOrder',
+});
