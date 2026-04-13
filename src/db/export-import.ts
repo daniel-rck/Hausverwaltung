@@ -25,6 +25,9 @@ const STORE_NAMES = [
   'payments',
   'handoverProtocols',
   'settings',
+  'rentChanges',
+  'depositEvents',
+  'documents',
 ] as const;
 
 export async function exportDatabase(): Promise<string> {

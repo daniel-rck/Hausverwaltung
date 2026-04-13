@@ -4,16 +4,9 @@ import { db } from '../../db';
 import { Card } from '../../components/shared/Card';
 import { NumInput } from '../../components/shared/NumInput';
 import { formatEuro } from '../../utils/format';
+import type { FinancingData } from '../../db/schema';
 
-export interface FinancingData {
-  kaufpreis: number;
-  eigenkapital: number;
-  kreditbetrag: number;
-  zinssatz: number;
-  tilgung: number;
-  jaehrlicheKreditrate: number;
-  nichtUmlagefaehigeKosten: number;
-}
+export type { FinancingData };
 
 const defaultFinancing: FinancingData = {
   kaufpreis: 0,
@@ -23,6 +16,7 @@ const defaultFinancing: FinancingData = {
   tilgung: 0,
   jaehrlicheKreditrate: 0,
   nichtUmlagefaehigeKosten: 0,
+  afaSatz: 2,
 };
 
 interface FinancingInputProps {
@@ -137,6 +131,15 @@ export function FinancingInput({ propertyId }: FinancingInputProps) {
           suffix="EUR"
           min={0}
           className="sm:col-span-2 lg:col-span-1"
+        />
+        <NumInput
+          label="AfA-Satz (Anlage V, Zeile 33)"
+          value={data.afaSatz}
+          onChange={(v) => update('afaSatz', v)}
+          suffix="%"
+          min={0}
+          max={10}
+          step={0.5}
         />
       </div>
 

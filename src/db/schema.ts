@@ -173,3 +173,49 @@ export interface LandlordInfo {
   iban?: string;
   taxId?: string;
 }
+
+export type RentChangeReason = 'mietspiegel' | 'index' | 'modernization' | 'agreement';
+
+export interface RentChange {
+  id?: number;
+  occupancyId: number;
+  effectiveDate: string;
+  oldRentCold: number;
+  newRentCold: number;
+  reason: RentChangeReason;
+  notes?: string;
+}
+
+export type DepositEventType = 'payment' | 'interest' | 'deduction' | 'refund';
+
+export interface DepositEvent {
+  id?: number;
+  occupancyId: number;
+  date: string;
+  type: DepositEventType;
+  amount: number;
+  description?: string;
+}
+
+export interface AppDocument {
+  id?: number;
+  entityType: 'unit' | 'occupancy' | 'property' | 'maintenance';
+  entityId: number;
+  name: string;
+  mimeType: string;
+  size: number;
+  data: string;
+  uploadedAt: string;
+  notes?: string;
+}
+
+export interface FinancingData {
+  kaufpreis: number;
+  eigenkapital: number;
+  kreditbetrag: number;
+  zinssatz: number;
+  tilgung: number;
+  jaehrlicheKreditrate: number;
+  nichtUmlagefaehigeKosten: number;
+  afaSatz: number;
+}
