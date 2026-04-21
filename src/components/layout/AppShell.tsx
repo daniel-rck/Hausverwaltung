@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { SidebarNav, BottomNav } from './Nav';
 import { PropertySelector } from './PropertySelector';
 import { useTheme } from '../../hooks/useTheme';
+import { SyncStatusBadge } from '../sync/SyncStatusBadge';
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { theme, toggle } = useTheme();
@@ -17,6 +18,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
 
         <div className="flex items-center gap-2">
+          <SyncStatusBadge />
           <PropertySelector />
           <button
             onClick={toggle}

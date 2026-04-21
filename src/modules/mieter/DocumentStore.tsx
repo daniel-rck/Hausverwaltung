@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../../db';
+import { db, deleteWithTombstone } from '../../db';
 import { Card } from '../../components/shared/Card';
 import { EmptyState } from '../../components/shared/EmptyState';
 import { ConfirmDialog } from '../../components/shared/ConfirmDialog';
@@ -101,7 +101,7 @@ export function DocumentStore({
 
   const handleDelete = async () => {
     if (deleteDoc?.id) {
-      await db.documents.delete(deleteDoc.id);
+      await deleteWithTombstone('documents', deleteDoc.id);
       setDeleteDoc(null);
     }
   };

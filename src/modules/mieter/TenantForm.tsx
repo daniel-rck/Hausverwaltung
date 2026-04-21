@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../../db';
+import { db, deleteWithTombstone } from '../../db';
 import { Card } from '../../components/shared/Card';
 import { DataTable, type Column } from '../../components/shared/DataTable';
 import { StatusBadge } from '../../components/shared/StatusBadge';
@@ -105,7 +105,7 @@ export function TenantForm({ unit, onBack }: TenantFormProps) {
   };
 
   const handleDeleteOccupancy = async (id: number) => {
-    await db.occupancies.delete(id);
+    await deleteWithTombstone('occupancies', id);
   };
 
   const columns: Column<OccupancyRow>[] = [

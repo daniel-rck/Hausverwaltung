@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../../db';
+import { db, deleteWithTombstone } from '../../db';
 import { useProperty } from '../../hooks/useProperty';
 import { Card } from '../../components/shared/Card';
 import { NumInput } from '../../components/shared/NumInput';
@@ -209,7 +209,7 @@ export function MonthOverview({ year }: MonthOverviewProps) {
         .equals([editingCell.occupancyId, editingCell.month])
         .first();
       if (existing?.id) {
-        await db.payments.delete(existing.id);
+        await deleteWithTombstone('payments', existing.id);
       }
       setEditingCell(null);
     } finally {

@@ -1,5 +1,5 @@
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../../db';
+import { db, deleteWithTombstone } from '../../db';
 import { Card } from '../../components/shared/Card';
 import { NumInput } from '../../components/shared/NumInput';
 import { EmptyState } from '../../components/shared/EmptyState';
@@ -101,7 +101,7 @@ export function PrepaymentInput({ propertyId, year }: PrepaymentInputProps) {
       .first();
 
     if (existing?.id) {
-      await db.prepayments.delete(existing.id);
+      await deleteWithTombstone('prepayments', existing.id);
     }
   };
 

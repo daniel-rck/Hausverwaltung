@@ -1,11 +1,25 @@
-export interface Property {
+/**
+ * Sync-Metadaten, die jeder synchronisierbare Record trägt.
+ * `syncId` ist die geräteübergreifende Identität, `updatedAt` entscheidet Merge-Konflikte.
+ *
+ * Die Felder sind statisch optional, weil sie von Dexie-Hooks beim
+ * Insert/Update automatisch gesetzt werden — Aufrufer von `table.add(...)`
+ * müssen sie nicht manuell liefern. Beim Lesen sind sie für persistente Records
+ * immer gesetzt.
+ */
+export interface SyncFields {
+  syncId?: string;
+  updatedAt?: number;
+}
+
+export interface Property extends SyncFields {
   id?: number;
   name: string;
   address: string;
   units: number;
 }
 
-export interface Unit {
+export interface Unit extends SyncFields {
   id?: number;
   propertyId: number;
   name: string;
@@ -14,7 +28,7 @@ export interface Unit {
   notes?: string;
 }
 
-export interface Tenant {
+export interface Tenant extends SyncFields {
   id?: number;
   unitId: number;
   name: string;
@@ -23,7 +37,7 @@ export interface Tenant {
   notes?: string;
 }
 
-export interface Occupancy {
+export interface Occupancy extends SyncFields {
   id?: number;
   unitId: number;
   tenantId: number;
@@ -40,7 +54,7 @@ export interface Occupancy {
 export type DistributionKey = 'area' | 'persons' | 'units' | 'messdienst' | 'direct';
 export type CostCategory = 'water' | 'heating' | 'insurance' | 'tax' | 'cleaning' | 'misc';
 
-export interface CostType {
+export interface CostType extends SyncFields {
   id?: number;
   name: string;
   distribution: DistributionKey;
@@ -48,7 +62,7 @@ export interface CostType {
   sortOrder: number;
 }
 
-export interface Cost {
+export interface Cost extends SyncFields {
   id?: number;
   propertyId: number;
   year: number;
@@ -56,28 +70,28 @@ export interface Cost {
   totalAmount: number;
 }
 
-export interface CostShare {
+export interface CostShare extends SyncFields {
   id?: number;
   costId: number;
   occupancyId: number;
   amount: number;
 }
 
-export interface Prepayment {
+export interface Prepayment extends SyncFields {
   id?: number;
   occupancyId: number;
   year: number;
   amount: number;
 }
 
-export interface MeterType {
+export interface MeterType extends SyncFields {
   id?: number;
   name: string;
   unit: string;
   category: 'water' | 'energy';
 }
 
-export interface Meter {
+export interface Meter extends SyncFields {
   id?: number;
   unitId: number | null;
   meterTypeId: number;
@@ -87,7 +101,7 @@ export interface Meter {
   notes?: string;
 }
 
-export interface MeterReading {
+export interface MeterReading extends SyncFields {
   id?: number;
   meterId: number;
   date: string;
@@ -95,7 +109,7 @@ export interface MeterReading {
   source: 'self' | 'messdienst' | 'versorger';
 }
 
-export interface SupplierBill {
+export interface SupplierBill extends SyncFields {
   id?: number;
   propertyId: number;
   year: number;
@@ -109,7 +123,7 @@ export interface SupplierBill {
   notes?: string;
 }
 
-export interface MaintenanceItem {
+export interface MaintenanceItem extends SyncFields {
   id?: number;
   unitId: number | null;
   date: string;
@@ -124,7 +138,7 @@ export interface MaintenanceItem {
   notes?: string;
 }
 
-export interface Payment {
+export interface Payment extends SyncFields {
   id?: number;
   occupancyId: number;
   month: string;
@@ -135,7 +149,7 @@ export interface Payment {
   notes?: string;
 }
 
-export interface HandoverProtocol {
+export interface HandoverProtocol extends SyncFields {
   id?: number;
   occupancyId: number;
   type: 'move-in' | 'move-out';
@@ -162,7 +176,7 @@ export interface RoomCondition {
 
 export type Rating = 'good' | 'fair' | 'poor';
 
-export interface Setting {
+export interface Setting extends SyncFields {
   key: string;
   value: unknown;
 }
@@ -176,7 +190,7 @@ export interface LandlordInfo {
 
 export type RentChangeReason = 'mietspiegel' | 'index' | 'modernization' | 'agreement';
 
-export interface RentChange {
+export interface RentChange extends SyncFields {
   id?: number;
   occupancyId: number;
   effectiveDate: string;
@@ -188,7 +202,7 @@ export interface RentChange {
 
 export type DepositEventType = 'payment' | 'interest' | 'deduction' | 'refund';
 
-export interface DepositEvent {
+export interface DepositEvent extends SyncFields {
   id?: number;
   occupancyId: number;
   date: string;
@@ -197,7 +211,7 @@ export interface DepositEvent {
   description?: string;
 }
 
-export interface AppDocument {
+export interface AppDocument extends SyncFields {
   id?: number;
   entityType: 'unit' | 'occupancy' | 'property' | 'maintenance';
   entityId: number;
@@ -218,4 +232,14 @@ export interface FinancingData {
   jaehrlicheKreditrate: number;
   nichtUmlagefaehigeKosten: number;
   afaSatz: number;
+}
+
+/**
+ * Tombstone für gelöschte Records. Wird vom Sync-Layer ausgewertet,
+ * damit ein Gerät B erkennen kann, dass A einen Record gelöscht hat.
+ */
+export interface Tombstone {
+  syncId: string;
+  tableName: string;
+  deletedAt: number;
 }
