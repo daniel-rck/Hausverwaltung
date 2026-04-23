@@ -1,8 +1,11 @@
 import { useCallback } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../db';
+import { db, deleteWithTombstone, SYNCABLE_TABLES } from '../db';
 
 type TableName = keyof typeof db & string;
+type SyncableTable = (typeof SYNCABLE_TABLES)[number];
+
+const SYNCABLE_SET = new Set<string>(SYNCABLE_TABLES);
 
 /**
  * Generic CRUD hook for any Dexie store.
@@ -37,6 +40,9 @@ export function useDB<T extends { id?: number }>(
 
   const remove = useCallback(
     async (id: number) => {
+      if (SYNCABLE_SET.has(table)) {
+        return deleteWithTombstone(table as SyncableTable, id);
+      }
       return db.table(table).delete(id);
     },
     [table],

@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../../db';
+import { db, deleteWithTombstone } from '../../db';
 import type { SupplierBill } from '../../db/schema';
 import { Card } from '../../components/shared/Card';
 import { DataTable, type Column } from '../../components/shared/DataTable';
@@ -88,7 +88,7 @@ export function SupplierInput({ year, type }: SupplierInputProps) {
   }, [propertyId, year, type, form]);
 
   const handleDelete = useCallback(async (id: number) => {
-    await db.supplierBills.delete(id);
+    await deleteWithTombstone('supplierBills', id);
   }, []);
 
   const columns: Column<SupplierBill>[] = [

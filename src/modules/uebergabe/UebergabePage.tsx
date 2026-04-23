@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../../db';
+import { db, deleteWithTombstone } from '../../db';
 import { useProperty } from '../../hooks/useProperty';
 import { Card } from '../../components/shared/Card';
 import { EmptyState } from '../../components/shared/EmptyState';
@@ -111,7 +111,7 @@ export function UebergabePage() {
 
   const handleDelete = async () => {
     if (deleteId) {
-      await db.handoverProtocols.delete(deleteId);
+      await deleteWithTombstone('handoverProtocols', deleteId);
       setDeleteId(null);
     }
   };

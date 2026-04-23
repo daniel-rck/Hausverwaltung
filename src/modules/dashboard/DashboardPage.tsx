@@ -10,6 +10,7 @@ import { ConfirmDialog } from '../../components/shared/ConfirmDialog';
 import { QuickStats } from './QuickStats';
 import { AlertsList } from './AlertsList';
 import { ExportImport } from './ExportImport';
+import { SyncSettings } from '../../components/sync/SyncSettings';
 import { AnnualReport } from './AnnualReport';
 import { formatEuro } from '../../utils/format';
 import type { LandlordInfo } from '../../db/schema';
@@ -71,6 +72,7 @@ export function DashboardPage() {
       <div className="grid md:grid-cols-2 gap-4">
         <AlertsList />
         <div className="space-y-4">
+          <SyncSettings />
           <ExportImport />
           <SettingsCard />
         </div>

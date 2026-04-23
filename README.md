@@ -39,11 +39,38 @@ Die App ist gemacht für Vermieter mit 3 bis 10 Wohneinheiten, die ihre Verwaltu
 
 ## Deine Daten gehören dir
 
-- Alle Daten bleiben **lokal in deinem Browser** gespeichert — es werden keine Daten an einen Server gesendet
+- Alle Daten bleiben **lokal in deinem Browser** gespeichert — es werden keine Daten an einen fremden Server gesendet
 - Kein Account, keine Registrierung, keine E-Mail-Adresse nötig
 - **Backup per JSON-Datei** — jederzeit exportieren und auf einem anderen Gerät importieren
 - **Transfer per Link** — Daten komprimiert als URL teilen, z.B. vom PC aufs Tablet
+- **Multi-Device-Sync (OneDrive)** — optional: synchronisiere zwischen mehreren Geräten über deinen eigenen OneDrive-Speicher (siehe unten)
 - **Installierbar** — als App auf dem Homescreen deines Handys (PWA)
+
+### Multi-Device-Sync einrichten
+
+Wenn du die Hausverwaltung auf mehreren Geräten (z.B. Laptop + Handy) nutzt
+und die Daten automatisch synchronisieren willst, kannst du dich mit deinem
+eigenen OneDrive-Speicher verbinden. Die App legt dann eine einzige Datei im
+Ordner `/Apps/Hausverwaltung/sync.json` ab — kein fremder Server ist beteiligt,
+und andere Dateien in deinem OneDrive sind für die App unsichtbar.
+
+Für Nutzer der öffentlich gehosteten Version ist die Funktion einsatzbereit
+(sofern beim Build eine OneDrive-Client-ID mitgegeben wurde — siehe
+Build-Hinweise).
+
+**Selbst deployen mit eigener OneDrive-Integration:**
+
+1. Bei [portal.azure.com](https://portal.azure.com) → **App registrations** → **New registration**
+2. **Supported account types**: "Personal Microsoft accounts only"
+3. **Redirect URI** (Platform: Single-page application): deine Deployment-URL, z.B.
+   `https://mein-benutzer.github.io/Hausverwaltung/` sowie `http://localhost:5173/` für lokale Entwicklung
+4. Unter **API permissions** hinzufügen: `Files.ReadWrite.AppFolder` (delegated)
+5. **Application (client) ID** kopieren und beim Build als Env-Variable setzen:
+   ```bash
+   VITE_ONEDRIVE_CLIENT_ID=deine-client-id npm run build
+   ```
+
+Kein Client-Secret nötig (PKCE-Flow).
 
 ## So funktioniert's
 

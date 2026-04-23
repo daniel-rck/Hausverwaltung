@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../../db';
+import { db, deleteWithTombstone } from '../../db';
 import { useProperty } from '../../hooks/useProperty';
 import { Card } from '../../components/shared/Card';
 import { DataTable, type Column } from '../../components/shared/DataTable';
@@ -146,8 +146,16 @@ export function MeterList() {
     await db.meterReadings
       .where('[meterId+date]')
       .between([deleteTarget.id, ''], [deleteTarget.id, '\uffff'])
-      .delete();
-    await db.meters.delete(deleteTarget.id);
+      .toArray()
+      .then((readings) =>
+        Promise.all(
+          readings
+            .map((r) => r.id)
+            .filter((id): id is number => id !== undefined)
+            .map((id) => deleteWithTombstone('meterReadings', id)),
+        ),
+      );
+    await deleteWithTombstone('meters', deleteTarget.id);
     setDeleteTarget(null);
     setShowForm(false);
     setEditMeter(null);

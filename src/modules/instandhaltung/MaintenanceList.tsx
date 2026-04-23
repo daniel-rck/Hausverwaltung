@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../../db';
+import { db, deleteWithTombstone } from '../../db';
 import { useProperty } from '../../hooks/useProperty';
 import { Card } from '../../components/shared/Card';
 import { DataTable, type Column } from '../../components/shared/DataTable';
@@ -166,7 +166,7 @@ export function MaintenanceList() {
 
   const handleDelete = async () => {
     if (deleteId !== null) {
-      await db.maintenanceItems.delete(deleteId);
+      await deleteWithTombstone('maintenanceItems', deleteId);
       setDeleteId(null);
     }
   };
