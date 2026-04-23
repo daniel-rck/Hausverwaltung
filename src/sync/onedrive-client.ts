@@ -1,6 +1,7 @@
 import {
   PublicClientApplication,
   type AccountInfo,
+  BrowserAuthError,
   InteractionRequiredAuthError,
 } from '@azure/msal-browser';
 
@@ -57,11 +58,34 @@ async function ensureInitialized(): Promise<PublicClientApplication> {
   if (!initPromise) {
     initPromise = pca
       .initialize()
-      .then(() => pca.handleRedirectPromise())
-      .then(() => undefined);
+      .then(async () => {
+        try {
+          await pca.handleRedirectPromise();
+        } catch (err) {
+          // `no_token_request_cache_error` tritt auf, wenn die URL ein OAuth-Fragment
+          // (z.B. aus abgebrochenem Redirect-Flow oder geleertem Cache nach signOut)
+          // enthält, der zugehörige Request im Cache aber nicht mehr existiert.
+          // Harmlos: URL bereinigen, App-Start nicht blockieren.
+          if (isNoTokenRequestCacheError(err)) {
+            const url = new URL(window.location.href);
+            url.search = '';
+            url.hash = '';
+            window.history.replaceState(null, '', url.toString());
+            return;
+          }
+          throw err;
+        }
+      });
   }
   await initPromise;
   return pca;
+}
+
+function isNoTokenRequestCacheError(err: unknown): boolean {
+  return (
+    err instanceof BrowserAuthError &&
+    err.errorCode === 'no_token_request_cache_error'
+  );
 }
 
 export async function signIn(): Promise<AccountInfo> {
