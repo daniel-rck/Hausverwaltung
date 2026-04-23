@@ -29,6 +29,8 @@ jobs:
 
       - run: npm ci --legacy-peer-deps
       - run: npm run build
+        env:
+          VITE_ONEDRIVE_CLIENT_ID: ${{ secrets.VITE_ONEDRIVE_CLIENT_ID }}
 
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
