@@ -46,7 +46,10 @@ function getInstance(): PublicClientApplication {
         redirectUri: window.location.origin + BASE_URL,
       },
       cache: {
-        cacheLocation: 'localStorage',
+        // sessionStorage statt localStorage: Token bleiben nicht persistent über
+        // Browser-Sessions hinweg, was XSS-Token-Leaks deutlich entschärft.
+        // Nutzer akzeptiert dafür einen erneuten Login pro neuer Browser-Session.
+        cacheLocation: 'sessionStorage',
       },
     });
   }

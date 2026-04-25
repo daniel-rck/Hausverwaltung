@@ -1,6 +1,6 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../db';
-import { getDistributionShare } from '../../utils/calc';
+import { getDistributionShare, getOccupiedMonthsFractional } from '../../utils/calc';
 import { formatEuro, formatArea, formatDate } from '../../utils/format';
 import type {
   Occupancy,
@@ -59,15 +59,7 @@ const DISTRIBUTION_LABELS: Record<string, string> = {
 };
 
 function getOccupiedMonths(occupancy: Occupancy, year: number): number {
-  const yearStart = `${year}-01`;
-  const yearEnd = `${year}-12`;
-  const start = occupancy.from < yearStart ? yearStart : occupancy.from;
-  const end =
-    occupancy.to === null || occupancy.to > yearEnd ? yearEnd : occupancy.to;
-
-  const [y1, m1] = start.split('-').map(Number);
-  const [y2, m2] = end.split('-').map(Number);
-  return Math.max(0, (y2 - y1) * 12 + (m2 - m1) + 1);
+  return getOccupiedMonthsFractional(occupancy, year);
 }
 
 export function AbrechnungView({

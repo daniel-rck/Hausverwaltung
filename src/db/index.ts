@@ -116,6 +116,49 @@ db.version(4)
     }
   });
 
+/**
+ * Version 5 – Unique-Constraint auf [unitId+from] für occupancies und
+ * [occupancyId+month] für payments. Verhindert versehentliche Duplikate,
+ * die zu Doppelabrechnung führen.
+ *
+ * Vor dem Index-Upgrade werden Duplikate dedupliziert (keep oldest by id).
+ */
+db.version(5)
+  .stores({
+    occupancies: '++id, &[unitId+from], tenantId, unitId, syncId, updatedAt',
+    payments: '++id, &[occupancyId+month], month, syncId, updatedAt',
+  })
+  .upgrade(async (tx) => {
+    type Occ = { id?: number; unitId: number; from: string };
+    type Pay = { id?: number; occupancyId: number; month: string };
+
+    const dedupe = async <T extends { id?: number }>(
+      tableName: 'occupancies' | 'payments',
+      keyFn: (rec: T) => string,
+    ) => {
+      const all = (await tx.table(tableName).toArray()) as T[];
+      const seen = new Map<string, number>();
+      const idsToDelete: number[] = [];
+      for (const rec of all) {
+        if (rec.id === undefined) continue;
+        const key = keyFn(rec);
+        const existing = seen.get(key);
+        if (existing === undefined) {
+          seen.set(key, rec.id);
+        } else {
+          idsToDelete.push(rec.id > existing ? rec.id : existing);
+          seen.set(key, rec.id < existing ? rec.id : existing);
+        }
+      }
+      if (idsToDelete.length > 0) {
+        await tx.table(tableName).bulkDelete(idsToDelete);
+      }
+    };
+
+    await dedupe<Occ>('occupancies', (r) => `${r.unitId}_${r.from}`);
+    await dedupe<Pay>('payments', (r) => `${r.occupancyId}_${r.month}`);
+  });
+
 // Listener-Liste für lokale Schreibvorgänge. Wird vom Sync-Service abonniert,
 // um bei Änderungen einen Push auszulösen.
 const localWriteListeners = new Set<() => void>();

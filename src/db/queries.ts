@@ -108,13 +108,21 @@ export async function getConsumption(
   return last.value - first.value;
 }
 
-/** Fehlende Mietzahlungen für einen Monat */
+/** Fehlende Mietzahlungen für einen Monat innerhalb einer Property */
 export async function getOpenPayments(
+  propertyId: number,
   month: string,
 ): Promise<{ unit: Unit; occupancy: Occupancy }[]> {
+  const units = await db.units.where('propertyId').equals(propertyId).toArray();
+  const unitIds = new Set(units.map((u) => u.id!));
+  const unitMap = new Map(units.map((u) => [u.id!, u]));
+
   const allOccupancies = await db.occupancies.toArray();
   const active = allOccupancies.filter(
-    (o) => o.from <= month && (o.to === null || o.to >= month),
+    (o) =>
+      unitIds.has(o.unitId) &&
+      o.from <= month &&
+      (o.to === null || o.to >= month),
   );
 
   const open: { unit: Unit; occupancy: Occupancy }[] = [];
@@ -126,7 +134,7 @@ export async function getOpenPayments(
       .first();
 
     if (!payment) {
-      const unit = await db.units.get(occ.unitId);
+      const unit = unitMap.get(occ.unitId);
       if (unit) {
         open.push({ unit, occupancy: occ });
       }

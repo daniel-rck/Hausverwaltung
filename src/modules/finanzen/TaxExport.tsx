@@ -74,7 +74,13 @@ export function TaxExport({ year }: TaxExportProps) {
     const financingSetting = await db.settings.get(`financing_${propertyId}`);
     const financing = financingSetting?.value as FinancingData | undefined;
 
-    const afa = financing && financing.afaSatz > 0 ? financing.kaufpreis * financing.afaSatz / 100 : 0;
+    // AfA: jährlicher Satz × Kaufpreis. AfA-Satz wird auf 0–5% begrenzt
+    // (Gebäude-AfA liegt typisch zwischen 2% und 3%).
+    const afaSatz = financing ? Math.min(5, Math.max(0, financing.afaSatz)) : 0;
+    const afa = financing && afaSatz > 0 ? financing.kaufpreis * afaSatz / 100 : 0;
+    // Schuldzinsen: Näherung kreditbetrag × zinssatz — ignoriert Tilgung über
+    // die Jahre. Für die Anlage V müssen die TATSÄCHLICH gezahlten Zinsen
+    // angegeben werden; die UI weist explizit darauf hin.
     const schuldzinsen = financing ? financing.kreditbetrag * financing.zinssatz / 100 : 0;
 
     const unitIds = units.map((u) => u.id!);
@@ -271,7 +277,18 @@ export function TaxExport({ year }: TaxExportProps) {
           ))}
         </tbody>
       </table>
-      <p className="text-xs text-stone-400 dark:text-stone-500 mt-4">
+      <div className="mt-4 p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 text-xs text-amber-900 dark:text-amber-200 space-y-1">
+        <p className="font-semibold">Hinweis zur Anlage V — Näherungswerte</p>
+        <p>
+          AfA und Schuldzinsen werden hier näherungsweise berechnet
+          (Kaufpreis × AfA-Satz bzw. Kreditbetrag × Zinssatz). Beide Werte
+          ändern sich über die Laufzeit (Tilgung reduziert die Zinslast,
+          AfA bleibt konstant). Für ELSTER bitte die <strong>tatsächlich
+          gezahlten Zinsen</strong> aus der Bank-Jahresabrechnung übernehmen
+          und die AfA gegen Steuerberater/Vorjahres-Bescheid prüfen.
+        </p>
+      </div>
+      <p className="text-xs text-stone-400 dark:text-stone-500 mt-2">
         Die Angaben dienen als Ausfüllhilfe für die Anlage V der Einkommensteuererklärung.
         Bitte prüfen Sie alle Werte vor der Übertragung in ELSTER.
       </p>

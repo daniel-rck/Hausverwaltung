@@ -60,19 +60,19 @@ export function DepositManager({ occupancy }: DepositManagerProps) {
   const remaining = occupancy.deposit - balance;
   const isPaid = remaining <= 0;
 
-  // Move-out warning: > 6 months since moveout and balance > 0
+  // Move-out warning: > 6 months since moveout and balance > 0.
+  // UTC-Arithmetik vermeidet DST-/Timezone-Verschiebungen.
   const moveoutWarning = useMemo(() => {
     if (!occupancy.to || balance <= 0) return null;
 
-    const moveoutDate = new Date(occupancy.to + '-01');
-    const deadline = new Date(moveoutDate);
-    deadline.setMonth(deadline.getMonth() + 6);
+    const [y, m] = occupancy.to.split('-').map(Number);
+    const deadline = new Date(Date.UTC(y, m - 1 + 6, 1));
 
     const now = new Date();
     if (now > deadline) {
-      const dd = String(deadline.getDate()).padStart(2, '0');
-      const mm = String(deadline.getMonth() + 1).padStart(2, '0');
-      const yyyy = deadline.getFullYear();
+      const dd = String(deadline.getUTCDate()).padStart(2, '0');
+      const mm = String(deadline.getUTCMonth() + 1).padStart(2, '0');
+      const yyyy = deadline.getUTCFullYear();
       return `Kaution muss innerhalb von 6 Monaten nach Auszug (bis ${dd}.${mm}.${yyyy}) abgerechnet werden.`;
     }
 

@@ -8,7 +8,8 @@ import {
   type ReactNode,
 } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db, deleteWithTombstone } from '../db';
+import { db } from '../db';
+import { cascadeDeleteProperty } from '../db/cascade';
 import type { Property } from '../db/schema';
 
 interface PropertyContextValue {
@@ -50,7 +51,7 @@ export function PropertyProvider({ children }: { children: ReactNode }) {
 
   const deleteProperty = useCallback(
     async (id: number) => {
-      await deleteWithTombstone('properties', id);
+      await cascadeDeleteProperty(id);
       if (activeId === id) {
         setActiveId(null);
       }
