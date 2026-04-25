@@ -28,6 +28,30 @@ function isImage(mimeType: string): boolean {
   return mimeType.startsWith('image/');
 }
 
+const ALLOWED_MIME_TYPES = new Set([
+  'application/pdf',
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/gif',
+]);
+
+/** Konvertiert eine Data-URL ("data:application/pdf;base64,...") in einen Blob. */
+function dataUrlToBlob(dataUrl: string): Blob {
+  const match = /^data:([^;,]+)(;base64)?,(.*)$/.exec(dataUrl);
+  if (!match) throw new Error('Ungültige Data-URL');
+  const mime = match[1];
+  const isBase64 = match[2] === ';base64';
+  const payload = match[3];
+  if (isBase64) {
+    const binary = atob(payload);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return new Blob([bytes], { type: mime });
+  }
+  return new Blob([decodeURIComponent(payload)], { type: mime });
+}
+
 export function DocumentStore({
   entityType,
   entityId,
@@ -71,12 +95,22 @@ export function DocumentStore({
       return;
     }
 
+    if (!ALLOWED_MIME_TYPES.has(file.type)) {
+      setError(`Dateityp nicht unterstützt (${file.type || 'unbekannt'}).`);
+      return;
+    }
+
     const data = await new Promise<string>((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = () => resolve(reader.result as string);
       reader.onerror = () => reject(reader.error);
       reader.readAsDataURL(file);
     });
+
+    if (!data.startsWith(`data:${file.type};base64,`)) {
+      setError('Datei konnte nicht gelesen werden.');
+      return;
+    }
 
     await db.documents.add({
       entityType,
@@ -93,7 +127,20 @@ export function DocumentStore({
 
   const handlePreview = (doc: AppDocument) => {
     if (isPdf(doc.mimeType)) {
-      window.open(doc.data);
+      // Blob-URL statt Data-URL: kleinere URL, isolierter Origin via blob:-Scheme,
+      // bessere Browser-Kompatibilität und automatische GC nach revoke.
+      try {
+        const blob = dataUrlToBlob(doc.data);
+        const url = URL.createObjectURL(blob);
+        const win = window.open(url, '_blank', 'noopener,noreferrer');
+        // Nach kurzer Zeit revoken — Blob-URLs leben sonst bis Tab-Close
+        setTimeout(() => URL.revokeObjectURL(url), 60_000);
+        if (!win) {
+          setError('Pop-up wurde blockiert. Bitte in den Browser-Einstellungen erlauben.');
+        }
+      } catch {
+        setError('PDF konnte nicht geöffnet werden.');
+      }
     } else if (isImage(doc.mimeType)) {
       setPreviewDoc(doc);
     }

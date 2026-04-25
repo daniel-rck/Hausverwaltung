@@ -89,3 +89,50 @@ export function waterPerCapitaPerDay(
   if (persons <= 0 || days <= 0) return 0;
   return (cubicMeters * 1000) / persons / days;
 }
+
+/**
+ * Tagegenaue Belegungsdauer einer Belegung im Bezugsjahr.
+ * Halbmonatige Mietverhältnisse werden korrekt anteilig verrechnet —
+ * der angefangene Monat wird nicht voll gezählt.
+ *
+ * Berechnung: Anzahl belegter Tage / 365 (oder 366 im Schaltjahr) × 12.
+ */
+export function getOccupiedMonthsFractional(
+  occupancy: { from: string; to: string | null },
+  year: number,
+): number {
+  // Bei Belegungen im YYYY-MM-Format gibt es keinen exakten Tag — wir nehmen
+  // den 1. des Eintrittsmonats und den letzten des Auszugsmonats.
+  const yearStart = new Date(Date.UTC(year, 0, 1));
+  const yearEnd = new Date(Date.UTC(year, 11, 31));
+  const isLeap = (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+  const daysInYear = isLeap ? 366 : 365;
+
+  const [fy, fm, fd = 1] = occupancy.from.split('-').map(Number);
+  const start = new Date(Date.UTC(fy, fm - 1, fd));
+  const effectiveStart = start < yearStart ? yearStart : start;
+
+  let effectiveEnd: Date;
+  if (occupancy.to === null) {
+    effectiveEnd = yearEnd;
+  } else {
+    const parts = occupancy.to.split('-').map(Number);
+    const [ty, tm, td] = parts;
+    let endDate: Date;
+    if (td !== undefined) {
+      endDate = new Date(Date.UTC(ty, tm - 1, td));
+    } else {
+      // letzter Tag des Auszugsmonats
+      endDate = new Date(Date.UTC(ty, tm, 0));
+    }
+    effectiveEnd = endDate > yearEnd ? yearEnd : endDate;
+  }
+
+  if (effectiveEnd < effectiveStart) return 0;
+
+  const msPerDay = 24 * 60 * 60 * 1000;
+  const days =
+    Math.round((effectiveEnd.getTime() - effectiveStart.getTime()) / msPerDay) + 1;
+
+  return (days / daysInYear) * 12;
+}

@@ -138,7 +138,7 @@ export function FinancingInput({ propertyId }: FinancingInputProps) {
           onChange={(v) => update('afaSatz', v)}
           suffix="%"
           min={0}
-          max={10}
+          max={5}
           step={0.5}
         />
       </div>

@@ -3,7 +3,8 @@ import { db, deleteWithTombstone } from '../../db';
 import { Card } from '../../components/shared/Card';
 import { NumInput } from '../../components/shared/NumInput';
 import { EmptyState } from '../../components/shared/EmptyState';
-import { formatEuro } from '../../utils/format';
+import { formatEuro, formatNumber } from '../../utils/format';
+import { getOccupiedMonthsFractional } from '../../utils/calc';
 import type { Occupancy, Tenant, Unit, Prepayment } from '../../db/schema';
 
 interface PrepaymentInputProps {
@@ -21,15 +22,7 @@ interface OccupancyRow {
 }
 
 function getOccupiedMonths(occupancy: Occupancy, year: number): number {
-  const yearStart = `${year}-01`;
-  const yearEnd = `${year}-12`;
-  const start = occupancy.from < yearStart ? yearStart : occupancy.from;
-  const end =
-    occupancy.to === null || occupancy.to > yearEnd ? yearEnd : occupancy.to;
-
-  const [y1, m1] = start.split('-').map(Number);
-  const [y2, m2] = end.split('-').map(Number);
-  return Math.max(0, (y2 - y1) * 12 + (m2 - m1) + 1);
+  return getOccupiedMonthsFractional(occupancy, year);
 }
 
 export function PrepaymentInput({ propertyId, year }: PrepaymentInputProps) {
@@ -185,7 +178,7 @@ export function PrepaymentInput({ propertyId, year }: PrepaymentInputProps) {
                     {formatEuro(row.occupancy.rentUtilities)}
                   </td>
                   <td className="py-2 px-3 text-center text-stone-600 dark:text-stone-300">
-                    {row.months}
+                    {formatNumber(row.months)}
                   </td>
                   <td className="py-2 px-3 text-right font-mono font-tabular text-stone-500 dark:text-stone-400">
                     {formatEuro(row.autoAmount)}

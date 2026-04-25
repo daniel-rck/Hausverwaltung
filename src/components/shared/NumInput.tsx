@@ -43,7 +43,26 @@ export function NumInput({
 
   const handleBlur = useCallback(() => {
     setEditing(false);
-    const parsed = parseFloat(rawValue.replace(',', '.'));
+    // Deutsche Notation: "1.234,56" → "1234.56"
+    // Punkt = Tausender-Trenner (entfernen), Komma = Dezimaltrenner (→ Punkt).
+    // Wenn ausschließlich Punkte vorhanden sind und der letzte 1–3 Nachkommastellen
+    // hat, behandeln wir ihn als Dezimaltrenner (englische Eingabe).
+    let normalized = rawValue.trim();
+    if (normalized.includes(',')) {
+      normalized = normalized.replace(/\./g, '').replace(',', '.');
+    } else {
+      const parts = normalized.split('.');
+      if (parts.length > 1) {
+        const last = parts[parts.length - 1];
+        if (last.length === 3 && parts.slice(0, -1).every((p) => p.length === 3 || /^\d{1,3}$/.test(p))) {
+          // "1.234" oder "1.234.567" — Tausender, kein Dezimal
+          normalized = parts.join('');
+        } else {
+          normalized = parts.slice(0, -1).join('') + '.' + last;
+        }
+      }
+    }
+    const parsed = parseFloat(normalized);
     if (!isNaN(parsed)) {
       let clamped = parsed;
       if (min !== undefined) clamped = Math.max(min, clamped);

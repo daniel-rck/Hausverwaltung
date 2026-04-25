@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../db';
 import { Card } from '../../components/shared/Card';
@@ -6,6 +6,7 @@ import { DataTable, type Column } from '../../components/shared/DataTable';
 import { NumInput } from '../../components/shared/NumInput';
 import { EmptyState } from '../../components/shared/EmptyState';
 import { formatEuro, formatMonth } from '../../utils/format';
+import { checkRentIncrease } from '../../utils/rentLaw';
 import type { Occupancy, Unit, RentChange, RentChangeReason } from '../../db/schema';
 
 interface RentHistoryProps {
@@ -39,8 +40,24 @@ export function RentHistory({ occupancy, unit }: RentHistoryProps) {
     [occupancy.id],
   );
 
+  const issues = useMemo(() => {
+    if (!form.effectiveDate || form.newRentCold <= 0) return [];
+    return checkRentIncrease({
+      effectiveDate: form.effectiveDate,
+      newRentCold: form.newRentCold,
+      oldRentCold: occupancy.rentCold,
+      reason: form.reason,
+      occupancyFrom: occupancy.from,
+      history: changes ?? [],
+    });
+  }, [form, occupancy, changes]);
+
+  const hasErrors = issues.some((i) => i.level === 'error');
+  const [overrideErrors, setOverrideErrors] = useState(false);
+
   const handleSave = async () => {
     if (!form.effectiveDate || form.newRentCold <= 0) return;
+    if (hasErrors && !overrideErrors) return;
 
     await db.rentChanges.add({
       occupancyId: occupancy.id!,
@@ -59,6 +76,7 @@ export function RentHistory({ occupancy, unit }: RentHistoryProps) {
       reason: 'mietspiegel',
       notes: '',
     });
+    setOverrideErrors(false);
     setShowForm(false);
   };
 
@@ -185,15 +203,45 @@ export function RentHistory({ occupancy, unit }: RentHistoryProps) {
               />
             </div>
           </div>
+          {issues.length > 0 && (
+            <div className="mt-3 space-y-1.5">
+              {issues.map((issue, idx) => (
+                <div
+                  key={idx}
+                  className={`text-xs px-3 py-2 rounded-lg border ${
+                    issue.level === 'error'
+                      ? 'bg-red-50 border-red-300 text-red-800 dark:bg-red-950/40 dark:border-red-800 dark:text-red-200'
+                      : 'bg-amber-50 border-amber-300 text-amber-800 dark:bg-amber-950/40 dark:border-amber-800 dark:text-amber-200'
+                  }`}
+                >
+                  {issue.message}
+                </div>
+              ))}
+              {hasErrors && (
+                <label className="flex items-center gap-2 text-xs text-stone-600 dark:text-stone-300 mt-1">
+                  <input
+                    type="checkbox"
+                    checked={overrideErrors}
+                    onChange={(e) => setOverrideErrors(e.target.checked)}
+                  />
+                  Trotzdem speichern (juristische Verantwortung übernehme ich)
+                </label>
+              )}
+            </div>
+          )}
           <div className="flex gap-2 mt-3">
             <button
               onClick={handleSave}
-              className="px-4 py-1.5 text-sm bg-stone-800 dark:bg-stone-600 text-white rounded-lg hover:bg-stone-900 dark:hover:bg-stone-500 transition-colors"
+              disabled={hasErrors && !overrideErrors}
+              className="px-4 py-1.5 text-sm bg-stone-800 dark:bg-stone-600 text-white rounded-lg hover:bg-stone-900 dark:hover:bg-stone-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Speichern
             </button>
             <button
-              onClick={() => setShowForm(false)}
+              onClick={() => {
+                setShowForm(false);
+                setOverrideErrors(false);
+              }}
               className="px-4 py-1.5 text-sm border border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-300 rounded-lg hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors"
             >
               Abbrechen

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db, bulkDeleteWithTombstones, deleteWithTombstone } from '../../db';
+import { db } from '../../db';
+import { cascadeDeleteUnit } from '../../db/cascade';
 import { useProperty } from '../../hooks/useProperty';
 import { Card } from '../../components/shared/Card';
 import { DataTable, type Column } from '../../components/shared/DataTable';
@@ -79,55 +80,7 @@ export function UnitList({ onSelectUnit }: UnitListProps) {
   };
 
   const handleDelete = async (id: number) => {
-    // Cascade: delete all dependent records (with tombstones for sync)
-    const occupancies = await db.occupancies.where('unitId').equals(id).toArray();
-    const occIds = occupancies.map((o) => o.id!);
-
-    if (occIds.length > 0) {
-      const [allPayments, allCostShares, allPrepayments, allHandovers] = await Promise.all([
-        db.payments.toArray(),
-        db.costShares.toArray(),
-        db.prepayments.toArray(),
-        db.handoverProtocols.toArray(),
-      ]);
-
-      await bulkDeleteWithTombstones(
-        'payments',
-        allPayments.filter((p) => occIds.includes(p.occupancyId)).map((p) => p.id!),
-      );
-      await bulkDeleteWithTombstones(
-        'costShares',
-        allCostShares.filter((s) => occIds.includes(s.occupancyId)).map((s) => s.id!),
-      );
-      await bulkDeleteWithTombstones(
-        'prepayments',
-        allPrepayments.filter((p) => occIds.includes(p.occupancyId)).map((p) => p.id!),
-      );
-      await bulkDeleteWithTombstones(
-        'handoverProtocols',
-        allHandovers.filter((h) => occIds.includes(h.occupancyId)).map((h) => h.id!),
-      );
-      await bulkDeleteWithTombstones('occupancies', occIds);
-    }
-
-    const meters = await db.meters.where('unitId').equals(id).toArray();
-    for (const meter of meters) {
-      const readings = await db.meterReadings.where('meterId').equals(meter.id!).toArray();
-      await bulkDeleteWithTombstones(
-        'meterReadings',
-        readings.map((r) => r.id!).filter((rid) => rid !== undefined),
-      );
-    }
-    await bulkDeleteWithTombstones(
-      'meters',
-      meters.map((m) => m.id!).filter((mid) => mid !== undefined),
-    );
-    const tenants = await db.tenants.where('unitId').equals(id).toArray();
-    await bulkDeleteWithTombstones(
-      'tenants',
-      tenants.map((t) => t.id!).filter((tid) => tid !== undefined),
-    );
-    await deleteWithTombstone('units', id);
+    await cascadeDeleteUnit(id);
   };
 
   const columns: Column<UnitRow>[] = [

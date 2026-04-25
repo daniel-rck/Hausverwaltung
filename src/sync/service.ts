@@ -1,4 +1,4 @@
-import { onLocalWrite, withoutWriteEvents } from '../db';
+import { db, onLocalWrite, withoutWriteEvents } from '../db';
 import { applySnapshot, buildLocalSnapshot, type SyncSnapshot } from './snapshot';
 import { mergeSnapshots, snapshotSignature } from './merge';
 import {
@@ -35,6 +35,9 @@ const LS_ETAG_KEY = 'hv-sync-etag';
 const LS_LAST_SYNC_KEY = 'hv-sync-last';
 const LS_SIGNATURE_KEY = 'hv-sync-sig';
 const LS_AUTO_KEY = 'hv-sync-auto';
+// Tombstones, die älter als das TTL sind, werden nach erfolgreichem Push
+// gelöscht — sie haben ihren Zweck erfüllt und blähen sonst den Snapshot.
+const TOMBSTONE_TTL_MS = 90 * 24 * 60 * 60 * 1000; // 90 Tage
 
 class SyncService {
   private state: SyncState = {
@@ -253,8 +256,20 @@ class SyncService {
       localStorage.setItem(LS_ETAG_KEY, newEtag);
       localStorage.setItem(LS_SIGNATURE_KEY, newSig);
       this.dirty = false;
+      await this.cleanupOldTombstones();
     } else if (remote && remote !== 'not-modified') {
       localStorage.setItem(LS_ETAG_KEY, remote.etag);
+    }
+  }
+
+  private async cleanupOldTombstones(): Promise<void> {
+    const cutoff = Date.now() - TOMBSTONE_TTL_MS;
+    try {
+      await withoutWriteEvents(async () => {
+        await db.tombstones.where('deletedAt').below(cutoff).delete();
+      });
+    } catch {
+      // Cleanup ist best-effort, bei Fehler nicht stören
     }
   }
 

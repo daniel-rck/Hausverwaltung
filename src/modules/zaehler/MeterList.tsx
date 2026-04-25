@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db, deleteWithTombstone } from '../../db';
+import { db } from '../../db';
+import { cascadeDeleteMeter } from '../../db/cascade';
 import { useProperty } from '../../hooks/useProperty';
 import { Card } from '../../components/shared/Card';
 import { DataTable, type Column } from '../../components/shared/DataTable';
@@ -55,44 +56,41 @@ export function MeterList() {
   const meterRows = useLiveQuery(async (): Promise<MeterRow[]> => {
     if (!activeProperty?.id) return [];
 
-    const propertyUnits = await db.units
-      .where('propertyId')
-      .equals(activeProperty.id)
-      .toArray();
-    const unitIds = propertyUnits.map((u) => u.id!);
+    const [propertyUnits, allMeters, types, allReadings] = await Promise.all([
+      db.units.where('propertyId').equals(activeProperty.id).toArray(),
+      db.meters.toArray(),
+      db.meterTypes.toArray(),
+      db.meterReadings.toArray(),
+    ]);
+
+    const unitIds = new Set(propertyUnits.map((u) => u.id!));
     const unitMap = new Map(propertyUnits.map((u) => [u.id!, u]));
-
-    const allMeters = await db.meters.toArray();
-    const propertyMeters = allMeters.filter(
-      (m) => m.unitId === null || unitIds.includes(m.unitId),
-    );
-
-    const types = await db.meterTypes.toArray();
     const typeMap = new Map(types.map((t) => [t.id!, t]));
 
-    const rows: MeterRow[] = [];
+    const propertyMeters = allMeters.filter(
+      (m) => m.unitId === null || unitIds.has(m.unitId),
+    );
 
-    for (const meter of propertyMeters) {
-      const readings = await db.meterReadings
-        .where('[meterId+date]')
-        .between([meter.id!, ''], [meter.id!, '\uffff'])
-        .reverse()
-        .limit(1)
-        .sortBy('date');
-
-      const lastReading = readings.length > 0 ? readings[readings.length - 1] : null;
-      const mt = typeMap.get(meter.meterTypeId);
-
-      if (mt) {
-        rows.push({
-          meter,
-          meterType: mt,
-          unit: meter.unitId ? unitMap.get(meter.unitId) ?? null : null,
-          lastReading,
-        });
+    // Letzten Reading je Meter in einem Pass: O(n_readings) statt O(n_meters * log n)
+    const lastByMeter = new Map<number, MeterRow['lastReading']>();
+    for (const r of allReadings) {
+      const prev = lastByMeter.get(r.meterId);
+      if (!prev || r.date > prev.date) {
+        lastByMeter.set(r.meterId, r);
       }
     }
 
+    const rows: MeterRow[] = [];
+    for (const meter of propertyMeters) {
+      const mt = typeMap.get(meter.meterTypeId);
+      if (!mt) continue;
+      rows.push({
+        meter,
+        meterType: mt,
+        unit: meter.unitId ? unitMap.get(meter.unitId) ?? null : null,
+        lastReading: lastByMeter.get(meter.id!) ?? null,
+      });
+    }
     return rows;
   }, [activeProperty?.id]);
 
@@ -143,19 +141,7 @@ export function MeterList() {
 
   const handleDelete = async () => {
     if (!deleteTarget?.id) return;
-    await db.meterReadings
-      .where('[meterId+date]')
-      .between([deleteTarget.id, ''], [deleteTarget.id, '\uffff'])
-      .toArray()
-      .then((readings) =>
-        Promise.all(
-          readings
-            .map((r) => r.id)
-            .filter((id): id is number => id !== undefined)
-            .map((id) => deleteWithTombstone('meterReadings', id)),
-        ),
-      );
-    await deleteWithTombstone('meters', deleteTarget.id);
+    await cascadeDeleteMeter(deleteTarget.id);
     setDeleteTarget(null);
     setShowForm(false);
     setEditMeter(null);
