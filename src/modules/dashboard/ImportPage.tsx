@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Inflate } from 'pako';
 import { importDatabase } from '../../db/export-import';
@@ -28,67 +28,63 @@ function safeInflateToString(binary: Uint8Array): string {
   return result;
 }
 
+type ParsedPayload =
+  | { ok: true; jsonData: string }
+  | { ok: false; error: string };
+
+function parsePayload(payload: string | undefined): ParsedPayload {
+  if (!payload) {
+    return { ok: false, error: 'Kein Import-Payload in der URL gefunden.' };
+  }
+  try {
+    if (payload.length > MAX_PAYLOAD_BASE64) {
+      throw new Error('Import-Link ist zu groß. Bitte JSON-Datei verwenden.');
+    }
+    const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const binary = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
+    const decompressed = safeInflateToString(binary);
+    const parsed = JSON.parse(decompressed);
+    if (parsed.app !== 'hausverwaltung') {
+      throw new Error('Ungültige Daten: Kein Hausverwaltung-Export.');
+    }
+    return { ok: true, jsonData: decompressed };
+  } catch (err) {
+    return {
+      ok: false,
+      error: err instanceof Error ? err.message : 'Import-Daten konnten nicht gelesen werden.',
+    };
+  }
+}
+
+type Phase = 'confirm' | 'importing' | 'success' | 'error';
+
 export function ImportPage() {
   const { payload } = useParams<{ payload: string }>();
   const navigate = useNavigate();
-  const [status, setStatus] = useState<'loading' | 'confirm' | 'importing' | 'success' | 'error'>('loading');
-  const [error, setError] = useState('');
-  const [jsonData, setJsonData] = useState<string | null>(null);
+  const parsed = useMemo(() => parsePayload(payload), [payload]);
 
-  useEffect(() => {
-    if (!payload) {
-      setStatus('error');
-      setError('Kein Import-Payload in der URL gefunden.');
-      return;
-    }
+  const [phase, setPhase] = useState<Phase | null>(null);
+  const [importError, setImportError] = useState('');
 
-    try {
-      if (payload.length > MAX_PAYLOAD_BASE64) {
-        throw new Error('Import-Link ist zu groß. Bitte JSON-Datei verwenden.');
-      }
-
-      // Decode base64url → binary → inflate (mit Größenlimit) → JSON string
-      const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
-      const binary = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
-      const decompressed = safeInflateToString(binary);
-
-      // Validate JSON structure
-      const parsed = JSON.parse(decompressed);
-      if (parsed.app !== 'hausverwaltung') {
-        throw new Error('Ungültige Daten: Kein Hausverwaltung-Export.');
-      }
-
-      setJsonData(decompressed);
-      setStatus('confirm');
-    } catch (err) {
-      setStatus('error');
-      setError(
-        err instanceof Error ? err.message : 'Import-Daten konnten nicht gelesen werden.',
-      );
-    }
-  }, [payload]);
+  const status: Phase = phase ?? (parsed.ok ? 'confirm' : 'error');
+  const error = phase === 'error' ? importError : parsed.ok ? '' : parsed.error;
 
   const handleImport = async () => {
-    if (!jsonData) return;
-
-    setStatus('importing');
+    if (!parsed.ok) return;
+    setPhase('importing');
     try {
-      await importDatabase(jsonData);
-      setStatus('success');
+      await importDatabase(parsed.jsonData);
+      setPhase('success');
       setTimeout(() => navigate('/'), 2000);
     } catch (err) {
-      setStatus('error');
-      setError(err instanceof Error ? err.message : 'Import fehlgeschlagen.');
+      setImportError(err instanceof Error ? err.message : 'Import fehlgeschlagen.');
+      setPhase('error');
     }
   };
 
   return (
     <div className="max-w-md mx-auto mt-12">
       <Card title="Daten importieren">
-        {status === 'loading' && (
-          <p className="text-sm text-stone-500 dark:text-stone-400">Daten werden gelesen...</p>
-        )}
-
         {status === 'confirm' && (
           <div className="space-y-4">
             <p className="text-sm text-stone-600 dark:text-stone-300">
