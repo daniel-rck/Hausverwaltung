@@ -29,23 +29,24 @@ export function SyncSettings() {
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [mode, setMode] = useState<Mode>('idle');
   const [pairing, setPairing] = useState<{ otp: string; expiresAt: number } | null>(null);
-  const [now, setNow] = useState(Date.now());
+  const [now, setNow] = useState(() => Date.now());
   const [otpInput, setOtpInput] = useState('');
 
-  // Tick once per second while a pairing OTP is active, for the countdown.
+  // While a pairing OTP is active: tick `now` every second for the countdown,
+  // and schedule a one-shot timer to auto-clear exactly when the OTP expires.
   useEffect(() => {
     if (!pairing) return;
-    const t = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(t);
-  }, [pairing]);
-
-  // Auto-clear pairing card when OTP expires.
-  useEffect(() => {
-    if (pairing && now >= pairing.expiresAt) {
+    const tick = setInterval(() => setNow(Date.now()), 1000);
+    const remaining = pairing.expiresAt - Date.now();
+    const expire = setTimeout(() => {
       setPairing(null);
       setMode('idle');
-    }
-  }, [pairing, now]);
+    }, Math.max(0, remaining));
+    return () => {
+      clearInterval(tick);
+      clearTimeout(expire);
+    };
+  }, [pairing]);
 
   const handleEnable = async () => {
     setMessage(null);

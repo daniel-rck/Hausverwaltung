@@ -70,7 +70,7 @@ Server relayed nur den Chiffretext.
 **Selbst deployen auf Cloudflare Pages:**
 
 1. Repo forken und in [Cloudflare Pages](https://dash.cloudflare.com/?to=/:account/pages)
-   verbinden. Build-Command: `npm ci --legacy-peer-deps && npm run build`,
+   verbinden. Build-Command: `npm ci && npm run build`,
    Output-Verzeichnis: `dist`.
 2. R2-Bucket anlegen: `wrangler r2 bucket create hausverwaltung-sync` (plus
    `hausverwaltung-sync-preview` für Preview-Builds).
