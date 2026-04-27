@@ -43,3 +43,13 @@ export function clientIp(request: Request): string {
     'unknown'
   );
 }
+
+export function rateLimited(retryAfter: number): Response {
+  return new Response(JSON.stringify({ error: 'rate_limited' }), {
+    status: 429,
+    headers: {
+      'Content-Type': 'application/json',
+      'Retry-After': String(retryAfter),
+    },
+  });
+}

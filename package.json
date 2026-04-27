@@ -8,8 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "dev:cf": "wrangler pages dev",
-    "deploy:cf": "wrangler pages deploy dist"
+    "dev:cf": "wrangler dev",
+    "deploy:cf": "wrangler deploy"
   },
   "dependencies": {
     "chart.js": "^4.5.1",

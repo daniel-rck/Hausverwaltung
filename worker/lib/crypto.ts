@@ -53,8 +53,8 @@ export function timingSafeEqual(a: string, b: string): boolean {
 }
 
 /**
- * 6-digit numeric OTP, zero-padded. Uses crypto.getRandomValues (uniform
- * over 0..999999) by rejection sampling.
+ * 6-digit numeric OTP, zero-padded. Uses crypto.getRandomValues with
+ * rejection sampling for uniform distribution over 0..999999.
  */
 export function randomOtp(): string {
   const max = 1_000_000;

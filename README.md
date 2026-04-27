@@ -67,23 +67,27 @@ Während der Übertragung wird das Sync-Geheimnis client-seitig mit einem aus
 dem Code abgeleiteten Schlüssel (HKDF-SHA256 → AES-GCM) verschlüsselt; der
 Server relayed nur den Chiffretext.
 
-**Selbst deployen auf Cloudflare Pages:**
+**Selbst deployen auf Cloudflare Workers:**
 
-1. Repo forken und in [Cloudflare Pages](https://dash.cloudflare.com/?to=/:account/pages)
-   verbinden. Build-Command: `npm ci && npm run build`,
-   Output-Verzeichnis: `dist`.
-2. R2-Bucket anlegen: `wrangler r2 bucket create hausverwaltung-sync` (plus
-   `hausverwaltung-sync-preview` für Preview-Builds).
-3. KV-Namespace anlegen: `wrangler kv namespace create PAIR_KV`. Die
-   Namespace-ID in `wrangler.toml` eintragen (Prod- und Preview-ID).
-4. Im Cloudflare-Pages-Dashboard unter **Settings → Functions** die Bindings
-   hinterlegen: `SYNC_BUCKET` → R2-Bucket, `PAIR_KV` → KV-Namespace.
-5. Push auf `main` → Cloudflare baut und deployt automatisch.
+1. Repo forken und in [Cloudflare Workers](https://dash.cloudflare.com/?to=/:account/workers-and-pages)
+   verbinden („Create application" → „Workers" → „Connect to Git").
+   Build-Command: `npm ci && npm run build` (Output landet in `dist/`,
+   Wrangler liest das per `[assets]`-Block aus `wrangler.toml`).
+2. R2-Bucket anlegen: `wrangler r2 bucket create hausverwaltung-sync`.
+3. KV-Namespace anlegen: `wrangler kv namespace create PAIR_KV`.
+4. Im Workers-Dashboard unter **Settings → Bindings** zuweisen:
+   `SYNC_BUCKET` → R2-Bucket, `PAIR_KV` → KV-Namespace (für Production
+   und Preview).
+5. Push auf `main` → Cloudflare baut, `wrangler deploy` veröffentlicht
+   automatisch.
 
 Kein Client-Secret, keine Drittanbieter-Tokens, kein Account.
 
 ### Architektur des Sync-Backends
 
+- **Hosting:** Cloudflare Workers + Static Assets. SPA-Build (Vite) liegt
+  in `dist/`, der Worker in `worker/index.ts` routet `/api/*` an die
+  Sync-Handler und reicht alles andere an die statischen Assets durch.
 - **Speicher:** Cloudflare R2, Schlüssel `objects/<id>/data.json`. Die `<id>`
   wird aus `sha256(secret).slice(0,16)` (Crockford-base32) abgeleitet — der
   Worker führt keine User-Tabelle.

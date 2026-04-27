@@ -1,25 +1,20 @@
-import type { Env, PairCreateRequest, PairCreateResponse } from '../_lib/types';
-import { jsonError } from '../_lib/auth';
-import { rateLimit, clientIp } from '../_lib/ratelimit';
+import type { Env, PairCreateRequest, PairCreateResponse } from '../lib/types';
+import { jsonError } from '../lib/auth';
+import { rateLimit, clientIp, rateLimited } from '../lib/ratelimit';
 
 const TTL_SEC = 300;
 
-export const onRequestPost: PagesFunction<Env> = async (ctx) => {
-  const ip = clientIp(ctx.request);
-  const rl = await rateLimit(ctx.env, `pair-create:${ip}`, 5, 60);
-  if (!rl.allowed) {
-    return new Response(JSON.stringify({ error: 'rate_limited' }), {
-      status: 429,
-      headers: {
-        'Content-Type': 'application/json',
-        'Retry-After': String(rl.retryAfter),
-      },
-    });
-  }
+export async function handlePairCreate(
+  request: Request,
+  env: Env,
+): Promise<Response> {
+  const ip = clientIp(request);
+  const rl = await rateLimit(env, `pair-create:${ip}`, 5, 60);
+  if (!rl.allowed) return rateLimited(rl.retryAfter);
 
   let body: PairCreateRequest;
   try {
-    body = (await ctx.request.json()) as PairCreateRequest;
+    body = (await request.json()) as PairCreateRequest;
   } catch {
     return jsonError(400, 'invalid_json');
   }
@@ -47,7 +42,7 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
   }
 
   const kvKey = `otp:${body.otp}`;
-  const existing = await ctx.env.PAIR_KV.get(kvKey);
+  const existing = await env.PAIR_KV.get(kvKey);
   if (existing) {
     return jsonError(409, 'otp_collision');
   }
@@ -59,11 +54,11 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
     salt: body.salt,
     nonce: body.nonce,
   });
-  await ctx.env.PAIR_KV.put(kvKey, value, { expirationTtl: TTL_SEC });
+  await env.PAIR_KV.put(kvKey, value, { expirationTtl: TTL_SEC });
 
   const res: PairCreateResponse = { expiresAt };
   return new Response(JSON.stringify(res), {
     status: 200,
     headers: { 'Content-Type': 'application/json' },
   });
-};
+}

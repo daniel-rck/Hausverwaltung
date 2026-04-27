@@ -1,10 +1,11 @@
 /**
- * Shared types for the Cloudflare Pages Functions sync backend.
+ * Shared types for the Cloudflare Worker sync backend.
  */
 
 export interface Env {
   SYNC_BUCKET: R2Bucket;
   PAIR_KV: KVNamespace;
+  ASSETS: Fetcher;
 }
 
 export interface PairCreateRequest {
