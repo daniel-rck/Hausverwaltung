@@ -2,7 +2,7 @@
 
 Kostenlose Web-App für private Vermieter kleiner Mehrfamilienhäuser.
 
-**[Direkt starten](https://daniel-rck.github.io/Hausverwaltung/)**
+**[Direkt starten](https://hausverwaltung.pages.dev/)**
 
 <!-- Screenshots -->
 <!--
@@ -43,38 +43,61 @@ Die App ist gemacht für Vermieter mit 3 bis 10 Wohneinheiten, die ihre Verwaltu
 - Kein Account, keine Registrierung, keine E-Mail-Adresse nötig
 - **Backup per JSON-Datei** — jederzeit exportieren und auf einem anderen Gerät importieren
 - **Transfer per Link** — Daten komprimiert als URL teilen, z.B. vom PC aufs Tablet
-- **Multi-Device-Sync (OneDrive)** — optional: synchronisiere zwischen mehreren Geräten über deinen eigenen OneDrive-Speicher (siehe unten)
+- **Multi-Device-Sync** — optional: synchronisiere zwischen mehreren Geräten ohne Konto (siehe unten)
 - **Installierbar** — als App auf dem Homescreen deines Handys (PWA)
 
 ### Multi-Device-Sync einrichten
 
-Wenn du die Hausverwaltung auf mehreren Geräten (z.B. Laptop + Handy) nutzt
-und die Daten automatisch synchronisieren willst, kannst du dich mit deinem
-eigenen OneDrive-Speicher verbinden. Die App legt dann eine einzige Datei im
-Ordner `/Apps/Hausverwaltung/sync.json` ab — kein fremder Server ist beteiligt,
-und andere Dateien in deinem OneDrive sind für die App unsichtbar.
+Wenn du die Hausverwaltung auf mehreren Geräten (z.B. Laptop + Handy) nutzt,
+kannst du den Sync direkt in der App aktivieren — **ohne Konto, ohne E-Mail,
+ohne Passwort**. Beim ersten „Sync aktivieren"-Klick wird auf dem Gerät ein
+zufälliges Sync-Geheimnis erzeugt, das im Browser gespeichert bleibt. Die
+Daten werden in einer einzigen verschlüsselten Datei im Sync-Backend abgelegt;
+der Server kennt das Sync-Geheimnis nie im Klartext.
 
-Für Nutzer der öffentlich gehosteten Version ist die Funktion einsatzbereit
-(sofern beim Build eine OneDrive-Client-ID mitgegeben wurde — siehe
-Build-Hinweise).
+**Weiteres Gerät verknüpfen (auf Gerät A):**
 
-**Selbst deployen mit eigener OneDrive-Integration:**
+1. Einstellungen → Sync → „Weiteres Gerät verknüpfen" — ein 6-stelliger Code
+   wird angezeigt (5 Minuten gültig).
+2. Auf Gerät B → „Mit anderem Gerät verknüpfen" → Code eintippen.
+3. Beide Geräte synchronisieren ab sofort denselben Datenbestand.
 
-1. Bei [portal.azure.com](https://portal.azure.com) → **App registrations** → **New registration**
-2. **Supported account types**: "Personal Microsoft accounts only"
-3. **Redirect URI** (Platform: Single-page application): deine Deployment-URL, z.B.
-   `https://mein-benutzer.github.io/Hausverwaltung/` sowie `http://localhost:5173/` für lokale Entwicklung
-4. Unter **API permissions** hinzufügen: `Files.ReadWrite.AppFolder` (delegated)
-5. **Application (client) ID** kopieren und beim Build als Env-Variable setzen:
-   ```bash
-   VITE_ONEDRIVE_CLIENT_ID=deine-client-id npm run build
-   ```
+Der Code ist **einmalig** und läuft ab — auch wenn er nicht eingelöst wurde.
+Während der Übertragung wird das Sync-Geheimnis client-seitig mit einem aus
+dem Code abgeleiteten Schlüssel (HKDF-SHA256 → AES-GCM) verschlüsselt; der
+Server relayed nur den Chiffretext.
 
-Kein Client-Secret nötig (PKCE-Flow).
+**Selbst deployen auf Cloudflare Pages:**
+
+1. Repo forken und in [Cloudflare Pages](https://dash.cloudflare.com/?to=/:account/pages)
+   verbinden. Build-Command: `npm ci --legacy-peer-deps && npm run build`,
+   Output-Verzeichnis: `dist`.
+2. R2-Bucket anlegen: `wrangler r2 bucket create hausverwaltung-sync` (plus
+   `hausverwaltung-sync-preview` für Preview-Builds).
+3. KV-Namespace anlegen: `wrangler kv namespace create PAIR_KV`. Die
+   Namespace-ID in `wrangler.toml` eintragen (Prod- und Preview-ID).
+4. Im Cloudflare-Pages-Dashboard unter **Settings → Functions** die Bindings
+   hinterlegen: `SYNC_BUCKET` → R2-Bucket, `PAIR_KV` → KV-Namespace.
+5. Push auf `main` → Cloudflare baut und deployt automatisch.
+
+Kein Client-Secret, keine Drittanbieter-Tokens, kein Account.
+
+### Architektur des Sync-Backends
+
+- **Speicher:** Cloudflare R2, Schlüssel `objects/<id>/data.json`. Die `<id>`
+  wird aus `sha256(secret).slice(0,16)` (Crockford-base32) abgeleitet — der
+  Worker führt keine User-Tabelle.
+- **Konflikt-Erkennung:** R2-`ETag` mit `If-Match` (Upload) und
+  `If-None-Match` (Download) — bei parallelen Edits liefert ein PUT 412 und
+  der Sync-Layer merged automatisch nach.
+- **Pairing:** Cloudflare KV speichert den verschlüsselten OTP-Slot mit
+  TTL 300 s; nach erfolgreichem Claim wird der Slot sofort gelöscht.
+- **Rate-Limit:** KV-basierte Token-Buckets, 5 `pair/create`/min, 10
+  `pair/claim`/15min, 60 Daten-Operationen/min pro IP.
 
 ## So funktioniert's
 
-1. Öffne **[daniel-rck.github.io/Hausverwaltung](https://daniel-rck.github.io/Hausverwaltung/)**
+1. Öffne **[hausverwaltung.pages.dev](https://hausverwaltung.pages.dev/)**
 2. Leg dein erstes Mietobjekt an (Name, Adresse)
 3. Füg Wohnungen und Mieter hinzu
 4. Fertig — alle Module (Nebenkosten, Zähler, Finanzen, ...) greifen automatisch auf diese Daten zu

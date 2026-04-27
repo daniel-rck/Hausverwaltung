@@ -2,14 +2,17 @@ import { db, onLocalWrite, withoutWriteEvents } from '../db';
 import { applySnapshot, buildLocalSnapshot, type SyncSnapshot } from './snapshot';
 import { mergeSnapshots, snapshotSignature } from './merge';
 import {
+  claimPairing,
+  createPairing,
+  disable,
   downloadSyncFile,
+  enableAsOwner,
   EtagConflictError,
-  getActiveAccount,
-  isOneDriveConfigured,
-  signIn,
-  signOut,
+  getSyncId,
+  isEnabled,
   uploadSyncFile,
-} from './onedrive-client';
+  type PairingTicket,
+} from './cf-client';
 
 export type SyncStatus =
   | 'disconnected'
@@ -21,7 +24,7 @@ export type SyncStatus =
 
 export interface SyncState {
   status: SyncStatus;
-  accountEmail: string | null;
+  syncId: string | null;
   lastSyncedAt: number | null;
   lastError: string | null;
   autoSync: boolean;
@@ -42,7 +45,7 @@ const TOMBSTONE_TTL_MS = 90 * 24 * 60 * 60 * 1000; // 90 Tage
 class SyncService {
   private state: SyncState = {
     status: 'disconnected',
-    accountEmail: null,
+    syncId: null,
     lastSyncedAt: null,
     lastError: null,
     autoSync: true,
@@ -66,7 +69,7 @@ class SyncService {
 
   /**
    * Wird beim App-Start einmal aufgerufen. Lädt den Sync-Zustand aus localStorage,
-   * prüft auf bestehende OneDrive-Session und startet ggf. den Poll-Loop.
+   * prüft auf bestehende Sync-Aktivierung und startet ggf. den Poll-Loop.
    */
   async init(): Promise<void> {
     if (this.initialized) return;
@@ -77,40 +80,28 @@ class SyncService {
     const storedLast = Number(localStorage.getItem(LS_LAST_SYNC_KEY) ?? 0);
     this.state.lastSyncedAt = Number.isFinite(storedLast) && storedLast > 0 ? storedLast : null;
 
-    if (!isOneDriveConfigured()) {
+    if (!isEnabled()) {
       this.setState({ status: 'disconnected' });
       return;
     }
 
-    try {
-      const account = await getActiveAccount();
-      if (account) {
-        this.setState({
-          status: 'idle',
-          accountEmail: account.username,
-        });
-        this.hookDbWrites();
-        this.schedulePoll();
-        // Initiale Sync-Runde
-        void this.runSync();
-      } else {
-        this.setState({ status: 'disconnected' });
-      }
-    } catch (err) {
-      this.setState({
-        status: 'error',
-        lastError: err instanceof Error ? err.message : String(err),
-      });
-    }
+    this.setState({
+      status: 'idle',
+      syncId: getSyncId(),
+    });
+    this.hookDbWrites();
+    this.schedulePoll();
+    // Initiale Sync-Runde
+    void this.runSync();
   }
 
   async connect(): Promise<void> {
     this.setState({ status: 'connecting', lastError: null });
     try {
-      const account = await signIn();
+      const { id } = await enableAsOwner();
       this.setState({
         status: 'idle',
-        accountEmail: account.username,
+        syncId: id,
         lastError: null,
       });
       this.hookDbWrites();
@@ -127,20 +118,45 @@ class SyncService {
 
   async disconnect(): Promise<void> {
     this.clearPoll();
-    try {
-      await signOut();
-    } catch {
-      // best-effort
-    }
+    disable();
     localStorage.removeItem(LS_ETAG_KEY);
     localStorage.removeItem(LS_SIGNATURE_KEY);
     localStorage.removeItem(LS_LAST_SYNC_KEY);
     this.setState({
       status: 'disconnected',
-      accountEmail: null,
+      syncId: null,
       lastSyncedAt: null,
       lastError: null,
     });
+  }
+
+  async createPairing(): Promise<PairingTicket> {
+    return createPairing();
+  }
+
+  async claimPairing(otp: string): Promise<void> {
+    this.setState({ status: 'connecting', lastError: null });
+    try {
+      const { id } = await claimPairing(otp);
+      // Bestehender ETag/Signature gehört zu einem anderen Namespace —
+      // verwerfen, damit das erste Sync den Remote-Stand korrekt einholt.
+      localStorage.removeItem(LS_ETAG_KEY);
+      localStorage.removeItem(LS_SIGNATURE_KEY);
+      this.setState({
+        status: 'idle',
+        syncId: id,
+        lastError: null,
+      });
+      this.hookDbWrites();
+      this.schedulePoll();
+      await this.runSync();
+    } catch (err) {
+      this.setState({
+        status: 'error',
+        lastError: err instanceof Error ? err.message : String(err),
+      });
+      throw err;
+    }
   }
 
   setAutoSync(enabled: boolean): void {

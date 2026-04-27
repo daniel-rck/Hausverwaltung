@@ -1,0 +1,17 @@
+name = "hausverwaltung"
+compatibility_date = "2026-04-01"
+pages_build_output_dir = "dist"
+
+# R2-Bucket für sync.json-Snapshots (Key: objects/<id>/data.json).
+# Erstellen: `wrangler r2 bucket create hausverwaltung-sync` (+ -preview-Variante).
+[[r2_buckets]]
+binding = "SYNC_BUCKET"
+bucket_name = "hausverwaltung-sync"
+preview_bucket_name = "hausverwaltung-sync-preview"
+
+# KV für OTP-Pairing-Slots (TTL 300 s) und KV-basiertes Rate-Limiting.
+# IDs nach `wrangler kv namespace create PAIR_KV` (+ --preview) hier eintragen.
+[[kv_namespaces]]
+binding = "PAIR_KV"
+id = "REPLACE_WITH_PROD_KV_ID"
+preview_id = "REPLACE_WITH_PREVIEW_KV_ID"
