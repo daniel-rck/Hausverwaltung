@@ -273,7 +273,7 @@ export function SyncSettings() {
               checked={state.autoSync}
               onChange={(e) => syncService.setAutoSync(e.target.checked)}
             />
-            Automatisch synchronisieren (alle 20 s + bei Änderungen)
+            Automatisch bei Änderungen pushen
           </label>
         </div>
       )}

@@ -32,7 +32,6 @@ export interface SyncState {
 
 type Listener = (state: SyncState) => void;
 
-const POLL_INTERVAL_MS = 20_000;
 const DEBOUNCE_WRITE_MS = 2_000;
 const LS_ETAG_KEY = 'hv-sync-etag';
 const LS_LAST_SYNC_KEY = 'hv-sync-last';
@@ -51,7 +50,6 @@ class SyncService {
     autoSync: true,
   };
   private listeners = new Set<Listener>();
-  private pollTimer: ReturnType<typeof setTimeout> | null = null;
   private debounceTimer: ReturnType<typeof setTimeout> | null = null;
   private isRunning = false;
   private dirty = false;
@@ -68,8 +66,9 @@ class SyncService {
   }
 
   /**
-   * Wird beim App-Start einmal aufgerufen. Lädt den Sync-Zustand aus localStorage,
-   * prüft auf bestehende Sync-Aktivierung und startet ggf. den Poll-Loop.
+   * Wird beim App-Start einmal aufgerufen. Lädt den Sync-Zustand aus
+   * localStorage, prüft auf bestehende Sync-Aktivierung und löst die
+   * initiale Sync-Runde aus (Pull + Merge + ggf. Push).
    */
   async init(): Promise<void> {
     if (this.initialized) return;
@@ -90,8 +89,7 @@ class SyncService {
       syncId: getSyncId(),
     });
     this.hookDbWrites();
-    this.schedulePoll();
-    // Initiale Sync-Runde
+    // Initiale Sync-Runde nach App-Start: Remote-Stand einholen.
     void this.runSync();
   }
 
@@ -105,7 +103,6 @@ class SyncService {
         lastError: null,
       });
       this.hookDbWrites();
-      this.schedulePoll();
       await this.runSync();
     } catch (err) {
       this.setState({
@@ -117,7 +114,7 @@ class SyncService {
   }
 
   async disconnect(): Promise<void> {
-    this.clearPoll();
+    this.clearTimers();
     disable();
     localStorage.removeItem(LS_ETAG_KEY);
     localStorage.removeItem(LS_SIGNATURE_KEY);
@@ -148,7 +145,6 @@ class SyncService {
         lastError: null,
       });
       this.hookDbWrites();
-      this.schedulePoll();
       await this.runSync();
     } catch (err) {
       this.setState({
@@ -162,10 +158,8 @@ class SyncService {
   setAutoSync(enabled: boolean): void {
     this.setState({ autoSync: enabled });
     localStorage.setItem(LS_AUTO_KEY, String(enabled));
-    if (enabled) {
-      this.schedulePoll();
-    } else {
-      this.clearPoll();
+    if (!enabled) {
+      this.clearTimers();
     }
   }
 
@@ -311,23 +305,7 @@ class SyncService {
     }, DEBOUNCE_WRITE_MS);
   }
 
-  private schedulePoll(): void {
-    this.clearPoll();
-    if (!this.state.autoSync) return;
-    const tick = () => {
-      this.pollTimer = setTimeout(async () => {
-        await this.runSync();
-        tick();
-      }, POLL_INTERVAL_MS);
-    };
-    tick();
-  }
-
-  private clearPoll(): void {
-    if (this.pollTimer) {
-      clearTimeout(this.pollTimer);
-      this.pollTimer = null;
-    }
+  private clearTimers(): void {
     if (this.debounceTimer) {
       clearTimeout(this.debounceTimer);
       this.debounceTimer = null;
@@ -342,23 +320,11 @@ class SyncService {
 
 export const syncService = new SyncService();
 
-// Tab-Fokus + online/offline als zusätzliche Trigger
+// Online-Event als zusätzlicher Trigger: pending Pushes nach einer
+// Offline-Phase nachholen, sobald die Verbindung wieder steht.
 if (typeof window !== 'undefined') {
-  window.addEventListener('focus', () => {
-    if (syncService.getState().status !== 'disconnected') {
-      void syncService.syncNow();
-    }
-  });
   window.addEventListener('online', () => {
     if (syncService.getState().status !== 'disconnected') {
-      void syncService.syncNow();
-    }
-  });
-  window.addEventListener('visibilitychange', () => {
-    if (
-      document.visibilityState === 'visible' &&
-      syncService.getState().status !== 'disconnected'
-    ) {
       void syncService.syncNow();
     }
   });
