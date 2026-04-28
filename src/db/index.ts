@@ -57,6 +57,15 @@ db.version(3).stores({
  * Version 4 – Multi-Device-Sync:
  *   - Jeder Record bekommt `syncId` (UUID) und `updatedAt` (epoch ms).
  *   - Neue Tabelle `tombstones` tracked Löschungen für den Sync-Layer.
+ *
+ * WONTFIX — Migration stempelt allen Bestandsrecords `Date.now()` als
+ * `updatedAt` und vergibt frische `syncId`s. Edge-Case: wenn zwei Geräte
+ * dasselbe JSON-Backup importiert haben und _danach_ unabhängig nach v4
+ * migrieren, bekommen identische Inhalte auf jedem Gerät eine eigene
+ * `syncId`. Beim ersten Pairing entsteht dann Union-Merge → jeder Record
+ * doppelt. Eine echte Lösung bräuchte Content-Fingerprinting beim ersten
+ * Sync (Hash-basierte Dedup) — größere Architektur-Änderung. Im normalen
+ * Single-Backup-pro-Gerät-Workflow ist der Fall nicht erreichbar.
  */
 const SYNCABLE_TABLES = [
   'properties',
