@@ -115,6 +115,11 @@ class SyncService {
 
   async disconnect(): Promise<void> {
     this.clearTimers();
+    if (this.writeUnsubscribe) {
+      this.writeUnsubscribe();
+      this.writeUnsubscribe = null;
+    }
+    this.dirty = false;
     disable();
     localStorage.removeItem(LS_ETAG_KEY);
     localStorage.removeItem(LS_SIGNATURE_KEY);
@@ -183,6 +188,10 @@ class SyncService {
     }
 
     this.isRunning = true;
+    // Dirty-Flag VOR dem Sync zurücksetzen, damit Writes, die während
+    // des Push-Vorgangs eintrudeln, das Flag wieder auf true setzen
+    // und im finally erkannt werden.
+    this.dirty = false;
     this.setState({ status: 'syncing', lastError: null });
 
     try {
@@ -203,12 +212,14 @@ class SyncService {
           });
           localStorage.setItem(LS_LAST_SYNC_KEY, String(this.state.lastSyncedAt));
         } catch (retryErr) {
+          this.dirty = true;
           this.setState({
             status: 'error',
             lastError: retryErr instanceof Error ? retryErr.message : String(retryErr),
           });
         }
       } else {
+        this.dirty = true;
         const isNetwork =
           err instanceof TypeError && /fetch|network/i.test(err.message);
         this.setState({
@@ -218,6 +229,12 @@ class SyncService {
       }
     } finally {
       this.isRunning = false;
+      // Wenn während des Syncs lokal geschrieben wurde, setzt der Hook
+      // dirty wieder auf true — dann brauchen wir noch eine Runde.
+      // `syncId === null` heißt disconnect() hat zugeschlagen, nichts mehr tun.
+      if (this.dirty && this.state.autoSync && this.state.syncId !== null) {
+        this.scheduleDebouncedPush();
+      }
     }
   }
 
@@ -265,7 +282,6 @@ class SyncService {
       );
       localStorage.setItem(LS_ETAG_KEY, newEtag);
       localStorage.setItem(LS_SIGNATURE_KEY, newSig);
-      this.dirty = false;
       await this.cleanupOldTombstones();
     } else if (remote && remote !== 'not-modified') {
       localStorage.setItem(LS_ETAG_KEY, remote.etag);

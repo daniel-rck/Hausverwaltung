@@ -168,6 +168,19 @@ describe('PUT /api/objects/:id/data', () => {
     expect(res.status).toBe(413);
   });
 
+  it('PUT with non-numeric Content-Length returns 400', async () => {
+    const res = await SELF.fetch(url(), {
+      method: 'PUT',
+      headers: {
+        ...authHeaders(),
+        'Content-Type': 'application/json',
+        'Content-Length': 'not-a-number',
+      },
+      body: JSON.stringify({ a: 1 }),
+    });
+    expect(res.status).toBe(400);
+  });
+
   it('returns 405 for non-GET/PUT methods on the data path', async () => {
     const res = await SELF.fetch(url(), {
       method: 'DELETE',

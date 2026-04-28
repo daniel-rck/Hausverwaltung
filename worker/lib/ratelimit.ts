@@ -24,14 +24,18 @@ export async function rateLimit(
     }
   }
   count += 1;
-  const ttl = Math.max(1, resetAt - now);
+  const remaining = Math.max(1, resetAt - now);
+  // Cloudflare KV erlaubt expirationTtl erst ab 60s — sonst wirft put() 400.
+  // Wir clampen den TTL nach oben, der `resetAt` im Wert bleibt unverändert,
+  // sodass die Rate-Limit-Logik korrekt weiterzählt.
+  const kvTtl = Math.max(60, remaining);
   await env.PAIR_KV.put(
     kvKey,
     JSON.stringify({ count, resetAt }),
-    { expirationTtl: ttl },
+    { expirationTtl: kvTtl },
   );
   if (count > limit) {
-    return { allowed: false, retryAfter: ttl };
+    return { allowed: false, retryAfter: remaining };
   }
   return { allowed: true, retryAfter: 0 };
 }

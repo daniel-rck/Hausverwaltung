@@ -85,7 +85,16 @@ export async function handleObjectPut(
   const auth = await checkAuth(request, id);
   if (!auth.ok) return auth.res;
 
-  const contentLength = Number(request.headers.get('content-length') ?? 0);
+  const lenHeader = request.headers.get('content-length');
+  if (lenHeader === null) {
+    // Ohne Length-Header (Chunked) können wir den 60-MB-Cap nicht
+    // billig vorab prüfen — Upload ablehnen.
+    return jsonError(411, 'length_required');
+  }
+  const contentLength = Number(lenHeader);
+  if (!Number.isFinite(contentLength) || contentLength < 0) {
+    return jsonError(400, 'invalid_content_length');
+  }
   if (contentLength > MAX_BODY_BYTES) {
     return jsonError(413, 'body_too_large');
   }

@@ -93,18 +93,39 @@ export async function applySnapshot(snapshot: SyncSnapshot): Promise<void> {
         if (!syncId) continue;
         if (tombstoneSet.has(syncId)) {
           // Record ist gelöscht – falls lokal noch vorhanden, löschen
-          const existing = (await db
-            .table(tableName)
-            .where('syncId')
-            .equals(syncId)
-            .first()) as AnyRecord | undefined;
-          if (existing?.id !== undefined) {
-            await db.table(tableName).delete(existing.id as number);
+          if (tableName === 'settings') {
+            const existing = (await db
+              .table(tableName)
+              .where('syncId')
+              .equals(syncId)
+              .first()) as AnyRecord | undefined;
+            if (existing && typeof existing.key === 'string') {
+              await db.table(tableName).delete(existing.key);
+            }
+          } else {
+            const existing = (await db
+              .table(tableName)
+              .where('syncId')
+              .equals(syncId)
+              .first()) as AnyRecord | undefined;
+            if (existing?.id !== undefined) {
+              await db.table(tableName).delete(existing.id as number);
+            }
           }
           continue;
         }
 
         const localRecord = translateRowFromWire(tableName, wire, syncIdToLocalId);
+
+        if (tableName === 'settings') {
+          // Settings haben `key` als Primärschlüssel (kein Auto-Inc).
+          // `put` upserted nach `key`; falls lokal bereits ein Record mit
+          // gleichem `key` existiert, gewinnt der Wert aus dem Snapshot —
+          // der Merge-Layer hat den LWW-Sieger schon ermittelt.
+          await db.table(tableName).put(localRecord);
+          continue;
+        }
+
         const existing = (await db
           .table(tableName)
           .where('syncId')
@@ -167,8 +188,12 @@ function translateRowToWire(
       const syncId = idToSyncId[targetTable]?.get(val);
       if (syncId) {
         out[`${field}__sync`] = syncId;
-        delete out[field];
       }
+      // Lokale numerische ID nie ins Wire-Format leaken — sie ist auf
+      // anderen Geräten bedeutungslos und würde dort auf einen falschen
+      // Record zeigen. Wenn das Ziel keine syncId hat, lieber FK leer lassen
+      // und den nächsten Sync-Durchlauf reparieren.
+      delete out[field];
     }
   }
 
@@ -178,8 +203,8 @@ function translateRowToWire(
     const syncId = idToSyncId[dynamicTarget]?.get(row.entityId);
     if (syncId) {
       out.entityId__sync = syncId;
-      delete out.entityId;
     }
+    delete out.entityId;
   }
 
   return out;

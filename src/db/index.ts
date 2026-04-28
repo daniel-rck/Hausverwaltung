@@ -201,7 +201,9 @@ for (const tableName of SYNCABLE_TABLES) {
   const table = db.table(tableName) as any;
   table.hook('creating', (_pk: unknown, obj: Record<string, unknown>) => {
     if (!obj.syncId) obj.syncId = crypto.randomUUID();
-    obj.updatedAt = Date.now();
+    // Beim Sync-Apply liefert der Snapshot bereits `updatedAt` aus der
+    // Quelle — sonst würde das Last-Write-Wins-Argument verloren gehen.
+    if (typeof obj.updatedAt !== 'number') obj.updatedAt = Date.now();
     queueMicrotask(notifyLocalWrite);
   });
   table.hook('updating', (mods: Record<string, unknown>) => {
