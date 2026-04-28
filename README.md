@@ -71,8 +71,10 @@ Server relayed nur den Chiffretext.
 
 1. Repo forken und in [Cloudflare Workers](https://dash.cloudflare.com/?to=/:account/workers-and-pages)
    verbinden („Create application" → „Workers" → „Connect to Git").
-   Build-Command: `npm ci && npm run build` (Output landet in `dist/`,
-   Wrangler liest das per `[assets]`-Block aus `wrangler.toml`).
+   Build-Command: `bun install --frozen-lockfile && bun run build` (Output
+   landet in `dist/`, Wrangler liest das per `[assets]`-Block aus
+   `wrangler.toml`). Cloudflare erkennt Bun automatisch über das
+   `packageManager`-Feld in `package.json` und die `bun.lock`.
 2. R2-Bucket anlegen: `wrangler r2 bucket create hausverwaltung-sync`.
 3. KV-Namespace anlegen: `wrangler kv namespace create PAIR_KV`.
 4. Im Workers-Dashboard unter **Settings → Bindings** zuweisen:
