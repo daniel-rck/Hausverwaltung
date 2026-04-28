@@ -15,7 +15,6 @@ export default defineConfig({
         plugins: [
           cloudflareTest({
             main: './worker/index.ts',
-            wrangler: { configPath: './wrangler.toml' },
             miniflare: {
               compatibilityDate: '2026-04-01',
               r2Buckets: ['SYNC_BUCKET'],
