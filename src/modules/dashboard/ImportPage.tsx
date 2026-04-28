@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Inflate } from 'pako';
 import { importDatabase } from '../../db/export-import';
 import { Card } from '../../components/shared/Card';
+import { syncService } from '../../sync/service';
+import { useSyncStatus } from '../../sync/useSyncStatus';
 
 const MAX_PAYLOAD_BASE64 = 512 * 1024; // 512 KB komprimiert via URL
 const MAX_DECOMPRESSED_BYTES = 20 * 1024 * 1024; // 20 MB JSON-Limit gegen ZIP-Bomben
@@ -65,6 +67,8 @@ export function ImportPage() {
 
   const [phase, setPhase] = useState<Phase | null>(null);
   const [importError, setImportError] = useState('');
+  const syncState = useSyncStatus();
+  const syncActive = syncState.status !== 'disconnected';
 
   const status: Phase = phase ?? (parsed.ok ? 'confirm' : 'error');
   const error = phase === 'error' ? importError : parsed.ok ? '' : parsed.error;
@@ -73,6 +77,12 @@ export function ImportPage() {
     if (!parsed.ok) return;
     setPhase('importing');
     try {
+      // Sync VOR dem Import abklemmen, sonst pusht der Debounce-Timer
+      // den (potenziell alten) Backup-Stand hoch und überschreibt damit
+      // den Datenbestand auf allen verknüpften Geräten.
+      if (syncService.getState().status !== 'disconnected') {
+        await syncService.disconnect();
+      }
       await importDatabase(parsed.jsonData);
       setPhase('success');
       setTimeout(() => navigate('/'), 2000);
@@ -90,6 +100,14 @@ export function ImportPage() {
             <p className="text-sm text-stone-600 dark:text-stone-300">
               Es wurden Daten in der URL gefunden. Alle vorhandenen Daten werden
               durch den Import <strong>überschrieben</strong>.
+              {syncActive && (
+                <>
+                  {' '}
+                  Der Multi-Device-Sync wird dabei zurückgesetzt — sonst würden
+                  die importierten Daten auf alle verknüpften Geräte gepusht.
+                  Du kannst dich danach wieder verknüpfen.
+                </>
+              )}
             </p>
             <div className="flex gap-2">
               <button

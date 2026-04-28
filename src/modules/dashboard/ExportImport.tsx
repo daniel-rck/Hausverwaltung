@@ -2,6 +2,8 @@ import { useRef, useState } from 'react';
 import { exportDatabase, importDatabase, downloadJson, exportAsUrl } from '../../db/export-import';
 import { Card } from '../../components/shared/Card';
 import { ConfirmDialog } from '../../components/shared/ConfirmDialog';
+import { syncService } from '../../sync/service';
+import { useSyncStatus } from '../../sync/useSyncStatus';
 
 export function ExportImport() {
   const fileInput = useRef<HTMLInputElement>(null);
@@ -10,6 +12,8 @@ export function ExportImport() {
   const [pendingFile, setPendingFile] = useState<string | null>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [shareUrl, setShareUrl] = useState<string | null>(null);
+  const syncState = useSyncStatus();
+  const syncActive = syncState.status !== 'disconnected';
 
   const handleExport = async () => {
     try {
@@ -45,6 +49,12 @@ export function ExportImport() {
     setConfirmOpen(false);
 
     try {
+      // Sync VOR dem Import abklemmen, sonst pusht der Debounce-Timer
+      // den (potenziell alten) Backup-Stand hoch und überschreibt damit
+      // den Datenbestand auf allen verknüpften Geräten.
+      if (syncService.getState().status !== 'disconnected') {
+        await syncService.disconnect();
+      }
       await importDatabase(pendingFile);
       setMessage({ type: 'success', text: 'Daten erfolgreich importiert. Seite wird neu geladen...' });
       setTimeout(() => window.location.reload(), 1500);
@@ -133,7 +143,11 @@ export function ExportImport() {
       <ConfirmDialog
         open={confirmOpen}
         title="Daten importieren?"
-        message="Alle vorhandenen Daten werden durch den Import überschrieben. Diese Aktion kann nicht rückgängig gemacht werden."
+        message={
+          syncActive
+            ? 'Alle vorhandenen Daten werden durch den Import überschrieben und der Multi-Device-Sync wird zurückgesetzt — sonst würden die alten Backup-Daten auf alle verknüpften Geräte gepusht. Du kannst dich danach wieder verknüpfen. Diese Aktion kann nicht rückgängig gemacht werden.'
+            : 'Alle vorhandenen Daten werden durch den Import überschrieben. Diese Aktion kann nicht rückgängig gemacht werden.'
+        }
         confirmLabel="Importieren"
         onConfirm={handleConfirmImport}
         onCancel={() => {
