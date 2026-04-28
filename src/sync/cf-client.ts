@@ -51,6 +51,12 @@ function getSecret(): string {
 }
 
 export async function enableAsOwner(): Promise<{ id: string }> {
+  // Schutz vor versehentlichem Überschreiben eines bestehenden Secrets —
+  // sonst wäre der bisherige Remote-Datenbestand unter altem Namespace
+  // unwiederbringlich verwaist.
+  if (localStorage.getItem(LS_SECRET)) {
+    throw new Error('Sync ist bereits aktiv. Bitte zuerst zurücksetzen.');
+  }
   const secret = randomBase32(32);
   const id = await deriveSyncId(secret);
   localStorage.setItem(LS_SECRET, secret);
@@ -59,6 +65,8 @@ export async function enableAsOwner(): Promise<{ id: string }> {
 }
 
 export async function enableFromPairing(secret: string): Promise<{ id: string }> {
+  // Beim Pairing wird das alte Secret bewusst durch das des Owner-Geräts
+  // ersetzt — der Aufrufer hat das in claimPairing schon explizit gewollt.
   const id = await deriveSyncId(secret);
   localStorage.setItem(LS_SECRET, secret);
   localStorage.setItem(LS_ID, id);

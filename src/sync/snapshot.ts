@@ -86,9 +86,21 @@ export async function applySnapshot(snapshot: SyncSnapshot): Promise<void> {
 
   for (const tableName of order) {
     const remoteRows = snapshot.tables[tableName] ?? [];
+    // Settings teilen sich den Primary Key `key` über mehrere syncIds —
+    // wenn zwei Geräte unabhängig dasselbe Setting setzen, landen beide
+    // im Snapshot, aber put() überschreibt nach Iterationsreihenfolge.
+    // ASC nach updatedAt sortieren stellt sicher, dass der höchste Wert
+    // zuletzt geschrieben wird (= LWW gewinnt).
+    const orderedRows =
+      tableName === 'settings'
+        ? [...remoteRows].sort(
+            (a, b) =>
+              ((a.updatedAt as number) ?? 0) - ((b.updatedAt as number) ?? 0),
+          )
+        : remoteRows;
 
     await db.transaction('rw', db.table(tableName), async () => {
-      for (const wire of remoteRows) {
+      for (const wire of orderedRows) {
         const syncId = wire.syncId as string;
         if (!syncId) continue;
         if (tombstoneSet.has(syncId)) {

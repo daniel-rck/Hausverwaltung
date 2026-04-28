@@ -140,13 +140,16 @@ class SyncService {
     this.setState({ status: 'connecting', lastError: null });
     try {
       const { id } = await claimPairing(otp);
-      // Bestehender ETag/Signature gehört zu einem anderen Namespace —
-      // verwerfen, damit das erste Sync den Remote-Stand korrekt einholt.
+      // Bestehender ETag/Signature/lastSyncedAt gehört zu einem anderen
+      // Namespace — verwerfen, damit das erste Sync den Remote-Stand korrekt
+      // einholt und die UI keinen veralteten Sync-Zeitstempel anzeigt.
       localStorage.removeItem(LS_ETAG_KEY);
       localStorage.removeItem(LS_SIGNATURE_KEY);
+      localStorage.removeItem(LS_LAST_SYNC_KEY);
       this.setState({
         status: 'idle',
         syncId: id,
+        lastSyncedAt: null,
         lastError: null,
       });
       this.hookDbWrites();
