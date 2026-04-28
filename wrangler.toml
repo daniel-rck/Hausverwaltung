@@ -1,0 +1,16 @@
+name = "hausverwaltung"
+main = "worker/index.ts"
+compatibility_date = "2026-04-01"
+
+[assets]
+directory = "./dist"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+
+# Bindings (R2 `SYNC_BUCKET`, KV `PAIR_KV`) werden im Cloudflare-Dashboard
+# unter „Settings → Bindings" verwaltet — das ist die Source of Truth für
+# Production und Preview.
+#
+# Für lokale Entwicklung mit `wrangler dev` lokale R2 + KV per CLI-Flags
+# übergeben oder hier `[[r2_buckets]]` / `[[kv_namespaces]]` mit echten
+# Preview-IDs ergänzen.

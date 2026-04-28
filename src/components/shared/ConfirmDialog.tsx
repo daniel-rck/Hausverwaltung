@@ -28,7 +28,6 @@ export function ConfirmDialog({
   // Auto-Focus auf Confirm-Button beim Öffnen
   useEffect(() => {
     if (open) {
-      setBusy(false);
       // Verzögert, damit das Element gemountet ist
       const t = setTimeout(() => confirmRef.current?.focus(), 0);
       return () => clearTimeout(t);

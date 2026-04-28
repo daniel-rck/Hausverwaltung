@@ -2,14 +2,17 @@ import { db, onLocalWrite, withoutWriteEvents } from '../db';
 import { applySnapshot, buildLocalSnapshot, type SyncSnapshot } from './snapshot';
 import { mergeSnapshots, snapshotSignature } from './merge';
 import {
+  claimPairing,
+  createPairing,
+  disable,
   downloadSyncFile,
+  enableAsOwner,
   EtagConflictError,
-  getActiveAccount,
-  isOneDriveConfigured,
-  signIn,
-  signOut,
+  getSyncId,
+  isEnabled,
   uploadSyncFile,
-} from './onedrive-client';
+  type PairingTicket,
+} from './cf-client';
 
 export type SyncStatus =
   | 'disconnected'
@@ -21,7 +24,7 @@ export type SyncStatus =
 
 export interface SyncState {
   status: SyncStatus;
-  accountEmail: string | null;
+  syncId: string | null;
   lastSyncedAt: number | null;
   lastError: string | null;
   autoSync: boolean;
@@ -29,7 +32,6 @@ export interface SyncState {
 
 type Listener = (state: SyncState) => void;
 
-const POLL_INTERVAL_MS = 20_000;
 const DEBOUNCE_WRITE_MS = 2_000;
 const LS_ETAG_KEY = 'hv-sync-etag';
 const LS_LAST_SYNC_KEY = 'hv-sync-last';
@@ -42,13 +44,12 @@ const TOMBSTONE_TTL_MS = 90 * 24 * 60 * 60 * 1000; // 90 Tage
 class SyncService {
   private state: SyncState = {
     status: 'disconnected',
-    accountEmail: null,
+    syncId: null,
     lastSyncedAt: null,
     lastError: null,
     autoSync: true,
   };
   private listeners = new Set<Listener>();
-  private pollTimer: ReturnType<typeof setTimeout> | null = null;
   private debounceTimer: ReturnType<typeof setTimeout> | null = null;
   private isRunning = false;
   private dirty = false;
@@ -65,8 +66,9 @@ class SyncService {
   }
 
   /**
-   * Wird beim App-Start einmal aufgerufen. Lädt den Sync-Zustand aus localStorage,
-   * prüft auf bestehende OneDrive-Session und startet ggf. den Poll-Loop.
+   * Wird beim App-Start einmal aufgerufen. Lädt den Sync-Zustand aus
+   * localStorage, prüft auf bestehende Sync-Aktivierung und löst die
+   * initiale Sync-Runde aus (Pull + Merge + ggf. Push).
    */
   async init(): Promise<void> {
     if (this.initialized) return;
@@ -77,44 +79,30 @@ class SyncService {
     const storedLast = Number(localStorage.getItem(LS_LAST_SYNC_KEY) ?? 0);
     this.state.lastSyncedAt = Number.isFinite(storedLast) && storedLast > 0 ? storedLast : null;
 
-    if (!isOneDriveConfigured()) {
+    if (!isEnabled()) {
       this.setState({ status: 'disconnected' });
       return;
     }
 
-    try {
-      const account = await getActiveAccount();
-      if (account) {
-        this.setState({
-          status: 'idle',
-          accountEmail: account.username,
-        });
-        this.hookDbWrites();
-        this.schedulePoll();
-        // Initiale Sync-Runde
-        void this.runSync();
-      } else {
-        this.setState({ status: 'disconnected' });
-      }
-    } catch (err) {
-      this.setState({
-        status: 'error',
-        lastError: err instanceof Error ? err.message : String(err),
-      });
-    }
+    this.setState({
+      status: 'idle',
+      syncId: getSyncId(),
+    });
+    this.hookDbWrites();
+    // Initiale Sync-Runde nach App-Start: Remote-Stand einholen.
+    void this.runSync();
   }
 
   async connect(): Promise<void> {
     this.setState({ status: 'connecting', lastError: null });
     try {
-      const account = await signIn();
+      const { id } = await enableAsOwner();
       this.setState({
         status: 'idle',
-        accountEmail: account.username,
+        syncId: id,
         lastError: null,
       });
       this.hookDbWrites();
-      this.schedulePoll();
       await this.runSync();
     } catch (err) {
       this.setState({
@@ -126,30 +114,52 @@ class SyncService {
   }
 
   async disconnect(): Promise<void> {
-    this.clearPoll();
-    try {
-      await signOut();
-    } catch {
-      // best-effort
-    }
+    this.clearTimers();
+    disable();
     localStorage.removeItem(LS_ETAG_KEY);
     localStorage.removeItem(LS_SIGNATURE_KEY);
     localStorage.removeItem(LS_LAST_SYNC_KEY);
     this.setState({
       status: 'disconnected',
-      accountEmail: null,
+      syncId: null,
       lastSyncedAt: null,
       lastError: null,
     });
   }
 
+  async createPairing(): Promise<PairingTicket> {
+    return createPairing();
+  }
+
+  async claimPairing(otp: string): Promise<void> {
+    this.setState({ status: 'connecting', lastError: null });
+    try {
+      const { id } = await claimPairing(otp);
+      // Bestehender ETag/Signature gehört zu einem anderen Namespace —
+      // verwerfen, damit das erste Sync den Remote-Stand korrekt einholt.
+      localStorage.removeItem(LS_ETAG_KEY);
+      localStorage.removeItem(LS_SIGNATURE_KEY);
+      this.setState({
+        status: 'idle',
+        syncId: id,
+        lastError: null,
+      });
+      this.hookDbWrites();
+      await this.runSync();
+    } catch (err) {
+      this.setState({
+        status: 'error',
+        lastError: err instanceof Error ? err.message : String(err),
+      });
+      throw err;
+    }
+  }
+
   setAutoSync(enabled: boolean): void {
     this.setState({ autoSync: enabled });
     localStorage.setItem(LS_AUTO_KEY, String(enabled));
-    if (enabled) {
-      this.schedulePoll();
-    } else {
-      this.clearPoll();
+    if (!enabled) {
+      this.clearTimers();
     }
   }
 
@@ -295,23 +305,7 @@ class SyncService {
     }, DEBOUNCE_WRITE_MS);
   }
 
-  private schedulePoll(): void {
-    this.clearPoll();
-    if (!this.state.autoSync) return;
-    const tick = () => {
-      this.pollTimer = setTimeout(async () => {
-        await this.runSync();
-        tick();
-      }, POLL_INTERVAL_MS);
-    };
-    tick();
-  }
-
-  private clearPoll(): void {
-    if (this.pollTimer) {
-      clearTimeout(this.pollTimer);
-      this.pollTimer = null;
-    }
+  private clearTimers(): void {
     if (this.debounceTimer) {
       clearTimeout(this.debounceTimer);
       this.debounceTimer = null;
@@ -326,23 +320,11 @@ class SyncService {
 
 export const syncService = new SyncService();
 
-// Tab-Fokus + online/offline als zusätzliche Trigger
+// Online-Event als zusätzlicher Trigger: pending Pushes nach einer
+// Offline-Phase nachholen, sobald die Verbindung wieder steht.
 if (typeof window !== 'undefined') {
-  window.addEventListener('focus', () => {
-    if (syncService.getState().status !== 'disconnected') {
-      void syncService.syncNow();
-    }
-  });
   window.addEventListener('online', () => {
     if (syncService.getState().status !== 'disconnected') {
-      void syncService.syncNow();
-    }
-  });
-  window.addEventListener('visibilitychange', () => {
-    if (
-      document.visibilityState === 'visible' &&
-      syncService.getState().status !== 'disconnected'
-    ) {
       void syncService.syncNow();
     }
   });
