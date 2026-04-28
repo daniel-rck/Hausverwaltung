@@ -2,7 +2,7 @@
 
 Kostenlose Web-App für private Vermieter kleiner Mehrfamilienhäuser.
 
-**[Direkt starten](https://hausverwaltung.workers.dev/)**
+**[Direkt starten](https://hausverwaltung.daniel-rck.workers.dev/)**
 
 <!-- Screenshots -->
 <!--
@@ -103,7 +103,7 @@ Kein Client-Secret, keine Drittanbieter-Tokens, kein Account.
 
 ## So funktioniert's
 
-1. Öffne **[hausverwaltung.workers.dev](https://hausverwaltung.workers.dev/)**
+1. Öffne **[hausverwaltung.daniel-rck.workers.dev](https://hausverwaltung.daniel-rck.workers.dev/)**
 2. Leg dein erstes Mietobjekt an (Name, Adresse)
 3. Füg Wohnungen und Mieter hinzu
 4. Fertig — alle Module (Nebenkosten, Zähler, Finanzen, ...) greifen automatisch auf diese Daten zu
