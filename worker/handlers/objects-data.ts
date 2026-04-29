@@ -91,8 +91,14 @@ export async function handleObjectPut(
     // billig vorab prüfen — Upload ablehnen.
     return jsonError(411, 'length_required');
   }
-  const contentLength = Number(lenHeader);
-  if (!Number.isFinite(contentLength) || contentLength < 0) {
+  // HTTP-Spec: Content-Length ist eine nicht-negative Ganzzahl. `Number()`
+  // akzeptiert sonst auch "1.5", "1e3", führende/trailing Whitespace etc.
+  const contentLength = Number(lenHeader.trim());
+  if (
+    !Number.isFinite(contentLength) ||
+    !Number.isInteger(contentLength) ||
+    contentLength < 0
+  ) {
     return jsonError(400, 'invalid_content_length');
   }
   if (contentLength > MAX_BODY_BYTES) {

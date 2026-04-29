@@ -181,6 +181,39 @@ describe('PUT /api/objects/:id/data', () => {
     expect(res.status).toBe(400);
   });
 
+  it('PUT with fractional Content-Length returns 400', async () => {
+    const res = await SELF.fetch(url(), {
+      method: 'PUT',
+      headers: {
+        ...authHeaders(),
+        'Content-Type': 'application/json',
+        'Content-Length': '1.5',
+      },
+      body: JSON.stringify({ a: 1 }),
+    });
+    expect(res.status).toBe(400);
+  });
+
+  it('PUT without Content-Length (chunked stream) returns 411', async () => {
+    // ReadableStream body → fetch verwendet Transfer-Encoding: chunked und
+    // setzt kein Content-Length. Damit testen wir den Bypass-Schutz.
+    const stream = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(new TextEncoder().encode('{"a":1}'));
+        controller.close();
+      },
+    });
+    const res = await SELF.fetch(url(), {
+      method: 'PUT',
+      headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+      body: stream,
+      // @ts-expect-error duplex ist im fetch-Standard für Streams Pflicht,
+      // wird vom Lib-Typ aber noch nicht erfasst.
+      duplex: 'half',
+    });
+    expect(res.status).toBe(411);
+  });
+
   it('returns 405 for non-GET/PUT methods on the data path', async () => {
     const res = await SELF.fetch(url(), {
       method: 'DELETE',
