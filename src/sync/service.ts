@@ -54,6 +54,11 @@ class SyncService {
   private isRunning = false;
   private dirty = false;
   private initialized = false;
+  // Monoton steigender Counter; wird in `disconnect()` inkrementiert.
+  // Ein laufender `runSync()` snapshot-t den Wert beim Start und checkt
+  // ihn vor jedem setState/Schedule, um Tail-Updates nach einem Disconnect
+  // zu unterdrücken (sonst überschreiben sie den 'disconnected'-State).
+  private runEpoch = 0;
 
   getState(): SyncState {
     return this.state;
@@ -114,7 +119,16 @@ class SyncService {
   }
 
   async disconnect(): Promise<void> {
+    // Epoch erhöhen, damit ein evtl. laufender `runSync()` seine
+    // Tail-setState-Calls überspringt und den 'disconnected'-State
+    // nicht überschreibt.
+    this.runEpoch++;
     this.clearTimers();
+    if (this.writeUnsubscribe) {
+      this.writeUnsubscribe();
+      this.writeUnsubscribe = null;
+    }
+    this.dirty = false;
     disable();
     localStorage.removeItem(LS_ETAG_KEY);
     localStorage.removeItem(LS_SIGNATURE_KEY);
@@ -135,13 +149,16 @@ class SyncService {
     this.setState({ status: 'connecting', lastError: null });
     try {
       const { id } = await claimPairing(otp);
-      // Bestehender ETag/Signature gehört zu einem anderen Namespace —
-      // verwerfen, damit das erste Sync den Remote-Stand korrekt einholt.
+      // Bestehender ETag/Signature/lastSyncedAt gehört zu einem anderen
+      // Namespace — verwerfen, damit das erste Sync den Remote-Stand korrekt
+      // einholt und die UI keinen veralteten Sync-Zeitstempel anzeigt.
       localStorage.removeItem(LS_ETAG_KEY);
       localStorage.removeItem(LS_SIGNATURE_KEY);
+      localStorage.removeItem(LS_LAST_SYNC_KEY);
       this.setState({
         status: 'idle',
         syncId: id,
+        lastSyncedAt: null,
         lastError: null,
       });
       this.hookDbWrites();
@@ -183,32 +200,49 @@ class SyncService {
     }
 
     this.isRunning = true;
+    const myEpoch = this.runEpoch;
+    // wasDirty fängt Writes vor dem Sync-Start auf — sonst würden sie
+    // verloren gehen, wenn snapshotSignature() sich rein zufällig nicht
+    // ändert (z.B. Write im selben ms wie das bisherige max(updatedAt)).
+    // Dirty-Flag selbst zurücksetzen, damit Writes WÄHREND des Syncs es
+    // wieder auf true setzen und im finally eine Folge-Runde geschedult
+    // wird.
+    const wasDirty = this.dirty;
+    this.dirty = false;
     this.setState({ status: 'syncing', lastError: null });
 
+    const isStale = (): boolean => myEpoch !== this.runEpoch;
+
     try {
-      await this.syncOnce();
+      await this.syncOnce(wasDirty);
+      if (isStale()) return;
       this.setState({
         status: 'idle',
         lastSyncedAt: Date.now(),
       });
       localStorage.setItem(LS_LAST_SYNC_KEY, String(this.state.lastSyncedAt));
     } catch (err) {
+      if (isStale()) return;
       if (err instanceof EtagConflictError) {
         // Noch einen Versuch: Remote hat sich geändert
         try {
-          await this.syncOnce();
+          await this.syncOnce(wasDirty);
+          if (isStale()) return;
           this.setState({
             status: 'idle',
             lastSyncedAt: Date.now(),
           });
           localStorage.setItem(LS_LAST_SYNC_KEY, String(this.state.lastSyncedAt));
         } catch (retryErr) {
+          if (isStale()) return;
+          this.dirty = true;
           this.setState({
             status: 'error',
             lastError: retryErr instanceof Error ? retryErr.message : String(retryErr),
           });
         }
       } else {
+        this.dirty = true;
         const isNetwork =
           err instanceof TypeError && /fetch|network/i.test(err.message);
         this.setState({
@@ -218,10 +252,21 @@ class SyncService {
       }
     } finally {
       this.isRunning = false;
+      // Wenn während des Syncs lokal geschrieben wurde, setzt der Hook
+      // dirty wieder auf true — dann brauchen wir noch eine Runde.
+      // Nach Disconnect (epoch mismatch) nichts mehr scheduln.
+      if (
+        !isStale() &&
+        this.dirty &&
+        this.state.autoSync &&
+        this.state.syncId !== null
+      ) {
+        this.scheduleDebouncedPush();
+      }
     }
   }
 
-  private async syncOnce(): Promise<void> {
+  private async syncOnce(wasDirty: boolean): Promise<void> {
     const prevEtag = localStorage.getItem(LS_ETAG_KEY) ?? undefined;
     const remote = await downloadSyncFile(prevEtag);
 
@@ -253,6 +298,7 @@ class SyncService {
     const newSig = snapshotSignature(finalSnap);
     const prevSig = localStorage.getItem(LS_SIGNATURE_KEY);
     const needsPush =
+      wasDirty ||
       this.dirty ||
       mergedFromRemote ||
       remote === null ||
@@ -265,7 +311,6 @@ class SyncService {
       );
       localStorage.setItem(LS_ETAG_KEY, newEtag);
       localStorage.setItem(LS_SIGNATURE_KEY, newSig);
-      this.dirty = false;
       await this.cleanupOldTombstones();
     } else if (remote && remote !== 'not-modified') {
       localStorage.setItem(LS_ETAG_KEY, remote.etag);
