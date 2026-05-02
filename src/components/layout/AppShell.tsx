@@ -1,8 +1,12 @@
 import type { ReactNode } from 'react';
+import { Link } from 'react-router-dom';
 import { SidebarNav, BottomNav } from './Nav';
 import { PropertySelector } from './PropertySelector';
+import { UpdatePrompt } from './UpdatePrompt';
 import { useTheme } from '../../hooks/useTheme';
 import { SyncStatusBadge } from '../sync/SyncStatusBadge';
+
+const buildDate = new Date(__BUILD_DATE__).toLocaleDateString('de-DE');
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { theme, toggle } = useTheme();
@@ -39,6 +43,21 @@ export function AppShell({ children }: { children: ReactNode }) {
       </div>
 
       <BottomNav />
+
+      <footer className="hidden md:flex flex-wrap justify-center items-center gap-x-3 gap-y-1 py-2 px-4 text-xs text-stone-400 dark:text-stone-500 no-print">
+        <span>
+          v{__APP_VERSION__} · {buildDate}
+        </span>
+        <span aria-hidden="true">·</span>
+        <Link to="/datenschutz" className="hover:underline">
+          Datenschutz
+        </Link>
+        <Link to="/impressum" className="hover:underline">
+          Impressum
+        </Link>
+      </footer>
+
+      <UpdatePrompt />
     </div>
   );
 }
