@@ -11,6 +11,7 @@ import { InstandhaltungPage } from './modules/instandhaltung/InstandhaltungPage'
 import { UebergabePage } from './modules/uebergabe/UebergabePage';
 import { RenditePage } from './modules/rendite/RenditePage';
 import { ImportPage } from './modules/dashboard/ImportPage';
+import { DatenschutzPage } from './modules/legal/DatenschutzPage';
 
 export function App() {
   return (
@@ -28,6 +29,7 @@ export function App() {
             <Route path="/uebergabe" element={<UebergabePage />} />
             <Route path="/rendite" element={<RenditePage />} />
             <Route path="/import/:payload" element={<ImportPage />} />
+            <Route path="/datenschutz" element={<DatenschutzPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </AppShell>
