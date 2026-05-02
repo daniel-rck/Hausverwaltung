@@ -52,9 +52,14 @@ export function AppShell({ children }: { children: ReactNode }) {
         <Link to="/datenschutz" className="hover:underline">
           Datenschutz
         </Link>
-        <Link to="/impressum" className="hover:underline">
-          Impressum
-        </Link>
+        <a
+          href="https://github.com/daniel-rck/Hausverwaltung"
+          target="_blank"
+          rel="noreferrer"
+          className="hover:underline"
+        >
+          GitHub
+        </a>
       </footer>
 
       <UpdatePrompt />

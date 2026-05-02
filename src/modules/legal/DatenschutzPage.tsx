@@ -6,22 +6,33 @@ export function DatenschutzPage() {
       <Card title="Datenschutzerklärung">
         <div className="space-y-6 text-sm text-stone-700 dark:text-stone-200 leading-relaxed">
           <p className="text-xs text-stone-500 dark:text-stone-400">
-            Bitte ersetze die mit <code>[…]</code> markierten Platzhalter durch deine Angaben und
-            lass den Text vor Veröffentlichung rechtlich prüfen. Dieser Text ist eine
-            Vorlage und keine Rechtsberatung.
+            Hausverwaltung ist ein nicht-kommerzielles Open-Source-Projekt. Es wird keine
+            Werbung geschaltet, keine Bezahlung verlangt und kein wirtschaftliches Interesse
+            verfolgt. Daher liegt kein geschäftsmäßiges Telemedienangebot im Sinne von § 5 DDG
+            vor; ein gesondertes Impressum entfällt.
           </p>
 
           <section>
             <h3 className="font-semibold mb-2">1. Verantwortlicher</h3>
             <p>
-              Verantwortlich für die Datenverarbeitung im Sinne von Art. 4 Nr. 7 DSGVO ist:
+              Verantwortlich für die Datenverarbeitung im Sinne von Art. 4 Nr. 7 DSGVO ist der
+              Betreiber dieser Anwendung. Kontakt:
             </p>
             <p className="mt-2">
-              [NAME]
+              E-Mail:{' '}
+              <a href="mailto:daniel-rck@proton.me" className="underline">
+                daniel-rck@proton.me
+              </a>
               <br />
-              [ANSCHRIFT]
-              <br />
-              E-Mail: [E-MAIL]
+              Quellcode:{' '}
+              <a
+                href="https://github.com/daniel-rck/Hausverwaltung"
+                target="_blank"
+                rel="noreferrer"
+                className="underline"
+              >
+                github.com/daniel-rck/Hausverwaltung
+              </a>
             </p>
           </section>
 
@@ -45,9 +56,9 @@ export function DatenschutzPage() {
             <h3 className="font-semibold mb-2">3. Optionaler Geräte-Sync über Cloudflare</h3>
             <p>
               Wenn du den Geräte-Sync nutzt, werden Daten an Cloudflare, Inc. (101 Townsend St,
-              San Francisco, CA 94107, USA) als Auftragsverarbeiter übermittelt. Mit Cloudflare
-              besteht ein Auftragsverarbeitungsvertrag (AVV / DPA) inklusive der EU-Standard­
-              vertragsklauseln gemäß Art. 46 Abs. 2 lit. c DSGVO.
+              San Francisco, CA 94107, USA) als Auftragsverarbeiter übermittelt. Cloudflare ist
+              unter dem EU-US Data Privacy Framework zertifiziert; ergänzend kommen die
+              EU-Standardvertragsklauseln gemäß Art. 46 Abs. 2 lit. c DSGVO zur Anwendung.
             </p>
             <p className="mt-2 font-medium">
               Konkret werden folgende Daten verarbeitet:
@@ -60,7 +71,7 @@ export function DatenschutzPage() {
               </li>
               <li>
                 <strong>Pairing-Codes (Cloudflare KV):</strong> Beim Koppeln eines neuen Geräts
-                wird ein 6-stelliger Einmal-Code zusammen mit einem clientseitig verschlüsselten
+                wird ein 6-stelliger Einmal-Code zusammen mit clientseitig verschlüsseltem
                 Schlüsselmaterial für maximal 5 Minuten in Cloudflare KV gespeichert und nach
                 Abruf bzw. Ablauf gelöscht.
               </li>
@@ -74,16 +85,16 @@ export function DatenschutzPage() {
             <p className="mt-2">
               Rechtsgrundlage für den Sync ist Art. 6 Abs. 1 lit. b DSGVO (Erfüllung der
               gewünschten Funktion). Du kannst den Sync jederzeit beenden und die Daten in
-              Cloudflare R2 löschen lassen.
+              Cloudflare R2 per Anfrage an die oben genannte E-Mail löschen lassen.
             </p>
           </section>
 
           <section>
             <h3 className="font-semibold mb-2">4. Hosting der Anwendung</h3>
             <p>
-              Die App selbst (HTML, JavaScript, CSS) wird über Cloudflare Pages bzw. Cloudflare
-              Workers ausgeliefert. Beim Aufruf werden in den Server-Logs von Cloudflare die
-              unter Abschnitt 3 genannten Verbindungsdaten verarbeitet.
+              Die App selbst (HTML, JavaScript, CSS) wird über Cloudflare Workers ausgeliefert.
+              Beim Aufruf werden in den Server-Logs von Cloudflare die unter Abschnitt 3
+              genannten Verbindungsdaten verarbeitet.
             </p>
           </section>
 
@@ -98,10 +109,10 @@ export function DatenschutzPage() {
           </section>
 
           <section>
-            <h3 className="font-semibold mb-2">6. Empfänger und Drittlandtransfer</h3>
+            <h3 className="font-semibold mb-2">6. Drittlandtransfer</h3>
             <p>
-              Eine Übermittlung in Drittländer (USA) findet im Rahmen der unter Abschnitt 3 und
-              5 genannten Dienste statt. Cloudflare und Google sind unter dem EU-US Data
+              Eine Übermittlung in die USA findet im Rahmen der unter Abschnitt 3 und 5
+              genannten Dienste statt. Cloudflare und Google sind unter dem EU-US Data
               Privacy Framework zertifiziert; ergänzend kommen die EU-Standardvertragsklauseln
               zur Anwendung.
             </p>
@@ -128,14 +139,21 @@ export function DatenschutzPage() {
               (Art. 20 DSGVO) und Widerspruch (Art. 21 DSGVO) zu. Außerdem hast du das Recht,
               dich bei einer Datenschutz-Aufsichtsbehörde zu beschweren (Art. 77 DSGVO).
             </p>
-            <p className="mt-2">Anfragen richte bitte an: [E-MAIL]</p>
+            <p className="mt-2">
+              Anfragen richte bitte an{' '}
+              <a href="mailto:daniel-rck@proton.me" className="underline">
+                daniel-rck@proton.me
+              </a>
+              .
+            </p>
           </section>
 
           <section>
             <h3 className="font-semibold mb-2">9. Änderungen</h3>
             <p>
               Diese Datenschutzerklärung kann angepasst werden, wenn sich Funktionen oder
-              Rechtslage ändern. Stand: [DATUM].
+              Rechtslage ändern. Der jeweils aktuelle Stand entspricht dem Build-Datum, das im
+              Footer der Anwendung angezeigt wird.
             </p>
           </section>
         </div>
