@@ -13,15 +13,12 @@ Free-Tier nutzbar, keine Kreditkarte nötig.
 Die Resource-Namen sind frei wählbar (oben sind die empfohlenen Defaults
 mit `hausverwaltung-`-Prefix). Die Binding-Namen im Code (`SYNC_BUCKET`,
 `PAIR_KV`, `ASSETS`) sind dagegen **fest** — sie stehen in
-`worker/lib/types.ts` und müssen bei der Binding-Konfiguration exakt so
-geschrieben werden.
+`worker/lib/types.ts` und müssen exakt so geschrieben werden.
 
-Das `ASSETS`-Binding richtet Cloudflare beim Deploy automatisch ein —
-gesteuert über den `[assets]`-Block in `wrangler.toml` (Quell-Verzeichnis
-`./dist`, SPA-Routing für unbekannte Pfade). Du musst es im Dashboard
-nicht manuell anlegen, es taucht nach dem ersten Deploy automatisch in
-der Bindings-Liste auf. R2 und KV dagegen erstellst du manuell (siehe
-unten).
+Bindings sind in [`wrangler.toml`](./wrangler.toml) hinterlegt — sie
+gehören also zum Repo und überleben jeden Re-Deploy. Du musst sie nicht
+mehr manuell im Dashboard zuweisen; nur einmalig die KV-Namespace-ID
+einfügen (Schritt 3 unten).
 
 Bei typischer Nutzung (3–10 Wohneinheiten, 1–3 Geräte) bleibst du
 problemlos im Free-Tier.
@@ -44,9 +41,6 @@ wrangler r2 bucket create hausverwaltung-sync
 
 Oder im Dashboard: **R2 → Create bucket** → Name `hausverwaltung-sync`.
 
-Der Bucket-Name kann frei gewählt werden — er taucht im Code nicht auf.
-Verknüpft wird er gleich über das **Binding** `SYNC_BUCKET`.
-
 ### 2. KV-Namespace anlegen
 
 ```bash
@@ -64,16 +58,28 @@ binding = "PAIR_KV"
 id = "abc123def456..."
 ```
 
-Die ID notieren — falls du später die Bindings in `wrangler.toml`
-deklarieren willst, brauchst du sie. Über das Dashboard reicht der Name.
+**Diese ID brauchst du im nächsten Schritt** — kopier sie.
 
-> **Namens-Konvention:** Der Resource-Name im CF-Dashboard ist
-> `hausverwaltung-pairing`. Der Binding-Variablenname im Worker-Code
-> bleibt `PAIR_KV` — er ist im TypeScript fest verdrahtet (`env.PAIR_KV`).
-> Beim Binding-Setup verbindest du den Variablennamen mit dem
-> Resource-Namen.
+### 3. KV-ID in `wrangler.toml` einfügen
 
-### 3. Worker mit Git verbinden
+In [`wrangler.toml`](./wrangler.toml) den Platzhalter ersetzen:
+
+```toml
+[[kv_namespaces]]
+binding = "PAIR_KV"
+id = "REPLACE_WITH_HAUSVERWALTUNG_PAIRING_KV_ID"   # ← hier deine ID einsetzen
+```
+
+Falls du die ID gerade nicht zur Hand hast:
+```bash
+wrangler kv namespace list
+```
+Oder im Dashboard: **Workers & Pages → KV → hausverwaltung-pairing**.
+
+Commit und push — beim nächsten Deploy nimmt Cloudflare die Bindings
+direkt aus der `wrangler.toml`.
+
+### 4. Worker mit Git verbinden (einmalig)
 
 Im Cloudflare-Dashboard:
 
@@ -87,40 +93,12 @@ Im Cloudflare-Dashboard:
 5. **Save & Deploy**
 
 Cloudflare erkennt Bun automatisch über `packageManager` in `package.json`.
+R2- und KV-Bindings werden beim Deploy aus `wrangler.toml` übernommen
+und tauchen automatisch unter **Settings → Bindings** auf.
 
-### 4. Bindings zuweisen ⚠️ **Der häufigste Fehler-Punkt**
+### 5. Verifizieren
 
-Im Worker-Dashboard: **Settings → Bindings → Add binding**
-
-**R2-Binding:**
-
-| Feld | Wert |
-|---|---|
-| Type | R2 bucket |
-| Variable name | `SYNC_BUCKET` *(exakt so!)* |
-| R2 bucket | `hausverwaltung-sync` |
-
-**KV-Binding:**
-
-| Feld | Wert |
-|---|---|
-| Type | KV namespace |
-| Variable name | `PAIR_KV` *(exakt so!)* |
-| KV namespace | `hausverwaltung-pairing` |
-
-**Beide für Production UND Preview anlegen** — sonst funktioniert Sync
-nur in einer der beiden Umgebungen.
-
-### 5. Re-Deploy
-
-Nach Binding-Änderungen muss neu deployed werden:
-
-- Im Dashboard auf den letzten Build → **Retry deployment**
-- Oder leeren Commit auf `main` pushen: `git commit --allow-empty -m "redeploy" && git push`
-
-### 6. Verifizieren
-
-Auf der deployten URL: **Einstellungen → Sync → "Sync aktivieren"**.
+Auf der deployten URL: **Einstellungen → Sync → „Sync aktivieren"**.
 
 Im Browser-Netzwerktab solltest du sehen:
 
@@ -135,45 +113,31 @@ Wenn beides klappt: ✅ fertig.
 
 ### `503 binding_missing:SYNC_BUCKET` oder `binding_missing:PAIR_KV`
 
-Die genannte Bindung ist im Dashboard nicht zugewiesen — oder der
-Variable-Name ist falsch geschrieben. Schritt 4 prüfen: die Namen
-müssen **exakt** `SYNC_BUCKET` und `PAIR_KV` lauten (Großbuchstaben,
-Unterstrich).
+Die genannte Bindung kommt nicht im Worker an. Häufigste Ursachen:
+
+- KV-ID in `wrangler.toml` wurde nicht ersetzt (steht noch
+  `REPLACE_WITH_…` drin).
+- R2-Bucket / KV-Namespace existiert nicht (mehr) im Account, oder
+  unter einem anderen Namen.
+- Der Deploy lief noch nicht durch — Build-Status im Dashboard
+  prüfen.
 
 ### `500 internal_error:<message>`
 
 Echter Runtime-Fehler. Die Message gibt den Hinweis:
 
-- `R2 bucket … not found` → Bucket gelöscht oder falsch verknüpft
-- `KV namespace … not found` → KV-Namespace gelöscht
-- alles andere → Issue auf GitHub aufmachen mit der Message
-
-### Bindings verschwinden nach Deploy
-
-Bekanntes Cloudflare-Verhalten: Workers Builds (Git-Auto-Deploy)
-überschreibt manchmal Dashboard-Bindings. Workaround — Bindings in
-`wrangler.toml` deklarieren:
-
-```toml
-[[r2_buckets]]
-binding = "SYNC_BUCKET"
-bucket_name = "hausverwaltung-sync"
-
-[[kv_namespaces]]
-binding = "PAIR_KV"
-id = "<id-des-hausverwaltung-pairing-namespace>"
-```
-
-Dann sind die Bindings Teil des Repos und überleben jeden Re-Deploy.
-Wenn du diesen Weg gehst, kannst du die manuell zugewiesenen Bindings
-im Dashboard entfernen.
+- `R2 bucket … not found` → Bucket-Name in `wrangler.toml` weicht vom
+  tatsächlich angelegten Namen ab.
+- `KV namespace … not found` → ID in `wrangler.toml` zeigt auf einen
+  Namespace, der gelöscht oder umbenannt wurde.
+- alles andere → Issue auf GitHub aufmachen mit der Message.
 
 ### Pairing-Code wird abgelehnt
 
 OTP-TTL ist 5 Minuten. Wenn der Code zu lange offen liegt, wird er
 verworfen. Auf Gerät A neuen Code generieren.
 
-### Sync-Status bleibt auf "Synchronisiere…"
+### Sync-Status bleibt auf „Synchronisiere…"
 
 Browser-DevTools öffnen → Console + Network. Letzten `/api/*`-Request
 anschauen — Statuscode + Response-Body zeigen, was schiefläuft.

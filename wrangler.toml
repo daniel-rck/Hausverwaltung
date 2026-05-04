@@ -7,10 +7,19 @@ directory = "./dist"
 binding = "ASSETS"
 not_found_handling = "single-page-application"
 
-# Bindings (R2 `SYNC_BUCKET`, KV `PAIR_KV`) werden im Cloudflare-Dashboard
-# unter „Settings → Bindings" verwaltet — das ist die Source of Truth für
-# Production und Preview.
-#
-# Für lokale Entwicklung mit `wrangler dev` lokale R2 + KV per CLI-Flags
-# übergeben oder hier `[[r2_buckets]]` / `[[kv_namespaces]]` mit echten
-# Preview-IDs ergänzen.
+# Bindings hier in wrangler.toml deklariert (statt nur im Dashboard),
+# damit Workers Builds (Git-Auto-Deploy) sie nicht beim Re-Deploy
+# überschreibt. wrangler.toml ist Source of Truth, das Dashboard zeigt
+# danach nur noch an, was hier steht.
+
+[[r2_buckets]]
+binding = "SYNC_BUCKET"
+bucket_name = "hausverwaltung-sync"
+
+[[kv_namespaces]]
+binding = "PAIR_KV"
+# TODO: Namespace-ID des `hausverwaltung-pairing`-KV einfügen.
+# Finden via:
+#   wrangler kv namespace list
+# oder im Dashboard unter Workers & Pages → KV → hausverwaltung-pairing.
+id = "REPLACE_WITH_HAUSVERWALTUNG_PAIRING_KV_ID"
