@@ -6,13 +6,22 @@ Free-Tier nutzbar, keine Kreditkarte nötig.
 | Service | Resource-Name (Dashboard) | Binding (im Code) | Wofür | Free Tier |
 |---|---|---|---|---|
 | **Workers** | `hausverwaltung` | — | Hostet die SPA + das `/api/*`-Backend | 100k Requests/Tag |
+| **Static Assets** | *(automatisch)* | `ASSETS` | Liefert die SPA (HTML/JS/CSS aus `dist/`) — Cloudflare hostet die Build-Artefakte direkt am Edge, ohne dass jeder Request den Worker durchläuft | inklusive im Workers-Plan |
 | **R2** | `hausverwaltung-sync` | `SYNC_BUCKET` | Verschlüsselte Sync-Datei (`objects/<id>/data.json`) | 10 GB, 1M Class-A + 10M Class-B Ops/Monat |
 | **KV** | `hausverwaltung-pairing` | `PAIR_KV` | OTP-Pairing-Tickets (TTL 5 min) + Rate-Limit-Counter | 100k Reads/Tag, 1k Writes/Tag |
 
 Die Resource-Namen sind frei wählbar (oben sind die empfohlenen Defaults
 mit `hausverwaltung-`-Prefix). Die Binding-Namen im Code (`SYNC_BUCKET`,
-`PAIR_KV`) sind dagegen **fest** — sie stehen in `worker/lib/types.ts`
-und müssen bei der Binding-Konfiguration exakt so geschrieben werden.
+`PAIR_KV`, `ASSETS`) sind dagegen **fest** — sie stehen in
+`worker/lib/types.ts` und müssen bei der Binding-Konfiguration exakt so
+geschrieben werden.
+
+Das `ASSETS`-Binding richtet Cloudflare beim Deploy automatisch ein —
+gesteuert über den `[assets]`-Block in `wrangler.toml` (Quell-Verzeichnis
+`./dist`, SPA-Routing für unbekannte Pfade). Du musst es im Dashboard
+nicht manuell anlegen, es taucht nach dem ersten Deploy automatisch in
+der Bindings-Liste auf. R2 und KV dagegen erstellst du manuell (siehe
+unten).
 
 Bei typischer Nutzung (3–10 Wohneinheiten, 1–3 Geräte) bleibst du
 problemlos im Free-Tier.
