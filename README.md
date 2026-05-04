@@ -76,12 +76,17 @@ Server relayed nur den Chiffretext.
    `wrangler.toml`). Cloudflare erkennt Bun automatisch über das
    `packageManager`-Feld in `package.json` und die `bun.lock`.
 2. R2-Bucket anlegen: `wrangler r2 bucket create hausverwaltung-sync`.
-3. KV-Namespace anlegen: `wrangler kv namespace create PAIR_KV`.
-4. Im Workers-Dashboard unter **Settings → Bindings** zuweisen:
-   `SYNC_BUCKET` → R2-Bucket, `PAIR_KV` → KV-Namespace (für Production
-   und Preview).
+3. KV-Namespace anlegen: `wrangler kv namespace create hausverwaltung-pairing`.
+4. Im Workers-Dashboard unter **Settings → Bindings** zuweisen
+   (jeweils für Production und Preview):
+   `SYNC_BUCKET` → `hausverwaltung-sync`,
+   `PAIR_KV` → `hausverwaltung-pairing`.
+   Die Binding-Variablennamen `SYNC_BUCKET` / `PAIR_KV` sind im
+   Worker-Code fest — also exakt so schreiben.
 5. Push auf `main` → Cloudflare baut, `wrangler deploy` veröffentlicht
    automatisch.
+
+Schritt-für-Schritt-Anleitung mit Troubleshooting in [SETUP.md](./SETUP.md).
 
 Kein Client-Secret, keine Drittanbieter-Tokens, kein Account.
 

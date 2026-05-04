@@ -3,11 +3,16 @@
 Du brauchst genau **drei Cloudflare-Services** — alle im kostenlosen
 Free-Tier nutzbar, keine Kreditkarte nötig.
 
-| Service | Wofür | Free Tier |
-|---|---|---|
-| **Workers** | Hostet die SPA + das `/api/*`-Backend | 100k Requests/Tag |
-| **R2** | Verschlüsselte Sync-Datei pro Geräte­gruppe (`objects/<id>/data.json`) | 10 GB Speicher, 1M Class-A + 10M Class-B Ops/Monat |
-| **KV** | OTP-Pairing-Tickets (TTL 5 min) + Rate-Limit-Counter | 100k Reads/Tag, 1k Writes/Tag |
+| Service | Resource-Name (Dashboard) | Binding (im Code) | Wofür | Free Tier |
+|---|---|---|---|---|
+| **Workers** | `hausverwaltung` | — | Hostet die SPA + das `/api/*`-Backend | 100k Requests/Tag |
+| **R2** | `hausverwaltung-sync` | `SYNC_BUCKET` | Verschlüsselte Sync-Datei (`objects/<id>/data.json`) | 10 GB, 1M Class-A + 10M Class-B Ops/Monat |
+| **KV** | `hausverwaltung-pairing` | `PAIR_KV` | OTP-Pairing-Tickets (TTL 5 min) + Rate-Limit-Counter | 100k Reads/Tag, 1k Writes/Tag |
+
+Die Resource-Namen sind frei wählbar (oben sind die empfohlenen Defaults
+mit `hausverwaltung-`-Prefix). Die Binding-Namen im Code (`SYNC_BUCKET`,
+`PAIR_KV`) sind dagegen **fest** — sie stehen in `worker/lib/types.ts`
+und müssen bei der Binding-Konfiguration exakt so geschrieben werden.
 
 Bei typischer Nutzung (3–10 Wohneinheiten, 1–3 Geräte) bleibst du
 problemlos im Free-Tier.
@@ -36,13 +41,13 @@ Verknüpft wird er gleich über das **Binding** `SYNC_BUCKET`.
 ### 2. KV-Namespace anlegen
 
 ```bash
-wrangler kv namespace create PAIR_KV
+wrangler kv namespace create hausverwaltung-pairing
 ```
 
 Im Output steht die Namespace-ID, z.B.:
 
 ```
-🌀 Creating namespace with title "PAIR_KV"
+🌀 Creating namespace with title "hausverwaltung-pairing"
 ✨ Success!
 Add the following to your configuration file:
 [[kv_namespaces]]
@@ -52,6 +57,12 @@ id = "abc123def456..."
 
 Die ID notieren — falls du später die Bindings in `wrangler.toml`
 deklarieren willst, brauchst du sie. Über das Dashboard reicht der Name.
+
+> **Namens-Konvention:** Der Resource-Name im CF-Dashboard ist
+> `hausverwaltung-pairing`. Der Binding-Variablenname im Worker-Code
+> bleibt `PAIR_KV` — er ist im TypeScript fest verdrahtet (`env.PAIR_KV`).
+> Beim Binding-Setup verbindest du den Variablennamen mit dem
+> Resource-Namen.
 
 ### 3. Worker mit Git verbinden
 
@@ -86,7 +97,7 @@ Im Worker-Dashboard: **Settings → Bindings → Add binding**
 |---|---|
 | Type | KV namespace |
 | Variable name | `PAIR_KV` *(exakt so!)* |
-| KV namespace | `PAIR_KV` |
+| KV namespace | `hausverwaltung-pairing` |
 
 **Beide für Production UND Preview anlegen** — sonst funktioniert Sync
 nur in einer der beiden Umgebungen.
@@ -141,7 +152,7 @@ bucket_name = "hausverwaltung-sync"
 
 [[kv_namespaces]]
 binding = "PAIR_KV"
-id = "<deine-kv-namespace-id>"
+id = "<id-des-hausverwaltung-pairing-namespace>"
 ```
 
 Dann sind die Bindings Teil des Repos und überleben jeden Re-Deploy.
