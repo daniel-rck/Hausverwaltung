@@ -18,8 +18,4 @@ bucket_name = "hausverwaltung-sync"
 
 [[kv_namespaces]]
 binding = "PAIR_KV"
-# TODO: Namespace-ID des `hausverwaltung-pairing`-KV einfügen.
-# Finden via:
-#   wrangler kv namespace list
-# oder im Dashboard unter Workers & Pages → KV → hausverwaltung-pairing.
-id = "REPLACE_WITH_HAUSVERWALTUNG_PAIRING_KV_ID"
+id = "4d106b6283244dff9571a4956c3d2449"

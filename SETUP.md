@@ -60,21 +60,28 @@ id = "abc123def456..."
 
 **Diese ID brauchst du im nächsten Schritt** — kopier sie.
 
-### 3. KV-ID in `wrangler.toml` einfügen
+### 3. KV-ID in `wrangler.toml` eintragen
 
-In [`wrangler.toml`](./wrangler.toml) den Platzhalter ersetzen:
+> Nur relevant beim **Forken**: für das Original-Repo ist die ID schon
+> hinterlegt. Wenn du die App selbst deployst, zeigt der `id`-Wert noch
+> auf einen anderen Account und der Deploy schlägt mit
+> `KV namespace … is not valid` fehl — du musst ihn durch deine eigene
+> Namespace-ID ersetzen.
+
+In [`wrangler.toml`](./wrangler.toml):
 
 ```toml
 [[kv_namespaces]]
 binding = "PAIR_KV"
-id = "REPLACE_WITH_HAUSVERWALTUNG_PAIRING_KV_ID"   # ← hier deine ID einsetzen
+id = "<32-Hex-Zeichen — deine eigene Namespace-ID>"
 ```
 
-Falls du die ID gerade nicht zur Hand hast:
+ID holen — entweder per CLI:
 ```bash
 wrangler kv namespace list
 ```
-Oder im Dashboard: **Workers & Pages → KV → hausverwaltung-pairing**.
+und den Eintrag mit `"title": "hausverwaltung-pairing"` raussuchen,
+oder im Dashboard unter **Workers & Pages → KV → hausverwaltung-pairing**.
 
 Commit und push — beim nächsten Deploy nimmt Cloudflare die Bindings
 direkt aus der `wrangler.toml`.
