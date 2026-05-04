@@ -65,9 +65,40 @@ export async function applySnapshot(snapshot: SyncSnapshot): Promise<void> {
     }
   });
 
-  // Schritt 2: aktive Tombstones für Records im Snapshot sammeln
-  //   (wird vom Merge bereits gefiltert, aber defensive Sicherung hier)
-  const tombstoneSet = new Set(snapshot.tombstones.map((t) => t.syncId));
+  // Schritt 2: lokale Records gemäß Tombstones löschen.
+  // mergeSnapshots filtert Records, die gegen ihren Tombstone verlieren, aus
+  // `snapshot.tables` heraus — sie tauchen also in der records-Schleife nie auf.
+  // Ohne diesen Schritt würden auf anderen Geräten gelöschte Records lokal
+  // ewig bestehen bleiben. Resurrection (Record überlebt den Merge UND hat eine
+  // Tombstone) wird übersprungen: derselbe syncId steht dann noch in
+  // `snapshot.tables`, der Record gewinnt per LWW und soll erhalten bleiben.
+  const survivingSyncIds = new Set<string>();
+  for (const rows of Object.values(snapshot.tables)) {
+    for (const r of rows) {
+      const sid = r.syncId;
+      if (typeof sid === 'string') survivingSyncIds.add(sid);
+    }
+  }
+  const syncableSet = new Set<string>(SYNCABLE_TABLES);
+  for (const ts of snapshot.tombstones) {
+    if (survivingSyncIds.has(ts.syncId)) continue;
+    if (!syncableSet.has(ts.tableName)) continue;
+    const table = db.table(ts.tableName);
+    await db.transaction('rw', table, async () => {
+      const existing = (await table
+        .where('syncId')
+        .equals(ts.syncId)
+        .first()) as AnyRecord | undefined;
+      if (!existing) return;
+      if (ts.tableName === 'settings') {
+        if (typeof existing.key === 'string') {
+          await table.delete(existing.key);
+        }
+      } else if (typeof existing.id === 'number') {
+        await table.delete(existing.id);
+      }
+    });
+  }
 
   // Schritt 3: pro Tabelle Records upserten + zwischengespeicherte syncId→localId-Map aufbauen
   // Reihenfolge muss respektieren, dass FK-Ziele vor Quellen verarbeitet werden.
@@ -103,29 +134,6 @@ export async function applySnapshot(snapshot: SyncSnapshot): Promise<void> {
       for (const wire of orderedRows) {
         const syncId = wire.syncId as string;
         if (!syncId) continue;
-        if (tombstoneSet.has(syncId)) {
-          // Record ist gelöscht – falls lokal noch vorhanden, löschen
-          if (tableName === 'settings') {
-            const existing = (await db
-              .table(tableName)
-              .where('syncId')
-              .equals(syncId)
-              .first()) as AnyRecord | undefined;
-            if (existing && typeof existing.key === 'string') {
-              await db.table(tableName).delete(existing.key);
-            }
-          } else {
-            const existing = (await db
-              .table(tableName)
-              .where('syncId')
-              .equals(syncId)
-              .first()) as AnyRecord | undefined;
-            if (existing?.id !== undefined) {
-              await db.table(tableName).delete(existing.id as number);
-            }
-          }
-          continue;
-        }
 
         const localRecord = translateRowFromWire(tableName, wire, syncIdToLocalId);
 

@@ -67,21 +67,8 @@ Während der Übertragung wird das Sync-Geheimnis client-seitig mit einem aus
 dem Code abgeleiteten Schlüssel (HKDF-SHA256 → AES-GCM) verschlüsselt; der
 Server relayed nur den Chiffretext.
 
-**Selbst deployen auf Cloudflare Workers:**
-
-1. Repo forken und in [Cloudflare Workers](https://dash.cloudflare.com/?to=/:account/workers-and-pages)
-   verbinden („Create application" → „Workers" → „Connect to Git").
-   Build-Command: `bun install --frozen-lockfile && bun run build` (Output
-   landet in `dist/`, Wrangler liest das per `[assets]`-Block aus
-   `wrangler.toml`). Cloudflare erkennt Bun automatisch über das
-   `packageManager`-Feld in `package.json` und die `bun.lock`.
-2. R2-Bucket anlegen: `wrangler r2 bucket create hausverwaltung-sync`.
-3. KV-Namespace anlegen: `wrangler kv namespace create PAIR_KV`.
-4. Im Workers-Dashboard unter **Settings → Bindings** zuweisen:
-   `SYNC_BUCKET` → R2-Bucket, `PAIR_KV` → KV-Namespace (für Production
-   und Preview).
-5. Push auf `main` → Cloudflare baut, `wrangler deploy` veröffentlicht
-   automatisch.
+**Selbst deployen auf Cloudflare Workers:** siehe [SETUP.md](./SETUP.md)
+— Workers + R2 + KV, alles im Free-Tier.
 
 Kein Client-Secret, keine Drittanbieter-Tokens, kein Account.
 
