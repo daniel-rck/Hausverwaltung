@@ -4,7 +4,17 @@ import { db, deleteWithTombstone } from '../../db';
 import { useProperty } from '../../hooks/useProperty';
 import { Card } from '../../components/shared/Card';
 import { EmptyState } from '../../components/shared/EmptyState';
-import { ConfirmDialog } from '../../components/shared/ConfirmDialog';
+import {
+  Button,
+  FormField,
+  Input,
+  Select,
+  Textarea,
+  Wizard,
+  useConfirm,
+  useToast,
+} from '../../components/ui';
+import { PageHeader } from '../../components/layout/PageHeader';
 import { RoomInspection, createDefaultRooms } from './RoomInspection';
 import { MeterSnapshot as MeterSnapshotComponent } from './MeterSnapshot';
 import { KeyHandover, createDefaultKeys } from './KeyHandover';
@@ -22,10 +32,19 @@ interface OccRow {
   unit: Unit;
 }
 
+const WIZARD_STEPS: { id: Step; label: string }[] = [
+  { id: 'setup', label: 'Grunddaten' },
+  { id: 'rooms', label: 'Räume' },
+  { id: 'meters', label: 'Zähler' },
+  { id: 'keys', label: 'Schlüssel' },
+  { id: 'signatures', label: 'Unterschriften' },
+];
+
 export function UebergabePage() {
   const { activeProperty, addProperty } = useProperty();
   const [step, setStep] = useState<Step>('list');
-  const [deleteId, setDeleteId] = useState<number | null>(null);
+  const toast = useToast();
+  const confirm = useConfirm();
 
   // Form state
   const [selectedOccId, setSelectedOccId] = useState<number | null>(null);
@@ -105,15 +124,26 @@ export function UebergabePage() {
       notes: notes || undefined,
       signatures: { landlord: sigLandlord, tenant: sigTenant },
     };
-    await db.handoverProtocols.add(protocol as HandoverProtocol);
-    resetForm();
+    try {
+      await db.handoverProtocols.add(protocol as HandoverProtocol);
+      toast.success('Übergabeprotokoll gespeichert.');
+      resetForm();
+    } catch (err) {
+      toast.error('Speichern fehlgeschlagen.');
+      console.error(err);
+    }
   };
 
-  const handleDelete = async () => {
-    if (deleteId) {
-      await deleteWithTombstone('handoverProtocols', deleteId);
-      setDeleteId(null);
-    }
+  const handleDelete = async (id: number) => {
+    const ok = await confirm({
+      title: 'Protokoll löschen?',
+      message: 'Das Übergabeprotokoll wird unwiderruflich gelöscht.',
+      confirmLabel: 'Löschen',
+      danger: true,
+    });
+    if (!ok) return;
+    await deleteWithTombstone('handoverProtocols', id);
+    toast.success('Protokoll gelöscht.');
   };
 
   const selectedOcc = occupancies?.find((o) => o.occupancy.id === selectedOccId);
@@ -123,31 +153,34 @@ export function UebergabePage() {
   }
 
   if (step !== 'list') {
+    const stepIndex = WIZARD_STEPS.findIndex((s) => s.id === step);
     return (
       <div className="space-y-4">
-        <button onClick={resetForm} className="text-sm text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200">
-          ← Abbrechen
-        </button>
-        <h1 className="text-xl font-bold text-stone-800 dark:text-stone-100">Neues Übergabeprotokoll</h1>
+        <PageHeader
+          title="Neues Übergabeprotokoll"
+          icon="🔑"
+          accent="uebergabe"
+          actions={
+            <Button variant="ghost" size="sm" onClick={resetForm}>
+              ← Abbrechen
+            </Button>
+          }
+        />
 
-        {/* Progress */}
-        <div className="flex gap-2 text-xs text-stone-400 dark:text-stone-500">
-          {(['setup', 'rooms', 'meters', 'keys', 'signatures'] as Step[]).map((s, i) => (
-            <span key={s} className={step === s ? 'text-blue-600 dark:text-blue-400 font-semibold' : ''}>
-              {i + 1}. {s === 'setup' ? 'Grunddaten' : s === 'rooms' ? 'Räume' : s === 'meters' ? 'Zähler' : s === 'keys' ? 'Schlüssel' : 'Unterschriften'}
-            </span>
-          ))}
-        </div>
+        <Wizard
+          steps={WIZARD_STEPS}
+          current={stepIndex}
+          accent="uebergabe"
+          ariaLabel="Schritte Übergabeprotokoll"
+        />
 
         {step === 'setup' && (
-          <Card title="Grunddaten">
+          <Card title="Grunddaten" accent="uebergabe">
             <div className="space-y-3">
-              <div>
-                <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">Belegung *</label>
-                <select
+              <FormField label="Belegung" required>
+                <Select
                   value={selectedOccId ?? ''}
                   onChange={(e) => setSelectedOccId(Number(e.target.value) || null)}
-                  className="w-full border border-stone-300 dark:border-stone-600 rounded-lg px-3 py-1.5 text-sm bg-white dark:bg-stone-700 dark:text-stone-200"
                 >
                   <option value="">Bitte wählen</option>
                   {occupancies?.map((o) => (
@@ -155,35 +188,32 @@ export function UebergabePage() {
                       {o.unit.name} – {o.tenant?.name ?? 'Unbekannt'} ({o.occupancy.from} bis {o.occupancy.to ?? 'heute'})
                     </option>
                   ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">Art</label>
-                <select
+                </Select>
+              </FormField>
+              <FormField label="Art">
+                <Select
                   value={protocolType}
                   onChange={(e) => setProtocolType(e.target.value as 'move-in' | 'move-out')}
-                  className="w-full border border-stone-300 dark:border-stone-600 rounded-lg px-3 py-1.5 text-sm bg-white dark:bg-stone-700 dark:text-stone-200"
                 >
                   <option value="move-in">Einzug</option>
                   <option value="move-out">Auszug</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">Datum</label>
-                <input
+                </Select>
+              </FormField>
+              <FormField label="Datum">
+                <Input
                   type="date"
                   value={protocolDate}
                   onChange={(e) => setProtocolDate(e.target.value)}
-                  className="w-full border border-stone-300 dark:border-stone-600 rounded-lg px-3 py-1.5 text-sm bg-white dark:bg-stone-700 dark:text-stone-200"
                 />
-              </div>
-              <button
+              </FormField>
+              <Button
+                variant="primary"
+                accent="uebergabe"
                 onClick={() => selectedOccId && setStep('rooms')}
                 disabled={!selectedOccId}
-                className="px-4 py-2 text-sm bg-stone-800 dark:bg-stone-600 text-white rounded-lg hover:bg-stone-900 dark:hover:bg-stone-500 transition-colors disabled:opacity-50"
               >
                 Weiter
-              </button>
+              </Button>
             </div>
           </Card>
         )}
@@ -192,8 +222,12 @@ export function UebergabePage() {
           <>
             <RoomInspection rooms={rooms} onChange={setRooms} />
             <div className="flex gap-2">
-              <button onClick={() => setStep('setup')} className="px-4 py-2 text-sm border border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-300 rounded-lg">Zurück</button>
-              <button onClick={() => setStep('meters')} className="px-4 py-2 text-sm bg-stone-800 dark:bg-stone-600 text-white rounded-lg">Weiter</button>
+              <Button variant="secondary" onClick={() => setStep('setup')}>
+                Zurück
+              </Button>
+              <Button variant="primary" accent="uebergabe" onClick={() => setStep('meters')}>
+                Weiter
+              </Button>
             </div>
           </>
         )}
@@ -202,8 +236,12 @@ export function UebergabePage() {
           <>
             <MeterSnapshotComponent unitId={selectedOcc.unit.id!} readings={meterReadings} onChange={setMeterReadings} />
             <div className="flex gap-2">
-              <button onClick={() => setStep('rooms')} className="px-4 py-2 text-sm border border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-300 rounded-lg">Zurück</button>
-              <button onClick={() => setStep('keys')} className="px-4 py-2 text-sm bg-stone-800 dark:bg-stone-600 text-white rounded-lg">Weiter</button>
+              <Button variant="secondary" onClick={() => setStep('rooms')}>
+                Zurück
+              </Button>
+              <Button variant="primary" accent="uebergabe" onClick={() => setStep('keys')}>
+                Weiter
+              </Button>
             </div>
           </>
         )}
@@ -211,18 +249,16 @@ export function UebergabePage() {
         {step === 'keys' && (
           <>
             <KeyHandover keys={keys} onChange={setKeys} />
-            <div>
-              <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">Bemerkungen</label>
-              <textarea
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                rows={3}
-                className="w-full border border-stone-300 dark:border-stone-600 rounded-lg px-3 py-1.5 text-sm bg-white dark:bg-stone-700 dark:text-stone-200"
-              />
-            </div>
+            <FormField label="Bemerkungen">
+              <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} />
+            </FormField>
             <div className="flex gap-2">
-              <button onClick={() => setStep('meters')} className="px-4 py-2 text-sm border border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-300 rounded-lg">Zurück</button>
-              <button onClick={() => setStep('signatures')} className="px-4 py-2 text-sm bg-stone-800 dark:bg-stone-600 text-white rounded-lg">Weiter</button>
+              <Button variant="secondary" onClick={() => setStep('meters')}>
+                Zurück
+              </Button>
+              <Button variant="primary" accent="uebergabe" onClick={() => setStep('signatures')}>
+                Weiter
+              </Button>
             </div>
           </>
         )}
@@ -234,10 +270,12 @@ export function UebergabePage() {
               <SignatureCanvas label="Unterschrift Mieter" value={sigTenant} onChange={setSigTenant} />
             </div>
             <div className="flex gap-2">
-              <button onClick={() => setStep('keys')} className="px-4 py-2 text-sm border border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-300 rounded-lg">Zurück</button>
-              <button onClick={handleSave} className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+              <Button variant="secondary" onClick={() => setStep('keys')}>
+                Zurück
+              </Button>
+              <Button variant="primary" accent="uebergabe" onClick={handleSave}>
                 Protokoll speichern
-              </button>
+              </Button>
             </div>
           </>
         )}
@@ -248,62 +286,55 @@ export function UebergabePage() {
   // List view
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-stone-800 dark:text-stone-100">Übergabeprotokolle</h1>
-        <button
-          onClick={() => setStep('setup')}
-          className="text-sm px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          + Neues Protokoll
-        </button>
-      </div>
+      <PageHeader
+        title="Übergabeprotokolle"
+        description="Einzugs- und Auszugsprotokolle erstellen, drucken und archivieren."
+        icon="🔑"
+        accent="uebergabe"
+        actions={
+          <Button variant="primary" accent="uebergabe" onClick={() => setStep('setup')}>
+            + Neues Protokoll
+          </Button>
+        }
+      />
 
       {!protocols || protocols.length === 0 ? (
         <Card>
           <EmptyState
             icon="🔑"
             title="Keine Protokolle"
-            description="Erstellen Sie Ihr erstes Übergabeprotokoll."
+            description="Erstelle dein erstes Übergabeprotokoll."
             action={{ label: 'Protokoll erstellen', onClick: () => setStep('setup') }}
           />
         </Card>
       ) : (
         <Card>
-          <div className="space-y-2">
+          <ul className="space-y-2">
             {protocols.map((p) => (
-              <div
+              <li
                 key={p.id}
                 className="flex items-center justify-between p-3 rounded-lg border border-stone-100 dark:border-stone-700 hover:bg-stone-50 dark:hover:bg-stone-700/50"
               >
-                <div className="cursor-pointer flex-1" onClick={() => setPreviewId(p.id!)}>
+                <button
+                  type="button"
+                  onClick={() => setPreviewId(p.id!)}
+                  className="flex-1 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 rounded-lg"
+                >
                   <p className="text-sm font-medium text-stone-800 dark:text-stone-200">
                     {p.type === 'move-in' ? 'Einzug' : 'Auszug'} – {p.unitName}
                   </p>
                   <p className="text-xs text-stone-500 dark:text-stone-400">
                     {p.tenantName} | {formatDate(p.date)}
                   </p>
-                </div>
-                <button
-                  onClick={() => setDeleteId(p.id!)}
-                  className="text-xs text-red-500 hover:text-red-700 ml-2"
-                >
-                  Löschen
                 </button>
-              </div>
+                <Button variant="link" size="sm" onClick={() => handleDelete(p.id!)} className="text-red-500">
+                  Löschen
+                </Button>
+              </li>
             ))}
-          </div>
+          </ul>
         </Card>
       )}
-
-      <ConfirmDialog
-        open={deleteId !== null}
-        title="Protokoll löschen?"
-        message="Das Übergabeprotokoll wird unwiderruflich gelöscht."
-        confirmLabel="Löschen"
-        onConfirm={handleDelete}
-        onCancel={() => setDeleteId(null)}
-        danger
-      />
     </div>
   );
 }
@@ -353,15 +384,12 @@ function ProtocolPreview({ protocolId, onBack }: { protocolId: number; onBack: (
   return (
     <div>
       <div className="flex items-center justify-between mb-4 no-print">
-        <button onClick={onBack} className="text-sm text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200">
+        <Button variant="ghost" size="sm" onClick={onBack}>
           ← Zurück zur Übersicht
-        </button>
-        <button
-          onClick={() => window.print()}
-          className="text-sm px-3 py-1.5 bg-stone-800 dark:bg-stone-600 text-white rounded-lg hover:bg-stone-900 dark:hover:bg-stone-500 transition-colors"
-        >
+        </Button>
+        <Button variant="primary" onClick={() => window.print()}>
           Drucken
-        </button>
+        </Button>
       </div>
       <UebergabePrint data={data} />
     </div>

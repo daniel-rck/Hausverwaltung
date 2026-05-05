@@ -6,7 +6,7 @@
   --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
 
-  /* Modul-Akzentfarben */
+  /* Modul-Akzentfarben (Hauptton) */
   --color-modul-nebenkosten: #d97706;
   --color-modul-wasser: #0891b2;
   --color-modul-mieter: #16a34a;
@@ -15,6 +15,65 @@
   --color-modul-zaehler: #7c3aed;
   --color-modul-uebergabe: #2563eb;
   --color-modul-rendite: #ca8a04;
+
+  /* Modul-Akzent Tints (50/100, hell) */
+  --color-modul-nebenkosten-50: #fffbeb;
+  --color-modul-nebenkosten-100: #fef3c7;
+  --color-modul-wasser-50: #ecfeff;
+  --color-modul-wasser-100: #cffafe;
+  --color-modul-mieter-50: #f0fdf4;
+  --color-modul-mieter-100: #dcfce7;
+  --color-modul-finanzen-50: #ecfdf5;
+  --color-modul-finanzen-100: #d1fae5;
+  --color-modul-instandhaltung-50: #fff1f2;
+  --color-modul-instandhaltung-100: #ffe4e6;
+  --color-modul-zaehler-50: #f5f3ff;
+  --color-modul-zaehler-100: #ede9fe;
+  --color-modul-uebergabe-50: #eff6ff;
+  --color-modul-uebergabe-100: #dbeafe;
+  --color-modul-rendite-50: #fefce8;
+  --color-modul-rendite-100: #fef9c3;
+
+  /* Modul-Akzent Shades (700, dunkle Schrift auf hell) */
+  --color-modul-nebenkosten-700: #b45309;
+  --color-modul-wasser-700: #0e7490;
+  --color-modul-mieter-700: #15803d;
+  --color-modul-finanzen-700: #047857;
+  --color-modul-instandhaltung-700: #be123c;
+  --color-modul-zaehler-700: #6d28d9;
+  --color-modul-uebergabe-700: #1d4ed8;
+  --color-modul-rendite-700: #a16207;
+
+  /* Modul-Akzent Dark-Variants (heller Text auf dunkel) */
+  --color-modul-nebenkosten-300: #fcd34d;
+  --color-modul-wasser-300: #67e8f9;
+  --color-modul-mieter-300: #86efac;
+  --color-modul-finanzen-300: #6ee7b7;
+  --color-modul-instandhaltung-300: #fda4af;
+  --color-modul-zaehler-300: #c4b5fd;
+  --color-modul-uebergabe-300: #93c5fd;
+  --color-modul-rendite-300: #fde047;
+
+  /* Radius-Skala */
+  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+  --radius-2xl: 22px;
+
+  /* Schatten-Skala */
+  --shadow-card: 0 1px 2px 0 rgb(0 0 0 / 0.04), 0 1px 3px 0 rgb(0 0 0 / 0.06);
+  --shadow-pop: 0 8px 24px -4px rgb(0 0 0 / 0.12), 0 4px 8px -2px rgb(0 0 0 / 0.06);
+  --shadow-modal: 0 24px 48px -12px rgb(0 0 0 / 0.25);
+
+  /* Motion */
+  --duration-fast: 120ms;
+  --duration-base: 200ms;
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  /* Layout */
+  --header-height: 56px;
+  --bottom-nav-height: 56px;
 }
 
 body {
@@ -27,24 +86,37 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-/* Dark mode form inputs */
-.dark input,
-.dark select,
-.dark textarea {
-  background-color: var(--color-stone-800);
-  border-color: var(--color-stone-600);
-  color: var(--color-stone-200);
+/* Skip-Link für Tastaturbedienung */
+.skip-link {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 100;
+  padding: 8px 14px;
+  background: var(--color-stone-900);
+  color: white;
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+  transform: translateY(-150%);
+  transition: transform var(--duration-fast) var(--ease-out);
 }
 
-.dark input::placeholder,
-.dark textarea::placeholder {
-  color: var(--color-stone-500);
+.skip-link:focus-visible {
+  transform: translateY(0);
+  outline: 2px solid white;
+  outline-offset: 2px;
 }
 
-.dark input:focus,
-.dark select:focus,
-.dark textarea:focus {
-  --tw-ring-color: var(--color-stone-500);
+/* Reduzierte Animation respektieren */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* Print styles */
