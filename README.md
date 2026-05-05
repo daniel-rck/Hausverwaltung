@@ -106,7 +106,7 @@ Abrechnungen, Mietverträge, Mahnungen und Übergabeprotokolle können direkt au
 - Funktioniert in allen modernen Browsern (Chrome, Firefox, Safari, Edge)
 - Responsive — nutzbar auf Handy, Tablet und Desktop
 - Nach dem ersten Laden auch **offline** nutzbar (PWA mit Service Worker)
-- Kostenlos und quelloffen (MIT-Lizenz)
+- Kostenlos und quelloffen ([MIT-Lizenz](./LICENSE))
 
 ## Fragen oder Probleme?
 
