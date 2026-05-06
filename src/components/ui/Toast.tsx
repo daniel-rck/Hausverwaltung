@@ -3,6 +3,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -44,8 +45,14 @@ export function useToast(): ToastApi {
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<ToastItem[]>([]);
   const idRef = useRef(0);
+  const timersRef = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
 
   const dismiss = useCallback((id: number) => {
+    const timer = timersRef.current.get(id);
+    if (timer) {
+      clearTimeout(timer);
+      timersRef.current.delete(id);
+    }
     setItems((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
@@ -61,11 +68,23 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       };
       setItems((prev) => [...prev, item]);
       if (item.duration > 0) {
-        setTimeout(() => dismiss(id), item.duration);
+        const timer = setTimeout(() => {
+          timersRef.current.delete(id);
+          setItems((prev) => prev.filter((t) => t.id !== id));
+        }, item.duration);
+        timersRef.current.set(id, timer);
       }
     },
-    [dismiss],
+    [],
   );
+
+  useEffect(() => {
+    const timers = timersRef.current;
+    return () => {
+      timers.forEach((t) => clearTimeout(t));
+      timers.clear();
+    };
+  }, []);
 
   const api = useMemo<ToastApi>(
     () => ({

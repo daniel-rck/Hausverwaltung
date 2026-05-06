@@ -173,7 +173,7 @@ function PropertyCard() {
   const handleDelete = async () => {
     const ok = await confirm({
       title: 'Objekt löschen?',
-      message: `„${activeProperty.name}" und alle zugehörigen Daten (Wohnungen, Mieter, etc.) werden gelöscht. Diese Aktion kann nicht rückgängig gemacht werden.`,
+      message: `„${activeProperty.name}“ und alle zugehörigen Daten (Wohnungen, Mieter, etc.) werden gelöscht. Diese Aktion kann nicht rückgängig gemacht werden.`,
       confirmLabel: 'Endgültig löschen',
       danger: true,
     });

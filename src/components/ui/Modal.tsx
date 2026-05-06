@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ReactNode } from 'react';
+import { useEffect, useId, useRef, type ReactNode } from 'react';
 
 interface ModalProps {
   open: boolean;
@@ -30,6 +30,9 @@ export function Modal({
 }: ModalProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const previouslyFocused = useRef<HTMLElement | null>(null);
+  const baseId = useId();
+  const titleId = `${baseId}-title`;
+  const descId = `${baseId}-desc`;
 
   useEffect(() => {
     if (!open) return;
@@ -90,17 +93,17 @@ export function Modal({
         ref={dialogRef}
         role="dialog"
         aria-modal="true"
-        aria-labelledby={title ? 'modal-title' : undefined}
-        aria-describedby={description ? 'modal-desc' : undefined}
+        aria-labelledby={title ? titleId : undefined}
+        aria-describedby={description ? descId : undefined}
         className={`bg-white dark:bg-stone-800 rounded-xl shadow-2xl w-full ${sizeMap[size]} max-h-[90vh] flex flex-col`}
       >
         {title && (
           <header className="px-5 py-4 border-b border-stone-200 dark:border-stone-700">
-            <h2 id="modal-title" className="text-base font-semibold text-stone-800 dark:text-stone-100">
+            <h2 id={titleId} className="text-base font-semibold text-stone-800 dark:text-stone-100">
               {title}
             </h2>
             {description && (
-              <p id="modal-desc" className="text-sm text-stone-500 dark:text-stone-400 mt-0.5">
+              <p id={descId} className="text-sm text-stone-500 dark:text-stone-400 mt-0.5">
                 {description}
               </p>
             )}

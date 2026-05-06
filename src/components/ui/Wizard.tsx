@@ -17,6 +17,7 @@ interface WizardProps {
 export function Wizard({ steps, current, accent, ariaLabel = 'Fortschritt' }: WizardProps) {
   const a = moduleAccent(accent);
   const activeBg = a?.bg ?? 'bg-stone-800 dark:bg-stone-100';
+  const activeBgText = a ? 'text-white' : 'text-white dark:text-stone-900';
   const activeText = a?.text ?? 'text-stone-900 dark:text-stone-100';
 
   return (
@@ -48,7 +49,7 @@ export function Wizard({ steps, current, accent, ariaLabel = 'Fortschritt' }: Wi
               <span
                 className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-semibold ${
                   active
-                    ? `${activeBg} text-white`
+                    ? `${activeBg} ${activeBgText}`
                     : done
                       ? 'bg-stone-300 dark:bg-stone-600 text-stone-700 dark:text-stone-200'
                       : 'bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400'

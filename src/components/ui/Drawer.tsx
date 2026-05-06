@@ -25,6 +25,25 @@ export function Drawer({ open, onClose, title, children, side = 'right' }: Drawe
       if (e.key === 'Escape') {
         e.preventDefault();
         onClose();
+        return;
+      }
+      if (e.key === 'Tab') {
+        const focusables = ref.current?.querySelectorAll<HTMLElement>(
+          'input, select, textarea, button, [href], [tabindex]:not([tabindex="-1"])',
+        );
+        if (!focusables || focusables.length === 0) return;
+        const list = Array.from(focusables).filter((el) => !el.hasAttribute('disabled'));
+        if (list.length === 0) return;
+        const first = list[0];
+        const last = list[list.length - 1];
+        const active = document.activeElement;
+        if (e.shiftKey && active === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && active === last) {
+          e.preventDefault();
+          first.focus();
+        }
       }
     };
     document.addEventListener('keydown', handler);

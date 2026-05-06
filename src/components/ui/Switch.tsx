@@ -1,4 +1,4 @@
-import { forwardRef, type InputHTMLAttributes, type ReactNode } from 'react';
+import { forwardRef, useId, type InputHTMLAttributes, type ReactNode } from 'react';
 
 interface SwitchProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> {
   label?: ReactNode;
@@ -7,7 +7,8 @@ interface SwitchProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'
 
 export const Switch = forwardRef<HTMLInputElement, SwitchProps>(
   ({ label, description, className = '', id, checked, disabled, ...rest }, ref) => {
-    const inputId = id ?? `sw-${Math.random().toString(36).slice(2, 8)}`;
+    const reactId = useId();
+    const inputId = id ?? reactId;
 
     return (
       <label

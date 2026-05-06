@@ -1,4 +1,4 @@
-import { useDeferredValue, useMemo, useState, type ReactNode } from 'react';
+import { useDeferredValue, useId, useMemo, useState, type ReactNode } from 'react';
 
 export interface Column<T> {
   key: string;
@@ -49,6 +49,8 @@ export function DataTable<T>({
   const [query, setQuery] = useState('');
   const [page, setPage] = useState(0);
   const deferredQuery = useDeferredValue(query);
+  const reactId = useId();
+  const searchId = `${reactId}-search`;
 
   const filtered = useMemo(() => {
     if (!searchable || !deferredQuery.trim()) return data;
@@ -94,15 +96,18 @@ export function DataTable<T>({
 
   const padY = density === 'compact' ? 'py-1.5' : 'py-2.5';
 
+  const alignClass = (a: Column<T>['align']) =>
+    a === 'right' ? 'text-right' : a === 'center' ? 'text-center' : 'text-left';
+
   return (
     <div className={`space-y-3 ${className}`}>
       {searchable && (
         <div className="flex items-center justify-between gap-2">
-          <label className="sr-only" htmlFor="dt-search">
+          <label className="sr-only" htmlFor={searchId}>
             Suchen
           </label>
           <input
-            id="dt-search"
+            id={searchId}
             type="search"
             value={query}
             onChange={(e) => {
@@ -133,7 +138,7 @@ export function DataTable<T>({
                     <th
                       key={col.key}
                       onClick={() => toggleSort(col.key)}
-                      className={`${padY} px-3 font-medium text-stone-500 dark:text-stone-400 text-${col.align ?? 'left'} ${
+                      className={`${padY} px-3 font-medium text-stone-500 dark:text-stone-400 ${alignClass(col.align)} ${
                         col.sortValue
                           ? 'cursor-pointer select-none hover:text-stone-700 dark:hover:text-stone-200'
                           : ''
@@ -170,7 +175,7 @@ export function DataTable<T>({
                     {columns.map((col) => (
                       <td
                         key={col.key}
-                        className={`${padY} px-3 text-${col.align ?? 'left'}`}
+                        className={`${padY} px-3 ${alignClass(col.align)}`}
                       >
                         {col.render(row)}
                       </td>

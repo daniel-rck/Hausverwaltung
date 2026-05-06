@@ -91,7 +91,7 @@ function AddPropertyModal({ open, onClose, onCreate }: AddPropertyModalProps) {
         address: form.address.trim(),
         units: Math.max(0, Number(form.units) || 0),
       });
-      toast.success(`Objekt „${form.name.trim()}" angelegt.`);
+      toast.success(`Objekt „${form.name.trim()}“ angelegt.`);
       handleClose();
     } catch (err) {
       toast.error('Anlegen fehlgeschlagen.');
