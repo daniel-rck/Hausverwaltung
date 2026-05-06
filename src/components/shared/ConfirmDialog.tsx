@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -73,7 +74,7 @@ export function ConfirmDialog({
     }
   };
 
-  return (
+  return createPortal(
     <div
       className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4"
       role="dialog"
@@ -123,6 +124,7 @@ export function ConfirmDialog({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

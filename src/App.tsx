@@ -1,37 +1,81 @@
+import { lazy, Suspense } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { PropertyProvider } from './hooks/useProperty';
 import { AppShell } from './components/layout/AppShell';
-import { DashboardPage } from './modules/dashboard/DashboardPage';
-import { MieterPage } from './modules/mieter/MieterPage';
-import { NebenkostenPage } from './modules/nebenkosten/NebenkostenPage';
-import { ZaehlerPage } from './modules/zaehler/ZaehlerPage';
-import { WasserPage } from './modules/wasser/WasserPage';
-import { FinanzenPage } from './modules/finanzen/FinanzenPage';
-import { InstandhaltungPage } from './modules/instandhaltung/InstandhaltungPage';
-import { UebergabePage } from './modules/uebergabe/UebergabePage';
-import { RenditePage } from './modules/rendite/RenditePage';
-import { ImportPage } from './modules/dashboard/ImportPage';
-import { DatenschutzPage } from './modules/legal/DatenschutzPage';
+import { Skeleton } from './components/ui';
+
+const DashboardPage = lazy(() =>
+  import('./modules/dashboard/DashboardPage').then((m) => ({ default: m.DashboardPage })),
+);
+const MieterPage = lazy(() =>
+  import('./modules/mieter/MieterPage').then((m) => ({ default: m.MieterPage })),
+);
+const NebenkostenPage = lazy(() =>
+  import('./modules/nebenkosten/NebenkostenPage').then((m) => ({ default: m.NebenkostenPage })),
+);
+const ZaehlerPage = lazy(() =>
+  import('./modules/zaehler/ZaehlerPage').then((m) => ({ default: m.ZaehlerPage })),
+);
+const WasserPage = lazy(() =>
+  import('./modules/wasser/WasserPage').then((m) => ({ default: m.WasserPage })),
+);
+const FinanzenPage = lazy(() =>
+  import('./modules/finanzen/FinanzenPage').then((m) => ({ default: m.FinanzenPage })),
+);
+const InstandhaltungPage = lazy(() =>
+  import('./modules/instandhaltung/InstandhaltungPage').then((m) => ({
+    default: m.InstandhaltungPage,
+  })),
+);
+const UebergabePage = lazy(() =>
+  import('./modules/uebergabe/UebergabePage').then((m) => ({ default: m.UebergabePage })),
+);
+const RenditePage = lazy(() =>
+  import('./modules/rendite/RenditePage').then((m) => ({ default: m.RenditePage })),
+);
+const ImportPage = lazy(() =>
+  import('./modules/dashboard/ImportPage').then((m) => ({ default: m.ImportPage })),
+);
+const DatenschutzPage = lazy(() =>
+  import('./modules/legal/DatenschutzPage').then((m) => ({ default: m.DatenschutzPage })),
+);
+
+function PageFallback() {
+  return (
+    <div className="space-y-4" aria-busy="true">
+      <Skeleton variant="text" width="40%" height="28px" />
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <Skeleton height="80px" />
+        <Skeleton height="80px" />
+        <Skeleton height="80px" />
+        <Skeleton height="80px" />
+      </div>
+      <Skeleton height="240px" />
+    </div>
+  );
+}
 
 export function App() {
   return (
     <HashRouter>
       <PropertyProvider>
         <AppShell>
-          <Routes>
-            <Route path="/" element={<DashboardPage />} />
-            <Route path="/mieter" element={<MieterPage />} />
-            <Route path="/nebenkosten" element={<NebenkostenPage />} />
-            <Route path="/zaehler" element={<ZaehlerPage />} />
-            <Route path="/wasser" element={<WasserPage />} />
-            <Route path="/finanzen" element={<FinanzenPage />} />
-            <Route path="/instandhaltung" element={<InstandhaltungPage />} />
-            <Route path="/uebergabe" element={<UebergabePage />} />
-            <Route path="/rendite" element={<RenditePage />} />
-            <Route path="/import/:payload" element={<ImportPage />} />
-            <Route path="/datenschutz" element={<DatenschutzPage />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
+          <Suspense fallback={<PageFallback />}>
+            <Routes>
+              <Route path="/" element={<DashboardPage />} />
+              <Route path="/mieter" element={<MieterPage />} />
+              <Route path="/nebenkosten" element={<NebenkostenPage />} />
+              <Route path="/zaehler" element={<ZaehlerPage />} />
+              <Route path="/wasser" element={<WasserPage />} />
+              <Route path="/finanzen" element={<FinanzenPage />} />
+              <Route path="/instandhaltung" element={<InstandhaltungPage />} />
+              <Route path="/uebergabe" element={<UebergabePage />} />
+              <Route path="/rendite" element={<RenditePage />} />
+              <Route path="/import/:payload" element={<ImportPage />} />
+              <Route path="/datenschutz" element={<DatenschutzPage />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </Suspense>
         </AppShell>
       </PropertyProvider>
     </HashRouter>

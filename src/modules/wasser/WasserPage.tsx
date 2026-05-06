@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useProperty } from '../../hooks/useProperty';
 import { EmptyState } from '../../components/shared/EmptyState';
 import { Card } from '../../components/shared/Card';
+import { FormField, KpiTile, Select, Tabs, type TabItem } from '../../components/ui';
+import { PageHeader } from '../../components/layout/PageHeader';
 import { SupplierInput } from './SupplierInput';
 import { DifferenzAnalyse } from './DifferenzAnalyse';
 import { ProKopfChart } from './ProKopfChart';
@@ -14,11 +16,11 @@ import type { SupplierBill } from '../../db/schema';
 
 type SupplierType = 'water' | 'gas' | 'electricity' | 'heating';
 
-const tabs: { key: SupplierType; label: string }[] = [
-  { key: 'water', label: 'Wasser' },
-  { key: 'gas', label: 'Gas' },
-  { key: 'electricity', label: 'Strom' },
-  { key: 'heating', label: 'Fernwärme' },
+const TAB_ITEMS: TabItem<SupplierType>[] = [
+  { id: 'water', label: 'Wasser', icon: '💧' },
+  { id: 'gas', label: 'Gas', icon: '🔥' },
+  { id: 'electricity', label: 'Strom', icon: '⚡' },
+  { id: 'heating', label: 'Fernwärme', icon: '♨️' },
 ];
 
 const currentYear = new Date().getFullYear();
@@ -63,25 +65,14 @@ function ConsumptionSummary({ year, type }: { year: number; type: SupplierType }
 
   return (
     <Card title="Verbrauchsübersicht">
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-stone-50 dark:bg-stone-700/50 rounded-lg p-4">
-          <p className="text-xs text-stone-500 dark:text-stone-400 mb-1">Gesamtkosten</p>
-          <p className="text-lg font-semibold text-stone-800 dark:text-stone-100">
-            {formatEuro(totalAmount)}
-          </p>
-        </div>
-        <div className="bg-stone-50 dark:bg-stone-700/50 rounded-lg p-4">
-          <p className="text-xs text-stone-500 dark:text-stone-400 mb-1">Gesamtverbrauch</p>
-          <p className="text-lg font-semibold text-stone-800 dark:text-stone-100">
-            {totalConsumption.toLocaleString('de-DE')} {unit}
-          </p>
-        </div>
-        <div className="bg-stone-50 dark:bg-stone-700/50 rounded-lg p-4">
-          <p className="text-xs text-stone-500 dark:text-stone-400 mb-1">Rechnungen</p>
-          <p className="text-lg font-semibold text-stone-800 dark:text-stone-100">
-            {bills.length}
-          </p>
-        </div>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <KpiTile label="Gesamtkosten" value={formatEuro(totalAmount)} accent="wasser" />
+        <KpiTile
+          label="Gesamtverbrauch"
+          value={`${totalConsumption.toLocaleString('de-DE')} ${unit}`}
+          accent="wasser"
+        />
+        <KpiTile label="Rechnungen" value={bills.length} />
       </div>
     </Card>
   );
@@ -94,13 +85,13 @@ export function WasserPage() {
 
   if (!activeProperty) {
     return (
-      <div>
-        <h1 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-4">Versorger &amp; Verbrauch</h1>
+      <div className="space-y-4">
+        <PageHeader title="Versorger & Verbrauch" icon="💧" accent="wasser" />
         <Card>
           <EmptyState
             icon="💧"
             title="Kein Objekt ausgewählt"
-            description="Bitte wählen Sie zuerst ein Objekt aus, um die Verbrauchsanalyse durchzuführen."
+            description="Bitte wähle zuerst ein Objekt aus, um die Verbrauchsanalyse durchzuführen."
           />
         </Card>
       </div>
@@ -110,47 +101,31 @@ export function WasserPage() {
   const yearOptions = buildYearOptions();
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-xl font-bold text-stone-800 dark:text-stone-100">Versorger &amp; Verbrauch</h1>
-        <div className="flex items-center gap-2">
-          <label
-            htmlFor="year-select"
-            className="text-sm font-medium text-stone-600 dark:text-stone-300"
-          >
-            Jahr:
-          </label>
-          <select
-            id="year-select"
-            value={year}
-            onChange={(e) => setYear(Number(e.target.value))}
-            className="border border-stone-300 dark:border-stone-600 rounded-lg px-3 py-1.5 text-sm bg-white dark:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-500"
-          >
-            {yearOptions.map((y) => (
-              <option key={y} value={y}>
-                {y}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
+    <div className="space-y-4">
+      <PageHeader
+        title="Versorger & Verbrauch"
+        description="Wasser, Gas, Strom und Wärme — Rechnungen, Verbräuche und Auffälligkeiten."
+        icon="💧"
+        accent="wasser"
+        actions={
+          <FormField label="Jahr" htmlFor="year-select">
+            <Select
+              id="year-select"
+              value={year}
+              onChange={(e) => setYear(Number(e.target.value))}
+              className="!h-9 max-w-[120px]"
+            >
+              {yearOptions.map((y) => (
+                <option key={y} value={y}>
+                  {y}
+                </option>
+              ))}
+            </Select>
+          </FormField>
+        }
+      />
 
-      {/* Tab bar */}
-      <div className="flex border-b border-stone-200 dark:border-stone-700 mb-6">
-        {tabs.map((tab) => (
-          <button
-            key={tab.key}
-            onClick={() => setSupplierType(tab.key)}
-            className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px ${
-              supplierType === tab.key
-                ? 'border-stone-800 dark:border-stone-200 text-stone-800 dark:text-stone-100'
-                : 'border-transparent text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-300 hover:border-stone-300 dark:hover:border-stone-600'
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
+      <Tabs items={TAB_ITEMS} value={supplierType} onChange={setSupplierType} accent="wasser" />
 
       <div className="space-y-6">
         <SupplierInput year={year} type={supplierType} />

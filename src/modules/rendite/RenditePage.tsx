@@ -1,5 +1,6 @@
 import { useProperty } from '../../hooks/useProperty';
 import { EmptyState } from '../../components/shared/EmptyState';
+import { PageHeader } from '../../components/layout/PageHeader';
 import { FinancingInput } from './FinancingInput';
 import { YieldCalculation } from './YieldCalculation';
 import { CashflowChart } from './CashflowChart';
@@ -13,7 +14,7 @@ export function RenditePage() {
       <EmptyState
         icon="📈"
         title="Kein Objekt ausgewählt"
-        description="Bitte wählen Sie ein Objekt aus, um die Renditeberechnung anzuzeigen."
+        description="Bitte wähle ein Objekt aus, um die Renditeberechnung anzuzeigen."
       />
     );
   }
@@ -22,10 +23,14 @@ export function RenditePage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-xl font-bold text-stone-800 dark:text-stone-100">Rendite</h1>
+      <PageHeader
+        title="Rendite"
+        description="Finanzierung, Cashflow und Wirtschaftlichkeit deines Objekts."
+        icon="📈"
+        accent="rendite"
+      />
 
       <FinancingInput propertyId={propertyId} />
-
       <YieldCalculation propertyId={propertyId} />
 
       <div className="grid md:grid-cols-2 gap-4">

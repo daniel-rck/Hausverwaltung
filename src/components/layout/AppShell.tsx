@@ -5,6 +5,7 @@ import { PropertySelector } from './PropertySelector';
 import { UpdatePrompt } from './UpdatePrompt';
 import { useTheme } from '../../hooks/useTheme';
 import { SyncStatusBadge } from '../sync/SyncStatusBadge';
+import { IconButton } from '../ui/IconButton';
 
 const buildDate = new Date(__BUILD_DATE__).toLocaleDateString('de-DE');
 
@@ -13,31 +14,51 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen flex flex-col bg-stone-50 dark:bg-stone-900">
-      {/* Header */}
-      <header className="bg-white dark:bg-stone-800 border-b border-stone-200 dark:border-stone-700 px-4 py-3 flex items-center justify-between no-print">
-        <div className="flex items-center gap-3">
-          <h1 className="text-lg font-semibold text-stone-800 dark:text-stone-100">
-            Hausverwaltung
-          </h1>
-        </div>
+      <a href="#main" className="skip-link">
+        Zum Inhalt springen
+      </a>
 
-        <div className="flex items-center gap-2">
-          <SyncStatusBadge />
-          <PropertySelector />
-          <button
-            onClick={toggle}
-            className="p-2 text-sm rounded-lg bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-600 transition-colors"
-            title={theme === 'light' ? 'Dunkelmodus' : 'Hellmodus'}
+      {/* Header */}
+      <header className="sticky top-0 z-30 bg-white/90 dark:bg-stone-800/90 backdrop-blur border-b border-stone-200 dark:border-stone-700 px-3 sm:px-4 no-print">
+        <div className="h-14 flex items-center justify-between gap-2">
+          <Link
+            to="/"
+            className="flex items-center gap-2 min-w-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 rounded-lg px-1"
           >
-            {theme === 'light' ? '🌙' : '☀️'}
-          </button>
+            <span aria-hidden="true" className="text-xl">
+              🏠
+            </span>
+            <span className="text-base sm:text-lg font-semibold text-stone-800 dark:text-stone-100 truncate">
+              Hausverwaltung
+            </span>
+          </Link>
+
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <div className="hidden sm:flex">
+              <SyncStatusBadge />
+            </div>
+            <PropertySelector />
+            <IconButton
+              variant="subtle"
+              size="md"
+              onClick={toggle}
+              aria-label={theme === 'light' ? 'Dunkelmodus aktivieren' : 'Hellmodus aktivieren'}
+              title={theme === 'light' ? 'Dunkelmodus' : 'Hellmodus'}
+            >
+              {theme === 'light' ? '🌙' : '☀️'}
+            </IconButton>
+          </div>
         </div>
       </header>
 
       {/* Main */}
-      <div className="flex flex-1">
+      <div className="flex flex-1 min-h-0">
         <SidebarNav />
-        <main className="flex-1 p-4 md:p-6 pb-20 md:pb-6 overflow-auto">
+        <main
+          id="main"
+          tabIndex={-1}
+          className="flex-1 p-4 md:p-6 pb-24 md:pb-6 overflow-x-hidden focus:outline-none"
+        >
           {children}
         </main>
       </div>

@@ -4,6 +4,8 @@ import { db } from '../../db';
 import { useProperty } from '../../hooks/useProperty';
 import { Card } from '../../components/shared/Card';
 import { EmptyState } from '../../components/shared/EmptyState';
+import { Button, FormField, Select, Tabs, type TabItem } from '../../components/ui';
+import { PageHeader } from '../../components/layout/PageHeader';
 import { CostEntry } from './CostEntry';
 import { MessdienstInput } from './MessdienstInput';
 import { PrepaymentInput } from './PrepaymentInput';
@@ -19,12 +21,12 @@ interface OccupancyInfo {
   unit: Unit;
 }
 
-const TAB_LABELS: Record<Tab, string> = {
-  kosten: 'Kosten erfassen',
-  messdienst: 'Messdienst',
-  vorauszahlung: 'Vorauszahlungen',
-  abrechnung: 'Abrechnung anzeigen',
-};
+const TAB_ITEMS: TabItem<Tab>[] = [
+  { id: 'kosten', label: 'Kosten erfassen' },
+  { id: 'messdienst', label: 'Messdienst' },
+  { id: 'vorauszahlung', label: 'Vorauszahlungen' },
+  { id: 'abrechnung', label: 'Abrechnung anzeigen' },
+];
 
 export function NebenkostenPage() {
   const { activeProperty, addProperty } = useProperty();
@@ -80,7 +82,7 @@ export function NebenkostenPage() {
       <EmptyState
         icon="🏠"
         title="Kein Objekt vorhanden"
-        description="Legen Sie zuerst ein Mietobjekt an."
+        description="Lege zuerst ein Mietobjekt an."
         action={{
           label: 'Objekt anlegen',
           onClick: () =>
@@ -106,58 +108,45 @@ export function NebenkostenPage() {
   );
 
   return (
-    <div>
-      <h1 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-4">
-        Nebenkostenabrechnung
-      </h1>
+    <div className="space-y-4">
+      <PageHeader
+        title="Nebenkostenabrechnung"
+        description={`${activeProperty.name}${activeProperty.address ? ` – ${activeProperty.address}` : ''}`}
+        icon="📋"
+        accent="nebenkosten"
+        actions={
+          <div className="no-print">
+            <FormField label="Abrechnungsjahr">
+              <Select
+                value={year}
+                onChange={(e) => {
+                  setYear(Number(e.target.value));
+                  setSelectedOccupancyId(null);
+                }}
+                className="!h-9 max-w-[140px]"
+              >
+                {yearOptions.map((y) => (
+                  <option key={y} value={y}>
+                    {y}
+                  </option>
+                ))}
+              </Select>
+            </FormField>
+          </div>
+        }
+      />
 
-      {/* Year selector and controls */}
-      <div className="no-print flex flex-wrap items-center gap-4 mb-4">
-        <div>
-          <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">
-            Abrechnungsjahr
-          </label>
-          <select
-            value={year}
-            onChange={(e) => {
-              setYear(Number(e.target.value));
-              setSelectedOccupancyId(null);
-            }}
-            className="border border-stone-300 dark:border-stone-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-500"
-          >
-            {yearOptions.map((y) => (
-              <option key={y} value={y}>
-                {y}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="text-sm text-stone-500 dark:text-stone-400 self-end pb-1">
-          {activeProperty.name}
-          {activeProperty.address && ` – ${activeProperty.address}`}
-        </div>
-      </div>
-
-      {/* Tab navigation */}
-      <div className="no-print flex border-b border-stone-200 dark:border-stone-700 mb-4 overflow-x-auto">
-        {(Object.keys(TAB_LABELS) as Tab[]).map((tab) => (
-          <button
-            key={tab}
-            onClick={() => {
-              setActiveTab(tab);
-              if (tab !== 'abrechnung') {
-                setSelectedOccupancyId(null);
-              }
-            }}
-            className={`px-4 py-2 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
-              activeTab === tab
-                ? 'border-amber-600 text-amber-700'
-                : 'border-transparent text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 hover:border-stone-300'
-            }`}
-          >
-            {TAB_LABELS[tab]}
-          </button>
-        ))}
+      <div className="no-print">
+        <Tabs
+          items={TAB_ITEMS}
+          value={activeTab}
+          accent="nebenkosten"
+          ariaLabel="Nebenkosten-Bereiche"
+          onChange={(id) => {
+            setActiveTab(id);
+            if (id !== 'abrechnung') setSelectedOccupancyId(null);
+          }}
+        />
       </div>
 
       {/* Tab content */}
@@ -179,40 +168,31 @@ export function NebenkostenPage() {
           <Card>
             <div className="flex flex-wrap items-end gap-4">
               <div className="flex-1 min-w-[200px]">
-                <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">
-                  Mieter auswählen
-                </label>
-                <select
-                  value={selectedOccupancyId ?? ''}
-                  onChange={(e) =>
-                    setSelectedOccupancyId(
-                      e.target.value ? Number(e.target.value) : null,
-                    )
-                  }
-                  className="w-full border border-stone-300 dark:border-stone-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-500"
-                >
-                  <option value="">Bitte wählen...</option>
-                  {occupancies?.map((info) => (
-                    <option key={info.occupancy.id} value={info.occupancy.id}>
-                      {info.unit.name} –{' '}
-                      {info.tenant?.name ?? 'Unbekannt'}
-                    </option>
-                  ))}
-                </select>
+                <FormField label="Mieter auswählen">
+                  <Select
+                    value={selectedOccupancyId ?? ''}
+                    onChange={(e) =>
+                      setSelectedOccupancyId(
+                        e.target.value ? Number(e.target.value) : null,
+                      )
+                    }
+                  >
+                    <option value="">Bitte wählen…</option>
+                    {occupancies?.map((info) => (
+                      <option key={info.occupancy.id} value={info.occupancy.id}>
+                        {info.unit.name} – {info.tenant?.name ?? 'Unbekannt'}
+                      </option>
+                    ))}
+                  </Select>
+                </FormField>
               </div>
-              <button
-                onClick={() => setShowPrintAll(true)}
-                className="px-4 py-1.5 text-sm bg-stone-800 text-white rounded-lg hover:bg-stone-900 transition-colors"
-              >
+              <Button variant="primary" accent="nebenkosten" onClick={() => setShowPrintAll(true)}>
                 Alle drucken
-              </button>
+              </Button>
               {selectedOccupancyId && (
-                <button
-                  onClick={() => window.print()}
-                  className="px-4 py-1.5 text-sm border border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-300 rounded-lg hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors"
-                >
+                <Button variant="secondary" onClick={() => window.print()}>
                   Diese Abrechnung drucken
-                </button>
+                </Button>
               )}
             </div>
           </Card>

@@ -1,7 +1,7 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../db';
 import { useProperty } from '../../hooks/useProperty';
-import { Card } from '../../components/shared/Card';
+import { KpiTile } from '../../components/ui';
 import { formatEuro } from '../../utils/format';
 
 export function QuickStats() {
@@ -39,31 +39,37 @@ export function QuickStats() {
       occupied: occupiedCount,
       vacant: vacantCount,
       monthlyRent,
-      vacancyRate: units.length > 0 ? vacantCount / units.length : 0,
     };
   }, [activeProperty?.id]);
 
-  if (!stats) return null;
-
-  const items = [
-    { label: 'Wohneinheiten', value: String(stats.totalUnits), color: 'text-stone-700 dark:text-stone-200' },
-    { label: 'Vermietet', value: String(stats.occupied), color: 'text-green-600' },
-    { label: 'Leerstand', value: String(stats.vacant), color: stats.vacant > 0 ? 'text-amber-600' : 'text-stone-400 dark:text-stone-500' },
-    { label: 'Monatsmiete', value: formatEuro(stats.monthlyRent), color: 'text-emerald-600' },
-  ];
+  const loading = stats === undefined;
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-      {items.map((item) => (
-        <Card key={item.label}>
-          <div className="text-center">
-            <p className="text-xs text-stone-500 dark:text-stone-400 mb-1">{item.label}</p>
-            <p className={`text-xl font-semibold font-mono font-tabular ${item.color}`}>
-              {item.value}
-            </p>
-          </div>
-        </Card>
-      ))}
+      <KpiTile
+        label="Wohneinheiten"
+        value={loading ? '…' : String(stats?.totalUnits ?? 0)}
+        loading={loading}
+      />
+      <KpiTile
+        label="Vermietet"
+        value={loading ? '…' : String(stats?.occupied ?? 0)}
+        accent="mieter"
+        loading={loading}
+      />
+      <KpiTile
+        label="Leerstand"
+        value={loading ? '…' : String(stats?.vacant ?? 0)}
+        hint={stats && stats.vacant > 0 ? 'Aktion empfohlen' : undefined}
+        accent={stats && stats.vacant > 0 ? 'nebenkosten' : undefined}
+        loading={loading}
+      />
+      <KpiTile
+        label="Monatsmiete"
+        value={loading ? '…' : formatEuro(stats?.monthlyRent ?? 0)}
+        accent="finanzen"
+        loading={loading}
+      />
     </div>
   );
 }
