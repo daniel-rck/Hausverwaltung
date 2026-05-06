@@ -1,4 +1,5 @@
 import { useEffect, useRef, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 
 interface DrawerProps {
   open: boolean;
@@ -63,7 +64,7 @@ export function Drawer({ open, onClose, title, children, side = 'right' }: Drawe
       ? 'inset-x-0 bottom-0 max-h-[85vh] rounded-t-2xl'
       : 'right-0 top-0 bottom-0 w-full max-w-sm';
 
-  return (
+  return createPortal(
     <div
       className="fixed inset-0 bg-black/40 z-50"
       onClick={(e) => {
@@ -92,6 +93,7 @@ export function Drawer({ open, onClose, title, children, side = 'right' }: Drawe
         )}
         <div className="flex-1 overflow-y-auto px-5 py-4">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
