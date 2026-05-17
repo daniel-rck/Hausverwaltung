@@ -6,6 +6,7 @@ import { usePrint } from '../../hooks/usePrint';
 import { Card } from '../../components/shared/Card';
 import { StatusBadge } from '../../components/shared/StatusBadge';
 import { EmptyState } from '../../components/shared/EmptyState';
+import { CheckCircle2 } from '../../components/ui/icons';
 import { formatEuro, formatMonth, formatDate } from '../../utils/format';
 import type { Occupancy, Unit, Tenant, Payment, LandlordInfo } from '../../db/schema';
 
@@ -237,12 +238,12 @@ export function PaymentReminder({ year }: PaymentReminderProps) {
     const totalFormatted = formatEuro(item.totalDifference);
 
     const letterContent = (
-      <div className="print-container bg-white dark:bg-stone-800 max-w-3xl mx-auto p-8 print:p-0">
+      <div className="print-container bg-white dark:bg-zinc-800 max-w-3xl mx-auto p-8 print:p-0">
         {/* A4 letter layout */}
-        <div className="min-h-[297mm] print:min-h-0 text-stone-800 dark:text-stone-100 print:text-black text-sm leading-relaxed">
+        <div className="min-h-[297mm] print:min-h-0 text-zinc-800 dark:text-zinc-100 print:text-black text-sm leading-relaxed">
           {/* Sender (small, above address window) */}
           {landlord.name && (
-            <p className="text-xs text-stone-400 dark:text-stone-500 print:text-gray-500 mb-1 underline">
+            <p className="text-xs text-zinc-400 dark:text-zinc-500 print:text-gray-500 mb-1 underline">
               {landlord.name} - {landlord.address.replace(/\n/g, ', ')}
             </p>
           )}
@@ -275,7 +276,7 @@ export function PaymentReminder({ year }: PaymentReminderProps) {
             <p className="font-semibold mb-2">Ausstehende Beträge:</p>
             <table className="w-full text-sm border-collapse">
               <thead>
-                <tr className="border-b-2 border-stone-300 print:border-black">
+                <tr className="border-b-2 border-zinc-300 print:border-black">
                   <th className="py-2 px-3 text-left font-medium">Monat</th>
                   <th className="py-2 px-3 text-right font-medium">Sollbetrag</th>
                   <th className="py-2 px-3 text-right font-medium">Eingegangen</th>
@@ -286,7 +287,7 @@ export function PaymentReminder({ year }: PaymentReminderProps) {
                 {item.overdueMonths.map((om) => (
                   <tr
                     key={om.month}
-                    className="border-b border-stone-200 dark:border-stone-600 print:border-gray-300"
+                    className="border-b border-zinc-200 dark:border-zinc-600 print:border-gray-300"
                   >
                     <td className="py-2 px-3">{formatMonth(om.month)}</td>
                     <td className="py-2 px-3 text-right font-mono">
@@ -302,7 +303,7 @@ export function PaymentReminder({ year }: PaymentReminderProps) {
                 ))}
               </tbody>
               <tfoot>
-                <tr className="border-t-2 border-stone-300 print:border-black">
+                <tr className="border-t-2 border-zinc-300 print:border-black">
                   <td className="py-2 px-3 font-bold" colSpan={3}>
                     Gesamtbetrag
                   </td>
@@ -315,7 +316,7 @@ export function PaymentReminder({ year }: PaymentReminderProps) {
           </div>
 
           {/* Payment details */}
-          <div className="mb-6 p-4 bg-stone-50 dark:bg-stone-700 print:bg-gray-50 rounded-lg print:border print:border-gray-300">
+          <div className="mb-6 p-4 bg-zinc-50 dark:bg-zinc-700 print:bg-gray-50 rounded-lg print:border print:border-gray-300">
             <p className="font-semibold mb-2">Zahlungsverbindung:</p>
             <p>Empfänger: {landlord.name || '–'}</p>
             {landlord.iban && (
@@ -342,8 +343,8 @@ export function PaymentReminder({ year }: PaymentReminderProps) {
 
           {/* Signature line */}
           <div className="mt-10">
-            <div className="w-64 border-b border-stone-400 print:border-black mb-1" />
-            <p className="text-xs text-stone-500 dark:text-stone-400 print:text-gray-600">
+            <div className="w-64 border-b border-zinc-400 print:border-black mb-1" />
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 print:text-gray-600">
               {landlord.name || 'Vermieter/in'}
             </p>
           </div>
@@ -361,7 +362,7 @@ export function PaymentReminder({ year }: PaymentReminderProps) {
         <div className="no-print flex items-center justify-between">
           <button
             onClick={closeLetter}
-            className="px-4 py-2 text-sm border border-stone-300 dark:border-stone-600 rounded-lg hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors text-stone-700 dark:text-stone-200"
+            className="px-4 py-2 text-sm border border-zinc-300 dark:border-zinc-600 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors text-zinc-700 dark:text-zinc-200"
           >
             Zurück zur Übersicht
           </button>
@@ -374,7 +375,7 @@ export function PaymentReminder({ year }: PaymentReminderProps) {
                   mahnstufe: Number(e.target.value) as Mahnstufe,
                 })
               }
-              className="border border-stone-300 dark:border-stone-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-200 focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-500"
+              className="border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
             >
               {MAHNSTUFE_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -384,7 +385,7 @@ export function PaymentReminder({ year }: PaymentReminderProps) {
             </select>
             <button
               onClick={print}
-              className="px-4 py-2 text-sm bg-stone-800 dark:bg-stone-600 text-white rounded-lg hover:bg-stone-900 dark:hover:bg-stone-500 transition-colors"
+              className="px-4 py-2 text-sm bg-zinc-800 dark:bg-zinc-600 text-white rounded-lg hover:bg-zinc-900 dark:hover:bg-zinc-500 transition-colors"
             >
               Drucken
             </button>
@@ -409,7 +410,7 @@ export function PaymentReminder({ year }: PaymentReminderProps) {
             <select
               value={selectedStufe}
               onChange={(e) => setSelectedStufe(Number(e.target.value) as Mahnstufe)}
-              className="border border-stone-300 dark:border-stone-600 rounded-lg px-2 py-1 text-xs bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-200 focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-500"
+              className="border border-zinc-300 dark:border-zinc-600 rounded-lg px-2 py-1 text-xs bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
             >
               {MAHNSTUFE_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -423,7 +424,7 @@ export function PaymentReminder({ year }: PaymentReminderProps) {
     >
       {items.length === 0 ? (
         <EmptyState
-          icon="✅"
+          icon={<CheckCircle2 size={24} strokeWidth={1.75} />}
           title="Keine offenen Posten"
           description={`Alle Mietzahlungen für ${year} sind vollständig eingegangen. Keine Mahnungen erforderlich.`}
         />
@@ -432,11 +433,11 @@ export function PaymentReminder({ year }: PaymentReminderProps) {
           {items.map((item) => (
             <div
               key={item.id}
-              className="flex items-center justify-between p-4 rounded-lg border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-900/40"
+              className="flex items-center justify-between p-4 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900/40"
             >
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="font-medium text-stone-800 dark:text-stone-100 truncate">
+                  <span className="font-medium text-zinc-800 dark:text-zinc-100 truncate">
                     {item.tenant.name}
                   </span>
                   <StatusBadge
@@ -444,27 +445,27 @@ export function PaymentReminder({ year }: PaymentReminderProps) {
                     label={`${item.overdueMonths.length} ${item.overdueMonths.length === 1 ? 'Monat' : 'Monate'} offen`}
                   />
                 </div>
-                <p className="text-sm text-stone-500 dark:text-stone-400">
+                <p className="text-sm text-zinc-500 dark:text-zinc-400">
                   {item.unit.name} &middot; Offen:{' '}
                   <span className="font-mono font-medium text-red-600 dark:text-red-400">
                     {formatEuro(item.totalDifference)}
                   </span>
                 </p>
-                <p className="text-xs text-stone-400 dark:text-stone-500 mt-0.5">
+                <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5">
                   {item.overdueMonths.map((om) => formatMonth(om.month)).join(', ')}
                 </p>
               </div>
               <button
                 onClick={() => openLetter(item)}
-                className="no-print ml-4 shrink-0 px-4 py-2 text-sm bg-stone-800 dark:bg-stone-600 text-white rounded-lg hover:bg-stone-900 dark:hover:bg-stone-500 transition-colors"
+                className="no-print ml-4 shrink-0 px-4 py-2 text-sm bg-zinc-800 dark:bg-zinc-600 text-white rounded-lg hover:bg-zinc-900 dark:hover:bg-zinc-500 transition-colors"
               >
                 Mahnung erstellen
               </button>
             </div>
           ))}
 
-          <div className="pt-3 border-t border-stone-200 dark:border-stone-700 flex justify-between text-sm">
-            <span className="text-stone-600 dark:text-stone-300">
+          <div className="pt-3 border-t border-zinc-200 dark:border-zinc-700 flex justify-between text-sm">
+            <span className="text-zinc-600 dark:text-zinc-300">
               {items.length} {items.length === 1 ? 'Mieter' : 'Mieter'} mit offenen Posten
             </span>
             <span className="font-mono font-semibold text-red-600 dark:text-red-400">

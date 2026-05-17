@@ -1,12 +1,17 @@
 import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from 'react';
-import { moduleAccent, type ModulKey } from './moduleAccent';
+import type { ModulKey } from './moduleAccent';
 
-type Variant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'link';
+type Variant = 'primary' | 'secondary' | 'ghost' | 'outline' | 'danger' | 'link';
 type Size = 'sm' | 'md' | 'lg';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant;
   size?: Size;
+  /**
+   * Modul-Akzent. Seit dem UI-Overhaul (Linear-Stil) wird der Modul-Akzent für Buttons
+   * **nicht** mehr visuell ausgespielt — Primary nutzt den globalen Indigo-Akzent.
+   * Die Prop bleibt zur Vermeidung von Breakage bestehender Call-Sites erhalten.
+   */
   accent?: ModulKey;
   loading?: boolean;
   leftIcon?: ReactNode;
@@ -15,33 +20,31 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const sizeClasses: Record<Size, string> = {
-  sm: 'h-8 px-3 text-xs gap-1.5',
-  md: 'h-10 px-4 text-sm gap-2',
-  lg: 'h-11 px-5 text-sm gap-2',
+  sm: 'h-7 px-2.5 text-xs gap-1.5',
+  md: 'h-9 px-3.5 text-sm gap-2',
+  lg: 'h-10 px-4 text-sm gap-2',
 };
 
 const baseClasses =
-  'inline-flex items-center justify-center font-medium rounded-lg transition-colors select-none ' +
-  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900 ' +
+  'inline-flex items-center justify-center font-medium rounded-md transition-colors select-none ' +
+  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-900 ' +
+  'focus-visible:ring-[--color-accent]/40 ' +
   'disabled:opacity-50 disabled:cursor-not-allowed';
 
-function variantClasses(variant: Variant, accent?: ModulKey): string {
-  const a = moduleAccent(accent);
-
+function variantClasses(variant: Variant): string {
   switch (variant) {
     case 'primary':
-      if (a) {
-        return `${a.buttonBg} text-white ${a.buttonHover} ${a.ring}`;
-      }
-      return 'bg-stone-900 text-white hover:bg-stone-800 dark:bg-stone-100 dark:text-stone-900 dark:hover:bg-stone-200 focus-visible:ring-stone-400';
+      return 'bg-[--color-accent] text-white hover:bg-[--color-accent-hover]';
     case 'secondary':
-      return 'bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-200 border border-stone-300 dark:border-stone-600 hover:bg-stone-50 dark:hover:bg-stone-700 focus-visible:ring-stone-400';
+      return 'bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-700/60';
+    case 'outline':
+      return 'bg-transparent text-zinc-700 dark:text-zinc-200 border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800';
     case 'ghost':
-      return 'bg-transparent text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 focus-visible:ring-stone-400';
+      return 'bg-transparent text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800';
     case 'danger':
-      return 'bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-400';
+      return 'bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-400/40';
     case 'link':
-      return 'bg-transparent text-stone-600 dark:text-stone-300 hover:text-stone-900 dark:hover:text-stone-100 underline-offset-4 hover:underline focus-visible:ring-stone-400 px-0 h-auto';
+      return 'bg-transparent text-[--color-accent] dark:text-[--color-accent-dark] underline-offset-4 hover:underline px-0 h-auto';
   }
 }
 
@@ -50,7 +53,6 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     {
       variant = 'secondary',
       size = 'md',
-      accent,
       loading = false,
       disabled,
       leftIcon,
@@ -67,7 +69,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     const cls = [
       baseClasses,
       variant === 'link' ? '' : sizeClasses[size],
-      variantClasses(variant, accent),
+      variantClasses(variant),
       fullWidth ? 'w-full' : '',
       className,
     ]

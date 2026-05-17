@@ -1,6 +1,7 @@
 import { useProperty } from '../../hooks/useProperty';
 import { EmptyState } from '../../components/shared/EmptyState';
 import { PageHeader } from '../../components/layout/PageHeader';
+import { TrendingUp } from '../../components/ui/icons';
 import { FinancingInput } from './FinancingInput';
 import { YieldCalculation } from './YieldCalculation';
 import { CashflowChart } from './CashflowChart';
@@ -12,7 +13,7 @@ export function RenditePage() {
   if (!activeProperty) {
     return (
       <EmptyState
-        icon="📈"
+        icon={<TrendingUp size={24} strokeWidth={1.75} />}
         title="Kein Objekt ausgewählt"
         description="Bitte wähle ein Objekt aus, um die Renditeberechnung anzuzeigen."
       />
@@ -26,7 +27,7 @@ export function RenditePage() {
       <PageHeader
         title="Rendite"
         description="Finanzierung, Cashflow und Wirtschaftlichkeit deines Objekts."
-        icon="📈"
+        icon={<TrendingUp size={20} strokeWidth={1.75} />}
         accent="rendite"
       />
 

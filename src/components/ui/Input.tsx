@@ -8,13 +8,13 @@ export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 export const inputBaseClasses =
-  'h-10 w-full rounded-lg border bg-white dark:bg-stone-800 text-sm text-stone-800 dark:text-stone-100 ' +
-  'placeholder:text-stone-400 dark:placeholder:text-stone-500 ' +
-  'focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 dark:focus-visible:ring-stone-500 ' +
-  'disabled:opacity-60 disabled:cursor-not-allowed';
+  'h-9 w-full rounded-md border bg-white dark:bg-zinc-800 text-sm text-zinc-800 dark:text-zinc-100 ' +
+  'placeholder:text-zinc-400 dark:placeholder:text-zinc-500 ' +
+  'focus:outline-none focus-visible:ring-2 focus-visible:ring-[--color-accent]/40 focus-visible:border-[--color-accent] ' +
+  'disabled:opacity-60 disabled:cursor-not-allowed transition-colors';
 
-export const inputBorderClasses = 'border-stone-300 dark:border-stone-600';
-export const inputInvalidClasses = 'border-red-500 dark:border-red-500 focus-visible:ring-red-400';
+export const inputBorderClasses = 'border-zinc-300 dark:border-zinc-700';
+export const inputInvalidClasses = 'border-red-500 dark:border-red-500 focus-visible:ring-red-400/40 focus-visible:border-red-500';
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
   (
@@ -52,7 +52,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       <span className={wrapperCls}>
         {leftAddon && (
           <span
-            className="absolute left-3 text-stone-400 dark:text-stone-500 text-sm pointer-events-none"
+            className="absolute left-3 text-zinc-400 dark:text-zinc-500 text-sm pointer-events-none"
             aria-hidden="true"
           >
             {leftAddon}
@@ -61,7 +61,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         <input ref={ref} type={type} aria-invalid={invalid || undefined} className={inputCls} {...rest} />
         {rightAddon && (
           <span
-            className="absolute right-3 text-stone-400 dark:text-stone-500 text-sm pointer-events-none"
+            className="absolute right-3 text-zinc-400 dark:text-zinc-500 text-sm pointer-events-none"
             aria-hidden="true"
           >
             {rightAddon}

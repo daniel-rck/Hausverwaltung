@@ -97,7 +97,7 @@ export function ImportPage() {
       <Card title="Daten importieren">
         {status === 'confirm' && (
           <div className="space-y-4">
-            <p className="text-sm text-stone-600 dark:text-stone-300">
+            <p className="text-sm text-zinc-600 dark:text-zinc-300">
               Es wurden Daten in der URL gefunden. Alle vorhandenen Daten werden
               durch den Import <strong>überschrieben</strong>.
               {syncActive && (
@@ -112,13 +112,13 @@ export function ImportPage() {
             <div className="flex gap-2">
               <button
                 onClick={handleImport}
-                className="px-4 py-2 text-sm bg-stone-800 text-white rounded-lg hover:bg-stone-900 transition-colors"
+                className="px-4 py-2 text-sm bg-zinc-800 text-white rounded-lg hover:bg-zinc-900 transition-colors"
               >
                 Jetzt importieren
               </button>
               <button
                 onClick={() => navigate('/')}
-                className="px-4 py-2 text-sm border border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-300 rounded-lg hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors"
+                className="px-4 py-2 text-sm border border-zinc-300 dark:border-zinc-600 text-zinc-600 dark:text-zinc-300 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors"
               >
                 Abbrechen
               </button>
@@ -127,7 +127,7 @@ export function ImportPage() {
         )}
 
         {status === 'importing' && (
-          <p className="text-sm text-stone-500 dark:text-stone-400">Import läuft...</p>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400">Import läuft...</p>
         )}
 
         {status === 'success' && (
@@ -141,7 +141,7 @@ export function ImportPage() {
             <p className="text-sm text-red-600">{error}</p>
             <button
               onClick={() => navigate('/')}
-              className="px-4 py-2 text-sm border border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-300 rounded-lg hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors"
+              className="px-4 py-2 text-sm border border-zinc-300 dark:border-zinc-600 text-zinc-600 dark:text-zinc-300 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors"
             >
               Zum Dashboard
             </button>

@@ -47,7 +47,7 @@ export function FormField({
       {label && (
         <label
           htmlFor={fieldId}
-          className="text-xs font-medium text-stone-600 dark:text-stone-300"
+          className="text-xs font-medium text-zinc-600 dark:text-zinc-300"
         >
           {label}
           {required && (
@@ -58,7 +58,7 @@ export function FormField({
         </label>
       )}
       {description && (
-        <p id={descId} className="text-xs text-stone-500 dark:text-stone-400">
+        <p id={descId} className="text-xs text-zinc-500 dark:text-zinc-400">
           {description}
         </p>
       )}
@@ -72,7 +72,7 @@ export function FormField({
           <span aria-hidden="true" />
         )}
         {hint && !error && (
-          <p className="text-xs text-stone-400 dark:text-stone-500 ml-auto">{hint}</p>
+          <p className="text-xs text-zinc-400 dark:text-zinc-500 ml-auto">{hint}</p>
         )}
       </div>
     </div>

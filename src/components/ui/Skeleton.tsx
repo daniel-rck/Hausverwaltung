@@ -11,7 +11,7 @@ export function Skeleton({
   height,
   className = '',
 }: SkeletonProps) {
-  const base = 'bg-stone-200 dark:bg-stone-700 animate-pulse';
+  const base = 'bg-zinc-200 dark:bg-zinc-700 animate-pulse';
   const shape =
     variant === 'circle' ? 'rounded-full' : variant === 'text' ? 'rounded h-4' : 'rounded-lg';
   const style: React.CSSProperties = {};

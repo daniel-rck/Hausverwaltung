@@ -86,16 +86,16 @@ export function ConfirmDialog({
         if (e.target === e.currentTarget && !busy) onCancel();
       }}
     >
-      <div className="bg-white dark:bg-stone-800 rounded-xl shadow-lg max-w-sm w-full p-5">
+      <div className="bg-white dark:bg-zinc-800 rounded-lg shadow-lg max-w-sm w-full p-5">
         <h3
           id="confirm-title"
-          className="text-base font-semibold text-stone-800 dark:text-stone-100 mb-2"
+          className="text-base font-semibold text-zinc-800 dark:text-zinc-100 mb-2"
         >
           {title}
         </h3>
         <p
           id="confirm-message"
-          className="text-sm text-stone-600 dark:text-stone-400 mb-4"
+          className="text-sm text-zinc-600 dark:text-zinc-400 mb-4"
         >
           {message}
         </p>
@@ -105,7 +105,7 @@ export function ConfirmDialog({
             type="button"
             onClick={onCancel}
             disabled={busy}
-            className="px-4 py-2 text-sm rounded-lg border border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors disabled:opacity-50"
+            className="px-4 py-2 text-sm rounded-lg border border-zinc-300 dark:border-zinc-600 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors disabled:opacity-50"
           >
             {cancelLabel}
           </button>
@@ -117,7 +117,7 @@ export function ConfirmDialog({
             className={`px-4 py-2 text-sm rounded-lg text-white transition-colors disabled:opacity-60 disabled:cursor-not-allowed ${
               danger
                 ? 'bg-red-600 hover:bg-red-700'
-                : 'bg-stone-800 hover:bg-stone-900 dark:bg-stone-600 dark:hover:bg-stone-500'
+                : 'bg-zinc-800 hover:bg-zinc-900 dark:bg-zinc-600 dark:hover:bg-zinc-500'
             }`}
           >
             {busy ? '...' : confirmLabel}

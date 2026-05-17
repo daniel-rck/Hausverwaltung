@@ -1,29 +1,50 @@
+import type { ReactNode } from 'react';
+import { Button } from '../ui/Button';
+
 interface EmptyStateProps {
-  icon?: string;
+  /** Lucide-Icon-Element (z.B. `<Users size={24} />`) oder beliebiger ReactNode. */
+  icon?: ReactNode;
   title: string;
   description?: string;
-  action?: {
-    label: string;
-    onClick: () => void;
-  };
+  action?: { label: string; onClick: () => void } | ReactNode;
+}
+
+function isActionObject(
+  action: EmptyStateProps['action'],
+): action is { label: string; onClick: () => void } {
+  return (
+    typeof action === 'object' &&
+    action !== null &&
+    'label' in (action as Record<string, unknown>) &&
+    'onClick' in (action as Record<string, unknown>)
+  );
 }
 
 export function EmptyState({ icon, title, description, action }: EmptyStateProps) {
   return (
     <div className="flex flex-col items-center justify-center py-12 text-center">
-      {icon && <span className="text-4xl mb-3">{icon}</span>}
-      <h3 className="text-base font-semibold text-stone-700 dark:text-stone-200 mb-1">{title}</h3>
-      {description && (
-        <p className="text-sm text-stone-500 dark:text-stone-400 max-w-xs mb-4">{description}</p>
-      )}
-      {action && (
-        <button
-          onClick={action.onClick}
-          className="px-4 py-2 text-sm bg-stone-800 dark:bg-stone-600 text-white rounded-lg hover:bg-stone-900 dark:hover:bg-stone-500 transition-colors"
+      {icon && (
+        <span
+          aria-hidden="true"
+          className="mb-3 inline-flex items-center justify-center w-12 h-12 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400"
         >
-          {action.label}
-        </button>
+          {icon}
+        </span>
       )}
+      <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-50 tracking-tight mb-1">
+        {title}
+      </h3>
+      {description && (
+        <p className="text-sm text-zinc-500 dark:text-zinc-400 max-w-xs mb-4">{description}</p>
+      )}
+      {action &&
+        (isActionObject(action) ? (
+          <Button variant="primary" onClick={action.onClick}>
+            {action.label}
+          </Button>
+        ) : (
+          action
+        ))}
     </div>
   );
 }

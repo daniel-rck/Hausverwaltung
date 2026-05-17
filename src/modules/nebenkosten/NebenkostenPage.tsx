@@ -6,6 +6,7 @@ import { Card } from '../../components/shared/Card';
 import { EmptyState } from '../../components/shared/EmptyState';
 import { Button, FormField, Select, Tabs, type TabItem } from '../../components/ui';
 import { PageHeader } from '../../components/layout/PageHeader';
+import { Building2, Receipt, Users } from '../../components/ui/icons';
 import { CostEntry } from './CostEntry';
 import { MessdienstInput } from './MessdienstInput';
 import { PrepaymentInput } from './PrepaymentInput';
@@ -80,7 +81,7 @@ export function NebenkostenPage() {
   if (!activeProperty) {
     return (
       <EmptyState
-        icon="🏠"
+        icon={<Building2 size={24} strokeWidth={1.75} />}
         title="Kein Objekt vorhanden"
         description="Lege zuerst ein Mietobjekt an."
         action={{
@@ -112,7 +113,7 @@ export function NebenkostenPage() {
       <PageHeader
         title="Nebenkostenabrechnung"
         description={`${activeProperty.name}${activeProperty.address ? ` – ${activeProperty.address}` : ''}`}
-        icon="📋"
+        icon={<Receipt size={20} strokeWidth={1.75} />}
         accent="nebenkosten"
         actions={
           <div className="no-print">
@@ -210,13 +211,13 @@ export function NebenkostenPage() {
             <Card>
               {!occupancies || occupancies.length === 0 ? (
                 <EmptyState
-                  icon="👤"
+                  icon={<Users size={24} strokeWidth={1.75} />}
                   title="Keine Belegungen"
                   description={`Keine aktiven Belegungen im Jahr ${year} gefunden. Legen Sie zuerst Wohnungen und Mieter an.`}
                 />
               ) : (
                 <EmptyState
-                  icon="📋"
+                  icon={<Receipt size={24} strokeWidth={1.75} />}
                   title="Mieter auswählen"
                   description="Wählen Sie einen Mieter aus, um die Abrechnung anzuzeigen."
                 />

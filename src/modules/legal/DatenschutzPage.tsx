@@ -4,8 +4,8 @@ export function DatenschutzPage() {
   return (
     <div className="max-w-3xl mx-auto space-y-4">
       <Card title="Datenschutzerklärung">
-        <div className="space-y-6 text-sm text-stone-700 dark:text-stone-200 leading-relaxed">
-          <p className="text-xs text-stone-500 dark:text-stone-400">
+        <div className="space-y-6 text-sm text-zinc-700 dark:text-zinc-200 leading-relaxed">
+          <p className="text-xs text-zinc-500 dark:text-zinc-400">
             Hausverwaltung ist ein nicht-kommerzielles Open-Source-Projekt. Es wird keine
             Werbung geschaltet, keine Bezahlung verlangt und kein wirtschaftliches Interesse
             verfolgt. Daher liegt kein geschäftsmäßiges Telemedienangebot im Sinne von § 5 DDG

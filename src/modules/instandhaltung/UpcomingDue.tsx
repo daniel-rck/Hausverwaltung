@@ -5,6 +5,7 @@ import { useProperty } from '../../hooks/useProperty';
 import { Card } from '../../components/shared/Card';
 import { DataTable, type Column } from '../../components/shared/DataTable';
 import { EmptyState } from '../../components/shared/EmptyState';
+import { ClipboardList } from '../../components/ui/icons';
 import { StatusBadge } from '../../components/shared/StatusBadge';
 import { formatDate, formatEuro } from '../../utils/format';
 import type { MaintenanceItem, Unit } from '../../db/schema';
@@ -147,7 +148,7 @@ export function UpcomingDue() {
       key: 'unit',
       header: 'Wohnung',
       render: (r) => (
-        <span className={r.item.unitId === null ? 'text-stone-500 dark:text-stone-400 italic' : ''}>
+        <span className={r.item.unitId === null ? 'text-zinc-500 dark:text-zinc-400 italic' : ''}>
           {r.unitName}
         </span>
       ),
@@ -172,17 +173,17 @@ export function UpcomingDue() {
     <Card title="Fällige Aufgaben">
       {rows.length === 0 ? (
         <EmptyState
-          icon="📋"
+          icon={<ClipboardList size={24} strokeWidth={1.75} />}
           title="Keine fälligen Aufgaben"
           description="Es stehen aktuell keine Maßnahmen in den nächsten 30 Tagen an."
         />
       ) : (
         <>
-          <div className="mb-3 flex gap-3 text-sm text-stone-600 dark:text-stone-300">
+          <div className="mb-3 flex gap-3 text-sm text-zinc-600 dark:text-zinc-300">
             <span>
               {rows.filter((r) => r.status === 'red').length} überfällig
             </span>
-            <span className="text-stone-300">|</span>
+            <span className="text-zinc-300">|</span>
             <span>
               {rows.filter((r) => r.status === 'yellow').length} in den nächsten 30 Tagen
             </span>

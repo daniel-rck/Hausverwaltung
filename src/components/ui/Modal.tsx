@@ -85,7 +85,7 @@ export function Modal({
 
   return createPortal(
     <div
-      className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
       onClick={(e) => {
         if (closeOnOverlay && e.target === e.currentTarget) onClose();
       }}
@@ -96,15 +96,15 @@ export function Modal({
         aria-modal="true"
         aria-labelledby={title ? titleId : undefined}
         aria-describedby={description ? descId : undefined}
-        className={`bg-white dark:bg-stone-800 rounded-xl shadow-2xl w-full ${sizeMap[size]} max-h-[90vh] flex flex-col`}
+        className={`bg-white dark:bg-zinc-900 rounded-lg shadow-modal border border-zinc-200 dark:border-zinc-800 w-full ${sizeMap[size]} max-h-[90vh] flex flex-col`}
       >
         {title && (
-          <header className="px-5 py-4 border-b border-stone-200 dark:border-stone-700">
-            <h2 id={titleId} className="text-base font-semibold text-stone-800 dark:text-stone-100">
+          <header className="px-5 py-3.5 border-b border-zinc-200 dark:border-zinc-800">
+            <h2 id={titleId} className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 tracking-tight">
               {title}
             </h2>
             {description && (
-              <p id={descId} className="text-sm text-stone-500 dark:text-stone-400 mt-0.5">
+              <p id={descId} className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
                 {description}
               </p>
             )}
@@ -112,7 +112,7 @@ export function Modal({
         )}
         <div className="px-5 py-4 overflow-y-auto flex-1">{children}</div>
         {footer && (
-          <footer className="px-5 py-3 border-t border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-900/40 rounded-b-xl flex justify-end gap-2">
+          <footer className="px-5 py-3 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50/60 dark:bg-zinc-900/40 rounded-b-lg flex justify-end gap-2">
             {footer}
           </footer>
         )}

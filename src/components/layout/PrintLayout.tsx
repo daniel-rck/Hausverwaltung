@@ -11,11 +11,11 @@ export function PrintLayout({ title, subtitle, children }: PrintLayoutProps) {
     <div className="print-container">
       <div className="print-only mb-6">
         <h1 className="text-xl font-bold">{title}</h1>
-        {subtitle && <p className="text-sm text-stone-500">{subtitle}</p>}
+        {subtitle && <p className="text-sm text-zinc-500">{subtitle}</p>}
         <hr className="mt-2" />
       </div>
       {children}
-      <div className="print-only mt-8 text-xs text-stone-400">
+      <div className="print-only mt-8 text-xs text-zinc-400">
         Erstellt am {new Date().toLocaleDateString('de-DE')} | Hausverwaltung
       </div>
     </div>

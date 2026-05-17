@@ -140,7 +140,7 @@ export function RentBenchmark({ propertyId, units, occupancies }: RentBenchmarkP
         r.occupancy ? (
           <span className="font-mono">{formatEuro(r.rentCold)}</span>
         ) : (
-          <span className="text-stone-400 dark:text-stone-500">Leerstand</span>
+          <span className="text-zinc-400 dark:text-zinc-500">Leerstand</span>
         ),
       align: 'right',
       sortValue: (r) => r.rentCold,
@@ -152,7 +152,7 @@ export function RentBenchmark({ propertyId, units, occupancies }: RentBenchmarkP
         r.area > 0 ? (
           <span className="font-mono">{formatNumber(r.rentPerSqm)} €</span>
         ) : (
-          <span className="text-stone-400 dark:text-stone-500">–</span>
+          <span className="text-zinc-400 dark:text-zinc-500">–</span>
         ),
       align: 'right',
       sortValue: (r) => r.rentPerSqm,
@@ -167,7 +167,7 @@ export function RentBenchmark({ propertyId, units, occupancies }: RentBenchmarkP
       key: 'diff',
       header: 'Differenz',
       render: (r) => {
-        if (r.area <= 0) return <span className="text-stone-400 dark:text-stone-500">–</span>;
+        if (r.area <= 0) return <span className="text-zinc-400 dark:text-zinc-500">–</span>;
         const cls = r.diff > 0 ? 'text-red-600 dark:text-red-400' : r.diff < 0 ? 'text-green-600 dark:text-green-400' : '';
         return (
           <span className={`font-mono ${cls}`}>
@@ -190,8 +190,8 @@ export function RentBenchmark({ propertyId, units, occupancies }: RentBenchmarkP
   return (
     <Card title="Mietspiegel-Vergleich">
       {/* Settings inputs */}
-      <div className="mb-4 p-4 bg-stone-50 dark:bg-stone-800/50 rounded-lg border border-stone-200 dark:border-stone-700">
-        <h3 className="text-sm font-semibold text-stone-700 dark:text-stone-200 mb-3">
+      <div className="mb-4 p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-lg border border-zinc-200 dark:border-zinc-700">
+        <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-200 mb-3">
           Ortsübliche Vergleichsmiete
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -203,7 +203,7 @@ export function RentBenchmark({ propertyId, units, occupancies }: RentBenchmarkP
             min={0}
           />
           <div>
-            <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">
+            <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
               Quelle
             </label>
             <input
@@ -211,18 +211,18 @@ export function RentBenchmark({ propertyId, units, occupancies }: RentBenchmarkP
               value={settings.source}
               onChange={(e) => saveSettings({ ...settings, source: e.target.value })}
               placeholder="z.B. Mietspiegel 2025 Stadt XY"
-              className="w-full border border-stone-300 dark:border-stone-600 rounded-lg px-3 py-1.5 text-sm bg-white dark:bg-stone-800 dark:text-stone-200 focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-500"
+              className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm bg-white dark:bg-zinc-800 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">
+            <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
               Gültig bis
             </label>
             <input
               type="month"
               value={settings.validUntil}
               onChange={(e) => saveSettings({ ...settings, validUntil: e.target.value })}
-              className="w-full border border-stone-300 dark:border-stone-600 rounded-lg px-3 py-1.5 text-sm bg-white dark:bg-stone-800 dark:text-stone-200 focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-500"
+              className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm bg-white dark:bg-zinc-800 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
             />
           </div>
         </div>
@@ -258,14 +258,14 @@ export function RentBenchmark({ propertyId, units, occupancies }: RentBenchmarkP
           )}
 
           {/* Legal note */}
-          <div className="mt-4 p-3 bg-stone-50 dark:bg-stone-700/30 rounded-lg">
-            <p className="text-xs text-stone-500 dark:text-stone-400">
+          <div className="mt-4 p-3 bg-zinc-50 dark:bg-zinc-700/30 rounded-lg">
+            <p className="text-xs text-zinc-500 dark:text-zinc-400">
               Beachten Sie die Kappungsgrenze von 20% innerhalb von 3 Jahren (§ 558 Abs. 3 BGB).
             </p>
           </div>
         </>
       ) : (
-        <p className="text-sm text-stone-500 dark:text-stone-400 text-center py-4">
+        <p className="text-sm text-zinc-500 dark:text-zinc-400 text-center py-4">
           Geben Sie die ortsübliche Vergleichsmiete ein, um den Vergleich zu starten.
         </p>
       )}

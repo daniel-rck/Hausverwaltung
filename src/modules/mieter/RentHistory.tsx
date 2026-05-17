@@ -5,6 +5,7 @@ import { Card } from '../../components/shared/Card';
 import { DataTable, type Column } from '../../components/shared/DataTable';
 import { NumInput } from '../../components/shared/NumInput';
 import { EmptyState } from '../../components/shared/EmptyState';
+import { TrendingUp } from '../../components/ui/icons';
 import { formatEuro, formatMonth } from '../../utils/format';
 import { checkRentIncrease } from '../../utils/rentLaw';
 import type { Occupancy, Unit, RentChange, RentChangeReason } from '../../db/schema';
@@ -120,7 +121,7 @@ export function RentHistory({ occupancy, unit }: RentHistoryProps) {
       key: 'notes',
       header: 'Notiz',
       render: (r) => (
-        <span className="text-stone-500 dark:text-stone-400 truncate max-w-[200px] inline-block">
+        <span className="text-zinc-500 dark:text-zinc-400 truncate max-w-[200px] inline-block">
           {r.notes ?? '–'}
         </span>
       ),
@@ -142,10 +143,10 @@ export function RentHistory({ occupancy, unit }: RentHistoryProps) {
       }
     >
       {/* Current rent display */}
-      <div className="mb-4 p-3 bg-stone-50 dark:bg-stone-700/30 rounded-lg">
-        <p className="text-sm text-stone-600 dark:text-stone-300">
+      <div className="mb-4 p-3 bg-zinc-50 dark:bg-zinc-700/30 rounded-lg">
+        <p className="text-sm text-zinc-600 dark:text-zinc-300">
           Aktuelle Kaltmiete:{' '}
-          <span className="font-semibold font-mono text-stone-800 dark:text-stone-100">
+          <span className="font-semibold font-mono text-zinc-800 dark:text-zinc-100">
             {formatEuro(occupancy.rentCold)}
           </span>
         </p>
@@ -153,20 +154,20 @@ export function RentHistory({ occupancy, unit }: RentHistoryProps) {
 
       {/* Inline form */}
       {showForm && (
-        <div className="mb-4 p-4 bg-stone-50 dark:bg-stone-800/50 rounded-lg border border-stone-200 dark:border-stone-700">
-          <h3 className="text-sm font-semibold text-stone-700 dark:text-stone-200 mb-3">
+        <div className="mb-4 p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-lg border border-zinc-200 dark:border-zinc-700">
+          <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-200 mb-3">
             Mieterhöhung erfassen
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">
+              <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
                 Wirksam ab *
               </label>
               <input
                 type="month"
                 value={form.effectiveDate}
                 onChange={(e) => setForm({ ...form, effectiveDate: e.target.value })}
-                className="w-full border border-stone-300 dark:border-stone-600 rounded-lg px-3 py-1.5 text-sm bg-white dark:bg-stone-800 dark:text-stone-200 focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-500"
+                className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm bg-white dark:bg-zinc-800 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
               />
             </div>
             <NumInput
@@ -177,13 +178,13 @@ export function RentHistory({ occupancy, unit }: RentHistoryProps) {
               min={0}
             />
             <div>
-              <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">
+              <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
                 Grund *
               </label>
               <select
                 value={form.reason}
                 onChange={(e) => setForm({ ...form, reason: e.target.value as RentChangeReason })}
-                className="w-full border border-stone-300 dark:border-stone-600 rounded-lg px-3 py-1.5 text-sm bg-white dark:bg-stone-800 dark:text-stone-200 focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-500"
+                className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm bg-white dark:bg-zinc-800 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
               >
                 <option value="mietspiegel">Mietspiegel</option>
                 <option value="index">Indexanpassung</option>
@@ -192,14 +193,14 @@ export function RentHistory({ occupancy, unit }: RentHistoryProps) {
               </select>
             </div>
             <div>
-              <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">
+              <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
                 Notiz
               </label>
               <input
                 type="text"
                 value={form.notes}
                 onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                className="w-full border border-stone-300 dark:border-stone-600 rounded-lg px-3 py-1.5 text-sm bg-white dark:bg-stone-800 dark:text-stone-200 focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-500"
+                className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm bg-white dark:bg-zinc-800 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
               />
             </div>
           </div>
@@ -218,7 +219,7 @@ export function RentHistory({ occupancy, unit }: RentHistoryProps) {
                 </div>
               ))}
               {hasErrors && (
-                <label className="flex items-center gap-2 text-xs text-stone-600 dark:text-stone-300 mt-1">
+                <label className="flex items-center gap-2 text-xs text-zinc-600 dark:text-zinc-300 mt-1">
                   <input
                     type="checkbox"
                     checked={overrideErrors}
@@ -233,7 +234,7 @@ export function RentHistory({ occupancy, unit }: RentHistoryProps) {
             <button
               onClick={handleSave}
               disabled={hasErrors && !overrideErrors}
-              className="px-4 py-1.5 text-sm bg-stone-800 dark:bg-stone-600 text-white rounded-lg hover:bg-stone-900 dark:hover:bg-stone-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-1.5 text-sm bg-zinc-800 dark:bg-zinc-600 text-white rounded-lg hover:bg-zinc-900 dark:hover:bg-zinc-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Speichern
             </button>
@@ -242,7 +243,7 @@ export function RentHistory({ occupancy, unit }: RentHistoryProps) {
                 setShowForm(false);
                 setOverrideErrors(false);
               }}
-              className="px-4 py-1.5 text-sm border border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-300 rounded-lg hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors"
+              className="px-4 py-1.5 text-sm border border-zinc-300 dark:border-zinc-600 text-zinc-600 dark:text-zinc-300 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors"
             >
               Abbrechen
             </button>
@@ -255,7 +256,7 @@ export function RentHistory({ occupancy, unit }: RentHistoryProps) {
         <DataTable columns={columns} data={changes} keyFn={(r) => r.id!} />
       ) : (
         <EmptyState
-          icon="📈"
+          icon={<TrendingUp size={24} strokeWidth={1.75} />}
           title="Keine Mietänderungen"
           description="Erfassen Sie Mieterhöhungen, um die Miethistorie nachzuverfolgen."
         />

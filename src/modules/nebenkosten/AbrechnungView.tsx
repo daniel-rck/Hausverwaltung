@@ -196,7 +196,7 @@ export function AbrechnungView({
 
   if (!data) {
     return (
-      <div className="text-center py-8 text-sm text-stone-500">
+      <div className="text-center py-8 text-sm text-zinc-500">
         Lade Abrechnung...
       </div>
     );
@@ -234,27 +234,27 @@ export function AbrechnungView({
       {/* Header */}
       <div className="mb-6">
         {landlord.name && (
-          <div className="text-sm text-stone-600 mb-4">
+          <div className="text-sm text-zinc-600 mb-4">
             <p className="font-semibold">{landlord.name}</p>
             <p className="whitespace-pre-line">{landlord.address}</p>
             {landlord.taxId && <p>St.-Nr.: {landlord.taxId}</p>}
           </div>
         )}
 
-        <div className="text-sm text-stone-600 mb-4">
+        <div className="text-sm text-zinc-600 mb-4">
           <p>
             {tenant?.name ?? '–'} | {unit.name},{' '}
             {property.address}
           </p>
         </div>
 
-        <h2 className="text-lg font-bold text-stone-800">
+        <h2 className="text-lg font-bold text-zinc-800">
           Betriebskostenabrechnung {year}
         </h2>
-        <p className="text-sm text-stone-500">
+        <p className="text-sm text-zinc-500">
           Objekt: {property.name}, {property.address}
         </p>
-        <p className="text-sm text-stone-500">
+        <p className="text-sm text-zinc-500">
           Wohnung: {unit.name} ({formatArea(unit.area)}) |{' '}
           Abrechnungszeitraum: {months} Monate
         </p>
@@ -263,17 +263,17 @@ export function AbrechnungView({
       {/* Cost table */}
       <table className="w-full text-sm mb-6">
         <thead>
-          <tr className="border-b-2 border-stone-300">
-            <th className="py-2 text-left font-semibold text-stone-700">
+          <tr className="border-b-2 border-zinc-300">
+            <th className="py-2 text-left font-semibold text-zinc-700">
               Kostenart
             </th>
-            <th className="py-2 text-right font-semibold text-stone-700">
+            <th className="py-2 text-right font-semibold text-zinc-700">
               Gesamtkosten
             </th>
-            <th className="py-2 text-left font-semibold text-stone-700 pl-4">
+            <th className="py-2 text-left font-semibold text-zinc-700 pl-4">
               Verteilung
             </th>
-            <th className="py-2 text-right font-semibold text-stone-700">
+            <th className="py-2 text-right font-semibold text-zinc-700">
               Ihr Anteil
             </th>
           </tr>
@@ -289,7 +289,7 @@ export function AbrechnungView({
                 <tr>
                   <td
                     colSpan={4}
-                    className="pt-3 pb-1 text-xs font-semibold text-stone-500 uppercase tracking-wide"
+                    className="pt-3 pb-1 text-xs font-semibold text-zinc-500 uppercase tracking-wide"
                   >
                     {CATEGORY_LABELS[cat]}
                   </td>
@@ -297,30 +297,30 @@ export function AbrechnungView({
                 {lines.map((line) => (
                   <tr
                     key={line.costType.id}
-                    className="border-b border-stone-100"
+                    className="border-b border-zinc-100"
                   >
-                    <td className="py-1.5 text-stone-700">
+                    <td className="py-1.5 text-zinc-700">
                       {line.costType.name}
                     </td>
-                    <td className="py-1.5 text-right font-mono font-tabular text-stone-600">
+                    <td className="py-1.5 text-right font-mono font-tabular text-zinc-600">
                       {formatEuro(line.cost.totalAmount)}
                     </td>
-                    <td className="py-1.5 pl-4 text-stone-500 text-xs">
+                    <td className="py-1.5 pl-4 text-zinc-500 text-xs">
                       {line.distributionLabel}
                     </td>
-                    <td className="py-1.5 text-right font-mono font-tabular text-stone-800">
+                    <td className="py-1.5 text-right font-mono font-tabular text-zinc-800">
                       {formatEuro(line.share)}
                     </td>
                   </tr>
                 ))}
-                <tr className="border-b border-stone-200">
+                <tr className="border-b border-zinc-200">
                   <td
                     colSpan={3}
-                    className="py-1.5 text-xs font-medium text-stone-500 text-right pr-4"
+                    className="py-1.5 text-xs font-medium text-zinc-500 text-right pr-4"
                   >
                     Zwischensumme {CATEGORY_LABELS[cat]}
                   </td>
-                  <td className="py-1.5 text-right font-mono font-tabular font-medium text-stone-700">
+                  <td className="py-1.5 text-right font-mono font-tabular font-medium text-zinc-700">
                     {formatEuro(catSubtotal)}
                   </td>
                 </tr>
@@ -330,25 +330,25 @@ export function AbrechnungView({
       </table>
 
       {/* Summary */}
-      <div className="border-t-2 border-stone-300 pt-4 space-y-2">
+      <div className="border-t-2 border-zinc-300 pt-4 space-y-2">
         <div className="flex justify-between text-sm">
-          <span className="font-semibold text-stone-700">
+          <span className="font-semibold text-zinc-700">
             Summe Betriebskosten
           </span>
-          <span className="font-mono font-tabular font-semibold text-stone-800">
+          <span className="font-mono font-tabular font-semibold text-zinc-800">
             {formatEuro(totalCostShare)}
           </span>
         </div>
         <div className="flex justify-between text-sm">
-          <span className="text-stone-600">
+          <span className="text-zinc-600">
             abzgl. Vorauszahlungen ({months} Monate)
           </span>
-          <span className="font-mono font-tabular text-stone-600">
+          <span className="font-mono font-tabular text-zinc-600">
             - {formatEuro(prepaymentAmount)}
           </span>
         </div>
-        <div className="flex justify-between text-base pt-2 border-t border-stone-200">
-          <span className="font-bold text-stone-800">
+        <div className="flex justify-between text-base pt-2 border-t border-zinc-200">
+          <span className="font-bold text-zinc-800">
             {result >= 0 ? 'Nachzahlung' : 'Guthaben'}
           </span>
           <span
@@ -363,7 +363,7 @@ export function AbrechnungView({
 
       {/* Payment info */}
       {result > 0 && landlord.iban && (
-        <div className="mt-4 p-3 bg-stone-50 rounded-lg text-xs text-stone-600">
+        <div className="mt-4 p-3 bg-zinc-50 rounded-lg text-xs text-zinc-600">
           <p>
             Bitte überweisen Sie den Betrag von{' '}
             <strong>{formatEuro(result)}</strong> auf folgendes Konto:
@@ -384,16 +384,16 @@ export function AbrechnungView({
       )}
 
       {/* Footer */}
-      <div className="mt-8 pt-4 border-t border-stone-200 text-xs text-stone-500">
+      <div className="mt-8 pt-4 border-t border-zinc-200 text-xs text-zinc-500">
         <p>Druckdatum: {formatDate(today)}</p>
         <div className="mt-8 flex justify-between">
           <div className="text-center">
-            <div className="w-48 border-t border-stone-400 pt-1">
+            <div className="w-48 border-t border-zinc-400 pt-1">
               Ort, Datum
             </div>
           </div>
           <div className="text-center">
-            <div className="w-48 border-t border-stone-400 pt-1">
+            <div className="w-48 border-t border-zinc-400 pt-1">
               Unterschrift Vermieter
             </div>
           </div>

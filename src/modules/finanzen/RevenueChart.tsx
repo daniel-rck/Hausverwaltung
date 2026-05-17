@@ -5,6 +5,7 @@ import { useProperty } from '../../hooks/useProperty';
 import { Card } from '../../components/shared/Card';
 import { BarChart } from '../../components/charts/BarChart';
 import { EmptyState } from '../../components/shared/EmptyState';
+import { BarChart3 } from '../../components/ui/icons';
 import { formatEuro, MONTH_NAMES } from '../../utils/format';
 
 interface RevenueChartProps {
@@ -84,10 +85,10 @@ export function RevenueChart({ year }: RevenueChartProps) {
       title="Jahresübersicht"
       action={
         hasData ? (
-          <div className="flex gap-4 text-xs text-stone-500 dark:text-stone-400">
+          <div className="flex gap-4 text-xs text-zinc-500 dark:text-zinc-400">
             <span>
               Soll:{' '}
-              <strong className="text-stone-700 dark:text-stone-200">
+              <strong className="text-zinc-700 dark:text-zinc-200">
                 {formatEuro(chartData.totalExpected)}
               </strong>
             </span>
@@ -109,7 +110,7 @@ export function RevenueChart({ year }: RevenueChartProps) {
     >
       {!hasData ? (
         <EmptyState
-          icon="📊"
+          icon={<BarChart3 size={24} strokeWidth={1.75} />}
           title="Keine Daten"
           description={`Für ${year} liegen keine Mietdaten vor.`}
         />

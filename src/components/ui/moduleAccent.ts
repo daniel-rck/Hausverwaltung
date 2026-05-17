@@ -8,6 +8,22 @@ export type ModulKey =
   | 'uebergabe'
   | 'rendite';
 
+/**
+ * Modul-Akzent-Klassen.
+ *
+ * **Hinweis (UI-Overhaul Linear/Vercel-Stil)**: Seit dem Refit werden Modul-Farben nur noch
+ * für 2px-Bar-Indikatoren (Sidebar-active, PageHeader-Bar, KpiTile-Top) und Chart-Datasets verwendet.
+ * Buttons, Pills, Cards, Tabs nutzen stattdessen den globalen Indigo-Akzent oder neutrale Zinc-Töne.
+ *
+ * Legacy-Felder (`text`, `bgSoft`, `border`, `hoverBg`, `ring`, `pillBg`, `pillText`,
+ * `buttonBg`, `buttonHover`) liefern jetzt neutrale Klassen — die alte Call-Site bleibt funktional,
+ * die Modul-Farbe wird aber visuell nicht mehr ausgespielt.
+ *
+ * Aktive Felder:
+ * - `bg` / `bar` — 2px-Akzent-Bar (einziger Ort mit Modul-Farbe in der UI)
+ * - `chart` — HEX-Wert für Chart.js-Datasets
+ * - `iconWash` — sehr subtiler Container-Background für Modul-Icons (PageHeader)
+ */
 interface AccentClassSet {
   text: string;
   bg: string;
@@ -19,104 +35,84 @@ interface AccentClassSet {
   pillText: string;
   buttonBg: string;
   buttonHover: string;
+  /** 2px-Akzent-Bar (Sidebar-active, PageHeader-Bar) */
+  bar: string;
+  /** HEX-Wert für Chart.js-Datasets */
+  chart: string;
+  /** Subtiler Container-Background für Modul-Icon (PageHeader) */
+  iconWash: string;
 }
+
+/** Neutrale Legacy-Felder — gleich für jedes Modul, damit alte Call-Sites visuell neutralisiert sind. */
+const neutralLegacy = {
+  text: 'text-zinc-700 dark:text-zinc-200',
+  bgSoft: 'bg-zinc-50 dark:bg-zinc-800/40',
+  border: 'border-zinc-200 dark:border-zinc-700',
+  hoverBg: 'hover:bg-zinc-100 dark:hover:bg-zinc-800',
+  ring: 'focus-visible:ring-[--color-accent]/40',
+  pillBg: 'bg-zinc-100 dark:bg-zinc-800',
+  pillText: 'text-zinc-700 dark:text-zinc-200',
+  /** Primary-Buttons nutzen jetzt den globalen Indigo-Akzent, unabhängig vom Modul */
+  buttonBg: 'bg-[--color-accent]',
+  buttonHover: 'hover:bg-[--color-accent-hover]',
+} as const;
 
 const accentMap: Record<ModulKey, AccentClassSet> = {
   nebenkosten: {
-    text: 'text-amber-600 dark:text-amber-300',
-    bg: 'bg-amber-600 dark:bg-amber-500',
-    bgSoft: 'bg-amber-50 dark:bg-amber-950/40',
-    border: 'border-amber-200 dark:border-amber-900',
-    hoverBg: 'hover:bg-amber-100 dark:hover:bg-amber-950/60',
-    ring: 'focus-visible:ring-amber-400',
-    pillBg: 'bg-amber-100 dark:bg-amber-950/60',
-    pillText: 'text-amber-800 dark:text-amber-200',
-    buttonBg: 'bg-amber-600',
-    buttonHover: 'hover:bg-amber-700',
+    ...neutralLegacy,
+    bg: 'bg-amber-500 dark:bg-amber-400',
+    bar: 'bg-amber-500 dark:bg-amber-400',
+    chart: '#d97706',
+    iconWash: 'bg-amber-500/10 text-amber-700 dark:text-amber-300',
   },
   wasser: {
-    text: 'text-cyan-600 dark:text-cyan-300',
-    bg: 'bg-cyan-600 dark:bg-cyan-500',
-    bgSoft: 'bg-cyan-50 dark:bg-cyan-950/40',
-    border: 'border-cyan-200 dark:border-cyan-900',
-    hoverBg: 'hover:bg-cyan-100 dark:hover:bg-cyan-950/60',
-    ring: 'focus-visible:ring-cyan-400',
-    pillBg: 'bg-cyan-100 dark:bg-cyan-950/60',
-    pillText: 'text-cyan-800 dark:text-cyan-200',
-    buttonBg: 'bg-cyan-600',
-    buttonHover: 'hover:bg-cyan-700',
+    ...neutralLegacy,
+    bg: 'bg-cyan-500 dark:bg-cyan-400',
+    bar: 'bg-cyan-500 dark:bg-cyan-400',
+    chart: '#0891b2',
+    iconWash: 'bg-cyan-500/10 text-cyan-700 dark:text-cyan-300',
   },
   mieter: {
-    text: 'text-green-600 dark:text-green-300',
-    bg: 'bg-green-600 dark:bg-green-500',
-    bgSoft: 'bg-green-50 dark:bg-green-950/40',
-    border: 'border-green-200 dark:border-green-900',
-    hoverBg: 'hover:bg-green-100 dark:hover:bg-green-950/60',
-    ring: 'focus-visible:ring-green-400',
-    pillBg: 'bg-green-100 dark:bg-green-950/60',
-    pillText: 'text-green-800 dark:text-green-200',
-    buttonBg: 'bg-green-600',
-    buttonHover: 'hover:bg-green-700',
+    ...neutralLegacy,
+    bg: 'bg-green-500 dark:bg-green-400',
+    bar: 'bg-green-500 dark:bg-green-400',
+    chart: '#16a34a',
+    iconWash: 'bg-green-500/10 text-green-700 dark:text-green-300',
   },
   finanzen: {
-    text: 'text-emerald-600 dark:text-emerald-300',
-    bg: 'bg-emerald-600 dark:bg-emerald-500',
-    bgSoft: 'bg-emerald-50 dark:bg-emerald-950/40',
-    border: 'border-emerald-200 dark:border-emerald-900',
-    hoverBg: 'hover:bg-emerald-100 dark:hover:bg-emerald-950/60',
-    ring: 'focus-visible:ring-emerald-400',
-    pillBg: 'bg-emerald-100 dark:bg-emerald-950/60',
-    pillText: 'text-emerald-800 dark:text-emerald-200',
-    buttonBg: 'bg-emerald-600',
-    buttonHover: 'hover:bg-emerald-700',
+    ...neutralLegacy,
+    bg: 'bg-emerald-500 dark:bg-emerald-400',
+    bar: 'bg-emerald-500 dark:bg-emerald-400',
+    chart: '#059669',
+    iconWash: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300',
   },
   instandhaltung: {
-    text: 'text-rose-600 dark:text-rose-300',
-    bg: 'bg-rose-600 dark:bg-rose-500',
-    bgSoft: 'bg-rose-50 dark:bg-rose-950/40',
-    border: 'border-rose-200 dark:border-rose-900',
-    hoverBg: 'hover:bg-rose-100 dark:hover:bg-rose-950/60',
-    ring: 'focus-visible:ring-rose-400',
-    pillBg: 'bg-rose-100 dark:bg-rose-950/60',
-    pillText: 'text-rose-800 dark:text-rose-200',
-    buttonBg: 'bg-rose-600',
-    buttonHover: 'hover:bg-rose-700',
+    ...neutralLegacy,
+    bg: 'bg-rose-500 dark:bg-rose-400',
+    bar: 'bg-rose-500 dark:bg-rose-400',
+    chart: '#e11d48',
+    iconWash: 'bg-rose-500/10 text-rose-700 dark:text-rose-300',
   },
   zaehler: {
-    text: 'text-violet-600 dark:text-violet-300',
-    bg: 'bg-violet-600 dark:bg-violet-500',
-    bgSoft: 'bg-violet-50 dark:bg-violet-950/40',
-    border: 'border-violet-200 dark:border-violet-900',
-    hoverBg: 'hover:bg-violet-100 dark:hover:bg-violet-950/60',
-    ring: 'focus-visible:ring-violet-400',
-    pillBg: 'bg-violet-100 dark:bg-violet-950/60',
-    pillText: 'text-violet-800 dark:text-violet-200',
-    buttonBg: 'bg-violet-600',
-    buttonHover: 'hover:bg-violet-700',
+    ...neutralLegacy,
+    bg: 'bg-violet-500 dark:bg-violet-400',
+    bar: 'bg-violet-500 dark:bg-violet-400',
+    chart: '#7c3aed',
+    iconWash: 'bg-violet-500/10 text-violet-700 dark:text-violet-300',
   },
   uebergabe: {
-    text: 'text-blue-600 dark:text-blue-300',
-    bg: 'bg-blue-600 dark:bg-blue-500',
-    bgSoft: 'bg-blue-50 dark:bg-blue-950/40',
-    border: 'border-blue-200 dark:border-blue-900',
-    hoverBg: 'hover:bg-blue-100 dark:hover:bg-blue-950/60',
-    ring: 'focus-visible:ring-blue-400',
-    pillBg: 'bg-blue-100 dark:bg-blue-950/60',
-    pillText: 'text-blue-800 dark:text-blue-200',
-    buttonBg: 'bg-blue-600',
-    buttonHover: 'hover:bg-blue-700',
+    ...neutralLegacy,
+    bg: 'bg-blue-500 dark:bg-blue-400',
+    bar: 'bg-blue-500 dark:bg-blue-400',
+    chart: '#2563eb',
+    iconWash: 'bg-blue-500/10 text-blue-700 dark:text-blue-300',
   },
   rendite: {
-    text: 'text-yellow-600 dark:text-yellow-300',
-    bg: 'bg-yellow-600 dark:bg-yellow-500',
-    bgSoft: 'bg-yellow-50 dark:bg-yellow-950/40',
-    border: 'border-yellow-200 dark:border-yellow-900',
-    hoverBg: 'hover:bg-yellow-100 dark:hover:bg-yellow-950/60',
-    ring: 'focus-visible:ring-yellow-400',
-    pillBg: 'bg-yellow-100 dark:bg-yellow-950/60',
-    pillText: 'text-yellow-800 dark:text-yellow-200',
-    buttonBg: 'bg-yellow-600',
-    buttonHover: 'hover:bg-yellow-700',
+    ...neutralLegacy,
+    bg: 'bg-yellow-500 dark:bg-yellow-400',
+    bar: 'bg-yellow-500 dark:bg-yellow-400',
+    chart: '#ca8a04',
+    iconWash: 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-300',
   },
 };
 

@@ -3,6 +3,7 @@ import { db, deleteWithTombstone } from '../../db';
 import { Card } from '../../components/shared/Card';
 import { NumInput } from '../../components/shared/NumInput';
 import { EmptyState } from '../../components/shared/EmptyState';
+import { Coins, Loader2 } from '../../components/ui/icons';
 import { formatEuro, formatNumber } from '../../utils/format';
 import { getOccupiedMonthsFractional } from '../../utils/calc';
 import type { Occupancy, Tenant, Unit, Prepayment } from '../../db/schema';
@@ -102,8 +103,8 @@ export function PrepaymentInput({ propertyId, year }: PrepaymentInputProps) {
     return (
       <Card>
         <EmptyState
-          icon="..."
-          title="Lade Daten..."
+          icon={<Loader2 size={24} strokeWidth={1.75} className="animate-spin" />}
+          title="Lade Daten…"
           description="Bitte warten."
         />
       </Card>
@@ -114,7 +115,7 @@ export function PrepaymentInput({ propertyId, year }: PrepaymentInputProps) {
     return (
       <Card>
         <EmptyState
-          icon="💰"
+          icon={<Coins size={24} strokeWidth={1.75} />}
           title="Keine Belegungen"
           description={`Keine aktiven Belegungen im Jahr ${year} gefunden.`}
         />
@@ -129,33 +130,33 @@ export function PrepaymentInput({ propertyId, year }: PrepaymentInputProps) {
 
   return (
     <Card title={`Vorauszahlungen ${year}`}>
-      <p className="text-xs text-stone-500 dark:text-stone-400 mb-4">
+      <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-4">
         Automatisch berechnet: NK-Vorauszahlung &times; Monate. Bei Bedarf
         können Sie den Betrag manuell überschreiben.
       </p>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-stone-200 dark:border-stone-700">
-              <th className="py-2 px-3 text-left font-medium text-stone-500 dark:text-stone-400">
+            <tr className="border-b border-zinc-200 dark:border-zinc-700">
+              <th className="py-2 px-3 text-left font-medium text-zinc-500 dark:text-zinc-400">
                 Wohnung
               </th>
-              <th className="py-2 px-3 text-left font-medium text-stone-500 dark:text-stone-400">
+              <th className="py-2 px-3 text-left font-medium text-zinc-500 dark:text-zinc-400">
                 Mieter
               </th>
-              <th className="py-2 px-3 text-right font-medium text-stone-500 dark:text-stone-400">
+              <th className="py-2 px-3 text-right font-medium text-zinc-500 dark:text-zinc-400">
                 NK/Monat
               </th>
-              <th className="py-2 px-3 text-center font-medium text-stone-500 dark:text-stone-400">
+              <th className="py-2 px-3 text-center font-medium text-zinc-500 dark:text-zinc-400">
                 Monate
               </th>
-              <th className="py-2 px-3 text-right font-medium text-stone-500 dark:text-stone-400">
+              <th className="py-2 px-3 text-right font-medium text-zinc-500 dark:text-zinc-400">
                 Automatisch
               </th>
-              <th className="py-2 px-3 text-right font-medium text-stone-500 dark:text-stone-400">
+              <th className="py-2 px-3 text-right font-medium text-zinc-500 dark:text-zinc-400">
                 Vorauszahlung
               </th>
-              <th className="py-2 px-3 text-center font-medium text-stone-500 dark:text-stone-400" />
+              <th className="py-2 px-3 text-center font-medium text-zinc-500 dark:text-zinc-400" />
             </tr>
           </thead>
           <tbody>
@@ -166,21 +167,21 @@ export function PrepaymentInput({ propertyId, year }: PrepaymentInputProps) {
               return (
                 <tr
                   key={row.occupancy.id}
-                  className="border-b border-stone-100 dark:border-stone-700"
+                  className="border-b border-zinc-100 dark:border-zinc-700"
                 >
-                  <td className="py-2 px-3 text-stone-700 dark:text-stone-200">
+                  <td className="py-2 px-3 text-zinc-700 dark:text-zinc-200">
                     {row.unit?.name ?? '–'}
                   </td>
-                  <td className="py-2 px-3 text-stone-700 dark:text-stone-200">
+                  <td className="py-2 px-3 text-zinc-700 dark:text-zinc-200">
                     {row.tenant?.name ?? '–'}
                   </td>
-                  <td className="py-2 px-3 text-right font-mono font-tabular text-stone-600 dark:text-stone-300">
+                  <td className="py-2 px-3 text-right font-mono font-tabular text-zinc-600 dark:text-zinc-300">
                     {formatEuro(row.occupancy.rentUtilities)}
                   </td>
-                  <td className="py-2 px-3 text-center text-stone-600 dark:text-stone-300">
+                  <td className="py-2 px-3 text-center text-zinc-600 dark:text-zinc-300">
                     {formatNumber(row.months)}
                   </td>
-                  <td className="py-2 px-3 text-right font-mono font-tabular text-stone-500 dark:text-stone-400">
+                  <td className="py-2 px-3 text-right font-mono font-tabular text-zinc-500 dark:text-zinc-400">
                     {formatEuro(row.autoAmount)}
                   </td>
                   <td className="py-2 px-3">
@@ -196,7 +197,7 @@ export function PrepaymentInput({ propertyId, year }: PrepaymentInputProps) {
                     {isOverridden && (
                       <button
                         onClick={() => handleReset(row.occupancy.id!)}
-                        className="text-xs text-stone-400 dark:text-stone-500 hover:text-stone-700 dark:hover:text-stone-200"
+                        className="text-xs text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200"
                         title="Auf automatischen Wert zurücksetzen"
                       >
                         Zurücksetzen
@@ -208,14 +209,14 @@ export function PrepaymentInput({ propertyId, year }: PrepaymentInputProps) {
             })}
           </tbody>
           <tfoot>
-            <tr className="border-t border-stone-200 dark:border-stone-700">
+            <tr className="border-t border-zinc-200 dark:border-zinc-700">
               <td
                 colSpan={5}
-                className="py-2 px-3 text-sm font-semibold text-stone-600 dark:text-stone-300"
+                className="py-2 px-3 text-sm font-semibold text-zinc-600 dark:text-zinc-300"
               >
                 Gesamt Vorauszahlungen
               </td>
-              <td className="py-2 px-3 text-right font-mono font-tabular font-semibold text-stone-800 dark:text-stone-100">
+              <td className="py-2 px-3 text-right font-mono font-tabular font-semibold text-zinc-800 dark:text-zinc-100">
                 {formatEuro(totalPrepayments)}
               </td>
               <td />

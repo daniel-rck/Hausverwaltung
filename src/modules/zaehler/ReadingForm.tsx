@@ -132,7 +132,7 @@ export function ReadingForm({ selectedMeterId, onMeterChange }: ReadingFormProps
       <div className="space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">
+            <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
               Zähler *
             </label>
             <select
@@ -141,7 +141,7 @@ export function ReadingForm({ selectedMeterId, onMeterChange }: ReadingFormProps
                 const val = e.target.value;
                 onMeterChange(val ? Number(val) : null);
               }}
-              className="w-full border border-stone-300 dark:border-stone-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-500"
+              className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
             >
               <option value="">– Zähler wählen –</option>
               {(meterOptions ?? []).map((opt) => (
@@ -152,14 +152,14 @@ export function ReadingForm({ selectedMeterId, onMeterChange }: ReadingFormProps
             </select>
           </div>
           <div>
-            <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">
+            <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
               Datum *
             </label>
             <input
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="w-full border border-stone-300 dark:border-stone-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-500"
+              className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
             />
           </div>
         </div>
@@ -173,13 +173,13 @@ export function ReadingForm({ selectedMeterId, onMeterChange }: ReadingFormProps
             min={0}
           />
           <div>
-            <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">
+            <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
               Quelle *
             </label>
             <select
               value={source}
               onChange={(e) => setSource(e.target.value as MeterReading['source'])}
-              className="w-full border border-stone-300 dark:border-stone-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-500"
+              className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
             >
               <option value="self">Eigene Ablesung</option>
               <option value="messdienst">Messdienstleister</option>
@@ -192,15 +192,15 @@ export function ReadingForm({ selectedMeterId, onMeterChange }: ReadingFormProps
           <button
             onClick={handleSave}
             disabled={!selectedMeterId || !date || saving}
-            className="px-4 py-1.5 text-sm bg-stone-800 text-white rounded-lg hover:bg-stone-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-1.5 text-sm bg-zinc-800 text-white rounded-lg hover:bg-zinc-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {saving ? 'Speichere...' : 'Ablesung speichern'}
           </button>
         </div>
 
         {selectedMeterId && (
-          <div className="mt-4 pt-4 border-t border-stone-200 dark:border-stone-700">
-            <h3 className="text-sm font-semibold text-stone-700 dark:text-stone-200 mb-2">
+          <div className="mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
+            <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-200 mb-2">
               Letzte Ablesungen
             </h3>
             <DataTable

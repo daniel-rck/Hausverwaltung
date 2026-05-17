@@ -4,6 +4,7 @@ import { db } from '../../db';
 import { useProperty } from '../../hooks/useProperty';
 import { Card } from '../../components/shared/Card';
 import { EmptyState } from '../../components/shared/EmptyState';
+import { FileText } from '../../components/ui/icons';
 import { PrintLayout } from '../../components/layout/PrintLayout';
 import { usePrint } from '../../hooks/usePrint';
 import { formatEuro, formatArea } from '../../utils/format';
@@ -155,23 +156,23 @@ export function TaxExport({ year }: TaxExportProps) {
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b-2 border-stone-300 dark:border-stone-600">
-            <th className="py-2 px-3 text-left font-medium text-stone-600 dark:text-stone-300">
+          <tr className="border-b-2 border-zinc-300 dark:border-zinc-600">
+            <th className="py-2 px-3 text-left font-medium text-zinc-600 dark:text-zinc-300">
               Einheit
             </th>
-            <th className="py-2 px-3 text-left font-medium text-stone-600 dark:text-stone-300">
+            <th className="py-2 px-3 text-left font-medium text-zinc-600 dark:text-zinc-300">
               Mieter
             </th>
-            <th className="py-2 px-3 text-left font-medium text-stone-600 dark:text-stone-300">
+            <th className="py-2 px-3 text-left font-medium text-zinc-600 dark:text-zinc-300">
               Zeitraum
             </th>
-            <th className="py-2 px-3 text-right font-medium text-stone-600 dark:text-stone-300">
+            <th className="py-2 px-3 text-right font-medium text-zinc-600 dark:text-zinc-300">
               Kaltmiete
             </th>
-            <th className="py-2 px-3 text-right font-medium text-stone-600 dark:text-stone-300">
+            <th className="py-2 px-3 text-right font-medium text-zinc-600 dark:text-zinc-300">
               Nebenkosten
             </th>
-            <th className="py-2 px-3 text-right font-medium text-stone-600 dark:text-stone-300">
+            <th className="py-2 px-3 text-right font-medium text-zinc-600 dark:text-zinc-300">
               Gesamt
             </th>
           </tr>
@@ -183,23 +184,23 @@ export function TaxExport({ year }: TaxExportProps) {
               ? formatPeriod(row.occupancyTo)
               : 'laufend';
             return (
-              <tr key={row.id} className="border-b border-stone-100 dark:border-stone-700">
-                <td className="py-2.5 px-3 font-medium text-stone-700 dark:text-stone-200">
+              <tr key={row.id} className="border-b border-zinc-100 dark:border-zinc-700">
+                <td className="py-2.5 px-3 font-medium text-zinc-700 dark:text-zinc-200">
                   {row.unitName}
                 </td>
-                <td className="py-2.5 px-3 text-stone-600 dark:text-stone-300">
+                <td className="py-2.5 px-3 text-zinc-600 dark:text-zinc-300">
                   {row.tenantName}
                 </td>
-                <td className="py-2.5 px-3 text-stone-500 dark:text-stone-400 text-xs">
+                <td className="py-2.5 px-3 text-zinc-500 dark:text-zinc-400 text-xs">
                   {fromDisplay} – {toDisplay}
                 </td>
-                <td className="py-2.5 px-3 text-right font-mono text-stone-700 dark:text-stone-200">
+                <td className="py-2.5 px-3 text-right font-mono text-zinc-700 dark:text-zinc-200">
                   {formatEuro(row.totalCold)}
                 </td>
-                <td className="py-2.5 px-3 text-right font-mono text-stone-700 dark:text-stone-200">
+                <td className="py-2.5 px-3 text-right font-mono text-zinc-700 dark:text-zinc-200">
                   {formatEuro(row.totalUtilities)}
                 </td>
-                <td className="py-2.5 px-3 text-right font-mono font-medium text-stone-800 dark:text-stone-100">
+                <td className="py-2.5 px-3 text-right font-mono font-medium text-zinc-800 dark:text-zinc-100">
                   {formatEuro(row.totalReceived)}
                 </td>
               </tr>
@@ -207,20 +208,20 @@ export function TaxExport({ year }: TaxExportProps) {
           })}
         </tbody>
         <tfoot>
-          <tr className="border-t-2 border-stone-300 dark:border-stone-600">
+          <tr className="border-t-2 border-zinc-300 dark:border-zinc-600">
             <td
               colSpan={3}
-              className="py-3 px-3 font-semibold text-stone-800 dark:text-stone-100"
+              className="py-3 px-3 font-semibold text-zinc-800 dark:text-zinc-100"
             >
               Summe {year}
             </td>
-            <td className="py-3 px-3 text-right font-mono font-semibold text-stone-800 dark:text-stone-100">
+            <td className="py-3 px-3 text-right font-mono font-semibold text-zinc-800 dark:text-zinc-100">
               {formatEuro(grandTotalCold)}
             </td>
-            <td className="py-3 px-3 text-right font-mono font-semibold text-stone-800 dark:text-stone-100">
+            <td className="py-3 px-3 text-right font-mono font-semibold text-zinc-800 dark:text-zinc-100">
               {formatEuro(grandTotalUtilities)}
             </td>
-            <td className="py-3 px-3 text-right font-mono font-bold text-stone-900">
+            <td className="py-3 px-3 text-right font-mono font-bold text-zinc-900">
               {formatEuro(grandTotal)}
             </td>
           </tr>
@@ -254,23 +255,23 @@ export function TaxExport({ year }: TaxExportProps) {
     <Card title="Anlage V – Übertragungshilfe für Elster">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b-2 border-stone-300 dark:border-stone-600">
-            <th className="py-2 px-2 text-left font-medium text-stone-500 dark:text-stone-400 w-16">Zeile</th>
-            <th className="py-2 px-3 text-left font-medium text-stone-600 dark:text-stone-300">Bezeichnung</th>
-            <th className="py-2 px-3 text-right font-medium text-stone-600 dark:text-stone-300">Wert</th>
+          <tr className="border-b-2 border-zinc-300 dark:border-zinc-600">
+            <th className="py-2 px-2 text-left font-medium text-zinc-500 dark:text-zinc-400 w-16">Zeile</th>
+            <th className="py-2 px-3 text-left font-medium text-zinc-600 dark:text-zinc-300">Bezeichnung</th>
+            <th className="py-2 px-3 text-right font-medium text-zinc-600 dark:text-zinc-300">Wert</th>
           </tr>
         </thead>
         <tbody>
           {anlageVRows.map((row) => (
             <tr
               key={row.zeile}
-              className={`border-b border-stone-100 dark:border-stone-700 ${row.highlight ? 'bg-emerald-50 dark:bg-emerald-900/20' : ''}`}
+              className={`border-b border-zinc-100 dark:border-zinc-700 ${row.highlight ? 'bg-emerald-50 dark:bg-emerald-900/20' : ''}`}
             >
-              <td className="py-2 px-2 text-xs text-stone-400 dark:text-stone-500 font-mono">{row.zeile}</td>
-              <td className={`py-2 px-3 ${row.bold || row.highlight ? 'font-semibold' : ''} text-stone-700 dark:text-stone-200`}>
+              <td className="py-2 px-2 text-xs text-zinc-400 dark:text-zinc-500 font-mono">{row.zeile}</td>
+              <td className={`py-2 px-3 ${row.bold || row.highlight ? 'font-semibold' : ''} text-zinc-700 dark:text-zinc-200`}>
                 {row.label}
               </td>
-              <td className={`py-2 px-3 text-right font-mono ${row.highlight ? 'font-bold text-emerald-700 dark:text-emerald-400' : row.bold ? 'font-semibold text-stone-800 dark:text-stone-100' : 'text-stone-700 dark:text-stone-200'}`}>
+              <td className={`py-2 px-3 text-right font-mono ${row.highlight ? 'font-bold text-emerald-700 dark:text-emerald-400' : row.bold ? 'font-semibold text-zinc-800 dark:text-zinc-100' : 'text-zinc-700 dark:text-zinc-200'}`}>
                 {row.value}
               </td>
             </tr>
@@ -288,7 +289,7 @@ export function TaxExport({ year }: TaxExportProps) {
           und die AfA gegen Steuerberater/Vorjahres-Bescheid prüfen.
         </p>
       </div>
-      <p className="text-xs text-stone-400 dark:text-stone-500 mt-2">
+      <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-2">
         Die Angaben dienen als Ausfüllhilfe für die Anlage V der Einkommensteuererklärung.
         Bitte prüfen Sie alle Werte vor der Übertragung in ELSTER.
       </p>
@@ -315,7 +316,7 @@ export function TaxExport({ year }: TaxExportProps) {
           rows.length > 0 ? (
             <button
               onClick={print}
-              className="px-3 py-1.5 text-xs bg-stone-800 text-white rounded-lg hover:bg-stone-900 transition-colors"
+              className="px-3 py-1.5 text-xs bg-zinc-800 text-white rounded-lg hover:bg-zinc-900 transition-colors"
             >
               Drucken
             </button>
@@ -324,14 +325,14 @@ export function TaxExport({ year }: TaxExportProps) {
       >
         {rows.length === 0 ? (
           <EmptyState
-            icon="📄"
+            icon={<FileText size={24} strokeWidth={1.75} />}
             title="Keine Einnahmen"
             description={`Für ${year} wurden noch keine Zahlungen erfasst.`}
           />
         ) : (
           <>
             {tableContent}
-            <p className="text-xs text-stone-400 dark:text-stone-500 mt-4">
+            <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-4">
               Alle Beträge in Euro. Nur tatsächlich eingegangene Zahlungen.
             </p>
           </>

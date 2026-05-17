@@ -61,19 +61,19 @@ function RoomTable({ rooms }: { rooms: RoomCondition[] }) {
   return (
     <table className="w-full text-sm border-collapse">
       <thead>
-        <tr className="bg-stone-100">
-          <th className="border border-stone-300 px-2 py-1.5 text-left font-medium">
+        <tr className="bg-zinc-100">
+          <th className="border border-zinc-300 px-2 py-1.5 text-left font-medium">
             Raum
           </th>
           {aspects.map((a) => (
             <th
               key={a.key}
-              className="border border-stone-300 px-2 py-1.5 text-center font-medium"
+              className="border border-zinc-300 px-2 py-1.5 text-center font-medium"
             >
               {a.label}
             </th>
           ))}
-          <th className="border border-stone-300 px-2 py-1.5 text-left font-medium">
+          <th className="border border-zinc-300 px-2 py-1.5 text-left font-medium">
             Bemerkungen
           </th>
         </tr>
@@ -81,18 +81,18 @@ function RoomTable({ rooms }: { rooms: RoomCondition[] }) {
       <tbody>
         {rooms.map((room, i) => (
           <tr key={i}>
-            <td className="border border-stone-300 px-2 py-1.5 font-medium">
+            <td className="border border-zinc-300 px-2 py-1.5 font-medium">
               {room.name}
             </td>
             {aspects.map((a) => (
               <td
                 key={a.key}
-                className={`border border-stone-300 px-2 py-1.5 text-center ${ratingPrintClass(room[a.key])}`}
+                className={`border border-zinc-300 px-2 py-1.5 text-center ${ratingPrintClass(room[a.key])}`}
               >
                 {ratingLabel(room[a.key])}
               </td>
             ))}
-            <td className="border border-stone-300 px-2 py-1.5 text-stone-600">
+            <td className="border border-zinc-300 px-2 py-1.5 text-zinc-600">
               {room.notes || '–'}
             </td>
           </tr>
@@ -109,13 +109,13 @@ export function UebergabePrint({ data }: UebergabePrintProps) {
   const typeLabel = protocol.type === 'move-in' ? 'Einzug' : 'Auszug';
 
   return (
-    <div className="print-only print-container font-sans text-stone-800">
+    <div className="print-only print-container font-sans text-zinc-800">
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-xl font-bold mb-1">
           Übergabeprotokoll – {typeLabel}
         </h1>
-        <p className="text-sm text-stone-500">
+        <p className="text-sm text-zinc-500">
           Erstellt am {formatDate(protocol.date)}
         </p>
       </div>
@@ -123,35 +123,35 @@ export function UebergabePrint({ data }: UebergabePrintProps) {
       {/* Parties */}
       <div className="grid grid-cols-2 gap-6 mb-6 text-sm">
         <div>
-          <h2 className="font-semibold text-stone-700 mb-1">Vermieter</h2>
+          <h2 className="font-semibold text-zinc-700 mb-1">Vermieter</h2>
           {landlord ? (
-            <div className="text-stone-600">
+            <div className="text-zinc-600">
               <p>{landlord.name}</p>
               <p className="whitespace-pre-line">{landlord.address}</p>
               {landlord.taxId && <p>Steuer-Nr.: {landlord.taxId}</p>}
             </div>
           ) : (
-            <p className="text-stone-400">Nicht hinterlegt</p>
+            <p className="text-zinc-400">Nicht hinterlegt</p>
           )}
         </div>
         <div>
-          <h2 className="font-semibold text-stone-700 mb-1">Mieter</h2>
-          <p className="text-stone-600">{tenantName}</p>
+          <h2 className="font-semibold text-zinc-700 mb-1">Mieter</h2>
+          <p className="text-zinc-600">{tenantName}</p>
         </div>
       </div>
 
       {/* Object info */}
-      <div className="grid grid-cols-3 gap-4 mb-6 text-sm bg-stone-50 p-3 rounded-lg border border-stone-200">
+      <div className="grid grid-cols-3 gap-4 mb-6 text-sm bg-zinc-50 p-3 rounded-lg border border-zinc-200">
         <div>
-          <span className="text-stone-500 text-xs">Objekt</span>
+          <span className="text-zinc-500 text-xs">Objekt</span>
           <p className="font-medium">{propertyName}</p>
         </div>
         <div>
-          <span className="text-stone-500 text-xs">Wohnung</span>
+          <span className="text-zinc-500 text-xs">Wohnung</span>
           <p className="font-medium">{unitName}</p>
         </div>
         <div>
-          <span className="text-stone-500 text-xs">Art / Datum</span>
+          <span className="text-zinc-500 text-xs">Art / Datum</span>
           <p className="font-medium">
             {typeLabel} – {formatDate(protocol.date)}
           </p>
@@ -170,17 +170,17 @@ export function UebergabePrint({ data }: UebergabePrintProps) {
           <h2 className="text-base font-semibold mb-2">Zählerstände</h2>
           <table className="w-full text-sm border-collapse">
             <thead>
-              <tr className="bg-stone-100">
-                <th className="border border-stone-300 px-2 py-1.5 text-left font-medium">
+              <tr className="bg-zinc-100">
+                <th className="border border-zinc-300 px-2 py-1.5 text-left font-medium">
                   Zählerart
                 </th>
-                <th className="border border-stone-300 px-2 py-1.5 text-left font-medium">
+                <th className="border border-zinc-300 px-2 py-1.5 text-left font-medium">
                   Zähler-Nr.
                 </th>
-                <th className="border border-stone-300 px-2 py-1.5 text-right font-medium">
+                <th className="border border-zinc-300 px-2 py-1.5 text-right font-medium">
                   Stand
                 </th>
-                <th className="border border-stone-300 px-2 py-1.5 text-left font-medium">
+                <th className="border border-zinc-300 px-2 py-1.5 text-left font-medium">
                   Einheit
                 </th>
               </tr>
@@ -188,16 +188,16 @@ export function UebergabePrint({ data }: UebergabePrintProps) {
             <tbody>
               {meterDetails.map((m) => (
                 <tr key={m.meterId}>
-                  <td className="border border-stone-300 px-2 py-1.5">
+                  <td className="border border-zinc-300 px-2 py-1.5">
                     {m.typeName}
                   </td>
-                  <td className="border border-stone-300 px-2 py-1.5 font-mono">
+                  <td className="border border-zinc-300 px-2 py-1.5 font-mono">
                     {m.serialNumber}
                   </td>
-                  <td className="border border-stone-300 px-2 py-1.5 text-right font-mono">
+                  <td className="border border-zinc-300 px-2 py-1.5 text-right font-mono">
                     {m.value.toLocaleString('de-DE')}
                   </td>
-                  <td className="border border-stone-300 px-2 py-1.5">
+                  <td className="border border-zinc-300 px-2 py-1.5">
                     {m.typeUnit}
                   </td>
                 </tr>
@@ -213,11 +213,11 @@ export function UebergabePrint({ data }: UebergabePrintProps) {
           <h2 className="text-base font-semibold mb-2">Schlüsselübergabe</h2>
           <table className="w-full text-sm border-collapse">
             <thead>
-              <tr className="bg-stone-100">
-                <th className="border border-stone-300 px-2 py-1.5 text-left font-medium">
+              <tr className="bg-zinc-100">
+                <th className="border border-zinc-300 px-2 py-1.5 text-left font-medium">
                   Schlüsselart
                 </th>
-                <th className="border border-stone-300 px-2 py-1.5 text-center font-medium">
+                <th className="border border-zinc-300 px-2 py-1.5 text-center font-medium">
                   Anzahl
                 </th>
               </tr>
@@ -225,10 +225,10 @@ export function UebergabePrint({ data }: UebergabePrintProps) {
             <tbody>
               {protocol.keys.map((k, i) => (
                 <tr key={i}>
-                  <td className="border border-stone-300 px-2 py-1.5">
+                  <td className="border border-zinc-300 px-2 py-1.5">
                     {k.type}
                   </td>
-                  <td className="border border-stone-300 px-2 py-1.5 text-center font-mono">
+                  <td className="border border-zinc-300 px-2 py-1.5 text-center font-mono">
                     {k.count}
                   </td>
                 </tr>
@@ -242,7 +242,7 @@ export function UebergabePrint({ data }: UebergabePrintProps) {
       {protocol.notes && (
         <div className="mb-6">
           <h2 className="text-base font-semibold mb-2">Sonstige Anmerkungen</h2>
-          <p className="text-sm text-stone-600 whitespace-pre-line border border-stone-300 rounded p-3">
+          <p className="text-sm text-zinc-600 whitespace-pre-line border border-zinc-300 rounded p-3">
             {protocol.notes}
           </p>
         </div>
@@ -254,36 +254,36 @@ export function UebergabePrint({ data }: UebergabePrintProps) {
         <h2 className="text-base font-semibold mb-4">Unterschriften</h2>
         <div className="grid grid-cols-2 gap-8">
           <div>
-            <p className="text-sm font-medium text-stone-700 mb-2">Vermieter</p>
+            <p className="text-sm font-medium text-zinc-700 mb-2">Vermieter</p>
             {protocol.signatures.landlord ? (
               <img
                 src={protocol.signatures.landlord}
                 alt="Unterschrift Vermieter"
-                className="h-24 border-b border-stone-400"
+                className="h-24 border-b border-zinc-400"
               />
             ) : (
-              <div className="h-24 border-b border-stone-400" />
+              <div className="h-24 border-b border-zinc-400" />
             )}
-            <p className="text-xs text-stone-500 mt-1">
+            <p className="text-xs text-zinc-500 mt-1">
               {landlord?.name ?? 'Vermieter'}
             </p>
-            <p className="text-xs text-stone-400">
+            <p className="text-xs text-zinc-400">
               Ort, Datum: ______________________
             </p>
           </div>
           <div>
-            <p className="text-sm font-medium text-stone-700 mb-2">Mieter</p>
+            <p className="text-sm font-medium text-zinc-700 mb-2">Mieter</p>
             {protocol.signatures.tenant ? (
               <img
                 src={protocol.signatures.tenant}
                 alt="Unterschrift Mieter"
-                className="h-24 border-b border-stone-400"
+                className="h-24 border-b border-zinc-400"
               />
             ) : (
-              <div className="h-24 border-b border-stone-400" />
+              <div className="h-24 border-b border-zinc-400" />
             )}
-            <p className="text-xs text-stone-500 mt-1">{tenantName}</p>
-            <p className="text-xs text-stone-400">
+            <p className="text-xs text-zinc-500 mt-1">{tenantName}</p>
+            <p className="text-xs text-zinc-400">
               Ort, Datum: ______________________
             </p>
           </div>

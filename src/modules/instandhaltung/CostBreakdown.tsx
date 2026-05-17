@@ -7,6 +7,7 @@ import { BarChart } from '../../components/charts/BarChart';
 import { DonutChart } from '../../components/charts/DonutChart';
 import { DataTable, type Column } from '../../components/shared/DataTable';
 import { EmptyState } from '../../components/shared/EmptyState';
+import { BarChart3 } from '../../components/ui/icons';
 import { formatEuro } from '../../utils/format';
 import type { MaintenanceItem, Unit } from '../../db/schema';
 
@@ -149,7 +150,7 @@ export function CostBreakdown() {
       key: 'unit',
       header: 'Wohnung',
       render: (r) => (
-        <span className={`font-medium ${r.unitName === 'Gemeinschaft' ? 'text-stone-500 dark:text-stone-400 italic' : ''}`}>
+        <span className={`font-medium ${r.unitName === 'Gemeinschaft' ? 'text-zinc-500 dark:text-zinc-400 italic' : ''}`}>
           {r.unitName}
         </span>
       ),
@@ -196,7 +197,7 @@ export function CostBreakdown() {
     return (
       <Card title="Kostenauswertung">
         <EmptyState
-          icon="📊"
+          icon={<BarChart3 size={24} strokeWidth={1.75} />}
           title="Keine Kostendaten"
           description="Sobald Maßnahmen erfasst sind, sehen Sie hier die Kostenauswertung."
         />
@@ -213,7 +214,7 @@ export function CostBreakdown() {
           <select
             value={effectiveYear ?? ''}
             onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-            className="text-sm border border-stone-300 dark:border-stone-600 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-500"
+            className="text-sm border border-zinc-300 dark:border-zinc-600 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
           >
             {availableYears.map((y) => (
               <option key={y} value={y}>{y}</option>
@@ -221,7 +222,7 @@ export function CostBreakdown() {
           </select>
         }
       >
-        <p className="text-sm text-stone-600 dark:text-stone-300">
+        <p className="text-sm text-zinc-600 dark:text-zinc-300">
           Gesamtkosten {effectiveYear}:{' '}
           <span className="font-semibold font-mono">{formatEuro(totalSelectedYear)}</span>
         </p>
@@ -239,7 +240,7 @@ export function CostBreakdown() {
               />
             </div>
           ) : (
-            <p className="text-sm text-stone-500 dark:text-stone-400 text-center py-8">Keine Daten</p>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400 text-center py-8">Keine Daten</p>
           )}
         </Card>
 
@@ -254,7 +255,7 @@ export function CostBreakdown() {
               />
             </div>
           ) : (
-            <p className="text-sm text-stone-500 dark:text-stone-400 text-center py-8">Keine Daten für dieses Jahr</p>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400 text-center py-8">Keine Daten für dieses Jahr</p>
           )}
         </Card>
       </div>
@@ -268,7 +269,7 @@ export function CostBreakdown() {
             keyFn={(r) => r.unitName}
           />
         ) : (
-          <p className="text-sm text-stone-500 dark:text-stone-400 text-center py-4">
+          <p className="text-sm text-zinc-500 dark:text-zinc-400 text-center py-4">
             Keine Kosten für dieses Jahr vorhanden.
           </p>
         )}

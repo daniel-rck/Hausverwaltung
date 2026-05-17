@@ -30,20 +30,20 @@ export function ContractTemplate({ occupancy, unit, tenant }: ContractTemplatePr
       <div className="no-print mb-4 flex justify-end">
         <button
           onClick={() => window.print()}
-          className="px-4 py-2 text-sm bg-stone-800 dark:bg-stone-600 text-white rounded-lg hover:bg-stone-900 dark:hover:bg-stone-500 transition-colors"
+          className="px-4 py-2 text-sm bg-zinc-800 dark:bg-zinc-600 text-white rounded-lg hover:bg-zinc-900 dark:hover:bg-zinc-500 transition-colors"
         >
           Vertrag drucken
         </button>
       </div>
 
       {/* A4 contract content – always light background for print */}
-      <div className="bg-white text-stone-900 max-w-[210mm] mx-auto p-10 print:p-0 text-sm leading-relaxed border border-stone-200 dark:border-stone-700 print:border-none shadow-sm print:shadow-none">
+      <div className="bg-white text-zinc-900 max-w-[210mm] mx-auto p-10 print:p-0 text-sm leading-relaxed border border-zinc-200 dark:border-zinc-700 print:border-none shadow-sm print:shadow-none">
         {/* Header */}
         <h1 className="text-2xl font-bold text-center mb-8 tracking-wide">
           MIETVERTRAG
         </h1>
 
-        <p className="mb-6 text-center text-xs text-stone-500">
+        <p className="mb-6 text-center text-xs text-zinc-500">
           zwischen den nachstehend genannten Vertragsparteien
         </p>
 
@@ -54,7 +54,7 @@ export function ContractTemplate({ occupancy, unit, tenant }: ContractTemplatePr
             <p>{landlord?.name ?? '________________________'}</p>
             <p>{landlord?.address ?? '________________________'}</p>
             {landlord?.taxId && (
-              <p className="text-xs text-stone-500 mt-1">
+              <p className="text-xs text-zinc-500 mt-1">
                 Steuer-Nr.: {landlord.taxId}
               </p>
             )}
@@ -62,12 +62,12 @@ export function ContractTemplate({ occupancy, unit, tenant }: ContractTemplatePr
           <div>
             <p className="font-semibold mb-1">Mieter:</p>
             <p>{tenant.name}</p>
-            {tenant.email && <p className="text-xs text-stone-500">{tenant.email}</p>}
-            {tenant.phone && <p className="text-xs text-stone-500">{tenant.phone}</p>}
+            {tenant.email && <p className="text-xs text-zinc-500">{tenant.email}</p>}
+            {tenant.phone && <p className="text-xs text-zinc-500">{tenant.phone}</p>}
           </div>
         </div>
 
-        <hr className="my-6 border-stone-300" />
+        <hr className="my-6 border-zinc-300" />
 
         {/* §1 Mietgegenstand */}
         <Section number={1} title="Mietgegenstand">
@@ -75,7 +75,7 @@ export function ContractTemplate({ occupancy, unit, tenant }: ContractTemplatePr
             Der Vermieter vermietet dem Mieter die nachstehend bezeichnete Wohnung
             in dem Anwesen:
           </p>
-          <div className="mt-2 pl-4 border-l-2 border-stone-300">
+          <div className="mt-2 pl-4 border-l-2 border-zinc-300">
             <p>
               <strong>Anschrift:</strong>{' '}
               {property?.address ?? '________________________'}
@@ -127,7 +127,7 @@ export function ContractTemplate({ occupancy, unit, tenant }: ContractTemplatePr
                   {formatEuro(occupancy.rentUtilities)}
                 </td>
               </tr>
-              <tr className="border-t border-stone-300 font-semibold">
+              <tr className="border-t border-zinc-300 font-semibold">
                 <td className="py-1">Gesamtmiete (monatlich):</td>
                 <td className="py-1 text-right font-mono">
                   {formatEuro(totalRent)}
@@ -232,7 +232,7 @@ export function ContractTemplate({ occupancy, unit, tenant }: ContractTemplatePr
             wirtschaftlichen Zweck der unwirksamen Bestimmung am nächsten kommt.
           </p>
           {occupancy.notes && (
-            <div className="mt-3 p-3 border border-stone-300 rounded">
+            <div className="mt-3 p-3 border border-zinc-300 rounded">
               <p className="text-xs font-semibold mb-1">Besondere Vereinbarungen:</p>
               <p>{occupancy.notes}</p>
             </div>
@@ -246,15 +246,15 @@ export function ContractTemplate({ occupancy, unit, tenant }: ContractTemplatePr
           </p>
           <div className="grid grid-cols-2 gap-12">
             <div>
-              <div className="border-t border-stone-900 pt-2">
-                <p className="text-xs text-stone-500">
+              <div className="border-t border-zinc-900 pt-2">
+                <p className="text-xs text-zinc-500">
                   Vermieter: {landlord?.name ?? ''}
                 </p>
               </div>
             </div>
             <div>
-              <div className="border-t border-stone-900 pt-2">
-                <p className="text-xs text-stone-500">
+              <div className="border-t border-zinc-900 pt-2">
+                <p className="text-xs text-zinc-500">
                   Mieter: {tenant.name}
                 </p>
               </div>

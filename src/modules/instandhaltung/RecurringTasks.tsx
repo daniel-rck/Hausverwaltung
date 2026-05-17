@@ -5,6 +5,7 @@ import { useProperty } from '../../hooks/useProperty';
 import { Card } from '../../components/shared/Card';
 import { DataTable, type Column } from '../../components/shared/DataTable';
 import { EmptyState } from '../../components/shared/EmptyState';
+import { Repeat } from '../../components/ui/icons';
 import { StatusBadge } from '../../components/shared/StatusBadge';
 import { formatDate } from '../../utils/format';
 import type { MaintenanceItem, Unit } from '../../db/schema';
@@ -92,7 +93,7 @@ export function RecurringTasks() {
       key: 'unit',
       header: 'Wohnung',
       render: (r) => (
-        <span className={r.item.unitId === null ? 'text-stone-500 dark:text-stone-400 italic' : ''}>
+        <span className={r.item.unitId === null ? 'text-zinc-500 dark:text-zinc-400 italic' : ''}>
           {r.unitName}
         </span>
       ),
@@ -110,7 +111,7 @@ export function RecurringTasks() {
       render: (r) =>
         r.item.recurringInterval
           ? `${r.item.recurringInterval} Monat${r.item.recurringInterval > 1 ? 'e' : ''}`
-          : <span className="text-stone-400 dark:text-stone-500">–</span>,
+          : <span className="text-zinc-400 dark:text-zinc-500">–</span>,
       sortValue: (r) => r.item.recurringInterval ?? 0,
       align: 'center',
     },
@@ -124,7 +125,7 @@ export function RecurringTasks() {
       key: 'nextDue',
       header: 'Nächste Fälligkeit',
       render: (r) => {
-        if (!r.item.nextDue) return <span className="text-stone-400 dark:text-stone-500">–</span>;
+        if (!r.item.nextDue) return <span className="text-zinc-400 dark:text-zinc-500">–</span>;
         return (
           <span className={r.isOverdue ? 'text-red-600 font-semibold' : ''}>
             {formatDate(r.item.nextDue)}
@@ -160,7 +161,7 @@ export function RecurringTasks() {
     <Card title="Wiederkehrende Aufgaben">
       {rows.length === 0 ? (
         <EmptyState
-          icon="🔁"
+          icon={<Repeat size={24} strokeWidth={1.75} />}
           title="Keine wiederkehrenden Aufgaben"
           description="Markieren Sie Maßnahmen als wiederkehrend, um sie hier zu sehen."
         />

@@ -3,6 +3,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../db';
 import { Card } from '../../components/shared/Card';
 import { EmptyState } from '../../components/shared/EmptyState';
+import { BarChart3 } from '../../components/ui/icons';
 import { formatEuro, formatPercent } from '../../utils/format';
 import type { FinancingData } from '../../db/schema';
 
@@ -184,7 +185,7 @@ export function AnnualReport({ propertyId }: AnnualReportProps) {
     return (
       <Card>
         <EmptyState
-          icon="📊"
+          icon={<BarChart3 size={24} strokeWidth={1.75} />}
           title="Keine Einheiten vorhanden"
           description="Legen Sie zuerst Wohneinheiten an, um den Jahresabschluss zu sehen."
         />
@@ -201,13 +202,13 @@ export function AnnualReport({ propertyId }: AnnualReportProps) {
       {/* Year selector + print button */}
       <div className="no-print flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <label className="text-sm font-medium text-stone-600 dark:text-stone-300">
+          <label className="text-sm font-medium text-zinc-600 dark:text-zinc-300">
             Jahr:
           </label>
           <select
             value={year}
             onChange={(e) => setYear(Number(e.target.value))}
-            className="border border-stone-300 dark:border-stone-600 rounded-lg px-3 py-1.5 text-sm bg-white dark:bg-stone-800 dark:text-stone-200 focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-500"
+            className="border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm bg-white dark:bg-zinc-800 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
           >
             {yearOptions.map((y) => (
               <option key={y} value={y}>
@@ -218,7 +219,7 @@ export function AnnualReport({ propertyId }: AnnualReportProps) {
         </div>
         <button
           onClick={() => window.print()}
-          className="px-4 py-2 text-sm bg-stone-800 dark:bg-stone-600 text-white rounded-lg hover:bg-stone-900 dark:hover:bg-stone-500 transition-colors"
+          className="px-4 py-2 text-sm bg-zinc-800 dark:bg-zinc-600 text-white rounded-lg hover:bg-zinc-900 dark:hover:bg-zinc-500 transition-colors"
         >
           Drucken
         </button>
@@ -228,7 +229,7 @@ export function AnnualReport({ propertyId }: AnnualReportProps) {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <Card>
           <div className="text-center">
-            <p className="text-xs text-stone-500 dark:text-stone-400 mb-1">
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">
               Einnahmen
             </p>
             <p className="text-xl font-semibold font-mono font-tabular text-green-600">
@@ -238,7 +239,7 @@ export function AnnualReport({ propertyId }: AnnualReportProps) {
         </Card>
         <Card>
           <div className="text-center">
-            <p className="text-xs text-stone-500 dark:text-stone-400 mb-1">
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">
               Ausgaben
             </p>
             <p className="text-xl font-semibold font-mono font-tabular text-red-600">
@@ -248,7 +249,7 @@ export function AnnualReport({ propertyId }: AnnualReportProps) {
         </Card>
         <Card>
           <div className="text-center">
-            <p className="text-xs text-stone-500 dark:text-stone-400 mb-1">
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">
               Ergebnis
             </p>
             <p
@@ -262,14 +263,14 @@ export function AnnualReport({ propertyId }: AnnualReportProps) {
         </Card>
         <Card>
           <div className="text-center">
-            <p className="text-xs text-stone-500 dark:text-stone-400 mb-1">
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">
               Leerstand
             </p>
             <p
               className={`text-xl font-semibold font-mono font-tabular ${
                 data.vacantMonths > 0
                   ? 'text-amber-600'
-                  : 'text-stone-400 dark:text-stone-500'
+                  : 'text-zinc-400 dark:text-zinc-500'
               }`}
             >
               {data.vacantMonths} / {data.totalMonths} Mon.
@@ -284,34 +285,34 @@ export function AnnualReport({ propertyId }: AnnualReportProps) {
           <table className="w-full text-sm">
             {/* Einnahmen section */}
             <thead>
-              <tr className="border-b-2 border-stone-300 dark:border-stone-600">
+              <tr className="border-b-2 border-zinc-300 dark:border-zinc-600">
                 <th
                   colSpan={2}
-                  className="py-2 px-3 text-left font-semibold text-stone-800 dark:text-stone-100"
+                  className="py-2 px-3 text-left font-semibold text-zinc-800 dark:text-zinc-100"
                 >
                   Einnahmen
                 </th>
               </tr>
             </thead>
             <tbody>
-              <tr className="border-b border-stone-100 dark:border-stone-700">
-                <td className="py-2 px-3 text-stone-600 dark:text-stone-300">
+              <tr className="border-b border-zinc-100 dark:border-zinc-700">
+                <td className="py-2 px-3 text-zinc-600 dark:text-zinc-300">
                   Kaltmiete (erhalten)
                 </td>
-                <td className="py-2 px-3 text-right font-mono text-stone-700 dark:text-stone-200">
+                <td className="py-2 px-3 text-right font-mono text-zinc-700 dark:text-zinc-200">
                   {formatEuro(data.totalColdReceived)}
                 </td>
               </tr>
-              <tr className="border-b border-stone-100 dark:border-stone-700">
-                <td className="py-2 px-3 text-stone-600 dark:text-stone-300">
+              <tr className="border-b border-zinc-100 dark:border-zinc-700">
+                <td className="py-2 px-3 text-zinc-600 dark:text-zinc-300">
                   Nebenkostenvorauszahlungen (erhalten)
                 </td>
-                <td className="py-2 px-3 text-right font-mono text-stone-700 dark:text-stone-200">
+                <td className="py-2 px-3 text-right font-mono text-zinc-700 dark:text-zinc-200">
                   {formatEuro(data.totalUtilitiesReceived)}
                 </td>
               </tr>
-              <tr className="border-b-2 border-stone-300 dark:border-stone-600 font-semibold">
-                <td className="py-2 px-3 text-stone-800 dark:text-stone-100">
+              <tr className="border-b-2 border-zinc-300 dark:border-zinc-600 font-semibold">
+                <td className="py-2 px-3 text-zinc-800 dark:text-zinc-100">
                   Summe Einnahmen
                 </td>
                 <td className="py-2 px-3 text-right font-mono text-green-600">
@@ -322,54 +323,54 @@ export function AnnualReport({ propertyId }: AnnualReportProps) {
 
             {/* Ausgaben section */}
             <thead>
-              <tr className="border-b-2 border-stone-300 dark:border-stone-600">
+              <tr className="border-b-2 border-zinc-300 dark:border-zinc-600">
                 <th
                   colSpan={2}
-                  className="py-2 px-3 text-left font-semibold text-stone-800 dark:text-stone-100 pt-4"
+                  className="py-2 px-3 text-left font-semibold text-zinc-800 dark:text-zinc-100 pt-4"
                 >
                   Ausgaben
                 </th>
               </tr>
             </thead>
             <tbody>
-              <tr className="border-b border-stone-100 dark:border-stone-700">
-                <td className="py-2 px-3 text-stone-600 dark:text-stone-300">
+              <tr className="border-b border-zinc-100 dark:border-zinc-700">
+                <td className="py-2 px-3 text-zinc-600 dark:text-zinc-300">
                   Nebenkosten / Betriebskosten
                 </td>
-                <td className="py-2 px-3 text-right font-mono text-stone-700 dark:text-stone-200">
+                <td className="py-2 px-3 text-right font-mono text-zinc-700 dark:text-zinc-200">
                   {formatEuro(data.totalNebenkosten)}
                 </td>
               </tr>
-              <tr className="border-b border-stone-100 dark:border-stone-700">
-                <td className="py-2 px-3 text-stone-600 dark:text-stone-300">
+              <tr className="border-b border-zinc-100 dark:border-zinc-700">
+                <td className="py-2 px-3 text-zinc-600 dark:text-zinc-300">
                   Instandhaltung / Reparaturen
                 </td>
-                <td className="py-2 px-3 text-right font-mono text-stone-700 dark:text-stone-200">
+                <td className="py-2 px-3 text-right font-mono text-zinc-700 dark:text-zinc-200">
                   {formatEuro(data.totalInstandhaltung)}
                 </td>
               </tr>
               {data.schuldzinsen > 0 && (
-                <tr className="border-b border-stone-100 dark:border-stone-700">
-                  <td className="py-2 px-3 text-stone-600 dark:text-stone-300">
+                <tr className="border-b border-zinc-100 dark:border-zinc-700">
+                  <td className="py-2 px-3 text-zinc-600 dark:text-zinc-300">
                     Schuldzinsen
                   </td>
-                  <td className="py-2 px-3 text-right font-mono text-stone-700 dark:text-stone-200">
+                  <td className="py-2 px-3 text-right font-mono text-zinc-700 dark:text-zinc-200">
                     {formatEuro(data.schuldzinsen)}
                   </td>
                 </tr>
               )}
               {data.afa > 0 && (
-                <tr className="border-b border-stone-100 dark:border-stone-700">
-                  <td className="py-2 px-3 text-stone-600 dark:text-stone-300">
+                <tr className="border-b border-zinc-100 dark:border-zinc-700">
+                  <td className="py-2 px-3 text-zinc-600 dark:text-zinc-300">
                     Abschreibung (AfA)
                   </td>
-                  <td className="py-2 px-3 text-right font-mono text-stone-700 dark:text-stone-200">
+                  <td className="py-2 px-3 text-right font-mono text-zinc-700 dark:text-zinc-200">
                     {formatEuro(data.afa)}
                   </td>
                 </tr>
               )}
-              <tr className="border-b-2 border-stone-300 dark:border-stone-600 font-semibold">
-                <td className="py-2 px-3 text-stone-800 dark:text-stone-100">
+              <tr className="border-b-2 border-zinc-300 dark:border-zinc-600 font-semibold">
+                <td className="py-2 px-3 text-zinc-800 dark:text-zinc-100">
                   Summe Ausgaben
                 </td>
                 <td className="py-2 px-3 text-right font-mono text-red-600">
@@ -381,7 +382,7 @@ export function AnnualReport({ propertyId }: AnnualReportProps) {
             {/* Ergebnis */}
             <tfoot>
               <tr>
-                <td className="py-3 px-3 font-bold text-stone-900 dark:text-stone-50 text-base">
+                <td className="py-3 px-3 font-bold text-zinc-900 dark:text-zinc-50 text-base">
                   Ergebnis
                 </td>
                 <td
@@ -399,28 +400,28 @@ export function AnnualReport({ propertyId }: AnnualReportProps) {
         {/* Additional details */}
         <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
           {/* Leerstand */}
-          <div className="p-3 bg-stone-50 dark:bg-stone-700/30 rounded-lg">
-            <p className="text-xs text-stone-500 dark:text-stone-400 mb-1">
+          <div className="p-3 bg-zinc-50 dark:bg-zinc-700/30 rounded-lg">
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">
               Leerstand
             </p>
-            <p className="font-semibold font-mono text-stone-800 dark:text-stone-100">
+            <p className="font-semibold font-mono text-zinc-800 dark:text-zinc-100">
               {data.vacantMonths} von {data.totalMonths} Monaten
             </p>
-            <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
               Leerstandsquote: {formatPercent(vacancyRate)}
             </p>
           </div>
 
           {/* Offene Posten */}
-          <div className="p-3 bg-stone-50 dark:bg-stone-700/30 rounded-lg">
-            <p className="text-xs text-stone-500 dark:text-stone-400 mb-1">
+          <div className="p-3 bg-zinc-50 dark:bg-zinc-700/30 rounded-lg">
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">
               Offene Posten
             </p>
             <p
               className={`font-semibold font-mono ${
                 data.openCount > 0
                   ? 'text-red-600'
-                  : 'text-stone-800 dark:text-stone-100'
+                  : 'text-zinc-800 dark:text-zinc-100'
               }`}
             >
               {data.openCount > 0
@@ -430,17 +431,17 @@ export function AnnualReport({ propertyId }: AnnualReportProps) {
           </div>
 
           {/* Rendite */}
-          <div className="p-3 bg-stone-50 dark:bg-stone-700/30 rounded-lg">
-            <p className="text-xs text-stone-500 dark:text-stone-400 mb-1">
+          <div className="p-3 bg-zinc-50 dark:bg-zinc-700/30 rounded-lg">
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">
               Bruttomietrendite
             </p>
-            <p className="font-semibold font-mono text-stone-800 dark:text-stone-100">
+            <p className="font-semibold font-mono text-zinc-800 dark:text-zinc-100">
               {data.hasFinancing && data.bruttomietrendite !== null
                 ? formatPercent(data.bruttomietrendite)
                 : 'k. A.'}
             </p>
             {!data.hasFinancing && (
-              <p className="text-xs text-stone-400 dark:text-stone-500 mt-0.5">
+              <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5">
                 Finanzierungsdaten fehlen
               </p>
             )}

@@ -1,34 +1,43 @@
-import type { ReactNode } from 'react';
+import { useCallback, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { SidebarNav, BottomNav } from './Nav';
 import { PropertySelector } from './PropertySelector';
 import { UpdatePrompt } from './UpdatePrompt';
 import { useTheme } from '../../hooks/useTheme';
+import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
 import { SyncStatusBadge } from '../sync/SyncStatusBadge';
 import { IconButton } from '../ui/IconButton';
+import { ShortcutsModal } from '../ui/ShortcutsModal';
+import { Sun, Moon, Building2, Search } from '../ui/icons';
 
 const buildDate = new Date(__BUILD_DATE__).toLocaleDateString('de-DE');
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { theme, toggle } = useTheme();
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const showHelp = useCallback(() => setShortcutsOpen(true), []);
+  useKeyboardShortcuts(showHelp);
 
   return (
-    <div className="min-h-screen flex flex-col bg-stone-50 dark:bg-stone-900">
+    <div className="min-h-screen flex flex-col bg-zinc-50 dark:bg-zinc-950">
       <a href="#main" className="skip-link">
         Zum Inhalt springen
       </a>
 
       {/* Header */}
-      <header className="sticky top-0 z-30 bg-white/90 dark:bg-stone-800/90 backdrop-blur border-b border-stone-200 dark:border-stone-700 px-3 sm:px-4 no-print">
+      <header className="sticky top-0 z-30 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800 px-3 sm:px-4 no-print">
         <div className="h-14 flex items-center justify-between gap-2">
           <Link
             to="/"
-            className="flex items-center gap-2 min-w-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 rounded-lg px-1"
+            className="flex items-center gap-2 min-w-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--color-accent]/40 rounded-md px-1"
           >
-            <span aria-hidden="true" className="text-xl">
-              🏠
+            <span
+              aria-hidden="true"
+              className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-[--color-accent]/10 text-[--color-accent] dark:text-[--color-accent-dark]"
+            >
+              <Building2 size={14} strokeWidth={2} />
             </span>
-            <span className="text-base sm:text-lg font-semibold text-stone-800 dark:text-stone-100 truncate">
+            <span className="text-sm sm:text-[15px] font-semibold tracking-tight text-zinc-900 dark:text-zinc-50 truncate">
               Hausverwaltung
             </span>
           </Link>
@@ -39,14 +48,28 @@ export function AppShell({ children }: { children: ReactNode }) {
             </div>
             <PropertySelector />
             <IconButton
-              variant="subtle"
-              size="md"
+              variant="ghost"
+              size="sm"
+              onClick={() => setShortcutsOpen(true)}
+              aria-label="Tastenkürzel anzeigen (?)"
+              title="Tastenkürzel (?)"
+              icon={<Search size={16} strokeWidth={1.75} />}
+              className="hidden sm:inline-flex"
+            />
+            <IconButton
+              variant="ghost"
+              size="sm"
               onClick={toggle}
               aria-label={theme === 'light' ? 'Dunkelmodus aktivieren' : 'Hellmodus aktivieren'}
               title={theme === 'light' ? 'Dunkelmodus' : 'Hellmodus'}
-            >
-              {theme === 'light' ? '🌙' : '☀️'}
-            </IconButton>
+              icon={
+                theme === 'light' ? (
+                  <Moon size={16} strokeWidth={1.75} />
+                ) : (
+                  <Sun size={16} strokeWidth={1.75} />
+                )
+              }
+            />
           </div>
         </div>
       </header>
@@ -57,7 +80,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <main
           id="main"
           tabIndex={-1}
-          className="flex-1 p-4 md:p-6 pb-24 md:pb-6 overflow-x-hidden focus:outline-none"
+          className="flex-1 p-3 md:p-5 pb-24 md:pb-5 overflow-x-hidden focus:outline-none"
         >
           {children}
         </main>
@@ -65,8 +88,8 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       <BottomNav />
 
-      <footer className="hidden md:flex flex-wrap justify-center items-center gap-x-3 gap-y-1 py-2 px-4 text-xs text-stone-400 dark:text-stone-500 no-print">
-        <span>
+      <footer className="hidden md:flex flex-wrap justify-center items-center gap-x-3 gap-y-1 py-2 px-4 text-[11px] text-zinc-400 dark:text-zinc-500 no-print">
+        <span className="tabular-nums">
           v{__APP_VERSION__} · {buildDate}
         </span>
         <span aria-hidden="true">·</span>
@@ -84,6 +107,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       </footer>
 
       <UpdatePrompt />
+      <ShortcutsModal open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
     </div>
   );
 }

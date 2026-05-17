@@ -6,6 +6,7 @@ import { useProperty } from '../../hooks/useProperty';
 import { Card } from '../../components/shared/Card';
 import { DataTable, type Column } from '../../components/shared/DataTable';
 import { EmptyState } from '../../components/shared/EmptyState';
+import { Building2 } from '../../components/ui/icons';
 import { StatusBadge } from '../../components/shared/StatusBadge';
 import { formatArea } from '../../utils/format';
 import type { Unit, Occupancy, Tenant } from '../../db/schema';
@@ -100,7 +101,7 @@ export function UnitList({ onSelectUnit }: UnitListProps) {
     {
       key: 'tenant',
       header: 'Mieter',
-      render: (r) => r.tenant?.name ?? <span className="text-stone-400 dark:text-stone-500">–</span>,
+      render: (r) => r.tenant?.name ?? <span className="text-zinc-400 dark:text-zinc-500">–</span>,
     },
     {
       key: 'status',
@@ -127,7 +128,7 @@ export function UnitList({ onSelectUnit }: UnitListProps) {
             });
             setShowForm(true);
           }}
-          className="text-xs text-stone-400 dark:text-stone-500 hover:text-stone-700 dark:hover:text-stone-200"
+          className="text-xs text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200"
         >
           Bearbeiten
         </button>
@@ -154,13 +155,13 @@ export function UnitList({ onSelectUnit }: UnitListProps) {
       }
     >
       {showForm && (
-        <div className="mb-4 p-4 bg-stone-50 dark:bg-stone-800/50 rounded-lg border border-stone-200 dark:border-stone-700">
-          <h3 className="text-sm font-semibold text-stone-700 dark:text-stone-200 mb-3">
+        <div className="mb-4 p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-lg border border-zinc-200 dark:border-zinc-700">
+          <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-200 mb-3">
             {editUnit ? 'Wohnung bearbeiten' : 'Neue Wohnung'}
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
-              <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">
+              <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
                 Bezeichnung *
               </label>
               <input
@@ -168,11 +169,11 @@ export function UnitList({ onSelectUnit }: UnitListProps) {
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 placeholder="z.B. EG, OG, KG"
-                className="w-full border border-stone-300 dark:border-stone-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-500"
+                className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">
+              <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
                 Fläche (m²)
               </label>
               <input
@@ -181,11 +182,11 @@ export function UnitList({ onSelectUnit }: UnitListProps) {
                 value={form.area}
                 onChange={(e) => setForm({ ...form, area: e.target.value })}
                 placeholder="z.B. 65,5"
-                className="w-full border border-stone-300 dark:border-stone-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-500"
+                className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">
+              <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
                 Stockwerk
               </label>
               <input
@@ -193,14 +194,14 @@ export function UnitList({ onSelectUnit }: UnitListProps) {
                 value={form.floor}
                 onChange={(e) => setForm({ ...form, floor: e.target.value })}
                 placeholder="z.B. Erdgeschoss"
-                className="w-full border border-stone-300 dark:border-stone-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-500"
+                className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
               />
             </div>
           </div>
           <div className="flex gap-2 mt-3">
             <button
               onClick={handleSave}
-              className="px-4 py-1.5 text-sm bg-stone-800 text-white rounded-lg hover:bg-stone-900 transition-colors"
+              className="px-4 py-1.5 text-sm bg-zinc-800 text-white rounded-lg hover:bg-zinc-900 transition-colors"
             >
               Speichern
             </button>
@@ -209,7 +210,7 @@ export function UnitList({ onSelectUnit }: UnitListProps) {
                 setShowForm(false);
                 setEditUnit(null);
               }}
-              className="px-4 py-1.5 text-sm border border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-300 rounded-lg hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors"
+              className="px-4 py-1.5 text-sm border border-zinc-300 dark:border-zinc-600 text-zinc-600 dark:text-zinc-300 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors"
             >
               Abbrechen
             </button>
@@ -231,7 +232,7 @@ export function UnitList({ onSelectUnit }: UnitListProps) {
 
       {!rows || rows.length === 0 ? (
         <EmptyState
-          icon="🏠"
+          icon={<Building2 size={24} strokeWidth={1.75} />}
           title="Keine Wohnungen"
           description="Legen Sie die Wohneinheiten Ihres Objekts an."
         />

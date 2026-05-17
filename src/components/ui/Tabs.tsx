@@ -29,8 +29,9 @@ export function Tabs<T extends string>({
 }: TabsProps<T>) {
   const baseId = useId();
   const a = moduleAccent(accent);
-  const activeText = a?.text ?? 'text-stone-900 dark:text-stone-100';
-  const activeBar = a?.bg ?? 'bg-stone-900 dark:bg-stone-100';
+  // Linear-Stil: Active-Text immer neutral, Modul-Akzent nur als 2px-Underline-Bar.
+  const activeText = 'text-zinc-900 dark:text-zinc-50';
+  const activeBar = a?.bar ?? 'bg-zinc-900 dark:bg-zinc-100';
 
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
@@ -68,7 +69,7 @@ export function Tabs<T extends string>({
   };
 
   return (
-    <div role="tablist" aria-label={ariaLabel} className="border-b border-stone-200 dark:border-stone-700">
+    <div role="tablist" aria-label={ariaLabel} className="border-b border-zinc-200 dark:border-zinc-800">
       <div className={`flex gap-1 ${fullWidth ? 'w-full' : ''} overflow-x-auto`}>
         {items.map((item, idx) => {
           const active = item.id === value;
@@ -89,13 +90,13 @@ export function Tabs<T extends string>({
               onClick={() => !item.disabled && onChange(item.id)}
               onKeyDown={(e) => handleKeyDown(e, idx)}
               className={[
-                'relative inline-flex items-center gap-2 px-3 py-2.5 text-sm font-medium whitespace-nowrap',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900',
+                'relative inline-flex items-center gap-2 px-3 py-2.5 text-sm font-medium whitespace-nowrap transition-colors',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--color-accent]/40 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-900',
                 'disabled:opacity-50 disabled:cursor-not-allowed',
                 fullWidth ? 'flex-1 justify-center' : '',
                 active
                   ? activeText
-                  : 'text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200',
+                  : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100',
               ].join(' ')}
             >
               {item.icon && (

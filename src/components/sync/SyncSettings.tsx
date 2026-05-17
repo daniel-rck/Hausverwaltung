@@ -130,7 +130,7 @@ export function SyncSettings() {
 
   return (
     <Card title="Multi-Device-Sync">
-      <p className="text-sm text-stone-600 dark:text-stone-300 mb-4">
+      <p className="text-sm text-zinc-600 dark:text-zinc-300 mb-4">
         Daten zwischen mehreren Geräten synchronisieren — verschlüsselt über
         deinen privaten Sync-Speicher. Kein Konto, keine E-Mail.
       </p>
@@ -140,18 +140,18 @@ export function SyncSettings() {
           <button
             onClick={handleEnable}
             disabled={busy}
-            className="w-full px-4 py-2 text-sm bg-stone-800 text-white rounded-lg hover:bg-stone-900 transition-colors disabled:opacity-50"
+            className="w-full px-4 py-2 text-sm bg-zinc-800 text-white rounded-lg hover:bg-zinc-900 transition-colors disabled:opacity-50"
           >
             {busy ? 'Aktiviere…' : 'Sync aktivieren'}
           </button>
           <button
             onClick={() => setMode('entering-otp')}
             disabled={busy}
-            className="w-full px-4 py-2 text-sm border border-stone-300 dark:border-stone-600 text-stone-700 dark:text-stone-200 rounded-lg hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors disabled:opacity-50"
+            className="w-full px-4 py-2 text-sm border border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-200 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors disabled:opacity-50"
           >
             Mit anderem Gerät verknüpfen
           </button>
-          <p className="text-xs text-stone-500 dark:text-stone-400 mt-2">
+          <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-2">
             Beim Aktivieren wird dieses Gerät zum Sync-Owner. Weitere Geräte
             verknüpfst du anschließend über einen 6-stelligen Code.
           </p>
@@ -160,7 +160,7 @@ export function SyncSettings() {
 
       {!enabled && mode === 'entering-otp' && (
         <div className="space-y-3">
-          <div className="text-sm text-stone-700 dark:text-stone-200">
+          <div className="text-sm text-zinc-700 dark:text-zinc-200">
             Code vom anderen Gerät eingeben:
           </div>
           <input
@@ -173,13 +173,13 @@ export function SyncSettings() {
             value={otpInput}
             onChange={(e) => setOtpInput(e.target.value.replace(/\D/g, '').slice(0, 6))}
             placeholder="123456"
-            className="w-full px-4 py-3 text-center text-2xl font-mono tracking-widest border border-stone-300 dark:border-stone-600 rounded-lg bg-white dark:bg-stone-700 text-stone-800 dark:text-stone-100"
+            className="w-full px-4 py-3 text-center text-2xl font-mono tracking-widest border border-zinc-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-700 text-zinc-800 dark:text-zinc-100"
           />
           <div className="flex gap-2">
             <button
               onClick={handleClaim}
               disabled={busy || otpInput.length !== 6}
-              className="flex-1 px-4 py-2 text-sm bg-stone-800 text-white rounded-lg hover:bg-stone-900 transition-colors disabled:opacity-50"
+              className="flex-1 px-4 py-2 text-sm bg-zinc-800 text-white rounded-lg hover:bg-zinc-900 transition-colors disabled:opacity-50"
             >
               {busy ? 'Verknüpfe…' : 'Verknüpfen'}
             </button>
@@ -189,7 +189,7 @@ export function SyncSettings() {
                 setOtpInput('');
               }}
               disabled={busy}
-              className="flex-1 px-4 py-2 text-sm border border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-300 rounded-lg hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors disabled:opacity-50"
+              className="flex-1 px-4 py-2 text-sm border border-zinc-300 dark:border-zinc-600 text-zinc-600 dark:text-zinc-300 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors disabled:opacity-50"
             >
               Abbrechen
             </button>
@@ -199,20 +199,20 @@ export function SyncSettings() {
 
       {enabled && mode === 'showing-otp' && pairing && (
         <div className="space-y-3">
-          <div className="text-sm text-stone-700 dark:text-stone-200">
+          <div className="text-sm text-zinc-700 dark:text-zinc-200">
             Code am anderen Gerät eingeben (gültig{' '}
             {formatCountdown(pairing.expiresAt - now)}):
           </div>
-          <div className="text-4xl sm:text-5xl text-center font-mono font-semibold tracking-[0.2em] py-6 bg-stone-50 dark:bg-stone-700 rounded-lg text-stone-800 dark:text-stone-100">
+          <div className="text-4xl sm:text-5xl text-center font-mono font-semibold tracking-[0.2em] py-6 bg-zinc-50 dark:bg-zinc-700 rounded-lg text-zinc-800 dark:text-zinc-100">
             {pairing.otp.slice(0, 3)} {pairing.otp.slice(3)}
           </div>
           <button
             onClick={handleCancelPairing}
-            className="w-full px-4 py-2 text-sm border border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-300 rounded-lg hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors"
+            className="w-full px-4 py-2 text-sm border border-zinc-300 dark:border-zinc-600 text-zinc-600 dark:text-zinc-300 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors"
           >
             Abbrechen
           </button>
-          <p className="text-xs text-stone-500 dark:text-stone-400">
+          <p className="text-xs text-zinc-500 dark:text-zinc-400">
             Der Code kann nur einmal verwendet werden und läuft nach 5 Minuten ab.
           </p>
         </div>
@@ -222,7 +222,7 @@ export function SyncSettings() {
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs text-stone-500 dark:text-stone-400">
+              <div className="text-xs text-zinc-500 dark:text-zinc-400">
                 Status:{' '}
                 {state.status === 'idle' && 'synchronisiert'}
                 {state.status === 'syncing' && 'synchronisiere…'}
@@ -231,12 +231,12 @@ export function SyncSettings() {
                 {state.status === 'error' && `Fehler: ${state.lastError ?? 'unbekannt'}`}
               </div>
               {state.lastSyncedAt && (
-                <div className="text-xs text-stone-400 dark:text-stone-500 mt-0.5">
+                <div className="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5">
                   Letzter Sync: {formatAbsolute(state.lastSyncedAt)}
                 </div>
               )}
               {state.syncId && (
-                <div className="text-xs text-stone-400 dark:text-stone-500 mt-0.5 font-mono">
+                <div className="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5 font-mono">
                   ID: {state.syncId.slice(0, 8)}…
                 </div>
               )}
@@ -247,27 +247,27 @@ export function SyncSettings() {
             <button
               onClick={handleSyncNow}
               disabled={busy || state.status === 'syncing'}
-              className="flex-1 px-4 py-2 text-sm border border-stone-300 dark:border-stone-600 text-stone-700 dark:text-stone-200 rounded-lg hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors disabled:opacity-50"
+              className="flex-1 px-4 py-2 text-sm border border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-200 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors disabled:opacity-50"
             >
               Jetzt synchronisieren
             </button>
             <button
               onClick={handleStartPairing}
               disabled={busy}
-              className="flex-1 px-4 py-2 text-sm border border-stone-300 dark:border-stone-600 text-stone-700 dark:text-stone-200 rounded-lg hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors disabled:opacity-50"
+              className="flex-1 px-4 py-2 text-sm border border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-200 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors disabled:opacity-50"
             >
               Weiteres Gerät verknüpfen
             </button>
             <button
               onClick={handleDisable}
               disabled={busy}
-              className="flex-1 px-4 py-2 text-sm border border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-300 rounded-lg hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors disabled:opacity-50"
+              className="flex-1 px-4 py-2 text-sm border border-zinc-300 dark:border-zinc-600 text-zinc-600 dark:text-zinc-300 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors disabled:opacity-50"
             >
               Sync zurücksetzen
             </button>
           </div>
 
-          <label className="flex items-center gap-2 text-xs text-stone-600 dark:text-stone-300">
+          <label className="flex items-center gap-2 text-xs text-zinc-600 dark:text-zinc-300">
             <input
               type="checkbox"
               checked={state.autoSync}

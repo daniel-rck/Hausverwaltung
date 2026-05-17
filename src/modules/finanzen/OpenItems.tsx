@@ -6,6 +6,7 @@ import { Card } from '../../components/shared/Card';
 import { DataTable, type Column } from '../../components/shared/DataTable';
 import { StatusBadge } from '../../components/shared/StatusBadge';
 import { EmptyState } from '../../components/shared/EmptyState';
+import { CheckCircle2 } from '../../components/ui/icons';
 import { formatEuro, formatMonth } from '../../utils/format';
 import type { Occupancy, Unit, Tenant, Payment } from '../../db/schema';
 
@@ -122,7 +123,7 @@ export function OpenItems({ year }: OpenItemsProps) {
       key: 'unit',
       header: 'Einheit',
       render: (row) => (
-        <span className="font-medium text-stone-700 dark:text-stone-200">{row.unit.name}</span>
+        <span className="font-medium text-zinc-700 dark:text-zinc-200">{row.unit.name}</span>
       ),
       sortValue: (row) => row.unit.name,
     },
@@ -194,7 +195,7 @@ export function OpenItems({ year }: OpenItemsProps) {
     >
       {items.length === 0 ? (
         <EmptyState
-          icon="✅"
+          icon={<CheckCircle2 size={24} strokeWidth={1.75} />}
           title="Keine offenen Posten"
           description={`Alle Mietzahlungen für ${year} sind vollständig eingegangen.`}
         />

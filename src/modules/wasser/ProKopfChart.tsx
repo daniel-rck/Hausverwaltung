@@ -4,6 +4,7 @@ import { db } from '../../db';
 import type { Unit, Occupancy, Meter, MeterReading } from '../../db/schema';
 import { Card } from '../../components/shared/Card';
 import { EmptyState } from '../../components/shared/EmptyState';
+import { ShowerHead } from '../../components/ui/icons';
 import { BarChart } from '../../components/charts/BarChart';
 import { formatNumber } from '../../utils/format';
 import { useProperty } from '../../hooks/useProperty';
@@ -146,7 +147,7 @@ export function ProKopfChart({ year }: ProKopfChartProps) {
     return (
       <Card title="Pro-Kopf-Verbrauch">
         <EmptyState
-          icon="🚿"
+          icon={<ShowerHead size={24} strokeWidth={1.75} />}
           title="Keine Verbrauchsdaten"
           description="Es liegen keine ausreichenden Zählerablesungen und Belegungsdaten für die Pro-Kopf-Analyse vor."
         />
@@ -164,7 +165,7 @@ export function ProKopfChart({ year }: ProKopfChartProps) {
 
   return (
     <Card title="Pro-Kopf-Verbrauch">
-      <p className="text-sm text-stone-600 dark:text-stone-300 mb-4">
+      <p className="text-sm text-zinc-600 dark:text-zinc-300 mb-4">
         Liter pro Person pro Tag nach Wohneinheit. Bundesdurchschnitt:{' '}
         <span className="font-semibold">{WATER_AVG_LITERS_PER_PERSON_DAY} l/Person/Tag</span>
       </p>
@@ -191,20 +192,20 @@ export function ProKopfChart({ year }: ProKopfChartProps) {
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-stone-200 dark:border-stone-700">
-              <th className="py-2 px-3 text-left font-medium text-stone-500 dark:text-stone-400">
+            <tr className="border-b border-zinc-200 dark:border-zinc-700">
+              <th className="py-2 px-3 text-left font-medium text-zinc-500 dark:text-zinc-400">
                 Einheit
               </th>
-              <th className="py-2 px-3 text-right font-medium text-stone-500 dark:text-stone-400">
+              <th className="py-2 px-3 text-right font-medium text-zinc-500 dark:text-zinc-400">
                 Personen
               </th>
-              <th className="py-2 px-3 text-right font-medium text-stone-500 dark:text-stone-400">
+              <th className="py-2 px-3 text-right font-medium text-zinc-500 dark:text-zinc-400">
                 Verbrauch (m³)
               </th>
-              <th className="py-2 px-3 text-right font-medium text-stone-500 dark:text-stone-400">
+              <th className="py-2 px-3 text-right font-medium text-zinc-500 dark:text-zinc-400">
                 l/Person/Tag
               </th>
-              <th className="py-2 px-3 text-right font-medium text-stone-500 dark:text-stone-400">
+              <th className="py-2 px-3 text-right font-medium text-zinc-500 dark:text-zinc-400">
                 Abweichung
               </th>
             </tr>
@@ -219,7 +220,7 @@ export function ProKopfChart({ year }: ProKopfChartProps) {
               return (
                 <tr
                   key={uc.unitName}
-                  className="border-b border-stone-100 dark:border-stone-700"
+                  className="border-b border-zinc-100 dark:border-zinc-700"
                 >
                   <td className="py-2.5 px-3">{uc.unitName}</td>
                   <td className="py-2.5 px-3 text-right font-mono">
