@@ -9,14 +9,10 @@ Versionierung folgt [SemVer](https://semver.org/lang/de/).
 ### Hinzugefügt
 
 - Hybrid-README mit Badges (CI, MIT, Live-Demo, Stack).
-- Willkommens-/Marketing-Seite als App-Route (`/#/willkommen`) mit
-  Feature-Tour, „Deine Daten gehören dir"-Sektion und Quick-Start-Schritten.
-- Auto-Redirect von `/` nach `/willkommen` für Erstbesucher (leere Datenbank).
 - `CONTRIBUTING.md` — Dev-Setup, Code-Style, PR-Prozess.
 - `SECURITY.md` — Vulnerability-Reporting und Security-Modell.
 - `CHANGELOG.md` — dieses Dokument.
 - Issue- und PR-Templates unter `.github/`.
-- Footer-Link „Willkommen" in der `AppShell`.
 
 ## [0.1.0] — geplant
 

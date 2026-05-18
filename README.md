@@ -14,7 +14,6 @@
 > keine laufenden Kosten.
 
 **[→ App starten](https://hausverwaltung.daniel-rck.workers.dev/)** ·
-**[→ Was ist das? (App-Tour)](https://hausverwaltung.daniel-rck.workers.dev/#/willkommen)** ·
 **[→ Issues](https://github.com/daniel-rck/Hausverwaltung/issues)**
 
 ## Highlights
@@ -24,8 +23,6 @@
 - **Optionaler Multi-Device-Sync**: Ende-zu-Ende verschlüsselt (HKDF-SHA256 → AES-GCM), Server kennt das Geheimnis nie
 - **PWA**: offline-fähig, installierbar auf Mobile, Dark Mode
 - **Druckbar**: A4-Abrechnungen, Mietverträge, Mahnungen, Übergabeprotokolle direkt aus dem Browser
-
-Volle Feature-Tour mit Screenshots: **[Willkommens-Seite in der App](https://hausverwaltung.daniel-rck.workers.dev/#/willkommen)**
 
 ## Quick Start (Entwickler)
 
