@@ -1,8 +1,10 @@
 import { lazy, Suspense } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { useLiveQuery } from 'dexie-react-hooks';
 import { PropertyProvider } from './hooks/useProperty';
 import { AppShell } from './components/layout/AppShell';
 import { Skeleton } from './components/ui';
+import { db } from './db';
 
 const DashboardPage = lazy(() =>
   import('./modules/dashboard/DashboardPage').then((m) => ({ default: m.DashboardPage })),
@@ -44,6 +46,21 @@ const EinstellungenPage = lazy(() =>
     default: m.EinstellungenPage,
   })),
 );
+const LandingPage = lazy(() =>
+  import('./modules/landing/LandingPage').then((m) => ({ default: m.LandingPage })),
+);
+
+/**
+ * Leitet Erstbesucher mit leerer Datenbank auf `/willkommen`. Während die
+ * IndexedDB noch geladen wird, liefert useLiveQuery `undefined` — dann wird
+ * nichts gerendert (kurzer Suspense-Frame), um einen Flash zu vermeiden.
+ */
+function HomeOrWelcome() {
+  const properties = useLiveQuery(() => db.properties.toArray());
+  if (properties === undefined) return null;
+  if (properties.length === 0) return <Navigate to="/willkommen" replace />;
+  return <DashboardPage />;
+}
 
 function PageFallback() {
   return (
@@ -67,7 +84,8 @@ export function App() {
         <AppShell>
           <Suspense fallback={<PageFallback />}>
             <Routes>
-              <Route path="/" element={<DashboardPage />} />
+              <Route path="/" element={<HomeOrWelcome />} />
+              <Route path="/willkommen" element={<LandingPage />} />
               <Route path="/mieter" element={<MieterPage />} />
               <Route path="/nebenkosten" element={<NebenkostenPage />} />
               <Route path="/zaehler" element={<ZaehlerPage />} />

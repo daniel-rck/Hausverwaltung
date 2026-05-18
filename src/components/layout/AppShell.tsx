@@ -93,6 +93,9 @@ export function AppShell({ children }: { children: ReactNode }) {
           v{__APP_VERSION__} · {buildDate}
         </span>
         <span aria-hidden="true">·</span>
+        <Link to="/willkommen" className="hover:underline">
+          Über die App
+        </Link>
         <Link to="/datenschutz" className="hover:underline">
           Datenschutz
         </Link>

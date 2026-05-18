@@ -1,0 +1,64 @@
+name: Feature-Vorschlag
+description: Eine neue Funktion oder Verbesserung vorschlagen
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Danke für den Vorschlag! Bitte erst kurz beschreiben, **welches Problem** gelöst werden soll —
+        die Lösung ergibt sich oft erst aus der Diskussion.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / Anwendungsfall
+      description: Welches konkrete Problem hast du? Wann tritt es auf?
+      placeholder: Bei jährlich wechselnden Versorger-Tarifen ist es mühsam, ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Lösungsvorschlag
+      description: Wie könnte das Feature aussehen? Skizze, Mockup, Screenshot helfen.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternativen
+      description: Workarounds, die du schon ausprobiert hast — oder andere Apps, die es besser machen.
+
+  - type: dropdown
+    id: module
+    attributes:
+      label: Welches Modul betrifft es?
+      multiple: true
+      options:
+        - Dashboard
+        - Mieterverwaltung
+        - Nebenkostenabrechnung
+        - Versorger / Wasser
+        - Zählerstände
+        - Finanzen / Mieteinnahmen
+        - Steuer-Export
+        - Instandhaltung
+        - Übergabeprotokoll
+        - Rendite
+        - Mieterhöhung / Mietspiegel
+        - Kautionsverwaltung
+        - Mietvertrag-Generator
+        - Sync / Multi-Device
+        - Einstellungen
+        - Sonstiges / modulübergreifend
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Zusätzlicher Kontext
+      description: Verwandte Issues, gesetzliche Bezüge (BetrKV, BGB ...), Links.
