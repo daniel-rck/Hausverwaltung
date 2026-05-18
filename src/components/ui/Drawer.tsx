@@ -1,5 +1,6 @@
 import { useEffect, useRef, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
+import { X } from './icons';
 
 interface DrawerProps {
   open: boolean;
@@ -61,12 +62,12 @@ export function Drawer({ open, onClose, title, children, side = 'right' }: Drawe
 
   const sideCls =
     side === 'bottom'
-      ? 'inset-x-0 bottom-0 max-h-[85vh] rounded-t-2xl'
-      : 'right-0 top-0 bottom-0 w-full max-w-sm';
+      ? 'inset-x-0 bottom-0 max-h-[85vh] rounded-t-xl border-t'
+      : 'right-0 top-0 bottom-0 w-full max-w-md border-l';
 
   return createPortal(
     <div
-      className="fixed inset-0 bg-black/40 z-50"
+      className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -76,18 +77,18 @@ export function Drawer({ open, onClose, title, children, side = 'right' }: Drawe
         role="dialog"
         aria-modal="true"
         aria-label={typeof title === 'string' ? title : 'Drawer'}
-        className={`absolute ${sideCls} bg-white dark:bg-stone-800 shadow-2xl flex flex-col`}
+        className={`absolute ${sideCls} border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-modal flex flex-col`}
       >
         {title && (
-          <header className="px-5 py-4 border-b border-stone-200 dark:border-stone-700 flex items-center justify-between">
-            <h2 className="text-base font-semibold text-stone-800 dark:text-stone-100">{title}</h2>
+          <header className="px-5 py-3.5 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 tracking-tight">{title}</h2>
             <button
               type="button"
               onClick={onClose}
               aria-label="Schließen"
-              className="w-8 h-8 inline-flex items-center justify-center rounded-lg text-stone-500 hover:bg-stone-100 dark:hover:bg-stone-700"
+              className="w-7 h-7 inline-flex items-center justify-center rounded-md text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-800 dark:hover:text-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--color-accent]/40"
             >
-              <span aria-hidden="true">✕</span>
+              <X size={16} aria-hidden="true" />
             </button>
           </header>
         )}

@@ -4,6 +4,8 @@ import { EmptyState } from '../../components/shared/EmptyState';
 import { Card } from '../../components/shared/Card';
 import { FormField, KpiTile, Select, Tabs, type TabItem } from '../../components/ui';
 import { PageHeader } from '../../components/layout/PageHeader';
+import { Droplet, Thermometer } from '../../components/ui/icons';
+import { Flame, Zap } from 'lucide-react';
 import { SupplierInput } from './SupplierInput';
 import { DifferenzAnalyse } from './DifferenzAnalyse';
 import { ProKopfChart } from './ProKopfChart';
@@ -17,10 +19,10 @@ import type { SupplierBill } from '../../db/schema';
 type SupplierType = 'water' | 'gas' | 'electricity' | 'heating';
 
 const TAB_ITEMS: TabItem<SupplierType>[] = [
-  { id: 'water', label: 'Wasser', icon: '💧' },
-  { id: 'gas', label: 'Gas', icon: '🔥' },
-  { id: 'electricity', label: 'Strom', icon: '⚡' },
-  { id: 'heating', label: 'Fernwärme', icon: '♨️' },
+  { id: 'water', label: 'Wasser', icon: <Droplet size={14} strokeWidth={1.75} /> },
+  { id: 'gas', label: 'Gas', icon: <Flame size={14} strokeWidth={1.75} /> },
+  { id: 'electricity', label: 'Strom', icon: <Zap size={14} strokeWidth={1.75} /> },
+  { id: 'heating', label: 'Fernwärme', icon: <Thermometer size={14} strokeWidth={1.75} /> },
 ];
 
 const currentYear = new Date().getFullYear();
@@ -52,7 +54,7 @@ function ConsumptionSummary({ year, type }: { year: number; type: SupplierType }
   if (!bills || bills.length === 0) {
     return (
       <Card title="Verbrauchsübersicht">
-        <p className="text-sm text-stone-500 dark:text-stone-400">
+        <p className="text-sm text-zinc-500 dark:text-zinc-400">
           Keine Rechnungen für dieses Jahr erfasst.
         </p>
       </Card>
@@ -86,10 +88,10 @@ export function WasserPage() {
   if (!activeProperty) {
     return (
       <div className="space-y-4">
-        <PageHeader title="Versorger & Verbrauch" icon="💧" accent="wasser" />
+        <PageHeader title="Versorger & Verbrauch" icon={<Droplet size={20} strokeWidth={1.75} />} accent="wasser" />
         <Card>
           <EmptyState
-            icon="💧"
+            icon={<Droplet size={24} strokeWidth={1.75} />}
             title="Kein Objekt ausgewählt"
             description="Bitte wähle zuerst ein Objekt aus, um die Verbrauchsanalyse durchzuführen."
           />
@@ -105,7 +107,7 @@ export function WasserPage() {
       <PageHeader
         title="Versorger & Verbrauch"
         description="Wasser, Gas, Strom und Wärme — Rechnungen, Verbräuche und Auffälligkeiten."
-        icon="💧"
+        icon={<Droplet size={20} strokeWidth={1.75} />}
         accent="wasser"
         actions={
           <FormField label="Jahr" htmlFor="year-select">

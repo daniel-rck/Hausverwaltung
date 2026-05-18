@@ -39,6 +39,11 @@ const ImportPage = lazy(() =>
 const DatenschutzPage = lazy(() =>
   import('./modules/legal/DatenschutzPage').then((m) => ({ default: m.DatenschutzPage })),
 );
+const EinstellungenPage = lazy(() =>
+  import('./modules/einstellungen/EinstellungenPage').then((m) => ({
+    default: m.EinstellungenPage,
+  })),
+);
 
 function PageFallback() {
   return (
@@ -72,6 +77,7 @@ export function App() {
               <Route path="/uebergabe" element={<UebergabePage />} />
               <Route path="/rendite" element={<RenditePage />} />
               <Route path="/import/:payload" element={<ImportPage />} />
+              <Route path="/einstellungen" element={<EinstellungenPage />} />
               <Route path="/datenschutz" element={<DatenschutzPage />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>

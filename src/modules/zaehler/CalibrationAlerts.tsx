@@ -5,6 +5,7 @@ import { Card } from '../../components/shared/Card';
 import { StatusBadge } from '../../components/shared/StatusBadge';
 import { DataTable, type Column } from '../../components/shared/DataTable';
 import { EmptyState } from '../../components/shared/EmptyState';
+import { CheckCircle2 } from '../../components/ui/icons';
 import { formatDate } from '../../utils/format';
 import type { Meter, MeterType, Unit } from '../../db/schema';
 
@@ -108,7 +109,7 @@ export function CalibrationAlerts() {
         r.unit ? (
           r.unit.name
         ) : (
-          <span className="text-stone-500 dark:text-stone-400 italic">Hauptzähler</span>
+          <span className="text-zinc-500 dark:text-zinc-400 italic">Hauptzähler</span>
         ),
     },
     {
@@ -130,7 +131,7 @@ export function CalibrationAlerts() {
     <Card title="Eichfristen">
       {alertRows.length === 0 ? (
         <EmptyState
-          icon="✅"
+          icon={<CheckCircle2 size={24} strokeWidth={1.75} />}
           title="Alle Eichfristen in Ordnung"
           description="Keine Zähler mit ablaufenden oder abgelaufenen Eichfristen."
         />

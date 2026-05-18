@@ -6,7 +6,13 @@
   --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
 
-  /* Modul-Akzentfarben (Hauptton) */
+  /* Primärer Akzent (Indigo) — einziger Marken-Akzent für Buttons, Focus-Rings, aktive States */
+  --color-accent: #6366f1;        /* indigo-500 */
+  --color-accent-hover: #4f46e5;  /* indigo-600 */
+  --color-accent-soft: #eef2ff;   /* indigo-50 */
+  --color-accent-dark: #818cf8;   /* indigo-400 (Dark-Mode-Text) */
+
+  /* Modul-Akzentfarben — werden nur noch für 2px-Bars und Chart-Datasets verwendet */
   --color-modul-nebenkosten: #d97706;
   --color-modul-wasser: #0891b2;
   --color-modul-mieter: #16a34a;
@@ -16,7 +22,7 @@
   --color-modul-uebergabe: #2563eb;
   --color-modul-rendite: #ca8a04;
 
-  /* Modul-Akzent Tints (50/100, hell) */
+  /* Modul-Akzent Tints (50/100, hell) — nur noch in Chart-Backgrounds */
   --color-modul-nebenkosten-50: #fffbeb;
   --color-modul-nebenkosten-100: #fef3c7;
   --color-modul-wasser-50: #ecfeff;
@@ -54,17 +60,17 @@
   --color-modul-uebergabe-300: #93c5fd;
   --color-modul-rendite-300: #fde047;
 
-  /* Radius-Skala */
-  --radius-sm: 6px;
-  --radius: 10px;
-  --radius-lg: 14px;
-  --radius-xl: 18px;
-  --radius-2xl: 22px;
+  /* Radius-Skala — Linear-Stil: präziser, weniger gerundet */
+  --radius-sm: 4px;
+  --radius: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 10px;
+  --radius-2xl: 12px;
 
-  /* Schatten-Skala */
-  --shadow-card: 0 1px 2px 0 rgb(0 0 0 / 0.04), 0 1px 3px 0 rgb(0 0 0 / 0.06);
-  --shadow-pop: 0 8px 24px -4px rgb(0 0 0 / 0.12), 0 4px 8px -2px rgb(0 0 0 / 0.06);
-  --shadow-modal: 0 24px 48px -12px rgb(0 0 0 / 0.25);
+  /* Schatten-Skala — Border-zentriert, Schatten nur für Overlays */
+  --shadow-card: 0 0 0 1px rgb(0 0 0 / 0.04);
+  --shadow-pop: 0 4px 12px -2px rgb(0 0 0 / 0.08), 0 0 0 1px rgb(0 0 0 / 0.04);
+  --shadow-modal: 0 16px 32px -8px rgb(0 0 0 / 0.16), 0 0 0 1px rgb(0 0 0 / 0.06);
 
   /* Motion */
   --duration-fast: 120ms;
@@ -77,9 +83,10 @@
 }
 
 body {
-  @apply bg-stone-50 text-stone-800 font-sans antialiased;
-  @apply dark:bg-stone-900 dark:text-stone-200;
+  @apply bg-zinc-50 text-zinc-800 font-sans antialiased;
+  @apply dark:bg-zinc-900 dark:text-zinc-200;
   margin: 0;
+  letter-spacing: -0.005em;
 }
 
 .font-tabular {
@@ -93,7 +100,7 @@ body {
   left: 8px;
   z-index: 100;
   padding: 8px 14px;
-  background: var(--color-stone-900);
+  background: var(--color-zinc-900);
   color: white;
   border-radius: var(--radius);
   font-size: 0.875rem;

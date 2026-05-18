@@ -2,40 +2,46 @@ import { useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { Drawer } from '../ui/Drawer';
 import { moduleAccent, type ModulKey } from '../ui/moduleAccent';
+import { ModulIcons, type ModulIconKey, MoreHorizontal } from '../ui/icons';
 
 interface NavItem {
   path: string;
   label: string;
-  icon: string;
+  iconKey: ModulIconKey;
   accent?: ModulKey;
   group: string;
 }
 
 const navItems: NavItem[] = [
-  { path: '/', label: 'Dashboard', icon: '⌂', group: 'Übersicht' },
-  { path: '/mieter', label: 'Mieter', icon: '👤', accent: 'mieter', group: 'Stammdaten' },
-  { path: '/zaehler', label: 'Zähler', icon: '🔢', accent: 'zaehler', group: 'Verbrauch' },
-  { path: '/wasser', label: 'Versorger', icon: '💧', accent: 'wasser', group: 'Verbrauch' },
-  { path: '/nebenkosten', label: 'Nebenkosten', icon: '📋', accent: 'nebenkosten', group: 'Buchhaltung' },
-  { path: '/finanzen', label: 'Finanzen', icon: '💶', accent: 'finanzen', group: 'Buchhaltung' },
-  { path: '/rendite', label: 'Rendite', icon: '📈', accent: 'rendite', group: 'Buchhaltung' },
-  { path: '/instandhaltung', label: 'Instandhaltung', icon: '🔧', accent: 'instandhaltung', group: 'Vorgänge' },
-  { path: '/uebergabe', label: 'Übergabe', icon: '🔑', accent: 'uebergabe', group: 'Vorgänge' },
+  { path: '/', label: 'Dashboard', iconKey: 'dashboard', group: 'Übersicht' },
+  { path: '/mieter', label: 'Mieter', iconKey: 'mieter', accent: 'mieter', group: 'Stammdaten' },
+  { path: '/zaehler', label: 'Zähler', iconKey: 'zaehler', accent: 'zaehler', group: 'Verbrauch' },
+  { path: '/wasser', label: 'Versorger', iconKey: 'wasser', accent: 'wasser', group: 'Verbrauch' },
+  {
+    path: '/nebenkosten',
+    label: 'Nebenkosten',
+    iconKey: 'nebenkosten',
+    accent: 'nebenkosten',
+    group: 'Buchhaltung',
+  },
+  { path: '/finanzen', label: 'Finanzen', iconKey: 'finanzen', accent: 'finanzen', group: 'Buchhaltung' },
+  { path: '/rendite', label: 'Rendite', iconKey: 'rendite', accent: 'rendite', group: 'Buchhaltung' },
+  {
+    path: '/instandhaltung',
+    label: 'Instandhaltung',
+    iconKey: 'instandhaltung',
+    accent: 'instandhaltung',
+    group: 'Vorgänge',
+  },
+  { path: '/uebergabe', label: 'Übergabe', iconKey: 'uebergabe', accent: 'uebergabe', group: 'Vorgänge' },
+  { path: '/einstellungen', label: 'Einstellungen', iconKey: 'einstellungen', group: 'System' },
 ];
 
-const groupOrder = ['Übersicht', 'Stammdaten', 'Verbrauch', 'Buchhaltung', 'Vorgänge'];
-
-function activeClasses(accent: ModulKey | undefined): string {
-  const a = moduleAccent(accent);
-  if (a) {
-    return `${a.pillBg} ${a.pillText} font-semibold`;
-  }
-  return 'bg-stone-200 dark:bg-stone-700 text-stone-900 dark:text-stone-100 font-semibold';
-}
+const groupOrder = ['Übersicht', 'Stammdaten', 'Verbrauch', 'Buchhaltung', 'Vorgänge', 'System'];
 
 function activeBar(accent: ModulKey | undefined): string {
   const a = moduleAccent(accent);
-  return a?.bg ?? 'bg-stone-700 dark:bg-stone-200';
+  return a?.bar ?? 'bg-zinc-900 dark:bg-zinc-100';
 }
 
 export function SidebarNav() {
@@ -47,25 +53,25 @@ export function SidebarNav() {
   return (
     <nav
       aria-label="Hauptnavigation"
-      className="hidden md:flex flex-col gap-4 w-56 shrink-0 p-4 no-print"
+      className="hidden md:flex flex-col gap-4 w-52 shrink-0 p-3 no-print border-r border-zinc-200/60 dark:border-zinc-800/60"
     >
       {groups.map((group) => (
-        <div key={group.name} className="space-y-1">
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500 px-3">
+        <div key={group.name} className="space-y-0.5">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 px-2.5 mb-1">
             {group.name}
           </p>
           {group.items.map((item) => {
-            const a = moduleAccent(item.accent);
+            const Icon = ModulIcons[item.iconKey];
             return (
               <NavLink
                 key={item.path}
                 to={item.path}
                 end={item.path === '/'}
                 className={({ isActive }) =>
-                  `relative flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900 ${
+                  `relative flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-[13px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--color-accent]/40 ${
                     isActive
-                      ? activeClasses(item.accent)
-                      : 'text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-stone-800 dark:hover:text-stone-100'
+                      ? 'bg-zinc-100 dark:bg-zinc-800/80 text-zinc-900 dark:text-zinc-50 font-medium'
+                      : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100/60 dark:hover:bg-zinc-800/40 hover:text-zinc-900 dark:hover:text-zinc-100'
                   }`
                 }
               >
@@ -77,9 +83,12 @@ export function SidebarNav() {
                         className={`absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-r ${activeBar(item.accent)}`}
                       />
                     )}
-                    <span aria-hidden="true" className={`text-lg ${a?.text ?? 'text-stone-500'}`}>
-                      {item.icon}
-                    </span>
+                    <Icon
+                      size={16}
+                      strokeWidth={1.75}
+                      className={isActive ? 'text-zinc-900 dark:text-zinc-50' : 'text-zinc-500 dark:text-zinc-400'}
+                      aria-hidden="true"
+                    />
                     <span>{item.label}</span>
                   </>
                 )}
@@ -104,29 +113,37 @@ export function BottomNav() {
     <>
       <nav
         aria-label="Hauptnavigation Mobile"
-        className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-stone-800 border-t border-stone-200 dark:border-stone-700 z-40 no-print"
+        className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border-t border-zinc-200 dark:border-zinc-800 z-40 no-print"
         style={{ paddingBottom: 'env(safe-area-inset-bottom, 0)' }}
       >
         <div className="flex justify-around py-1">
           {bottomMain.map((item) => {
-            const a = moduleAccent(item.accent);
+            const Icon = ModulIcons[item.iconKey];
             return (
               <NavLink
                 key={item.path}
                 to={item.path}
                 end={item.path === '/'}
                 className={({ isActive }) =>
-                  `flex flex-col items-center gap-0.5 min-w-[60px] py-2 px-2 text-[11px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 rounded-lg ${
+                  `relative flex flex-col items-center gap-0.5 min-w-[60px] py-2 px-2 text-[10px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--color-accent]/40 rounded-md ${
                     isActive
-                      ? `${a?.text ?? 'text-stone-900 dark:text-stone-100'} font-semibold`
-                      : 'text-stone-500 dark:text-stone-400'
+                      ? 'text-[--color-accent] dark:text-[--color-accent-dark] font-semibold'
+                      : 'text-zinc-500 dark:text-zinc-400'
                   }`
                 }
               >
-                <span aria-hidden="true" className="text-lg leading-none">
-                  {item.icon}
-                </span>
-                <span>{item.label}</span>
+                {({ isActive }) => (
+                  <>
+                    {isActive && (
+                      <span
+                        aria-hidden="true"
+                        className={`absolute top-0 left-3 right-3 h-0.5 rounded-b ${activeBar(item.accent)}`}
+                      />
+                    )}
+                    <Icon size={20} strokeWidth={1.75} aria-hidden="true" />
+                    <span>{item.label}</span>
+                  </>
+                )}
               </NavLink>
             );
           })}
@@ -135,21 +152,21 @@ export function BottomNav() {
             onClick={() => setOpen(true)}
             aria-label="Weitere Module öffnen"
             aria-expanded={open}
-            className={`flex flex-col items-center gap-0.5 min-w-[60px] py-2 px-2 text-[11px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 rounded-lg ${
-              moreActive ? 'text-stone-900 dark:text-stone-100 font-semibold' : 'text-stone-500 dark:text-stone-400'
+            className={`flex flex-col items-center gap-0.5 min-w-[60px] py-2 px-2 text-[10px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--color-accent]/40 rounded-md ${
+              moreActive
+                ? 'text-[--color-accent] dark:text-[--color-accent-dark] font-semibold'
+                : 'text-zinc-500 dark:text-zinc-400'
             }`}
           >
-            <span aria-hidden="true" className="text-lg leading-none">
-              ⋯
-            </span>
+            <MoreHorizontal size={20} strokeWidth={1.75} aria-hidden="true" />
             <span>Mehr</span>
           </button>
         </div>
       </nav>
       <Drawer open={open} onClose={() => setOpen(false)} title="Weitere Bereiche" side="bottom">
-        <ul className="space-y-1">
+        <ul className="space-y-0.5">
           {bottomMore.map((item) => {
-            const a = moduleAccent(item.accent);
+            const Icon = ModulIcons[item.iconKey];
             return (
               <li key={item.path}>
                 <NavLink
@@ -157,17 +174,30 @@ export function BottomNav() {
                   end={item.path === '/'}
                   onClick={() => setOpen(false)}
                   className={({ isActive }) =>
-                    `flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium ${
+                    `relative flex items-center gap-3 px-3 py-3 rounded-md text-sm transition-colors ${
                       isActive
-                        ? activeClasses(item.accent)
-                        : 'text-stone-700 dark:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-700'
+                        ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50 font-medium'
+                        : 'text-zinc-700 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-800/60'
                     }`
                   }
                 >
-                  <span aria-hidden="true" className={`text-lg ${a?.text ?? ''}`}>
-                    {item.icon}
-                  </span>
-                  <span>{item.label}</span>
+                  {({ isActive }) => (
+                    <>
+                      {isActive && (
+                        <span
+                          aria-hidden="true"
+                          className={`absolute left-0 top-2 bottom-2 w-0.5 rounded-r ${activeBar(item.accent)}`}
+                        />
+                      )}
+                      <Icon
+                        size={18}
+                        strokeWidth={1.75}
+                        className="text-zinc-500 dark:text-zinc-400"
+                        aria-hidden="true"
+                      />
+                      <span>{item.label}</span>
+                    </>
+                  )}
                 </NavLink>
               </li>
             );

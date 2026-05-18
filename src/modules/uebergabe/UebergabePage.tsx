@@ -15,6 +15,7 @@ import {
   useToast,
 } from '../../components/ui';
 import { PageHeader } from '../../components/layout/PageHeader';
+import { Building2, KeyRound, Plus } from '../../components/ui/icons';
 import { RoomInspection, createDefaultRooms } from './RoomInspection';
 import { MeterSnapshot as MeterSnapshotComponent } from './MeterSnapshot';
 import { KeyHandover, createDefaultKeys } from './KeyHandover';
@@ -91,7 +92,7 @@ export function UebergabePage() {
   if (!activeProperty) {
     return (
       <EmptyState
-        icon="🏠"
+        icon={<Building2 size={24} strokeWidth={1.75} />}
         title="Kein Objekt vorhanden"
         description="Legen Sie zuerst ein Mietobjekt an."
         action={{ label: 'Objekt anlegen', onClick: () => addProperty({ name: 'Mein Haus', address: '', units: 0 }) }}
@@ -158,7 +159,7 @@ export function UebergabePage() {
       <div className="space-y-4">
         <PageHeader
           title="Neues Übergabeprotokoll"
-          icon="🔑"
+          icon={<KeyRound size={20} strokeWidth={1.75} />}
           accent="uebergabe"
           actions={
             <Button variant="ghost" size="sm" onClick={resetForm}>
@@ -289,11 +290,15 @@ export function UebergabePage() {
       <PageHeader
         title="Übergabeprotokolle"
         description="Einzugs- und Auszugsprotokolle erstellen, drucken und archivieren."
-        icon="🔑"
+        icon={<KeyRound size={20} strokeWidth={1.75} />}
         accent="uebergabe"
         actions={
-          <Button variant="primary" accent="uebergabe" onClick={() => setStep('setup')}>
-            + Neues Protokoll
+          <Button
+            variant="primary"
+            onClick={() => setStep('setup')}
+            leftIcon={<Plus size={14} strokeWidth={2} />}
+          >
+            Neues Protokoll
           </Button>
         }
       />
@@ -301,7 +306,7 @@ export function UebergabePage() {
       {!protocols || protocols.length === 0 ? (
         <Card>
           <EmptyState
-            icon="🔑"
+            icon={<KeyRound size={24} strokeWidth={1.75} />}
             title="Keine Protokolle"
             description="Erstelle dein erstes Übergabeprotokoll."
             action={{ label: 'Protokoll erstellen', onClick: () => setStep('setup') }}
@@ -313,17 +318,17 @@ export function UebergabePage() {
             {protocols.map((p) => (
               <li
                 key={p.id}
-                className="flex items-center justify-between p-3 rounded-lg border border-stone-100 dark:border-stone-700 hover:bg-stone-50 dark:hover:bg-stone-700/50"
+                className="flex items-center justify-between p-3 rounded-lg border border-zinc-100 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-700/50"
               >
                 <button
                   type="button"
                   onClick={() => setPreviewId(p.id!)}
-                  className="flex-1 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 rounded-lg"
+                  className="flex-1 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 rounded-lg"
                 >
-                  <p className="text-sm font-medium text-stone-800 dark:text-stone-200">
+                  <p className="text-sm font-medium text-zinc-800 dark:text-zinc-200">
                     {p.type === 'move-in' ? 'Einzug' : 'Auszug'} – {p.unitName}
                   </p>
-                  <p className="text-xs text-stone-500 dark:text-stone-400">
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400">
                     {p.tenantName} | {formatDate(p.date)}
                   </p>
                 </button>
@@ -378,7 +383,7 @@ function ProtocolPreview({ protocolId, onBack }: { protocolId: number; onBack: (
   }, [protocolId]);
 
   if (!data) {
-    return <p className="text-sm text-stone-500 dark:text-stone-400">Lade Protokoll...</p>;
+    return <p className="text-sm text-zinc-500 dark:text-zinc-400">Lade Protokoll...</p>;
   }
 
   return (

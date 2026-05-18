@@ -270,10 +270,10 @@ export function AnomalyAlerts({ year }: AnomalyAlertsProps) {
                 />
               </div>
               <div>
-                <h4 className="text-sm font-semibold text-stone-800 dark:text-stone-100 mb-1">
+                <h4 className="text-sm font-semibold text-zinc-800 dark:text-zinc-100 mb-1">
                   {anomaly.title}
                 </h4>
-                <p className="text-sm text-stone-600 dark:text-stone-300">{anomaly.description}</p>
+                <p className="text-sm text-zinc-600 dark:text-zinc-300">{anomaly.description}</p>
               </div>
             </div>
           </div>

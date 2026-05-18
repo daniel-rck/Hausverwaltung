@@ -2,11 +2,23 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../db';
 import { useProperty } from '../../hooks/useProperty';
 import { Card } from '../../components/shared/Card';
+import { Home, Wrench, Gauge, AlertTriangle } from '../../components/ui/icons';
+import type { LucideIcon } from '../../components/ui/icons';
+
+type AlertKind = 'vacant' | 'maintenance' | 'calibration';
+type Severity = 'warning' | 'info';
 
 interface Alert {
-  type: 'warning' | 'info';
+  kind: AlertKind;
+  severity: Severity;
   message: string;
 }
+
+const iconMap: Record<AlertKind, LucideIcon> = {
+  vacant: Home,
+  maintenance: Wrench,
+  calibration: Gauge,
+};
 
 export function AlertsList() {
   const { activeProperty } = useProperty();
@@ -18,10 +30,7 @@ export function AlertsList() {
     const now = new Date().toISOString().slice(0, 7);
     const today = new Date().toISOString().slice(0, 10);
 
-    const units = await db.units
-      .where('propertyId')
-      .equals(activeProperty.id)
-      .toArray();
+    const units = await db.units.where('propertyId').equals(activeProperty.id).toArray();
     const unitIds = units.map((u) => u.id!);
 
     // Leerstand
@@ -29,20 +38,14 @@ export function AlertsList() {
     const occupiedIds = new Set(
       occupancies
         .filter(
-          (o) =>
-            unitIds.includes(o.unitId) &&
-            o.from <= now &&
-            (o.to === null || o.to >= now),
+          (o) => unitIds.includes(o.unitId) && o.from <= now && (o.to === null || o.to >= now),
         )
         .map((o) => o.unitId),
     );
 
     const vacantUnits = units.filter((u) => !occupiedIds.has(u.id!));
     for (const u of vacantUnits) {
-      result.push({
-        type: 'warning',
-        message: `${u.name} steht leer`,
-      });
+      result.push({ kind: 'vacant', severity: 'warning', message: `${u.name} steht leer` });
     }
 
     // Fällige Wartungen
@@ -55,7 +58,8 @@ export function AlertsList() {
     );
     for (const m of dueSoon) {
       result.push({
-        type: 'info',
+        kind: 'maintenance',
+        severity: 'info',
         message: `${m.title} fällig am ${m.nextDue}`,
       });
     }
@@ -65,12 +69,12 @@ export function AlertsList() {
     const soonExpiring = meters.filter(
       (m) =>
         m.calibrationDue &&
-        m.calibrationDue <=
-          new Date(Date.now() + 90 * 86400000).toISOString().slice(0, 10),
+        m.calibrationDue <= new Date(Date.now() + 90 * 86400000).toISOString().slice(0, 10),
     );
     for (const m of soonExpiring) {
       result.push({
-        type: 'warning',
+        kind: 'calibration',
+        severity: 'warning',
         message: `Zähler ${m.serialNumber}: Eichfrist läuft ab (${m.calibrationDue})`,
       });
     }
@@ -80,26 +84,33 @@ export function AlertsList() {
 
   if (!alerts || alerts.length === 0) {
     return (
-      <Card title="Hinweise">
-        <p className="text-sm text-stone-500 dark:text-stone-400">Keine aktuellen Hinweise.</p>
+      <Card title="Heute zu tun">
+        <p className="text-sm text-zinc-500 dark:text-zinc-400">Alles erledigt — keine offenen Hinweise.</p>
       </Card>
     );
   }
 
   return (
-    <Card title="Hinweise">
+    <Card title="Heute zu tun" description={`${alerts.length} offene${alerts.length === 1 ? 'r Hinweis' : ' Hinweise'}`}>
       <ul className="space-y-2">
-        {alerts.map((alert, i) => (
-          <li
-            key={i}
-            className={`flex items-start gap-2 text-sm ${
-              alert.type === 'warning' ? 'text-amber-700 dark:text-amber-400' : 'text-blue-700 dark:text-blue-400'
-            }`}
-          >
-            <span>{alert.type === 'warning' ? '⚠' : 'ℹ'}</span>
-            {alert.message}
-          </li>
-        ))}
+        {alerts.slice(0, 8).map((alert, i) => {
+          const Icon = iconMap[alert.kind] ?? AlertTriangle;
+          const iconColor =
+            alert.severity === 'warning'
+              ? 'text-amber-600 dark:text-amber-400'
+              : 'text-[--color-accent] dark:text-[--color-accent-dark]';
+          return (
+            <li key={i} className="flex items-start gap-3 text-sm text-zinc-700 dark:text-zinc-200">
+              <Icon
+                size={16}
+                strokeWidth={1.75}
+                className={`mt-0.5 shrink-0 ${iconColor}`}
+                aria-hidden="true"
+              />
+              <span className="min-w-0">{alert.message}</span>
+            </li>
+          );
+        })}
       </ul>
     </Card>
   );

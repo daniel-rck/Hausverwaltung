@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { moduleAccent, type ModulKey } from './moduleAccent';
+import type { ModulKey } from './moduleAccent';
 
 type BadgeVariant = 'neutral' | 'success' | 'warning' | 'danger' | 'info';
 type BadgeSize = 'sm' | 'md';
@@ -7,17 +7,21 @@ type BadgeSize = 'sm' | 'md';
 interface BadgeProps {
   variant?: BadgeVariant;
   size?: BadgeSize;
+  /**
+   * Modul-Akzent. Seit dem UI-Overhaul (Linear-Stil) wird der Akzent für Badges
+   * nicht mehr visuell ausgespielt — die `variant`-Prop steuert die Farbe.
+   */
   accent?: ModulKey;
   className?: string;
   children: ReactNode;
 }
 
 const variantClasses: Record<BadgeVariant, string> = {
-  neutral: 'bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-200',
-  success: 'bg-green-100 dark:bg-green-950/60 text-green-800 dark:text-green-200',
-  warning: 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-200',
-  danger: 'bg-red-100 dark:bg-red-950/60 text-red-800 dark:text-red-200',
-  info: 'bg-blue-100 dark:bg-blue-950/60 text-blue-800 dark:text-blue-200',
+  neutral: 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 border border-zinc-200/60 dark:border-zinc-700/60',
+  success: 'bg-green-50 dark:bg-green-950/60 text-green-700 dark:text-green-300 border border-green-200/60 dark:border-green-900/60',
+  warning: 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200/60 dark:border-amber-900/60',
+  danger: 'bg-red-50 dark:bg-red-950/60 text-red-700 dark:text-red-300 border border-red-200/60 dark:border-red-900/60',
+  info: 'bg-[--color-accent-soft] dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-900/60',
 };
 
 const sizeClasses: Record<BadgeSize, string> = {
@@ -28,16 +32,13 @@ const sizeClasses: Record<BadgeSize, string> = {
 export function Badge({
   variant = 'neutral',
   size = 'md',
-  accent,
   className = '',
   children,
 }: BadgeProps) {
-  const a = moduleAccent(accent);
-  const accentCls = a ? `${a.pillBg} ${a.pillText}` : variantClasses[variant];
   const cls = [
     'inline-flex items-center gap-1 rounded-full font-medium',
     sizeClasses[size],
-    accentCls,
+    variantClasses[variant],
     className,
   ].join(' ');
   return <span className={cls}>{children}</span>;

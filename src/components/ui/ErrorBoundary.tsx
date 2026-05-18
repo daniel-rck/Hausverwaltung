@@ -27,7 +27,7 @@ export class ErrorBoundary extends Component<Props, State> {
       if (this.props.fallback) return this.props.fallback(this.state.error, this.reset);
       return (
         <div className="p-6 max-w-xl mx-auto">
-          <div className="rounded-xl border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/40 p-5">
+          <div className="rounded-lg border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/40 p-5">
             <h2 className="text-base font-semibold text-red-800 dark:text-red-200 mb-1">
               Da ist etwas schiefgelaufen
             </h2>
@@ -43,14 +43,14 @@ export class ErrorBoundary extends Component<Props, State> {
               <button
                 type="button"
                 onClick={this.reset}
-                className="h-9 px-4 text-sm font-medium rounded-lg bg-stone-900 text-white hover:bg-stone-800 dark:bg-stone-100 dark:text-stone-900 dark:hover:bg-stone-200"
+                className="h-9 px-4 text-sm font-medium rounded-lg bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
               >
                 Erneut versuchen
               </button>
               <button
                 type="button"
                 onClick={() => window.location.reload()}
-                className="h-9 px-4 text-sm font-medium rounded-lg border border-stone-300 dark:border-stone-600 text-stone-700 dark:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-700"
+                className="h-9 px-4 text-sm font-medium rounded-lg border border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-700"
               >
                 App neu laden
               </button>

@@ -3,6 +3,7 @@ import { db } from '../../db';
 import { Card } from '../../components/shared/Card';
 import { NumInput } from '../../components/shared/NumInput';
 import { EmptyState } from '../../components/shared/EmptyState';
+import { BarChart3, Loader2, Users } from '../../components/ui/icons';
 import { formatEuro } from '../../utils/format';
 import type { CostType, Cost, CostShare, Occupancy, Tenant, Unit } from '../../db/schema';
 
@@ -126,8 +127,8 @@ export function MessdienstInput({ propertyId, year }: MessdienstInputProps) {
     return (
       <Card>
         <EmptyState
-          icon="..."
-          title="Lade Daten..."
+          icon={<Loader2 size={24} strokeWidth={1.75} className="animate-spin" />}
+          title="Lade Daten…"
           description="Bitte warten."
         />
       </Card>
@@ -138,7 +139,7 @@ export function MessdienstInput({ propertyId, year }: MessdienstInputProps) {
     return (
       <Card>
         <EmptyState
-          icon="📊"
+          icon={<BarChart3 size={24} strokeWidth={1.75} />}
           title="Keine Messdienst-Kostenarten"
           description="Es gibt keine Kostenarten mit Verteilung nach Messdienst oder Direktzuordnung."
         />
@@ -150,7 +151,7 @@ export function MessdienstInput({ propertyId, year }: MessdienstInputProps) {
     return (
       <Card>
         <EmptyState
-          icon="👤"
+          icon={<Users size={24} strokeWidth={1.75} />}
           title="Keine Belegungen"
           description={`Keine aktiven Belegungen im Jahr ${year} gefunden.`}
         />
@@ -169,13 +170,13 @@ export function MessdienstInput({ propertyId, year }: MessdienstInputProps) {
             title={`${costType.name} – ${messdienstName}-Anteil`}
           >
             {!cost ? (
-              <p className="text-sm text-stone-500 dark:text-stone-400">
+              <p className="text-sm text-zinc-500 dark:text-zinc-400">
                 Bitte erfassen Sie zuerst den Gesamtbetrag unter
                 &quot;Kosten erfassen&quot;.
               </p>
             ) : (
               <div className="space-y-3">
-                <p className="text-xs text-stone-500 dark:text-stone-400">
+                <p className="text-xs text-zinc-500 dark:text-zinc-400">
                   Gesamtbetrag: {formatEuro(cost.totalAmount)} | Verteilt:{' '}
                   {formatEuro(sharesTotal)}{' '}
                   {Math.abs(cost.totalAmount - sharesTotal) > 0.01 && (
@@ -187,14 +188,14 @@ export function MessdienstInput({ propertyId, year }: MessdienstInputProps) {
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b border-stone-200 dark:border-stone-700">
-                        <th className="py-2 px-3 text-left font-medium text-stone-500 dark:text-stone-400">
+                      <tr className="border-b border-zinc-200 dark:border-zinc-700">
+                        <th className="py-2 px-3 text-left font-medium text-zinc-500 dark:text-zinc-400">
                           Wohnung
                         </th>
-                        <th className="py-2 px-3 text-left font-medium text-stone-500 dark:text-stone-400">
+                        <th className="py-2 px-3 text-left font-medium text-zinc-500 dark:text-zinc-400">
                           Mieter
                         </th>
-                        <th className="py-2 px-3 text-right font-medium text-stone-500 dark:text-stone-400">
+                        <th className="py-2 px-3 text-right font-medium text-zinc-500 dark:text-zinc-400">
                           Betrag
                         </th>
                       </tr>
@@ -207,12 +208,12 @@ export function MessdienstInput({ propertyId, year }: MessdienstInputProps) {
                         return (
                           <tr
                             key={occupancy.id}
-                            className="border-b border-stone-100 dark:border-stone-700"
+                            className="border-b border-zinc-100 dark:border-zinc-700"
                           >
-                            <td className="py-2 px-3 text-stone-700 dark:text-stone-200">
+                            <td className="py-2 px-3 text-zinc-700 dark:text-zinc-200">
                               {unit?.name ?? '–'}
                             </td>
-                            <td className="py-2 px-3 text-stone-700 dark:text-stone-200">
+                            <td className="py-2 px-3 text-zinc-700 dark:text-zinc-200">
                               {tenant?.name ?? '–'}
                             </td>
                             <td className="py-2 px-3">
@@ -235,14 +236,14 @@ export function MessdienstInput({ propertyId, year }: MessdienstInputProps) {
                       })}
                     </tbody>
                     <tfoot>
-                      <tr className="border-t border-stone-200 dark:border-stone-700">
+                      <tr className="border-t border-zinc-200 dark:border-zinc-700">
                         <td
                           colSpan={2}
-                          className="py-2 px-3 text-sm font-semibold text-stone-600 dark:text-stone-300"
+                          className="py-2 px-3 text-sm font-semibold text-zinc-600 dark:text-zinc-300"
                         >
                           Summe Anteile
                         </td>
-                        <td className="py-2 px-3 text-right font-mono font-tabular font-semibold text-stone-800 dark:text-stone-100">
+                        <td className="py-2 px-3 text-right font-mono font-tabular font-semibold text-zinc-800 dark:text-zinc-100">
                           {formatEuro(sharesTotal)}
                         </td>
                       </tr>

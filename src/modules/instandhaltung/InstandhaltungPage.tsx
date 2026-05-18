@@ -3,6 +3,7 @@ import { useProperty } from '../../hooks/useProperty';
 import { EmptyState } from '../../components/shared/EmptyState';
 import { Tabs, type TabItem } from '../../components/ui';
 import { PageHeader } from '../../components/layout/PageHeader';
+import { Building2, Wrench } from '../../components/ui/icons';
 import { MaintenanceList } from './MaintenanceList';
 import { RecurringTasks } from './RecurringTasks';
 import { UpcomingDue } from './UpcomingDue';
@@ -23,7 +24,7 @@ export function InstandhaltungPage() {
   if (!activeProperty) {
     return (
       <EmptyState
-        icon="🏠"
+        icon={<Building2 size={24} strokeWidth={1.75} />}
         title="Kein Objekt vorhanden"
         description="Lege zuerst ein Mietobjekt an."
         action={{
@@ -39,7 +40,7 @@ export function InstandhaltungPage() {
       <PageHeader
         title="Instandhaltung"
         description="Reparaturen, wiederkehrende Wartungen und Kostenauswertungen."
-        icon="🔧"
+        icon={<Wrench size={20} strokeWidth={1.75} />}
         accent="instandhaltung"
       />
 

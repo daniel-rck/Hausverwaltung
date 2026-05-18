@@ -4,6 +4,7 @@ import { db } from '../../db';
 import type { Unit, Meter, MeterType, MeterReading } from '../../db/schema';
 import { Card } from '../../components/shared/Card';
 import { EmptyState } from '../../components/shared/EmptyState';
+import { Thermometer } from '../../components/ui/icons';
 import { StatusBadge } from '../../components/shared/StatusBadge';
 import { BarChart } from '../../components/charts/BarChart';
 import { formatNumber } from '../../utils/format';
@@ -154,7 +155,7 @@ export function WarmKaltRatio({ year }: WarmKaltRatioProps) {
     return (
       <Card title="Warm/Kalt-Verhältnis">
         <EmptyState
-          icon="🌡️"
+          icon={<Thermometer size={24} strokeWidth={1.75} />}
           title="Keine Daten vorhanden"
           description="Es werden Warm- und Kaltwasserzähler mit Ablesungen benötigt, um das Verhältnis zu berechnen."
         />
@@ -166,7 +167,7 @@ export function WarmKaltRatio({ year }: WarmKaltRatioProps) {
 
   return (
     <Card title="Warm/Kalt-Verhältnis">
-      <p className="text-sm text-stone-600 dark:text-stone-300 mb-4">
+      <p className="text-sm text-zinc-600 dark:text-zinc-300 mb-4">
         Anteil Warmwasser am Gesamtverbrauch pro Einheit. Normalbereich:{' '}
         <span className="font-semibold">
           {WARM_WATER_RATIO_MIN}–{WARM_WATER_RATIO_MAX} %
@@ -196,30 +197,30 @@ export function WarmKaltRatio({ year }: WarmKaltRatioProps) {
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-stone-200 dark:border-stone-700">
-              <th className="py-2 px-3 text-left font-medium text-stone-500 dark:text-stone-400">
+            <tr className="border-b border-zinc-200 dark:border-zinc-700">
+              <th className="py-2 px-3 text-left font-medium text-zinc-500 dark:text-zinc-400">
                 Einheit
               </th>
-              <th className="py-2 px-3 text-right font-medium text-stone-500 dark:text-stone-400">
+              <th className="py-2 px-3 text-right font-medium text-zinc-500 dark:text-zinc-400">
                 Warmwasser (m³)
               </th>
-              <th className="py-2 px-3 text-right font-medium text-stone-500 dark:text-stone-400">
+              <th className="py-2 px-3 text-right font-medium text-zinc-500 dark:text-zinc-400">
                 Kaltwasser (m³)
               </th>
-              <th className="py-2 px-3 text-right font-medium text-stone-500 dark:text-stone-400">
+              <th className="py-2 px-3 text-right font-medium text-zinc-500 dark:text-zinc-400">
                 Gesamt (m³)
               </th>
-              <th className="py-2 px-3 text-right font-medium text-stone-500 dark:text-stone-400">
+              <th className="py-2 px-3 text-right font-medium text-zinc-500 dark:text-zinc-400">
                 Warmanteil
               </th>
-              <th className="py-2 px-3 text-center font-medium text-stone-500 dark:text-stone-400">
+              <th className="py-2 px-3 text-center font-medium text-zinc-500 dark:text-zinc-400">
                 Bewertung
               </th>
             </tr>
           </thead>
           <tbody>
             {unitRatios.map((ur) => (
-              <tr key={ur.unitName} className="border-b border-stone-100 dark:border-stone-700">
+              <tr key={ur.unitName} className="border-b border-zinc-100 dark:border-zinc-700">
                 <td className="py-2.5 px-3">{ur.unitName}</td>
                 <td className="py-2.5 px-3 text-right font-mono">
                   {formatNumber(ur.warmM3)}

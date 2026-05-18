@@ -3,6 +3,7 @@ import { useProperty } from '../../hooks/useProperty';
 import { EmptyState } from '../../components/shared/EmptyState';
 import { IconButton, Select } from '../../components/ui';
 import { PageHeader } from '../../components/layout/PageHeader';
+import { Wallet, ChevronLeft, ChevronRight } from '../../components/ui/icons';
 import { MonthOverview } from './MonthOverview';
 import { OpenItems } from './OpenItems';
 import { RevenueChart } from './RevenueChart';
@@ -18,7 +19,7 @@ export function FinanzenPage() {
   if (!activeProperty) {
     return (
       <EmptyState
-        icon="💶"
+        icon={<Wallet size={24} strokeWidth={1.75} />}
         title="Kein Objekt ausgewählt"
         description="Bitte wähle zuerst ein Objekt aus."
       />
@@ -35,18 +36,17 @@ export function FinanzenPage() {
       <PageHeader
         title="Mieteinnahmen"
         description="Monatsübersicht, offene Posten, Auswertungen und Steuer-Export."
-        icon="💶"
+        icon={<Wallet size={20} strokeWidth={1.75} />}
         accent="finanzen"
         actions={
           <div className="flex items-center gap-1">
             <IconButton
-              variant="subtle"
+              variant="ghost"
               size="sm"
               aria-label="Vorheriges Jahr"
               onClick={() => setYear((y) => y - 1)}
-            >
-              ‹
-            </IconButton>
+              icon={<ChevronLeft size={16} strokeWidth={1.75} />}
+            />
             <Select
               aria-label="Jahr"
               value={year}
@@ -60,13 +60,12 @@ export function FinanzenPage() {
               ))}
             </Select>
             <IconButton
-              variant="subtle"
+              variant="ghost"
               size="sm"
               aria-label="Nächstes Jahr"
               onClick={() => setYear((y) => y + 1)}
-            >
-              ›
-            </IconButton>
+              icon={<ChevronRight size={16} strokeWidth={1.75} />}
+            />
           </div>
         }
       />

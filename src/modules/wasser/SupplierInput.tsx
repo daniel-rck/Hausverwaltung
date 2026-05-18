@@ -151,7 +151,7 @@ export function SupplierInput({ year, type }: SupplierInputProps) {
     <Card title={`${config.label} – Daten eingeben`}>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
         <div>
-          <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">
+          <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
             {config.label}
           </label>
           <input
@@ -159,7 +159,7 @@ export function SupplierInput({ year, type }: SupplierInputProps) {
             value={form.supplier}
             onChange={(e) => setForm((f) => ({ ...f, supplier: e.target.value }))}
             placeholder="z.B. Stadtwerke"
-            className="w-full border border-stone-300 dark:border-stone-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-500"
+            className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
           />
         </div>
         <NumInput
@@ -181,7 +181,7 @@ export function SupplierInput({ year, type }: SupplierInputProps) {
             <select
               value={form.unit}
               onChange={(e) => setForm((f) => ({ ...f, unit: e.target.value }))}
-              className="mt-1 border border-stone-300 dark:border-stone-600 rounded-lg px-2 py-1 text-xs bg-white dark:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-500"
+              className="mt-1 border border-zinc-300 dark:border-zinc-600 rounded-lg px-2 py-1 text-xs bg-white dark:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
             >
               {config.units.map((u) => (
                 <option key={u} value={u}>
@@ -192,29 +192,29 @@ export function SupplierInput({ year, type }: SupplierInputProps) {
           )}
         </div>
         <div>
-          <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">
+          <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
             Abrechnungszeitraum von
           </label>
           <input
             type="date"
             value={form.billingFrom}
             onChange={(e) => setForm((f) => ({ ...f, billingFrom: e.target.value }))}
-            className="w-full border border-stone-300 dark:border-stone-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-500"
+            className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">
+          <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
             Abrechnungszeitraum bis
           </label>
           <input
             type="date"
             value={form.billingTo}
             onChange={(e) => setForm((f) => ({ ...f, billingTo: e.target.value }))}
-            className="w-full border border-stone-300 dark:border-stone-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-500"
+            className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">
+          <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
             Hinweise
           </label>
           <input
@@ -222,7 +222,7 @@ export function SupplierInput({ year, type }: SupplierInputProps) {
             value={form.notes}
             onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
             placeholder="optional"
-            className="w-full border border-stone-300 dark:border-stone-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-500"
+            className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
           />
         </div>
       </div>
@@ -230,13 +230,13 @@ export function SupplierInput({ year, type }: SupplierInputProps) {
         <button
           onClick={handleSave}
           disabled={!isValid || saving}
-          className="px-4 py-2 text-sm bg-stone-800 text-white rounded-lg hover:bg-stone-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-4 py-2 text-sm bg-zinc-800 text-white rounded-lg hover:bg-zinc-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {saving ? 'Speichern...' : 'Rechnung speichern'}
         </button>
       </div>
 
-      <h3 className="text-sm font-medium text-stone-600 dark:text-stone-300 mb-2">
+      <h3 className="text-sm font-medium text-zinc-600 dark:text-zinc-300 mb-2">
         Erfasste Rechnungen ({year})
       </h3>
       <DataTable

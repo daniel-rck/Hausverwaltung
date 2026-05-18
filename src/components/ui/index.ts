@@ -18,6 +18,7 @@ export { ConfirmProvider, useConfirm } from './ConfirmProvider';
 export { ErrorBoundary } from './ErrorBoundary';
 export { Wizard, WizardFooter } from './Wizard';
 export { moduleAccent, moduleLabels, type ModulKey } from './moduleAccent';
+export { ModulIcon, ModulIcons, StatusIcons, type ModulIconKey, type LucideIcon } from './icons';
 export {
   useFormValidation,
   required,

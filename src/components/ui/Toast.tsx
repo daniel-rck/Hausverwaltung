@@ -9,6 +9,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
+import { StatusIcons, X } from './icons';
 
 type ToastVariant = 'success' | 'error' | 'info' | 'warning';
 
@@ -123,32 +124,31 @@ function ToastViewport({ items, onDismiss }: { items: ToastItem[]; onDismiss: (i
 
 const variantClasses: Record<ToastVariant, string> = {
   success:
-    'border-green-200 dark:border-green-900 bg-green-50 dark:bg-green-950/80 text-green-800 dark:text-green-200',
+    'border-green-200/60 dark:border-green-900/60 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100',
   error:
-    'border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/80 text-red-800 dark:text-red-200',
+    'border-red-200/60 dark:border-red-900/60 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100',
   info:
-    'border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-800 dark:text-stone-100',
+    'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100',
   warning:
-    'border-amber-200 dark:border-amber-900 bg-amber-50 dark:bg-amber-950/80 text-amber-900 dark:text-amber-200',
+    'border-amber-200/60 dark:border-amber-900/60 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100',
 };
 
-const variantIcon: Record<ToastVariant, string> = {
-  success: '✓',
-  error: '⚠',
-  info: 'ℹ',
-  warning: '⚠',
+const variantIconColor: Record<ToastVariant, string> = {
+  success: 'text-green-600 dark:text-green-400',
+  error: 'text-red-600 dark:text-red-400',
+  info: 'text-[--color-accent] dark:text-[--color-accent-dark]',
+  warning: 'text-amber-600 dark:text-amber-400',
 };
 
 function ToastView({ item, onDismiss }: { item: ToastItem; onDismiss: (id: number) => void }) {
   const role = item.variant === 'error' ? 'alert' : 'status';
+  const Icon = StatusIcons[item.variant];
   return (
     <div
       role={role}
-      className={`pointer-events-auto w-full max-w-sm rounded-lg border shadow-lg px-4 py-3 flex items-start gap-3 text-sm ${variantClasses[item.variant]}`}
+      className={`pointer-events-auto w-full max-w-sm rounded-lg border shadow-pop px-3.5 py-2.5 flex items-start gap-3 text-sm ${variantClasses[item.variant]}`}
     >
-      <span aria-hidden="true" className="text-base leading-5">
-        {variantIcon[item.variant]}
-      </span>
+      <Icon size={16} strokeWidth={2} className={`mt-0.5 shrink-0 ${variantIconColor[item.variant]}`} aria-hidden="true" />
       <div className="flex-1 min-w-0">
         <p>{item.message}</p>
         {item.action && (
@@ -158,7 +158,7 @@ function ToastView({ item, onDismiss }: { item: ToastItem; onDismiss: (id: numbe
               item.action?.onClick();
               onDismiss(item.id);
             }}
-            className="text-xs font-medium underline mt-1"
+            className="text-xs font-medium text-[--color-accent] dark:text-[--color-accent-dark] hover:underline mt-1"
           >
             {item.action.label}
           </button>
@@ -168,9 +168,9 @@ function ToastView({ item, onDismiss }: { item: ToastItem; onDismiss: (id: numbe
         type="button"
         onClick={() => onDismiss(item.id)}
         aria-label="Schließen"
-        className="text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200"
+        className="text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 -mr-1 -mt-0.5 p-1 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--color-accent]/40"
       >
-        <span aria-hidden="true">✕</span>
+        <X size={14} aria-hidden="true" />
       </button>
     </div>
   );

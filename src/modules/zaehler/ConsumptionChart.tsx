@@ -3,6 +3,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../db';
 import { Card } from '../../components/shared/Card';
 import { EmptyState } from '../../components/shared/EmptyState';
+import { BarChart3 } from '../../components/ui/icons';
 import { LineChart } from '../../components/charts/LineChart';
 import { formatDate, formatNumber } from '../../utils/format';
 import type { MeterType } from '../../db/schema';
@@ -46,7 +47,7 @@ export function ConsumptionChart({ meterId }: ConsumptionChartProps) {
     return (
       <Card title="Verbrauchsverlauf">
         <EmptyState
-          icon="📊"
+          icon={<BarChart3 size={24} strokeWidth={1.75} />}
           title="Kein Zähler ausgewählt"
           description="Wählen Sie einen Zähler, um den Verbrauchsverlauf anzuzeigen."
         />
@@ -58,7 +59,7 @@ export function ConsumptionChart({ meterId }: ConsumptionChartProps) {
     return (
       <Card title="Verbrauchsverlauf">
         <EmptyState
-          icon="📊"
+          icon={<BarChart3 size={24} strokeWidth={1.75} />}
           title="Nicht genug Daten"
           description="Es werden mindestens zwei Ablesungen benötigt, um den Verbrauch zu berechnen."
         />
@@ -71,7 +72,7 @@ export function ConsumptionChart({ meterId }: ConsumptionChartProps) {
   return (
     <Card title="Verbrauchsverlauf">
       <div className="mb-3">
-        <p className="text-xs text-stone-500 dark:text-stone-400">
+        <p className="text-xs text-zinc-500 dark:text-zinc-400">
           Verbrauch zwischen aufeinanderfolgenden Ablesungen
           {unitLabel ? ` (${unitLabel})` : ''}
         </p>
@@ -89,19 +90,19 @@ export function ConsumptionChart({ meterId }: ConsumptionChartProps) {
       <div className="mt-3 overflow-x-auto">
         <table className="w-full text-xs">
           <thead>
-            <tr className="border-b border-stone-200 dark:border-stone-700">
-              <th className="py-1.5 px-2 text-left font-medium text-stone-500 dark:text-stone-400">
+            <tr className="border-b border-zinc-200 dark:border-zinc-700">
+              <th className="py-1.5 px-2 text-left font-medium text-zinc-500 dark:text-zinc-400">
                 Zeitraum
               </th>
-              <th className="py-1.5 px-2 text-right font-medium text-stone-500 dark:text-stone-400">
+              <th className="py-1.5 px-2 text-right font-medium text-zinc-500 dark:text-zinc-400">
                 Verbrauch
               </th>
             </tr>
           </thead>
           <tbody>
             {chartData.labels.map((label, i) => (
-              <tr key={label} className="border-b border-stone-100 dark:border-stone-700">
-                <td className="py-1.5 px-2 text-stone-600 dark:text-stone-300">{label}</td>
+              <tr key={label} className="border-b border-zinc-100 dark:border-zinc-700">
+                <td className="py-1.5 px-2 text-zinc-600 dark:text-zinc-300">{label}</td>
                 <td className="py-1.5 px-2 text-right font-mono">
                   {formatNumber(chartData.data[i])} {unitLabel}
                 </td>

@@ -2,6 +2,7 @@
 import type { ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { moduleAccent, type ModulKey } from '../ui/moduleAccent';
+import { ChevronRight } from '../ui/icons';
 
 interface BreadcrumbItem {
   label: string;
@@ -35,7 +36,7 @@ export function PageHeader({
       {a && (
         <span
           aria-hidden="true"
-          className={`block w-12 h-1 rounded-full ${a.bg}`}
+          className={`block w-8 h-0.5 rounded-full ${a.bar}`}
         />
       )}
       {breadcrumbs && breadcrumbs.length > 0 && <Breadcrumbs items={breadcrumbs} />}
@@ -44,17 +45,17 @@ export function PageHeader({
           {icon && (
             <span
               aria-hidden="true"
-              className={`shrink-0 inline-flex items-center justify-center w-10 h-10 rounded-lg text-xl ${a?.pillBg ?? 'bg-stone-100 dark:bg-stone-800'} ${a?.text ?? 'text-stone-700 dark:text-stone-200'}`}
+              className="shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200"
             >
               {icon}
             </span>
           )}
           <div className="min-w-0">
-            <h1 className="text-xl md:text-2xl font-semibold text-stone-800 dark:text-stone-100 truncate">
+            <h1 className="text-lg md:text-xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50 truncate">
               {title}
             </h1>
             {description && (
-              <p className="text-sm text-stone-500 dark:text-stone-400 mt-0.5">{description}</p>
+              <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">{description}</p>
             )}
           </div>
         </div>
@@ -67,22 +68,27 @@ export function PageHeader({
 
 export function Breadcrumbs({ items }: { items: BreadcrumbItem[] }) {
   return (
-    <nav aria-label="Brotkrumen" className="text-xs text-stone-500 dark:text-stone-400">
-      <ol className="flex items-center gap-1.5 flex-wrap">
+    <nav aria-label="Brotkrumen" className="text-[11px] text-zinc-500 dark:text-zinc-400">
+      <ol className="flex items-center gap-1 flex-wrap">
         {items.map((item, idx) => {
           const last = idx === items.length - 1;
           return (
-            <li key={`${item.label}-${idx}`} className="flex items-center gap-1.5">
+            <li key={`${item.label}-${idx}`} className="flex items-center gap-1">
               {item.to && !last ? (
-                <Link to={item.to} className="hover:text-stone-700 dark:hover:text-stone-200">
+                <Link to={item.to} className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">
                   {item.label}
                 </Link>
               ) : (
-                <span className={last ? 'text-stone-700 dark:text-stone-200 font-medium' : ''} aria-current={last ? 'page' : undefined}>
+                <span
+                  className={last ? 'text-zinc-700 dark:text-zinc-200 font-medium' : ''}
+                  aria-current={last ? 'page' : undefined}
+                >
                   {item.label}
                 </span>
               )}
-              {!last && <span aria-hidden="true">/</span>}
+              {!last && (
+                <ChevronRight size={12} strokeWidth={1.75} className="text-zinc-400" aria-hidden="true" />
+              )}
             </li>
           );
         })}

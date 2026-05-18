@@ -4,6 +4,7 @@ import { db } from '../../db';
 import { useProperty } from '../../hooks/useProperty';
 import { EmptyState } from '../../components/shared/EmptyState';
 import { PageHeader } from '../../components/layout/PageHeader';
+import { Building2, Users } from '../../components/ui/icons';
 import { UnitList } from './UnitList';
 import { TenantForm } from './TenantForm';
 import { RentBenchmark } from './RentBenchmark';
@@ -42,7 +43,7 @@ export function MieterPage() {
   if (!activeProperty) {
     return (
       <EmptyState
-        icon="🏠"
+        icon={<Building2 size={24} strokeWidth={1.75} />}
         title="Kein Objekt vorhanden"
         description="Lege zuerst ein Mietobjekt an."
         action={{
@@ -58,7 +59,7 @@ export function MieterPage() {
       <PageHeader
         title="Mieterverwaltung"
         description={selectedUnit ? `Wohnung: ${selectedUnit.name}` : 'Wohnungen, Mieter und Mietverhältnisse pflegen.'}
-        icon="👤"
+        icon={<Users size={20} strokeWidth={1.75} />}
         accent="mieter"
         breadcrumbs={
           selectedUnit

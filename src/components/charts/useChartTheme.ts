@@ -13,8 +13,8 @@ export function useChartTheme(): ChartTheme {
   return useMemo(
     () =>
       theme === 'dark'
-        ? { text: '#a8a29e', grid: 'rgba(168,162,158,0.15)', border: '#292524' }
-        : { text: '#78716c', grid: 'rgba(120,113,108,0.12)', border: '#ffffff' },
+        ? { text: '#a1a1aa', grid: 'rgba(161,161,170,0.15)', border: '#27272a' }
+        : { text: '#71717a', grid: 'rgba(113,113,122,0.12)', border: '#ffffff' },
     [theme],
   );
 }

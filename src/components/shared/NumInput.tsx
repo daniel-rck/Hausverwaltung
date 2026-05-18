@@ -74,7 +74,7 @@ export function NumInput({
   return (
     <div className={className}>
       {label && (
-        <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">
+        <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
           {label}
         </label>
       )}
@@ -89,10 +89,10 @@ export function NumInput({
           onBlur={handleBlur}
           step={step}
           disabled={disabled}
-          className="w-full border border-stone-300 dark:border-stone-600 rounded-lg px-3 py-1.5 text-sm text-right font-mono bg-white dark:bg-stone-800 dark:text-stone-200 focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-500 disabled:bg-stone-50 disabled:text-stone-400 dark:disabled:bg-stone-800/50 dark:disabled:text-stone-500"
+          className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm text-right font-mono bg-white dark:bg-zinc-800 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500 disabled:bg-zinc-50 disabled:text-zinc-400 dark:disabled:bg-zinc-800/50 dark:disabled:text-zinc-500"
         />
         {suffix && (
-          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-stone-400 dark:text-stone-500 pointer-events-none">
+          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-400 dark:text-zinc-500 pointer-events-none">
             {suffix}
           </span>
         )}
