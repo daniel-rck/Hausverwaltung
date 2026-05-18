@@ -1,0 +1,89 @@
+name: Bug-Report
+description: Etwas funktioniert nicht wie erwartet
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Danke, dass du dir die Zeit nimmst! Bitte fülle die Felder unten so vollständig wie möglich aus —
+        das hilft uns, den Fehler schnell nachzustellen.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Beschreibung
+      description: Was ist passiert? Was ist das Problem?
+      placeholder: Beim Speichern einer Nebenkostenabrechnung erscheint ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Schritte zur Reproduktion
+      description: Möglichst minimal — gerne mit Beispieldaten.
+      placeholder: |
+        1. Öffne ...
+        2. Klicke auf ...
+        3. Trage ... ein
+        4. Beobachte ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Erwartetes Verhalten
+      placeholder: Die Abrechnung sollte gespeichert werden und in der Übersicht erscheinen.
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Tatsächliches Verhalten
+      placeholder: Die App zeigt eine Fehlermeldung "..." an, die Abrechnung wird nicht gespeichert.
+    validations:
+      required: true
+
+  - type: input
+    id: browser
+    attributes:
+      label: Browser und Version
+      placeholder: "Chrome 131 / Firefox 128 / Safari 18 ..."
+    validations:
+      required: true
+
+  - type: input
+    id: device
+    attributes:
+      label: Gerät / Betriebssystem
+      placeholder: "MacBook Air M2 (macOS 15), iPhone 15 (iOS 18), Windows 11 ..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: console
+    attributes:
+      label: Konsolen-Fehler
+      description: DevTools → Console → relevante Zeilen kopieren. Bitte als Code-Block.
+      render: shell
+
+  - type: dropdown
+    id: sync
+    attributes:
+      label: Sync aktiv?
+      options:
+        - "Nein, nur lokal"
+        - "Ja, ein Gerät"
+        - "Ja, mehrere Geräte"
+        - "Weiß ich nicht"
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Zusätzlicher Kontext
+      description: Screenshots, JSON-Export-Auszüge, alles was helfen könnte.

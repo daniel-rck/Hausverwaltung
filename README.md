@@ -1,113 +1,78 @@
 # Hausverwaltung
 
-Kostenlose Web-App für private Vermieter kleiner Mehrfamilienhäuser.
+[![CI](https://github.com/daniel-rck/Hausverwaltung/actions/workflows/ci.yml/badge.svg)](https://github.com/daniel-rck/Hausverwaltung/actions/workflows/ci.yml)
+[![Lizenz: MIT](https://img.shields.io/badge/Lizenz-MIT-blue.svg)](./LICENSE)
+[![Live Demo](https://img.shields.io/badge/Live-Demo-22c55e)](https://hausverwaltung.daniel-rck.workers.dev/)
+![React 19](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-6-3178C6?logo=typescript&logoColor=white)
+![Cloudflare Workers](https://img.shields.io/badge/Cloudflare-Workers-F38020?logo=cloudflare&logoColor=white)
+![Bun](https://img.shields.io/badge/Bun-1.3-000?logo=bun&logoColor=white)
+![PWA](https://img.shields.io/badge/PWA-ready-5A0FC8)
 
-**[Direkt starten](https://hausverwaltung.daniel-rck.workers.dev/)**
+> Kostenlose Open-Source Web-App für private Vermieter kleiner Mehrfamilienhäuser
+> (3–10 Wohneinheiten). Komplett im Browser — keine Installation, kein Account,
+> keine laufenden Kosten.
 
-<!-- Screenshots -->
-<!--
-![Dashboard](docs/screenshot-dashboard.png)
-![Nebenkostenabrechnung](docs/screenshot-nebenkosten.png)
-![Mieterverwaltung](docs/screenshot-mieter.png)
--->
+**[→ App starten](https://hausverwaltung.daniel-rck.workers.dev/)** ·
+**[→ Issues](https://github.com/daniel-rck/Hausverwaltung/issues)**
 
----
+## Highlights
 
-## Was ist das?
+- **12 Module**: Mieter, Nebenkosten, Versorger, Zähler, Mieteinnahmen, Steuer-Export (Anlage V), Mietverträge, Übergabeprotokolle, Rendite, Kaution, Mietspiegel, Instandhaltung
+- **Local-First**: Daten bleiben im Browser (IndexedDB) — kein Account, keine E-Mail, keine Cloud-Pflicht
+- **Optionaler Multi-Device-Sync**: Ende-zu-Ende verschlüsselt (HKDF-SHA256 → AES-GCM), Server kennt das Geheimnis nie
+- **PWA**: offline-fähig, installierbar auf Mobile, Dark Mode
+- **Druckbar**: A4-Abrechnungen, Mietverträge, Mahnungen, Übergabeprotokolle direkt aus dem Browser
 
-Hausverwaltung hilft dir, dein Mietobjekt einfach und übersichtlich zu verwalten — direkt im Browser, ohne Installation, ohne Registrierung, ohne monatliche Kosten.
+## Quick Start (Entwickler)
 
-Die App ist gemacht für Vermieter mit 3 bis 10 Wohneinheiten, die ihre Verwaltung unkompliziert selbst erledigen möchten.
+```bash
+git clone https://github.com/daniel-rck/Hausverwaltung.git
+cd Hausverwaltung
+bun install
+bun dev                  # SPA auf http://localhost:5173
+```
 
-## Funktionen
+Für lokales Sync-Backend (Worker + R2 + KV via Miniflare):
 
-- **Mieterverwaltung** — Wohnungen, Mieter und Belegungszeiträume auf einen Blick
-- **Nebenkostenabrechnung** — Jährliche Abrechnung mit Verteilungsschlüsseln, druckfertig für deine Mieter
-- **Versorger & Verbrauch** — Wasser, Gas, Strom, Fernwärme: Rechnungen erfassen, Verbrauch analysieren, Anomalien erkennen
-- **Zählerstand-Erfassung** — Alle Zähler an einem Ort, mit Eichfrist-Erinnerung
-- **Mieteinnahmen** — Soll/Ist-Vergleich, offene Posten, Mahnwesen, Jahresübersicht
-- **Steuer-Export** — Anlage V Übertragungshilfe für ELSTER mit automatisch berechneten Zeilen
-- **Instandhaltung** — Reparaturen, Wartungen und wiederkehrende Aufgaben verwalten
-- **Übergabeprotokoll** — Ein-/Auszugsprotokolle mit Raumzustand, Zählerständen und Unterschrift
-- **Renditeberechnung** — Brutto-/Nettomietrendite, Cashflow und Eigenkapitalrendite
-- **Mieterhöhung** — Miethistorie mit Begründung, automatische Aktualisierung der Belegungsdaten
-- **Kautionsverwaltung** — Einzahlung, Verzinsung, Abzüge, Erstattung mit Fristüberwachung
-- **Mietspiegel-Vergleich** — Kaltmiete/m² vs. ortsübliche Vergleichsmiete mit Ampel
-- **Mietvertrag-Generator** — Druckbare Vorlage vorausgefüllt mit deinen Stammdaten
-- **Dokumenten-Ablage** — PDFs und Fotos direkt in der App speichern (bis 5 MB pro Datei)
-- **Dark Mode** — Helles und dunkles Design, per Klick umschaltbar
+```bash
+bun dev:cf               # Worker + SPA gemeinsam
+```
 
-## Deine Daten gehören dir
+## Stack
 
-- Alle Daten bleiben **lokal in deinem Browser** gespeichert — es werden keine Daten an einen fremden Server gesendet
-- Kein Account, keine Registrierung, keine E-Mail-Adresse nötig
-- **Backup per JSON-Datei** — jederzeit exportieren und auf einem anderen Gerät importieren
-- **Transfer per Link** — Daten komprimiert als URL teilen, z.B. vom PC aufs Tablet
-- **Multi-Device-Sync** — optional: synchronisiere zwischen mehreren Geräten ohne Konto (siehe unten)
-- **Installierbar** — als App auf dem Homescreen deines Handys (PWA)
+React 19 · TypeScript 6 · Vite 8 · Tailwind 4 · Dexie (IndexedDB) ·
+Cloudflare Workers + R2 + KV · Bun 1.3 · Vitest
 
-### Multi-Device-Sync einrichten
+## Scripts
 
-Wenn du die Hausverwaltung auf mehreren Geräten (z.B. Laptop + Handy) nutzt,
-kannst du den Sync direkt in der App aktivieren — **ohne Konto, ohne E-Mail,
-ohne Passwort**. Beim ersten „Sync aktivieren"-Klick wird auf dem Gerät ein
-zufälliges Sync-Geheimnis erzeugt, das im Browser gespeichert bleibt. Die
-Daten werden in einer einzigen verschlüsselten Datei im Sync-Backend abgelegt;
-der Server kennt das Sync-Geheimnis nie im Klartext.
+| Script | Zweck |
+|---|---|
+| `bun dev` | Dev-Server (Vite) auf :5173 |
+| `bun dev:cf` | Worker + SPA via Wrangler |
+| `bun run build` | Production-Build (`dist/`) |
+| `bun run lint` | ESLint |
+| `bun run typecheck` | TypeScript-Check (App + Worker) |
+| `bun run test` | Vitest (watch) |
+| `bun run test:run` | Vitest (single run, CI) |
+| `bun run deploy:cf` | Manuelles Deploy via Wrangler |
 
-**Weiteres Gerät verknüpfen (auf Gerät A):**
+## Architektur
 
-1. Einstellungen → Sync → „Weiteres Gerät verknüpfen" — ein 6-stelliger Code
-   wird angezeigt (5 Minuten gültig).
-2. Auf Gerät B → „Mit anderem Gerät verknüpfen" → Code eintippen.
-3. Beide Geräte synchronisieren ab sofort denselben Datenbestand.
+SPA (`src/`) — 11 Module unter `src/modules/`, Dexie-Schema in `src/db/`,
+Sync-Client in `src/sync/`. Cloudflare Worker (`worker/`) routet `/api/*`
+an die Sync-Handler und liefert sonst die statischen Assets. Sync ist
+clientseitig verschlüsselt; konflikt-resolved via R2-ETag (`If-Match`).
 
-Der Code ist **einmalig** und läuft ab — auch wenn er nicht eingelöst wurde.
-Während der Übertragung wird das Sync-Geheimnis client-seitig mit einem aus
-dem Code abgeleiteten Schlüssel (HKDF-SHA256 → AES-GCM) verschlüsselt; der
-Server relayed nur den Chiffretext.
+Deploy-Setup & Free-Tier-Bindings: **[SETUP.md](./SETUP.md)**
 
-**Selbst deployen auf Cloudflare Workers:** siehe [SETUP.md](./SETUP.md)
-— Workers + R2 + KV, alles im Free-Tier.
+## Mitmachen
 
-Kein Client-Secret, keine Drittanbieter-Tokens, kein Account.
+Bug-Reports und PRs willkommen — siehe **[CONTRIBUTING.md](./CONTRIBUTING.md)** für
+Dev-Setup, Code-Style und PR-Prozess. Sicherheitslücken bitte **nicht** als
+öffentliches Issue: **[SECURITY.md](./SECURITY.md)**. Versionsverlauf:
+**[CHANGELOG.md](./CHANGELOG.md)**.
 
-### Architektur des Sync-Backends
+## Lizenz
 
-- **Hosting:** Cloudflare Workers + Static Assets. SPA-Build (Vite) liegt
-  in `dist/`, der Worker in `worker/index.ts` routet `/api/*` an die
-  Sync-Handler und reicht alles andere an die statischen Assets durch.
-- **Speicher:** Cloudflare R2, Schlüssel `objects/<id>/data.json`. Die `<id>`
-  wird aus `sha256(secret).slice(0,16)` (Crockford-base32) abgeleitet — der
-  Worker führt keine User-Tabelle.
-- **Konflikt-Erkennung:** R2-`ETag` mit `If-Match` (Upload) und
-  `If-None-Match` (Download) — bei parallelen Edits liefert ein PUT 412 und
-  der Sync-Layer merged automatisch nach.
-- **Pairing:** Cloudflare KV speichert den verschlüsselten OTP-Slot mit
-  TTL 300 s; nach erfolgreichem Claim wird der Slot sofort gelöscht.
-- **Rate-Limit:** KV-basierte Token-Buckets, 5 `pair/create`/min, 10
-  `pair/claim`/15min, 60 Daten-Operationen/min pro IP.
-
-## So funktioniert's
-
-1. Öffne **[hausverwaltung.daniel-rck.workers.dev](https://hausverwaltung.daniel-rck.workers.dev/)**
-2. Leg dein erstes Mietobjekt an (Name, Adresse)
-3. Füg Wohnungen und Mieter hinzu
-4. Fertig — alle Module (Nebenkosten, Zähler, Finanzen, ...) greifen automatisch auf diese Daten zu
-
-**Tipp:** Mach regelmäßig ein Backup über den Export-Button auf dem Dashboard.
-
-## Drucken
-
-Abrechnungen, Mietverträge, Mahnungen und Übergabeprotokolle können direkt aus der App als saubere A4-Seiten gedruckt oder als PDF gespeichert werden (über die Druckfunktion deines Browsers).
-
-## Technische Hinweise
-
-- Funktioniert in allen modernen Browsern (Chrome, Firefox, Safari, Edge)
-- Responsive — nutzbar auf Handy, Tablet und Desktop
-- Nach dem ersten Laden auch **offline** nutzbar (PWA mit Service Worker)
-- Kostenlos und quelloffen ([MIT-Lizenz](./LICENSE))
-
-## Fragen oder Probleme?
-
-Erstell ein [Issue](https://github.com/daniel-rck/Hausverwaltung/issues) hier auf GitHub.
+MIT — siehe [LICENSE](./LICENSE).

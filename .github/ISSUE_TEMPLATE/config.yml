@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Sicherheitslücke melden
+    url: https://github.com/daniel-rck/Hausverwaltung/security/advisories/new
+    about: Bitte nicht öffentlich. Nutze GitHub Security Advisories (siehe SECURITY.md).
+  - name: Frage / Diskussion
+    url: https://github.com/daniel-rck/Hausverwaltung/discussions
+    about: Allgemeine Fragen, Erfahrungsaustausch oder Ideen-Sammlung bitte in Discussions.
