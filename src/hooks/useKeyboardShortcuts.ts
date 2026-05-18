@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 /** Mapping `g <key>` → Route. */
@@ -32,7 +32,12 @@ function isEditable(target: EventTarget | null): boolean {
  */
 export function useKeyboardShortcuts(onShowHelp: () => void) {
   const navigate = useNavigate();
-  const [gPressedAt, setGPressedAt] = useState<number>(0);
+  const gPressedAtRef = useRef<number>(0);
+  const onShowHelpRef = useRef(onShowHelp);
+
+  useEffect(() => {
+    onShowHelpRef.current = onShowHelp;
+  }, [onShowHelp]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -41,24 +46,26 @@ export function useKeyboardShortcuts(onShowHelp: () => void) {
 
       if (e.key === '?') {
         e.preventDefault();
-        onShowHelp();
+        onShowHelpRef.current();
         return;
       }
 
-      if (e.key === 'g') {
-        setGPressedAt(Date.now());
+      const key = e.key.toLowerCase();
+
+      if (key === 'g') {
+        gPressedAtRef.current = Date.now();
         return;
       }
 
-      const recent = Date.now() - gPressedAt < 1500;
-      if (recent && GO_ROUTES[e.key]) {
+      const recent = Date.now() - gPressedAtRef.current < 1500;
+      if (recent && GO_ROUTES[key]) {
         e.preventDefault();
-        setGPressedAt(0);
-        navigate(GO_ROUTES[e.key]);
+        gPressedAtRef.current = 0;
+        navigate(GO_ROUTES[key]);
       }
     };
 
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
-  }, [navigate, onShowHelp, gPressedAt]);
+  }, [navigate]);
 }

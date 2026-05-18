@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Card } from '../shared/Card';
+import { Button } from '../ui/Button';
 import { useSyncStatus } from '../../sync/useSyncStatus';
 import { syncService } from '../../sync/service';
 
@@ -137,20 +138,12 @@ export function SyncSettings() {
 
       {!enabled && mode === 'idle' && (
         <div className="space-y-2">
-          <button
-            onClick={handleEnable}
-            disabled={busy}
-            className="w-full px-4 py-2 text-sm bg-zinc-800 text-white rounded-lg hover:bg-zinc-900 transition-colors disabled:opacity-50"
-          >
+          <Button variant="primary" fullWidth onClick={handleEnable} loading={busy}>
             {busy ? 'Aktiviere…' : 'Sync aktivieren'}
-          </button>
-          <button
-            onClick={() => setMode('entering-otp')}
-            disabled={busy}
-            className="w-full px-4 py-2 text-sm border border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-200 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors disabled:opacity-50"
-          >
+          </Button>
+          <Button variant="secondary" fullWidth onClick={() => setMode('entering-otp')} disabled={busy}>
             Mit anderem Gerät verknüpfen
-          </button>
+          </Button>
           <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-2">
             Beim Aktivieren wird dieses Gerät zum Sync-Owner. Weitere Geräte
             verknüpfst du anschließend über einen 6-stelligen Code.
@@ -173,26 +166,29 @@ export function SyncSettings() {
             value={otpInput}
             onChange={(e) => setOtpInput(e.target.value.replace(/\D/g, '').slice(0, 6))}
             placeholder="123456"
-            className="w-full px-4 py-3 text-center text-2xl font-mono tracking-widest border border-zinc-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-700 text-zinc-800 dark:text-zinc-100"
+            className="w-full px-4 py-3 text-center text-2xl font-mono tracking-widest border border-zinc-300 dark:border-zinc-700 rounded-md bg-white dark:bg-zinc-800 text-zinc-800 dark:text-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--color-accent]/40 focus-visible:border-[--color-accent]"
           />
           <div className="flex gap-2">
-            <button
+            <Button
+              variant="primary"
+              className="flex-1"
               onClick={handleClaim}
-              disabled={busy || otpInput.length !== 6}
-              className="flex-1 px-4 py-2 text-sm bg-zinc-800 text-white rounded-lg hover:bg-zinc-900 transition-colors disabled:opacity-50"
+              loading={busy}
+              disabled={otpInput.length !== 6}
             >
               {busy ? 'Verknüpfe…' : 'Verknüpfen'}
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="secondary"
+              className="flex-1"
               onClick={() => {
                 setMode('idle');
                 setOtpInput('');
               }}
               disabled={busy}
-              className="flex-1 px-4 py-2 text-sm border border-zinc-300 dark:border-zinc-600 text-zinc-600 dark:text-zinc-300 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors disabled:opacity-50"
             >
               Abbrechen
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -203,15 +199,12 @@ export function SyncSettings() {
             Code am anderen Gerät eingeben (gültig{' '}
             {formatCountdown(pairing.expiresAt - now)}):
           </div>
-          <div className="text-4xl sm:text-5xl text-center font-mono font-semibold tracking-[0.2em] py-6 bg-zinc-50 dark:bg-zinc-700 rounded-lg text-zinc-800 dark:text-zinc-100">
+          <div className="text-4xl sm:text-5xl text-center font-mono font-semibold tracking-[0.2em] py-6 bg-zinc-50 dark:bg-zinc-800/60 rounded-lg text-zinc-900 dark:text-zinc-100 border border-zinc-200 dark:border-zinc-800">
             {pairing.otp.slice(0, 3)} {pairing.otp.slice(3)}
           </div>
-          <button
-            onClick={handleCancelPairing}
-            className="w-full px-4 py-2 text-sm border border-zinc-300 dark:border-zinc-600 text-zinc-600 dark:text-zinc-300 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors"
-          >
+          <Button variant="secondary" fullWidth onClick={handleCancelPairing}>
             Abbrechen
-          </button>
+          </Button>
           <p className="text-xs text-zinc-500 dark:text-zinc-400">
             Der Code kann nur einmal verwendet werden und läuft nach 5 Minuten ab.
           </p>
@@ -244,27 +237,30 @@ export function SyncSettings() {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-2">
-            <button
+            <Button
+              variant="secondary"
+              className="flex-1"
               onClick={handleSyncNow}
               disabled={busy || state.status === 'syncing'}
-              className="flex-1 px-4 py-2 text-sm border border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-200 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors disabled:opacity-50"
             >
               Jetzt synchronisieren
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="secondary"
+              className="flex-1"
               onClick={handleStartPairing}
               disabled={busy}
-              className="flex-1 px-4 py-2 text-sm border border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-200 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors disabled:opacity-50"
             >
               Weiteres Gerät verknüpfen
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="secondary"
+              className="flex-1"
               onClick={handleDisable}
               disabled={busy}
-              className="flex-1 px-4 py-2 text-sm border border-zinc-300 dark:border-zinc-600 text-zinc-600 dark:text-zinc-300 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors disabled:opacity-50"
             >
               Sync zurücksetzen
-            </button>
+            </Button>
           </div>
 
           <label className="flex items-center gap-2 text-xs text-zinc-600 dark:text-zinc-300">

@@ -61,9 +61,12 @@ function AllgemeinTab() {
   const [messdienstName, setMessdienstName] = useState('');
   const toast = useToast();
 
+  const loaded = landlord !== undefined && messdienst !== undefined;
+
   const startEditing = () => {
-    if (landlord) setForm(landlord);
-    if (messdienst) setMessdienstName(messdienst);
+    if (!loaded) return;
+    setForm(landlord);
+    setMessdienstName(messdienst);
     setEditing(true);
   };
 
@@ -88,7 +91,7 @@ function AllgemeinTab() {
       description="Diese Daten erscheinen auf Abrechnungen und Mietverträgen."
       action={
         !editing ? (
-          <Button variant="ghost" size="sm" onClick={startEditing}>
+          <Button variant="ghost" size="sm" onClick={startEditing} disabled={!loaded}>
             Bearbeiten
           </Button>
         ) : undefined
