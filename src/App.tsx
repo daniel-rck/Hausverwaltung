@@ -54,11 +54,15 @@ const LandingPage = lazy(() =>
  * Leitet Erstbesucher mit leerer Datenbank auf `/willkommen`. Während die
  * IndexedDB noch geladen wird, liefert useLiveQuery `undefined` — dann wird
  * nichts gerendert (kurzer Suspense-Frame), um einen Flash zu vermeiden.
+ *
+ * Verwendet `count()` statt `toArray()`, damit die Subscription nur eine Zahl
+ * trackt und das Dashboard seine eigenen Properties-Queries weiterhin
+ * unabhängig fährt.
  */
 function HomeOrWelcome() {
-  const properties = useLiveQuery(() => db.properties.toArray());
-  if (properties === undefined) return null;
-  if (properties.length === 0) return <Navigate to="/willkommen" replace />;
+  const propertyCount = useLiveQuery(() => db.properties.count());
+  if (propertyCount === undefined) return null;
+  if (propertyCount === 0) return <Navigate to="/willkommen" replace />;
   return <DashboardPage />;
 }
 

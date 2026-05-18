@@ -19,7 +19,7 @@
 
 ## Highlights
 
-- **11 Module**: Mieter, Nebenkosten, Zähler, Finanzen, Steuer-Export (Anlage V), Mietverträge, Übergabeprotokolle, Rendite, Kaution, Mietspiegel, Instandhaltung
+- **12 Module**: Mieter, Nebenkosten, Versorger, Zähler, Mieteinnahmen, Steuer-Export (Anlage V), Mietverträge, Übergabeprotokolle, Rendite, Kaution, Mietspiegel, Instandhaltung
 - **Local-First**: Daten bleiben im Browser (IndexedDB) — kein Account, keine E-Mail, keine Cloud-Pflicht
 - **Optionaler Multi-Device-Sync**: Ende-zu-Ende verschlüsselt (HKDF-SHA256 → AES-GCM), Server kennt das Geheimnis nie
 - **PWA**: offline-fähig, installierbar auf Mobile, Dark Mode
