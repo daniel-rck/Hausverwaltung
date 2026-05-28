@@ -147,6 +147,47 @@ describe('getDistributionShare — units key', () => {
   });
 });
 
+describe('getDistributionShare — normalization invariant', () => {
+  // Design-Festschreibung: die Anteile aller übergebenen Belegungen summieren
+  // sich (per Konstruktion weight/totalWeight) auf 1. Leerstandskosten werden
+  // damit auf die anwesenden Belegungen normiert verteilt — wer dem Aufrufer
+  // diese Liste übergibt, bestimmt die Verteilbasis. Verhindert versehentliche
+  // Regressionen, die die Summe ≠ 1 machen würden.
+  it('shares of all occupancies sum to 1 (area, mixed durations)', () => {
+    const a = occUnit({ area: 70 }, { from: '2024-01', to: null });
+    const b = occUnit({ area: 30 }, { from: '2024-04', to: '2024-09' });
+    const all = [a, b];
+    const sum = all.reduce(
+      (s, o) => s + getDistributionShare('area', o, all, 2024),
+      0,
+    );
+    expect(sum).toBeCloseTo(1, 6);
+  });
+});
+
+describe('getOccupiedMonthsFractional — day-precise end date', () => {
+  it('honours an explicit day in the "to" field (YYYY-MM-DD)', () => {
+    // Jan 1 .. Jan 15 inclusive = 15 days / 366 (leap) * 12 ≈ 0.49
+    const m = getOccupiedMonthsFractional(
+      { from: '2024-01-01', to: '2024-01-15' },
+      2024,
+    );
+    expect(m).toBeCloseTo((15 / 366) * 12, 5);
+  });
+
+  it('counts fewer months for a mid-month move-out than the full month', () => {
+    const midMonth = getOccupiedMonthsFractional(
+      { from: '2024-01', to: '2024-06-15' },
+      2024,
+    );
+    const fullMonth = getOccupiedMonthsFractional(
+      { from: '2024-01', to: '2024-06' },
+      2024,
+    );
+    expect(midMonth).toBeLessThan(fullMonth);
+  });
+});
+
 describe('getOccupiedMonthsFractional', () => {
   it('returns 12 for a tenant occupying the entire year', () => {
     expect(

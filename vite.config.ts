@@ -49,5 +49,23 @@ export default defineConfig({
   ],
   build: {
     outDir: 'dist',
+    rollupOptions: {
+      output: {
+        // Selten ändernde Vendor-Libs vom App-Code trennen, damit sie bei
+        // App-Updates im Service-Worker-Cache (registerType: 'autoUpdate')
+        // erhalten bleiben. Reihenfolge beachten: react-router vor react,
+        // da dessen Pfad ebenfalls "react" enthält.
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return;
+          if (id.includes('react-router') || id.includes('/@remix-run/')) {
+            return 'vendor-router';
+          }
+          if (id.includes('/react-dom/') || id.includes('/react/') || id.includes('/scheduler/')) {
+            return 'vendor-react';
+          }
+          if (id.includes('/dexie')) return 'vendor-db';
+        },
+      },
+    },
   },
 });
