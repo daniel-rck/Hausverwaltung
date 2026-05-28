@@ -1,7 +1,7 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../db';
 import { getDistributionShare, getOccupiedMonthsFractional } from '../../utils/calc';
-import { formatEuro, formatArea, formatDate } from '../../utils/format';
+import { formatEuro, formatArea, formatDate, formatNumber } from '../../utils/format';
 import type {
   Occupancy,
   Unit,
@@ -256,7 +256,7 @@ export function AbrechnungView({
         </p>
         <p className="text-sm text-zinc-500">
           Wohnung: {unit.name} ({formatArea(unit.area)}) |{' '}
-          Abrechnungszeitraum: {months} Monate
+          Abrechnungszeitraum: {formatNumber(months)} Monate
         </p>
       </div>
 
@@ -341,7 +341,7 @@ export function AbrechnungView({
         </div>
         <div className="flex justify-between text-sm">
           <span className="text-zinc-600">
-            abzgl. Vorauszahlungen ({months} Monate)
+            abzgl. Vorauszahlungen ({formatNumber(months)} Monate)
           </span>
           <span className="font-mono font-tabular text-zinc-600">
             - {formatEuro(prepaymentAmount)}

@@ -1,8 +1,8 @@
 import { lazy, Suspense } from 'react';
-import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { PropertyProvider } from './hooks/useProperty';
 import { AppShell } from './components/layout/AppShell';
-import { Skeleton } from './components/ui';
+import { Skeleton, ErrorBoundary } from './components/ui';
 
 const DashboardPage = lazy(() =>
   import('./modules/dashboard/DashboardPage').then((m) => ({ default: m.DashboardPage })),
@@ -60,28 +60,43 @@ function PageFallback() {
   );
 }
 
+/**
+ * Routen-Container mit eigener ErrorBoundary: Crasht ein Modul, bleibt die
+ * AppShell (inkl. Navigation) erhalten — der Nutzer kann wegnavigieren. Der
+ * `key={pathname}` setzt den Fehlerzustand bei jedem Routenwechsel zurück,
+ * sodass "Erneut versuchen" bzw. Navigieren die kaputte Seite verlässt.
+ */
+function RoutedContent() {
+  const location = useLocation();
+  return (
+    <ErrorBoundary key={location.pathname}>
+      <Suspense fallback={<PageFallback />}>
+        <Routes>
+          <Route path="/" element={<DashboardPage />} />
+          <Route path="/mieter" element={<MieterPage />} />
+          <Route path="/nebenkosten" element={<NebenkostenPage />} />
+          <Route path="/zaehler" element={<ZaehlerPage />} />
+          <Route path="/wasser" element={<WasserPage />} />
+          <Route path="/finanzen" element={<FinanzenPage />} />
+          <Route path="/instandhaltung" element={<InstandhaltungPage />} />
+          <Route path="/uebergabe" element={<UebergabePage />} />
+          <Route path="/rendite" element={<RenditePage />} />
+          <Route path="/import/:payload" element={<ImportPage />} />
+          <Route path="/einstellungen" element={<EinstellungenPage />} />
+          <Route path="/datenschutz" element={<DatenschutzPage />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Suspense>
+    </ErrorBoundary>
+  );
+}
+
 export function App() {
   return (
     <HashRouter>
       <PropertyProvider>
         <AppShell>
-          <Suspense fallback={<PageFallback />}>
-            <Routes>
-              <Route path="/" element={<DashboardPage />} />
-              <Route path="/mieter" element={<MieterPage />} />
-              <Route path="/nebenkosten" element={<NebenkostenPage />} />
-              <Route path="/zaehler" element={<ZaehlerPage />} />
-              <Route path="/wasser" element={<WasserPage />} />
-              <Route path="/finanzen" element={<FinanzenPage />} />
-              <Route path="/instandhaltung" element={<InstandhaltungPage />} />
-              <Route path="/uebergabe" element={<UebergabePage />} />
-              <Route path="/rendite" element={<RenditePage />} />
-              <Route path="/import/:payload" element={<ImportPage />} />
-              <Route path="/einstellungen" element={<EinstellungenPage />} />
-              <Route path="/datenschutz" element={<DatenschutzPage />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </Suspense>
+          <RoutedContent />
         </AppShell>
       </PropertyProvider>
     </HashRouter>
