@@ -44,7 +44,8 @@ Query-Schicht), `useLiveQuery.ts` (reaktiver Hook). Cloudflare Worker (`worker/`
 verschlüsselt; Konflikte werden via R2-ETag (`If-Match`) aufgelöst.
 
 > Migrationsstand auf web-base: **Tooling/Biome ✓, Struktur (`src/lib`+`src/features`) ✓,
-> Storage→idb ✓, PWA injectManifest ✓, reusable CI ✓.**
+> Storage→idb ✓, PWA injectManifest ✓, reusable CI ✓, Theme-System (Tokens, `--accent-h: 250`,
+> `data-theme`-Theming, `ThemeToggle`/`InstallButton`/`primitives`) ✓.**
 >
 > Bewusste Abweichungen (App übertrifft die minimalen web-base-Scaffolds — analog zu
 > web-bases Prinzip „jede App besitzt ihre Infrastruktur nach init"):
@@ -57,8 +58,11 @@ verschlüsselt; Konflikte werden via R2-ETag (`If-Match`) aufgelöst.
 >   (`#/import/:payload`) und null Server-Config.
 > - **Worker/Sync**: eigene, fortgeschrittene Implementierung (OTP-Pairing, R2-Snapshots mit
 >   If-Match, KV, Rate-Limit) statt des minimalen Worker-Scaffolds.
-> - **Layout/Theme**: eigenes, ausgereiftes Design-System (AppShell, Modul-Accents, Tailwind-4
->   `@theme`) statt des minimalen `--accent-h`-Layout-Templates.
+> - **Layout/Theme**: web-base-Theme-System übernommen (`src/lib/ui/theme.css` mit `--accent-h: 250`,
+>   `data-theme`-Theming via `useTheme`/`ThemeToggle`, `primitives`/`InstallButton`). Die App-Shell
+>   bleibt reichhaltiger als das `AppShell`-Scaffold (Property-Selector, Sync-Badge, Shortcuts,
+>   Footer) und komponiert die web-base-Bausteine; Feature-Komponenten tragen teils noch
+>   `zinc-*`-Styles (schrittweise Migration auf semantische Tokens).
 
 ## Offene Konventions-Lücken
 

@@ -1,16 +1,15 @@
-@import "tailwindcss";
-
-@custom-variant dark (&:where(.dark, .dark *));
+/* web-base Design-Tokens (Surfaces, Akzent via --accent-h, data-theme-Variant). */
+@import "./lib/ui/theme.css";
 
 @theme {
   --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
 
-  /* Primärer Akzent (Indigo) — einziger Marken-Akzent für Buttons, Focus-Rings, aktive States */
-  --color-accent: #6366f1;        /* indigo-500 */
-  --color-accent-hover: #4f46e5;  /* indigo-600 */
-  --color-accent-soft: #eef2ff;   /* indigo-50 */
-  --color-accent-dark: #818cf8;   /* indigo-400 (Dark-Mode-Text) */
+  /* Marken-Akzent leitet sich aus den web-base-Akzent-Tokens (--accent-h: 250) ab. */
+  --color-accent: var(--color-accent-600);
+  --color-accent-hover: var(--color-accent-700);
+  --color-accent-soft: var(--color-accent-100);
+  --color-accent-dark: var(--color-accent-300);
 
   /* Modul-Akzentfarben — werden nur noch für 2px-Bars und Chart-Datasets verwendet */
   --color-modul-nebenkosten: #d97706;
@@ -132,7 +131,7 @@ body {
     @apply bg-white text-black text-sm;
   }
 
-  .dark {
+  :where([data-theme="dark"]) {
     background: white !important;
     color: black !important;
   }

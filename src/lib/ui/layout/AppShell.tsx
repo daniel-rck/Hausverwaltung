@@ -1,10 +1,11 @@
 import { type ReactNode, useCallback, useState } from "react";
 import { Link } from "react-router-dom";
 import { useKeyboardShortcuts } from "../../hooks/useKeyboardShortcuts";
-import { useTheme } from "../../hooks/useTheme";
+import { InstallButton } from "../InstallButton";
 import { SyncStatusBadge } from "../sync/SyncStatusBadge";
+import { ThemeToggle } from "../ThemeToggle";
 import { IconButton } from "../ui/IconButton";
-import { Building2, Moon, Search, Sun } from "../ui/icons";
+import { Building2, Search } from "../ui/icons";
 import { ShortcutsModal } from "../ui/ShortcutsModal";
 import { BottomNav, SidebarNav } from "./Nav";
 import { PropertySelector } from "./PropertySelector";
@@ -13,7 +14,6 @@ import { UpdatePrompt } from "./UpdatePrompt";
 const buildDate = new Date(__BUILD_DATE__).toLocaleDateString("de-DE");
 
 export function AppShell({ children }: { children: ReactNode }) {
-  const { theme, toggle } = useTheme();
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const showHelp = useCallback(() => setShortcutsOpen(true), []);
   useKeyboardShortcuts(showHelp);
@@ -56,20 +56,8 @@ export function AppShell({ children }: { children: ReactNode }) {
               icon={<Search size={16} strokeWidth={1.75} />}
               className="hidden sm:inline-flex"
             />
-            <IconButton
-              variant="ghost"
-              size="sm"
-              onClick={toggle}
-              aria-label={theme === "light" ? "Dunkelmodus aktivieren" : "Hellmodus aktivieren"}
-              title={theme === "light" ? "Dunkelmodus" : "Hellmodus"}
-              icon={
-                theme === "light" ? (
-                  <Moon size={16} strokeWidth={1.75} />
-                ) : (
-                  <Sun size={16} strokeWidth={1.75} />
-                )
-              }
-            />
+            <InstallButton />
+            <ThemeToggle />
           </div>
         </div>
       </header>
