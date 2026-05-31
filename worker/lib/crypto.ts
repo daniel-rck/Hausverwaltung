@@ -3,13 +3,11 @@
  */
 export async function sha256Hex(input: string): Promise<string> {
   const data = new TextEncoder().encode(input);
-  const hash = await crypto.subtle.digest('SHA-256', data);
-  return [...new Uint8Array(hash)]
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('');
+  const hash = await crypto.subtle.digest("SHA-256", data);
+  return [...new Uint8Array(hash)].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-const CROCKFORD = '0123456789abcdefghjkmnpqrstvwxyz';
+const CROCKFORD = "0123456789abcdefghjkmnpqrstvwxyz";
 
 /**
  * Crockford base32 of the first 16 bytes of SHA-256(input) — 26 lowercase
@@ -17,14 +15,14 @@ const CROCKFORD = '0123456789abcdefghjkmnpqrstvwxyz';
  */
 export async function deriveSyncId(secret: string): Promise<string> {
   const data = new TextEncoder().encode(secret);
-  const hash = new Uint8Array(await crypto.subtle.digest('SHA-256', data));
+  const hash = new Uint8Array(await crypto.subtle.digest("SHA-256", data));
   return crockfordBase32(hash.subarray(0, 16));
 }
 
 function crockfordBase32(bytes: Uint8Array): string {
   let bits = 0;
   let value = 0;
-  let out = '';
+  let out = "";
   for (let i = 0; i < bytes.length; i++) {
     value = (value << 8) | bytes[i];
     bits += 8;
@@ -63,7 +61,7 @@ export function randomOtp(): string {
   while (true) {
     crypto.getRandomValues(buf);
     if (buf[0] < limit) {
-      return (buf[0] % max).toString().padStart(6, '0');
+      return (buf[0] % max).toString().padStart(6, "0");
     }
   }
 }

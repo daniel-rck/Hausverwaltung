@@ -1,0 +1,118 @@
+/*
+ * Design tokens for daniel-rck web apps.
+ * Per-app: change only `--accent-h` below.
+ */
+
+@import "tailwindcss";
+
+/*
+ * Make Tailwind's `dark:` variant follow the manual theme choice, not just the
+ * OS. It triggers when the OS prefers dark AND the user hasn't forced light, or
+ * when the user has forced dark — mirroring the token logic below so utilities
+ * like `dark:bg-accent-900/40` stay in sync with the surface tokens.
+ */
+@custom-variant dark {
+  @media (prefers-color-scheme: dark) {
+    &:where(:not([data-theme="light"]), :not([data-theme="light"]) *) {
+      @slot;
+    }
+  }
+  &:where([data-theme="dark"], [data-theme="dark"] *) {
+    @slot;
+  }
+}
+
+@theme {
+  /* ── App accent — change this per app ─────────────────── */
+  --accent-h: 250; /* hue: 250=slate-blue, 155=emerald, 285=indigo */
+
+  --color-accent-50:  oklch(0.97 0.02 var(--accent-h));
+  --color-accent-100: oklch(0.94 0.04 var(--accent-h));
+  --color-accent-200: oklch(0.88 0.08 var(--accent-h));
+  --color-accent-300: oklch(0.80 0.12 var(--accent-h));
+  --color-accent-400: oklch(0.70 0.16 var(--accent-h));
+  --color-accent-500: oklch(0.62 0.18 var(--accent-h));
+  --color-accent-600: oklch(0.55 0.18 var(--accent-h));
+  --color-accent-700: oklch(0.48 0.16 var(--accent-h));
+  --color-accent-800: oklch(0.40 0.13 var(--accent-h));
+  --color-accent-900: oklch(0.30 0.10 var(--accent-h));
+
+  /* ── Surfaces ──────────────────────────────────────────── */
+  --color-surface:        oklch(1 0 0);
+  --color-surface-muted:  oklch(0.97 0 0);
+  --color-surface-sunken: oklch(0.94 0 0);
+  --color-border:         oklch(0.88 0 0);
+  --color-fg:             oklch(0.18 0 0);
+  --color-fg-muted:       oklch(0.45 0 0);
+  --color-fg-subtle:      oklch(0.60 0 0);
+
+  /* ── Semantic ──────────────────────────────────────────── */
+  --color-success: oklch(0.65 0.17 150);
+  --color-warning: oklch(0.75 0.15 80);
+  --color-danger:  oklch(0.60 0.20 25);
+  --color-info:    oklch(0.65 0.15 230);
+
+  /* ── Typography ────────────────────────────────────────── */
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+
+  /* ── Radii ─────────────────────────────────────────────── */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+
+  /* ── Shadows ───────────────────────────────────────────── */
+  --shadow-sm: 0 1px 2px 0 oklch(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px oklch(0 0 0 / 0.10), 0 2px 4px -2px oklch(0 0 0 / 0.10);
+  --shadow-lg: 0 10px 15px -3px oklch(0 0 0 / 0.10), 0 4px 6px -4px oklch(0 0 0 / 0.10);
+
+  /* ── Animation ─────────────────────────────────────────── */
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --duration-fast: 150ms;
+  --duration-base: 250ms;
+  --duration-slow: 400ms;
+}
+
+/*
+ * Dark tokens. `@theme` only works at top level, so dark values are plain
+ * custom-property overrides on `:root` (utilities read them via `var()`).
+ * Three states: no `data-theme` = follow the OS; `data-theme="dark"` / `"light"`
+ * = forced. The dark token list appears twice — once in the media query (system)
+ * and once on the forced selector — because CSS can't share one declaration
+ * block across a media query and a plain selector. Keep both blocks in sync.
+ */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-surface:        oklch(0.18 0 0);
+    --color-surface-muted:  oklch(0.22 0 0);
+    --color-surface-sunken: oklch(0.14 0 0);
+    --color-border:         oklch(0.30 0 0);
+    --color-fg:             oklch(0.95 0 0);
+    --color-fg-muted:       oklch(0.70 0 0);
+    --color-fg-subtle:      oklch(0.55 0 0);
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --color-surface:        oklch(0.18 0 0);
+  --color-surface-muted:  oklch(0.22 0 0);
+  --color-surface-sunken: oklch(0.14 0 0);
+  --color-border:         oklch(0.30 0 0);
+  --color-fg:             oklch(0.95 0 0);
+  --color-fg-muted:       oklch(0.70 0 0);
+  --color-fg-subtle:      oklch(0.55 0 0);
+  color-scheme: dark;
+}
+
+:root[data-theme="light"] { color-scheme: light; }
+
+html { color-scheme: light dark; }
+body {
+  background-color: var(--color-surface);
+  color: var(--color-fg);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
