@@ -1,11 +1,11 @@
-import { useState } from 'react';
-import { useProperty } from '../../hooks/useProperty';
-import { Modal } from '../ui/Modal';
-import { Button } from '../ui/Button';
-import { FormField } from '../ui/FormField';
-import { Input } from '../ui/Input';
-import { useToast } from '../ui/Toast';
-import { useFormValidation, required } from '../ui/useFormValidation';
+import { useState } from "react";
+import { useProperty } from "../../hooks/useProperty";
+import { Button } from "../ui/Button";
+import { FormField } from "../ui/FormField";
+import { Input } from "../ui/Input";
+import { Modal } from "../ui/Modal";
+import { useToast } from "../ui/Toast";
+import { required, useFormValidation } from "../ui/useFormValidation";
 
 export function PropertySelector() {
   const { properties, activeProperty, setActivePropertyId, addProperty } = useProperty();
@@ -21,10 +21,10 @@ export function PropertySelector() {
       {properties.length > 0 && (
         <select
           id="property-select"
-          value={activeProperty?.id ?? ''}
+          value={activeProperty?.id ?? ""}
           onChange={(e) => {
             const v = e.target.value;
-            if (v === '__new__') {
+            if (v === "__new__") {
               setOpen(true);
               return;
             }
@@ -66,15 +66,15 @@ interface AddPropertyModalProps {
 }
 
 function AddPropertyModal({ open, onClose, onCreate }: AddPropertyModalProps) {
-  const [form, setForm] = useState({ name: '', address: '', units: 1 });
+  const [form, setForm] = useState({ name: "", address: "", units: 1 });
   const [busy, setBusy] = useState(false);
   const toast = useToast();
   const { errors, validate, validateField } = useFormValidation<typeof form>({
-    name: required('Bitte Name angeben'),
+    name: required("Bitte Name angeben"),
   });
 
   const reset = () => {
-    setForm({ name: '', address: '', units: 1 });
+    setForm({ name: "", address: "", units: 1 });
   };
 
   const handleClose = () => {
@@ -94,7 +94,7 @@ function AddPropertyModal({ open, onClose, onCreate }: AddPropertyModalProps) {
       toast.success(`Objekt „${form.name.trim()}“ angelegt.`);
       handleClose();
     } catch (err) {
-      toast.error('Anlegen fehlgeschlagen.');
+      toast.error("Anlegen fehlgeschlagen.");
       console.error(err);
     } finally {
       setBusy(false);
@@ -123,7 +123,7 @@ function AddPropertyModal({ open, onClose, onCreate }: AddPropertyModalProps) {
           <Input
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
-            onBlur={() => validateField('name', form)}
+            onBlur={() => validateField("name", form)}
             placeholder="z.B. Hauptstr. 12"
             autoFocus
           />

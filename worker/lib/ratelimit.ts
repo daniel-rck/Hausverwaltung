@@ -1,4 +1,4 @@
-import type { Env } from './types';
+import type { Env } from "./types";
 
 /**
  * KV-backed token-bucket rate limit. Atomic enough for our purposes:
@@ -29,11 +29,7 @@ export async function rateLimit(
   // Wir clampen den TTL nach oben, der `resetAt` im Wert bleibt unverändert,
   // sodass die Rate-Limit-Logik korrekt weiterzählt.
   const kvTtl = Math.max(60, remaining);
-  await env.PAIR_KV.put(
-    kvKey,
-    JSON.stringify({ count, resetAt }),
-    { expirationTtl: kvTtl },
-  );
+  await env.PAIR_KV.put(kvKey, JSON.stringify({ count, resetAt }), { expirationTtl: kvTtl });
   if (count > limit) {
     return { allowed: false, retryAfter: remaining };
   }
@@ -42,18 +38,18 @@ export async function rateLimit(
 
 export function clientIp(request: Request): string {
   return (
-    request.headers.get('cf-connecting-ip') ??
-    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
-    'unknown'
+    request.headers.get("cf-connecting-ip") ??
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+    "unknown"
   );
 }
 
 export function rateLimited(retryAfter: number): Response {
-  return new Response(JSON.stringify({ error: 'rate_limited' }), {
+  return new Response(JSON.stringify({ error: "rate_limited" }), {
     status: 429,
     headers: {
-      'Content-Type': 'application/json',
-      'Retry-After': String(retryAfter),
+      "Content-Type": "application/json",
+      "Retry-After": String(retryAfter),
     },
   });
 }

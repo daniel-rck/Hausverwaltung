@@ -1,31 +1,24 @@
-import { useState } from 'react';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../../db';
-import {
-  Button,
-  FormField,
-  Input,
-  Tabs,
-  type TabItem,
-  useToast,
-} from '../../components/ui';
-import { Card } from '../../components/shared/Card';
-import { PageHeader } from '../../components/layout/PageHeader';
-import { SyncSettings } from '../../components/sync/SyncSettings';
-import { ExportImport } from '../dashboard/ExportImport';
-import { Settings } from '../../components/ui/icons';
-import type { LandlordInfo } from '../../db/schema';
+import { useLiveQuery } from "dexie-react-hooks";
+import { useState } from "react";
+import { PageHeader } from "../../components/layout/PageHeader";
+import { Card } from "../../components/shared/Card";
+import { SyncSettings } from "../../components/sync/SyncSettings";
+import { Button, FormField, Input, type TabItem, Tabs, useToast } from "../../components/ui";
+import { Settings } from "../../components/ui/icons";
+import { db } from "../../db";
+import type { LandlordInfo } from "../../db/schema";
+import { ExportImport } from "../dashboard/ExportImport";
 
-type Tab = 'allgemein' | 'sync' | 'daten';
+type Tab = "allgemein" | "sync" | "daten";
 
 const tabItems: TabItem<Tab>[] = [
-  { id: 'allgemein', label: 'Allgemein' },
-  { id: 'sync', label: 'Sync' },
-  { id: 'daten', label: 'Daten' },
+  { id: "allgemein", label: "Allgemein" },
+  { id: "sync", label: "Sync" },
+  { id: "daten", label: "Daten" },
 ];
 
 export function EinstellungenPage() {
-  const [tab, setTab] = useState<Tab>('allgemein');
+  const [tab, setTab] = useState<Tab>("allgemein");
 
   return (
     <div className="space-y-5">
@@ -37,28 +30,28 @@ export function EinstellungenPage() {
         <Tabs items={tabItems} value={tab} onChange={setTab} ariaLabel="Einstellungen-Bereiche" />
       </PageHeader>
 
-      {tab === 'allgemein' && <AllgemeinTab />}
-      {tab === 'sync' && <SyncSettings />}
-      {tab === 'daten' && <ExportImport />}
+      {tab === "allgemein" && <AllgemeinTab />}
+      {tab === "sync" && <SyncSettings />}
+      {tab === "daten" && <ExportImport />}
     </div>
   );
 }
 
 function AllgemeinTab() {
   const landlord = useLiveQuery(async () => {
-    const setting = await db.settings.get('landlord');
-    return (setting?.value as LandlordInfo) ?? { name: '', address: '', iban: '', taxId: '' };
+    const setting = await db.settings.get("landlord");
+    return (setting?.value as LandlordInfo) ?? { name: "", address: "", iban: "", taxId: "" };
   });
 
   const messdienst = useLiveQuery(async () => {
-    const setting = await db.settings.get('messdienstName');
-    return (setting?.value as string) ?? 'Messdienstleister';
+    const setting = await db.settings.get("messdienstName");
+    return (setting?.value as string) ?? "Messdienstleister";
   });
 
   const [editing, setEditing] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [form, setForm] = useState<LandlordInfo>({ name: '', address: '', iban: '', taxId: '' });
-  const [messdienstName, setMessdienstName] = useState('');
+  const [form, setForm] = useState<LandlordInfo>({ name: "", address: "", iban: "", taxId: "" });
+  const [messdienstName, setMessdienstName] = useState("");
   const toast = useToast();
 
   const loaded = landlord !== undefined && messdienst !== undefined;
@@ -73,12 +66,12 @@ function AllgemeinTab() {
   const handleSave = async () => {
     setBusy(true);
     try {
-      await db.settings.put({ key: 'landlord', value: form });
-      await db.settings.put({ key: 'messdienstName', value: messdienstName });
-      toast.success('Einstellungen gespeichert.');
+      await db.settings.put({ key: "landlord", value: form });
+      await db.settings.put({ key: "messdienstName", value: messdienstName });
+      toast.success("Einstellungen gespeichert.");
       setEditing(false);
     } catch (err) {
-      toast.error('Speichern fehlgeschlagen.');
+      toast.error("Speichern fehlgeschlagen.");
       console.error(err);
     } finally {
       setBusy(false);
@@ -109,15 +102,15 @@ function AllgemeinTab() {
         <div className="space-y-3">
           {(
             [
-              { key: 'name', label: 'Vermieter-Name' },
-              { key: 'address', label: 'Adresse' },
-              { key: 'iban', label: 'IBAN' },
-              { key: 'taxId', label: 'Steuer-ID' },
+              { key: "name", label: "Vermieter-Name" },
+              { key: "address", label: "Adresse" },
+              { key: "iban", label: "IBAN" },
+              { key: "taxId", label: "Steuer-ID" },
             ] as const
           ).map((field) => (
             <FormField key={field.key} label={field.label}>
               <Input
-                value={form[field.key] ?? ''}
+                value={form[field.key] ?? ""}
                 onChange={(e) => setForm({ ...form, [field.key]: e.target.value })}
               />
             </FormField>
@@ -147,7 +140,7 @@ function Row({ label, value }: { label: string; value: string | undefined }) {
   return (
     <div className="flex gap-2">
       <dt className="font-medium min-w-[140px] text-zinc-500 dark:text-zinc-400">{label}:</dt>
-      <dd>{value || '–'}</dd>
+      <dd>{value || "–"}</dd>
     </div>
   );
 }

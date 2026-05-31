@@ -1,4 +1,4 @@
-import { forwardRef, type InputHTMLAttributes, type ReactNode } from 'react';
+import { forwardRef, type InputHTMLAttributes, type ReactNode } from "react";
 
 export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   invalid?: boolean;
@@ -8,13 +8,14 @@ export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 export const inputBaseClasses =
-  'h-9 w-full rounded-md border bg-white dark:bg-zinc-800 text-sm text-zinc-800 dark:text-zinc-100 ' +
-  'placeholder:text-zinc-400 dark:placeholder:text-zinc-500 ' +
-  'focus:outline-none focus-visible:ring-2 focus-visible:ring-[--color-accent]/40 focus-visible:border-[--color-accent] ' +
-  'disabled:opacity-60 disabled:cursor-not-allowed transition-colors';
+  "h-9 w-full rounded-md border bg-white dark:bg-zinc-800 text-sm text-zinc-800 dark:text-zinc-100 " +
+  "placeholder:text-zinc-400 dark:placeholder:text-zinc-500 " +
+  "focus:outline-none focus-visible:ring-2 focus-visible:ring-[--color-accent]/40 focus-visible:border-[--color-accent] " +
+  "disabled:opacity-60 disabled:cursor-not-allowed transition-colors";
 
-export const inputBorderClasses = 'border-zinc-300 dark:border-zinc-700';
-export const inputInvalidClasses = 'border-red-500 dark:border-red-500 focus-visible:ring-red-400/40 focus-visible:border-red-500';
+export const inputBorderClasses = "border-zinc-300 dark:border-zinc-700";
+export const inputInvalidClasses =
+  "border-red-500 dark:border-red-500 focus-visible:ring-red-400/40 focus-visible:border-red-500";
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
   (
@@ -23,18 +24,18 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       leftAddon,
       rightAddon,
       fullWidth = true,
-      className = '',
-      type = 'text',
+      className = "",
+      type = "text",
       ...rest
     },
     ref,
   ) => {
-    const wrapperCls = [fullWidth ? 'w-full' : '', 'relative inline-flex items-center']
+    const wrapperCls = [fullWidth ? "w-full" : "", "relative inline-flex items-center"]
       .filter(Boolean)
-      .join(' ');
+      .join(" ");
 
-    const padLeft = leftAddon ? 'pl-9' : 'pl-3';
-    const padRight = rightAddon ? 'pr-9' : 'pr-3';
+    const padLeft = leftAddon ? "pl-9" : "pl-3";
+    const padRight = rightAddon ? "pr-9" : "pr-3";
 
     const inputCls = [
       inputBaseClasses,
@@ -42,10 +43,18 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       padLeft,
       padRight,
       className,
-    ].join(' ');
+    ].join(" ");
 
     if (!leftAddon && !rightAddon) {
-      return <input ref={ref} type={type} aria-invalid={invalid || undefined} className={inputCls} {...rest} />;
+      return (
+        <input
+          ref={ref}
+          type={type}
+          aria-invalid={invalid || undefined}
+          className={inputCls}
+          {...rest}
+        />
+      );
     }
 
     return (
@@ -58,7 +67,13 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             {leftAddon}
           </span>
         )}
-        <input ref={ref} type={type} aria-invalid={invalid || undefined} className={inputCls} {...rest} />
+        <input
+          ref={ref}
+          type={type}
+          aria-invalid={invalid || undefined}
+          className={inputCls}
+          {...rest}
+        />
         {rightAddon && (
           <span
             className="absolute right-3 text-zinc-400 dark:text-zinc-500 text-sm pointer-events-none"
@@ -71,4 +86,4 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     );
   },
 );
-Input.displayName = 'Input';
+Input.displayName = "Input";

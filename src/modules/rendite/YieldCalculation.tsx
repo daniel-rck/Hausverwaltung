@@ -1,9 +1,9 @@
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../../db';
-import { Card } from '../../components/shared/Card';
-import { formatEuro, formatPercent } from '../../utils/format';
-import { grossYield, netYield, cashflow, equityYield } from '../../utils/calc';
-import type { FinancingData } from './FinancingInput';
+import { useLiveQuery } from "dexie-react-hooks";
+import { Card } from "../../components/shared/Card";
+import { db } from "../../db";
+import { cashflow, equityYield, grossYield, netYield } from "../../utils/calc";
+import { formatEuro, formatPercent } from "../../utils/format";
+import type { FinancingData } from "./FinancingInput";
 
 interface YieldCalculationProps {
   propertyId: number;
@@ -18,17 +18,15 @@ interface MetricCardProps {
 function MetricCard({ label, value, positive }: MetricCardProps) {
   const colorClass =
     positive === null
-      ? 'text-zinc-800 dark:text-zinc-100'
+      ? "text-zinc-800 dark:text-zinc-100"
       : positive
-        ? 'text-green-600'
-        : 'text-red-600';
+        ? "text-green-600"
+        : "text-red-600";
 
   return (
     <div className="bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700 shadow-sm px-4 py-3 text-center">
       <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">{label}</p>
-      <p className={`text-lg font-bold font-mono font-tabular ${colorClass}`}>
-        {value}
-      </p>
+      <p className={`text-lg font-bold font-mono font-tabular ${colorClass}`}>{value}</p>
     </div>
   );
 }
@@ -41,20 +39,14 @@ export function YieldCalculation({ propertyId }: YieldCalculationProps) {
 
   const annualColdRent = useLiveQuery(async () => {
     const now = new Date().toISOString().slice(0, 10);
-    const units = await db.units
-      .where('propertyId')
-      .equals(propertyId)
-      .toArray();
+    const units = await db.units.where("propertyId").equals(propertyId).toArray();
     const unitIds = units.map((u) => u.id!);
 
     if (unitIds.length === 0) return 0;
 
     const allOccupancies = await db.occupancies.toArray();
     const active = allOccupancies.filter(
-      (o) =>
-        unitIds.includes(o.unitId) &&
-        o.from <= now &&
-        (o.to === null || o.to >= now),
+      (o) => unitIds.includes(o.unitId) && o.from <= now && (o.to === null || o.to >= now),
     );
 
     return active.reduce((sum, o) => sum + o.rentCold * 12, 0);

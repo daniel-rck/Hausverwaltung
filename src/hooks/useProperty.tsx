@@ -1,22 +1,16 @@
 /* eslint-disable react-refresh/only-export-components */
-import {
-  createContext,
-  useContext,
-  useState,
-  useMemo,
-  useCallback,
-  type ReactNode,
-} from 'react';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../db';
-import { cascadeDeleteProperty } from '../db/cascade';
-import type { Property } from '../db/schema';
+
+import { useLiveQuery } from "dexie-react-hooks";
+import { createContext, type ReactNode, useCallback, useContext, useMemo, useState } from "react";
+import { db } from "../db";
+import { cascadeDeleteProperty } from "../db/cascade";
+import type { Property } from "../db/schema";
 
 interface PropertyContextValue {
   properties: Property[];
   activeProperty: Property | null;
   setActivePropertyId: (id: number) => void;
-  addProperty: (p: Omit<Property, 'id'>) => Promise<number>;
+  addProperty: (p: Omit<Property, "id">) => Promise<number>;
   updateProperty: (p: Property) => Promise<void>;
   deleteProperty: (id: number) => Promise<void>;
 }
@@ -39,7 +33,7 @@ export function PropertyProvider({ children }: { children: ReactNode }) {
 
   const activeProperty = properties.find((p) => p.id === resolvedActiveId) ?? null;
 
-  const addProperty = useCallback(async (p: Omit<Property, 'id'>) => {
+  const addProperty = useCallback(async (p: Omit<Property, "id">) => {
     const id = await db.properties.add(p as Property);
     setActiveId(id as number);
     return id as number;
@@ -78,7 +72,7 @@ export function PropertyProvider({ children }: { children: ReactNode }) {
 export function useProperty(): PropertyContextValue {
   const ctx = useContext(PropertyContext);
   if (!ctx) {
-    throw new Error('useProperty must be used within PropertyProvider');
+    throw new Error("useProperty must be used within PropertyProvider");
   }
   return ctx;
 }

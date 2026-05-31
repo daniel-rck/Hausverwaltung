@@ -1,19 +1,19 @@
-import { useState, useMemo, useCallback } from 'react';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db, deleteWithTombstone } from '../../db';
-import { useProperty } from '../../hooks/useProperty';
-import { Card } from '../../components/shared/Card';
-import { NumInput } from '../../components/shared/NumInput';
-import { EmptyState } from '../../components/shared/EmptyState';
-import { Calendar } from '../../components/ui/icons';
-import { formatEuro, MONTH_NAMES } from '../../utils/format';
-import type { Payment, Occupancy, Unit, Tenant } from '../../db/schema';
+import { useLiveQuery } from "dexie-react-hooks";
+import { useCallback, useMemo, useState } from "react";
+import { Card } from "../../components/shared/Card";
+import { EmptyState } from "../../components/shared/EmptyState";
+import { NumInput } from "../../components/shared/NumInput";
+import { Calendar } from "../../components/ui/icons";
+import { db, deleteWithTombstone } from "../../db";
+import type { Occupancy, Payment, Tenant, Unit } from "../../db/schema";
+import { useProperty } from "../../hooks/useProperty";
+import { formatEuro, MONTH_NAMES } from "../../utils/format";
 
 interface PaymentForm {
   amountCold: number;
   amountUtilities: number;
   receivedDate: string;
-  method: Payment['method'];
+  method: Payment["method"];
   notes: string;
 }
 
@@ -25,17 +25,17 @@ interface CellData {
   expected: number;
   payment: Payment | undefined;
   received: number;
-  status: 'green' | 'yellow' | 'red' | 'gray';
+  status: "green" | "yellow" | "red" | "gray";
 }
 
 interface MonthOverviewProps {
   year: number;
 }
 
-const METHOD_LABELS: Record<Payment['method'], string> = {
-  transfer: 'Überweisung',
-  cash: 'Bar',
-  debit: 'Lastschrift',
+const METHOD_LABELS: Record<Payment["method"], string> = {
+  transfer: "Überweisung",
+  cash: "Bar",
+  debit: "Lastschrift",
 };
 
 export function MonthOverview({ year }: MonthOverviewProps) {
@@ -47,19 +47,16 @@ export function MonthOverview({ year }: MonthOverviewProps) {
   const [form, setForm] = useState<PaymentForm>({
     amountCold: 0,
     amountUtilities: 0,
-    receivedDate: '',
-    method: 'transfer',
-    notes: '',
+    receivedDate: "",
+    method: "transfer",
+    notes: "",
   });
   const [saving, setSaving] = useState(false);
 
   const data = useLiveQuery(async () => {
     if (!activeProperty?.id) return null;
 
-    const units = await db.units
-      .where('propertyId')
-      .equals(activeProperty.id)
-      .toArray();
+    const units = await db.units.where("propertyId").equals(activeProperty.id).toArray();
 
     const unitIds = units.map((u) => u.id!);
     const allOccupancies = await db.occupancies.toArray();
@@ -67,9 +64,7 @@ export function MonthOverview({ year }: MonthOverviewProps) {
 
     const tenantIds = [...new Set(occupancies.map((o) => o.tenantId))];
     const tenants = await db.tenants.bulkGet(tenantIds);
-    const tenantMap = new Map(
-      tenants.filter(Boolean).map((t) => [t!.id!, t!])
-    );
+    const tenantMap = new Map(tenants.filter(Boolean).map((t) => [t!.id!, t!]));
 
     const unitMap = new Map(units.map((u) => [u.id!, u]));
 
@@ -93,16 +88,16 @@ export function MonthOverview({ year }: MonthOverviewProps) {
     const yearEnd = `${year}-12`;
 
     const relevantOccs = occupancies.filter(
-      (o) => o.from <= yearEnd && (o.to === null || o.to >= yearStart)
+      (o) => o.from <= yearEnd && (o.to === null || o.to >= yearStart),
     );
 
     // Sort by unit name, then tenant name
     relevantOccs.sort((a, b) => {
-      const unitA = unitMap.get(a.unitId)?.name ?? '';
-      const unitB = unitMap.get(b.unitId)?.name ?? '';
+      const unitA = unitMap.get(a.unitId)?.name ?? "";
+      const unitB = unitMap.get(b.unitId)?.name ?? "";
       if (unitA !== unitB) return unitA.localeCompare(unitB);
-      const tA = tenantMap.get(a.tenantId)?.name ?? '';
-      const tB = tenantMap.get(b.tenantId)?.name ?? '';
+      const tA = tenantMap.get(a.tenantId)?.name ?? "";
+      const tB = tenantMap.get(b.tenantId)?.name ?? "";
       return tA.localeCompare(tB);
     });
 
@@ -113,25 +108,22 @@ export function MonthOverview({ year }: MonthOverviewProps) {
 
       const row: CellData[] = [];
       for (let m = 1; m <= 12; m++) {
-        const month = `${year}-${String(m).padStart(2, '0')}`;
-        const isActive =
-          occ.from <= month && (occ.to === null || occ.to >= month);
+        const month = `${year}-${String(m).padStart(2, "0")}`;
+        const isActive = occ.from <= month && (occ.to === null || occ.to >= month);
 
         const expected = isActive ? occ.rentCold + occ.rentUtilities : 0;
         const payment = paymentMap.get(`${occ.id}-${month}`);
-        const received = payment
-          ? payment.amountCold + payment.amountUtilities
-          : 0;
+        const received = payment ? payment.amountCold + payment.amountUtilities : 0;
 
-        let status: CellData['status'];
+        let status: CellData["status"];
         if (!isActive) {
-          status = 'gray';
+          status = "gray";
         } else if (received >= expected && expected > 0) {
-          status = 'green';
+          status = "green";
         } else if (received > 0) {
-          status = 'yellow';
+          status = "yellow";
         } else {
-          status = 'red';
+          status = "red";
         }
 
         row.push({ occupancy: occ, unit, tenant, month, expected, payment, received, status });
@@ -142,40 +134,37 @@ export function MonthOverview({ year }: MonthOverviewProps) {
     return rows;
   }, [data, year]);
 
-  const openEditor = useCallback(
-    (cell: CellData) => {
-      if (cell.status === 'gray') return;
-      setEditingCell({
-        occupancyId: cell.occupancy.id!,
-        month: cell.month,
+  const openEditor = useCallback((cell: CellData) => {
+    if (cell.status === "gray") return;
+    setEditingCell({
+      occupancyId: cell.occupancy.id!,
+      month: cell.month,
+    });
+    if (cell.payment) {
+      setForm({
+        amountCold: cell.payment.amountCold,
+        amountUtilities: cell.payment.amountUtilities,
+        receivedDate: cell.payment.receivedDate ?? "",
+        method: cell.payment.method,
+        notes: cell.payment.notes ?? "",
       });
-      if (cell.payment) {
-        setForm({
-          amountCold: cell.payment.amountCold,
-          amountUtilities: cell.payment.amountUtilities,
-          receivedDate: cell.payment.receivedDate ?? '',
-          method: cell.payment.method,
-          notes: cell.payment.notes ?? '',
-        });
-      } else {
-        setForm({
-          amountCold: cell.occupancy.rentCold,
-          amountUtilities: cell.occupancy.rentUtilities,
-          receivedDate: new Date().toISOString().slice(0, 10),
-          method: 'transfer',
-          notes: '',
-        });
-      }
-    },
-    []
-  );
+    } else {
+      setForm({
+        amountCold: cell.occupancy.rentCold,
+        amountUtilities: cell.occupancy.rentUtilities,
+        receivedDate: new Date().toISOString().slice(0, 10),
+        method: "transfer",
+        notes: "",
+      });
+    }
+  }, []);
 
   const handleSave = useCallback(async () => {
     if (!editingCell) return;
     setSaving(true);
     try {
       const existing = await db.payments
-        .where('[occupancyId+month]')
+        .where("[occupancyId+month]")
         .equals([editingCell.occupancyId, editingCell.month])
         .first();
 
@@ -206,11 +195,11 @@ export function MonthOverview({ year }: MonthOverviewProps) {
     setSaving(true);
     try {
       const existing = await db.payments
-        .where('[occupancyId+month]')
+        .where("[occupancyId+month]")
         .equals([editingCell.occupancyId, editingCell.month])
         .first();
       if (existing?.id) {
-        await deleteWithTombstone('payments', existing.id);
+        await deleteWithTombstone("payments", existing.id);
       }
       setEditingCell(null);
     } finally {
@@ -237,16 +226,11 @@ export function MonthOverview({ year }: MonthOverviewProps) {
   const shortMonths = MONTH_NAMES.map((n) => n.slice(0, 3));
 
   // Find the cell currently being edited for context display
-  const editingCellData =
-    editingCell
-      ? grid
-          .flat()
-          .find(
-            (c) =>
-              c.occupancy.id === editingCell.occupancyId &&
-              c.month === editingCell.month
-          )
-      : undefined;
+  const editingCellData = editingCell
+    ? grid
+        .flat()
+        .find((c) => c.occupancy.id === editingCell.occupancyId && c.month === editingCell.month)
+    : undefined;
 
   return (
     <>
@@ -258,9 +242,9 @@ export function MonthOverview({ year }: MonthOverviewProps) {
                 <th className="py-2 px-2 text-left font-medium text-zinc-500 dark:text-zinc-400 sticky left-0 bg-white dark:bg-zinc-800 min-w-[120px]">
                   Einheit / Mieter
                 </th>
-                {shortMonths.map((m, i) => (
+                {shortMonths.map((m) => (
                   <th
-                    key={i}
+                    key={m}
                     className="py-2 px-1 text-center font-medium text-zinc-500 dark:text-zinc-400 min-w-[56px]"
                   >
                     {m}
@@ -272,11 +256,14 @@ export function MonthOverview({ year }: MonthOverviewProps) {
               </tr>
             </thead>
             <tbody>
-              {grid.map((row, ri) => {
+              {grid.map((row) => {
                 const first = row[0];
                 const yearTotal = row.reduce((s, c) => s + c.received, 0);
                 return (
-                  <tr key={ri} className="border-b border-zinc-100 dark:border-zinc-700">
+                  <tr
+                    key={`${first.unit.id}-${first.tenant.id}`}
+                    className="border-b border-zinc-100 dark:border-zinc-700"
+                  >
                     <td className="py-1.5 px-2 sticky left-0 bg-white dark:bg-zinc-800">
                       <div className="font-medium text-zinc-700 dark:text-zinc-200">
                         {first.unit.name}
@@ -285,31 +272,32 @@ export function MonthOverview({ year }: MonthOverviewProps) {
                         {first.tenant.name}
                       </div>
                     </td>
-                    {row.map((cell, ci) => (
-                      <td key={ci} className="py-1.5 px-1 text-center">
+                    {row.map((cell) => (
+                      <td key={cell.month} className="py-1.5 px-1 text-center">
                         <button
+                          type="button"
                           onClick={() => openEditor(cell)}
-                          disabled={cell.status === 'gray'}
+                          disabled={cell.status === "gray"}
                           className={`w-full rounded-md py-1.5 px-0.5 text-xs font-mono transition-colors ${
-                            cell.status === 'green'
-                              ? 'bg-green-100 text-green-700 hover:bg-green-200'
-                              : cell.status === 'yellow'
-                                ? 'bg-amber-100 text-amber-700 hover:bg-amber-200'
-                                : cell.status === 'red'
-                                  ? 'bg-red-100 text-red-700 hover:bg-red-200'
-                                  : 'bg-zinc-50 dark:bg-zinc-800/50 text-zinc-300 cursor-default'
+                            cell.status === "green"
+                              ? "bg-green-100 text-green-700 hover:bg-green-200"
+                              : cell.status === "yellow"
+                                ? "bg-amber-100 text-amber-700 hover:bg-amber-200"
+                                : cell.status === "red"
+                                  ? "bg-red-100 text-red-700 hover:bg-red-200"
+                                  : "bg-zinc-50 dark:bg-zinc-800/50 text-zinc-300 cursor-default"
                           }`}
                           title={
-                            cell.status === 'gray'
-                              ? 'Kein Mietverhältnis'
+                            cell.status === "gray"
+                              ? "Kein Mietverhältnis"
                               : `Soll: ${formatEuro(cell.expected)}\nIst: ${formatEuro(cell.received)}`
                           }
                         >
-                          {cell.status === 'gray'
-                            ? '–'
+                          {cell.status === "gray"
+                            ? "–"
                             : cell.received > 0
-                              ? formatEuro(cell.received).replace(/\s?€/, '')
-                              : '0'}
+                              ? formatEuro(cell.received).replace(/\s?€/, "")
+                              : "0"}
                         </button>
                       </td>
                     ))}
@@ -352,17 +340,15 @@ export function MonthOverview({ year }: MonthOverviewProps) {
               Zahlung erfassen
             </h3>
             <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-4">
-              {editingCellData.unit.name} &middot;{' '}
-              {editingCellData.tenant.name} &middot;{' '}
-              {MONTH_NAMES[parseInt(editingCell.month.slice(5)) - 1]}{' '}
+              {editingCellData.unit.name} &middot; {editingCellData.tenant.name} &middot;{" "}
+              {MONTH_NAMES[parseInt(editingCell.month.slice(5), 10) - 1]}{" "}
               {editingCell.month.slice(0, 4)}
             </p>
 
             <div className="space-y-3">
               <div className="p-2 bg-zinc-50 dark:bg-zinc-800/50 rounded-lg text-xs text-zinc-500 dark:text-zinc-400">
-                Soll-Miete: {formatEuro(editingCellData.occupancy.rentCold)}{' '}
-                Kaltmiete + {formatEuro(editingCellData.occupancy.rentUtilities)}{' '}
-                Nebenkosten ={' '}
+                Soll-Miete: {formatEuro(editingCellData.occupancy.rentCold)} Kaltmiete +{" "}
+                {formatEuro(editingCellData.occupancy.rentUtilities)} Nebenkosten ={" "}
                 <strong className="text-zinc-700 dark:text-zinc-200">
                   {formatEuro(editingCellData.expected)}
                 </strong>
@@ -379,68 +365,65 @@ export function MonthOverview({ year }: MonthOverviewProps) {
                 <NumInput
                   label="Nebenkosten"
                   value={form.amountUtilities}
-                  onChange={(v) =>
-                    setForm((f) => ({ ...f, amountUtilities: v }))
-                  }
+                  onChange={(v) => setForm((f) => ({ ...f, amountUtilities: v }))}
                   suffix="€"
                   min={0}
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-                  Eingangsdatum
+                <label className="block">
+                  <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
+                    Eingangsdatum
+                  </span>
+                  <input
+                    type="date"
+                    value={form.receivedDate}
+                    onChange={(e) => setForm((f) => ({ ...f, receivedDate: e.target.value }))}
+                    className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+                  />
                 </label>
-                <input
-                  type="date"
-                  value={form.receivedDate}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, receivedDate: e.target.value }))
-                  }
-                  className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
-                />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-                  Zahlungsart
+                <label className="block">
+                  <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
+                    Zahlungsart
+                  </span>
+                  <select
+                    value={form.method}
+                    onChange={(e) =>
+                      setForm((f) => ({
+                        ...f,
+                        method: e.target.value as Payment["method"],
+                      }))
+                    }
+                    className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+                  >
+                    {(Object.entries(METHOD_LABELS) as [Payment["method"], string][]).map(
+                      ([value, label]) => (
+                        <option key={value} value={value}>
+                          {label}
+                        </option>
+                      ),
+                    )}
+                  </select>
                 </label>
-                <select
-                  value={form.method}
-                  onChange={(e) =>
-                    setForm((f) => ({
-                      ...f,
-                      method: e.target.value as Payment['method'],
-                    }))
-                  }
-                  className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
-                >
-                  {(
-                    Object.entries(METHOD_LABELS) as [
-                      Payment['method'],
-                      string,
-                    ][]
-                  ).map(([value, label]) => (
-                    <option key={value} value={value}>
-                      {label}
-                    </option>
-                  ))}
-                </select>
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-                  Bemerkung
+                <label className="block">
+                  <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
+                    Bemerkung
+                  </span>
+                  <input
+                    type="text"
+                    value={form.notes}
+                    onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
+                    placeholder="Optional"
+                    className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+                  />
                 </label>
-                <input
-                  type="text"
-                  value={form.notes}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, notes: e.target.value }))
-                  }
-                  placeholder="Optional"
-                  className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
-                />
               </div>
             </div>
 
@@ -448,6 +431,7 @@ export function MonthOverview({ year }: MonthOverviewProps) {
               <div>
                 {editingCellData.payment && (
                   <button
+                    type="button"
                     onClick={handleDelete}
                     disabled={saving}
                     className="px-3 py-2 text-sm text-red-600 hover:text-red-700 transition-colors disabled:opacity-50"
@@ -458,6 +442,7 @@ export function MonthOverview({ year }: MonthOverviewProps) {
               </div>
               <div className="flex gap-2">
                 <button
+                  type="button"
                   onClick={() => setEditingCell(null)}
                   disabled={saving}
                   className="px-4 py-2 text-sm rounded-lg border border-zinc-300 dark:border-zinc-600 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors disabled:opacity-50"
@@ -465,11 +450,12 @@ export function MonthOverview({ year }: MonthOverviewProps) {
                   Abbrechen
                 </button>
                 <button
+                  type="button"
                   onClick={handleSave}
                   disabled={saving}
                   className="px-4 py-2 text-sm rounded-lg bg-zinc-800 text-white hover:bg-zinc-900 transition-colors disabled:opacity-50"
                 >
-                  {saving ? 'Speichern...' : 'Speichern'}
+                  {saving ? "Speichern..." : "Speichern"}
                 </button>
               </div>
             </div>

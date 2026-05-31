@@ -1,13 +1,10 @@
-import type { Env, PairCreateRequest, PairCreateResponse } from '../lib/types';
-import { jsonError } from '../lib/auth';
-import { rateLimit, clientIp, rateLimited } from '../lib/ratelimit';
+import { jsonError } from "../lib/auth";
+import { clientIp, rateLimit, rateLimited } from "../lib/ratelimit";
+import type { Env, PairCreateRequest, PairCreateResponse } from "../lib/types";
 
 const TTL_SEC = 300;
 
-export async function handlePairCreate(
-  request: Request,
-  env: Env,
-): Promise<Response> {
+export async function handlePairCreate(request: Request, env: Env): Promise<Response> {
   const ip = clientIp(request);
   const rl = await rateLimit(env, `pair-create:${ip}`, 5, 60);
   if (!rl.allowed) return rateLimited(rl.retryAfter);
@@ -16,7 +13,7 @@ export async function handlePairCreate(
   try {
     body = (await request.json()) as PairCreateRequest;
   } catch {
-    return jsonError(400, 'invalid_json');
+    return jsonError(400, "invalid_json");
   }
 
   if (
@@ -27,7 +24,7 @@ export async function handlePairCreate(
     !body.salt ||
     !body.nonce
   ) {
-    return jsonError(400, 'invalid_payload');
+    return jsonError(400, "invalid_payload");
   }
 
   // Reject ciphertext that's larger than expected (defensive — wrappedSecret
@@ -38,13 +35,13 @@ export async function handlePairCreate(
     body.salt.length > 64 ||
     body.nonce.length > 64
   ) {
-    return jsonError(400, 'payload_too_large');
+    return jsonError(400, "payload_too_large");
   }
 
   const kvKey = `otp:${body.otp}`;
   const existing = await env.PAIR_KV.get(kvKey);
   if (existing) {
-    return jsonError(409, 'otp_collision');
+    return jsonError(409, "otp_collision");
   }
 
   const expiresAt = Date.now() + TTL_SEC * 1000;
@@ -59,6 +56,6 @@ export async function handlePairCreate(
   const res: PairCreateResponse = { expiresAt };
   return new Response(JSON.stringify(res), {
     status: 200,
-    headers: { 'Content-Type': 'application/json' },
+    headers: { "Content-Type": "application/json" },
   });
 }

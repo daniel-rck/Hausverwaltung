@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -16,8 +16,8 @@ export function ConfirmDialog({
   open,
   title,
   message,
-  confirmLabel = 'Bestätigen',
-  cancelLabel = 'Abbrechen',
+  confirmLabel = "Bestätigen",
+  cancelLabel = "Abbrechen",
   onConfirm,
   onCancel,
   danger = false,
@@ -39,12 +39,12 @@ export function ConfirmDialog({
   useEffect(() => {
     if (!open) return;
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
+      if (e.key === "Escape") {
         e.preventDefault();
         if (!busy) onCancel();
         return;
       }
-      if (e.key === 'Tab') {
+      if (e.key === "Tab") {
         const first = cancelRef.current;
         const last = confirmRef.current;
         if (!first || !last) return;
@@ -58,8 +58,8 @@ export function ConfirmDialog({
         }
       }
     };
-    document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
   }, [open, busy, onCancel]);
 
   if (!open) return null;
@@ -81,22 +81,24 @@ export function ConfirmDialog({
       aria-modal="true"
       aria-labelledby="confirm-title"
       aria-describedby="confirm-message"
-      onClick={(e) => {
-        // Klick auf Overlay schließt (außer auf Dialog-Inhalt)
-        if (e.target === e.currentTarget && !busy) onCancel();
-      }}
     >
-      <div className="bg-white dark:bg-zinc-800 rounded-lg shadow-lg max-w-sm w-full p-5">
+      {/* Klick auf Overlay schließt (außer auf Dialog-Inhalt) */}
+      <button
+        type="button"
+        aria-label="Abbrechen"
+        tabIndex={-1}
+        disabled={busy}
+        className="absolute inset-0 cursor-default"
+        onClick={onCancel}
+      />
+      <div className="relative bg-white dark:bg-zinc-800 rounded-lg shadow-lg max-w-sm w-full p-5">
         <h3
           id="confirm-title"
           className="text-base font-semibold text-zinc-800 dark:text-zinc-100 mb-2"
         >
           {title}
         </h3>
-        <p
-          id="confirm-message"
-          className="text-sm text-zinc-600 dark:text-zinc-400 mb-4"
-        >
+        <p id="confirm-message" className="text-sm text-zinc-600 dark:text-zinc-400 mb-4">
           {message}
         </p>
         <div className="flex justify-end gap-2">
@@ -116,11 +118,11 @@ export function ConfirmDialog({
             disabled={busy}
             className={`px-4 py-2 text-sm rounded-lg text-white transition-colors disabled:opacity-60 disabled:cursor-not-allowed ${
               danger
-                ? 'bg-red-600 hover:bg-red-700'
-                : 'bg-zinc-800 hover:bg-zinc-900 dark:bg-zinc-600 dark:hover:bg-zinc-500'
+                ? "bg-red-600 hover:bg-red-700"
+                : "bg-zinc-800 hover:bg-zinc-900 dark:bg-zinc-600 dark:hover:bg-zinc-500"
             }`}
           >
-            {busy ? '...' : confirmLabel}
+            {busy ? "..." : confirmLabel}
           </button>
         </div>
       </div>

@@ -1,25 +1,17 @@
-import { Line } from 'react-chartjs-2';
 import {
+  CategoryScale,
   Chart as ChartJS,
-  CategoryScale,
+  Legend,
   LinearScale,
-  PointElement,
   LineElement,
+  PointElement,
   Title,
   Tooltip,
-  Legend,
-} from 'chart.js';
-import { useChartTheme } from './useChartTheme';
+} from "chart.js";
+import { Line } from "react-chartjs-2";
+import { useChartTheme } from "./useChartTheme";
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-);
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 interface LineChartProps {
   labels: string[];
@@ -32,7 +24,7 @@ interface LineChartProps {
 }
 
 export function LineChart({ labels, datasets, height = 250 }: LineChartProps) {
-  const colors = ['#78716c', '#d97706', '#0891b2', '#16a34a', '#7c3aed'];
+  const colors = ["#78716c", "#d97706", "#0891b2", "#16a34a", "#7c3aed"];
   const theme = useChartTheme();
 
   return (
@@ -44,7 +36,7 @@ export function LineChart({ labels, datasets, height = 250 }: LineChartProps) {
           label: ds.label,
           data: ds.data,
           borderColor: ds.color ?? colors[i % colors.length],
-          backgroundColor: 'transparent',
+          backgroundColor: "transparent",
           tension: 0.3,
           pointRadius: 3,
         })),
@@ -53,7 +45,7 @@ export function LineChart({ labels, datasets, height = 250 }: LineChartProps) {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: { position: 'bottom', labels: { color: theme.text } },
+          legend: { position: "bottom", labels: { color: theme.text } },
         },
         scales: {
           x: { ticks: { color: theme.text }, grid: { color: theme.grid } },

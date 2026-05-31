@@ -1,3 +1,5 @@
+import { useId } from "react";
+
 interface MonthPickerProps {
   value: string;
   onChange: (value: string) => void;
@@ -5,20 +7,20 @@ interface MonthPickerProps {
   className?: string;
 }
 
-export function MonthPicker({
-  value,
-  onChange,
-  label,
-  className = '',
-}: MonthPickerProps) {
+export function MonthPicker({ value, onChange, label, className = "" }: MonthPickerProps) {
+  const inputId = useId();
   return (
     <div className={className}>
       {label && (
-        <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
+        <label
+          htmlFor={inputId}
+          className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1"
+        >
           {label}
         </label>
       )}
       <input
+        id={inputId}
         type="month"
         value={value}
         onChange={(e) => onChange(e.target.value)}

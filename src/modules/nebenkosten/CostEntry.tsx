@@ -1,12 +1,12 @@
-import { useMemo } from 'react';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../../db';
-import { Card } from '../../components/shared/Card';
-import { NumInput } from '../../components/shared/NumInput';
-import { EmptyState } from '../../components/shared/EmptyState';
-import { Loader2 } from '../../components/ui/icons';
-import { formatEuro } from '../../utils/format';
-import type { CostType, Cost, CostCategory } from '../../db/schema';
+import { useLiveQuery } from "dexie-react-hooks";
+import { useMemo } from "react";
+import { Card } from "../../components/shared/Card";
+import { EmptyState } from "../../components/shared/EmptyState";
+import { NumInput } from "../../components/shared/NumInput";
+import { Loader2 } from "../../components/ui/icons";
+import { db } from "../../db";
+import type { Cost, CostCategory, CostType } from "../../db/schema";
+import { formatEuro } from "../../utils/format";
 
 interface CostEntryProps {
   propertyId: number;
@@ -14,29 +14,22 @@ interface CostEntryProps {
 }
 
 const CATEGORY_LABELS: Record<CostCategory, string> = {
-  tax: 'Steuern & Abgaben',
-  water: 'Wasser & Abwasser',
-  heating: 'Heizung & Warmwasser',
-  insurance: 'Versicherungen',
-  cleaning: 'Reinigung & Gartenpflege',
-  misc: 'Sonstige Betriebskosten',
+  tax: "Steuern & Abgaben",
+  water: "Wasser & Abwasser",
+  heating: "Heizung & Warmwasser",
+  insurance: "Versicherungen",
+  cleaning: "Reinigung & Gartenpflege",
+  misc: "Sonstige Betriebskosten",
 };
 
-const CATEGORY_ORDER: CostCategory[] = [
-  'tax',
-  'water',
-  'heating',
-  'cleaning',
-  'insurance',
-  'misc',
-];
+const CATEGORY_ORDER: CostCategory[] = ["tax", "water", "heating", "cleaning", "insurance", "misc"];
 
 const DISTRIBUTION_LABELS: Record<string, string> = {
-  area: 'nach Fläche',
-  persons: 'nach Personen',
-  units: 'nach Einheiten',
-  messdienst: 'lt. Messdienst',
-  direct: 'Direktzuordnung',
+  area: "nach Fläche",
+  persons: "nach Personen",
+  units: "nach Einheiten",
+  messdienst: "lt. Messdienst",
+  direct: "Direktzuordnung",
 };
 
 interface CostRow {
@@ -45,14 +38,12 @@ interface CostRow {
 }
 
 export function CostEntry({ propertyId, year }: CostEntryProps) {
-  const costTypes = useLiveQuery(() =>
-    db.costTypes.orderBy('sortOrder').toArray(),
-  );
+  const costTypes = useLiveQuery(() => db.costTypes.orderBy("sortOrder").toArray());
 
   const costs = useLiveQuery(
     () =>
       db.costs
-        .where('propertyId')
+        .where("propertyId")
         .equals(propertyId)
         .toArray()
         .then((all) => all.filter((c) => c.year === year)),
@@ -114,19 +105,13 @@ export function CostEntry({ propertyId, year }: CostEntryProps) {
         const rows = grouped[cat];
         if (rows.length === 0) return null;
 
-        const subtotal = rows.reduce(
-          (sum, r) => sum + (r.cost?.totalAmount ?? 0),
-          0,
-        );
+        const subtotal = rows.reduce((sum, r) => sum + (r.cost?.totalAmount ?? 0), 0);
 
         return (
           <Card key={cat} title={CATEGORY_LABELS[cat]}>
             <div className="space-y-3">
               {rows.map((row) => (
-                <div
-                  key={row.costType.id}
-                  className="flex items-center gap-4"
-                >
+                <div key={row.costType.id} className="flex items-center gap-4">
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-zinc-800 dark:text-zinc-100 truncate">
                       {row.costType.name}

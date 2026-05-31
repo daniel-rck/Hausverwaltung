@@ -1,14 +1,14 @@
-import { useState, useMemo } from 'react';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../../db';
-import { useProperty } from '../../hooks/useProperty';
-import { usePrint } from '../../hooks/usePrint';
-import { Card } from '../../components/shared/Card';
-import { StatusBadge } from '../../components/shared/StatusBadge';
-import { EmptyState } from '../../components/shared/EmptyState';
-import { CheckCircle2 } from '../../components/ui/icons';
-import { formatEuro, formatMonth, formatDate } from '../../utils/format';
-import type { Occupancy, Unit, Tenant, Payment, LandlordInfo } from '../../db/schema';
+import { useLiveQuery } from "dexie-react-hooks";
+import { useMemo, useState } from "react";
+import { Card } from "../../components/shared/Card";
+import { EmptyState } from "../../components/shared/EmptyState";
+import { StatusBadge } from "../../components/shared/StatusBadge";
+import { CheckCircle2 } from "../../components/ui/icons";
+import { db } from "../../db";
+import type { LandlordInfo, Occupancy, Payment, Tenant, Unit } from "../../db/schema";
+import { usePrint } from "../../hooks/usePrint";
+import { useProperty } from "../../hooks/useProperty";
+import { formatDate, formatEuro, formatMonth } from "../../utils/format";
 
 type Mahnstufe = 1 | 2 | 3;
 
@@ -37,10 +37,10 @@ interface LetterData {
   mahnstufe: Mahnstufe;
 }
 
-const MAHNSTUFE_OPTIONS: { value: Mahnstufe; label: string; status: 'yellow' | 'red' | 'red' }[] = [
-  { value: 1, label: '1. Erinnerung', status: 'yellow' },
-  { value: 2, label: '2. Mahnung', status: 'red' },
-  { value: 3, label: '3. Letzte Mahnung', status: 'red' },
+const MAHNSTUFE_OPTIONS: { value: Mahnstufe; label: string; status: "yellow" | "red" | "red" }[] = [
+  { value: 1, label: "1. Erinnerung", status: "yellow" },
+  { value: 2, label: "2. Mahnung", status: "red" },
+  { value: 3, label: "3. Letzte Mahnung", status: "red" },
 ];
 
 function getMahnSubject(stufe: Mahnstufe): string {
@@ -95,16 +95,16 @@ function getDeadline(): string {
   const date = new Date();
   date.setDate(date.getDate() + 14);
   const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
   return `${y}-${m}-${d}`;
 }
 
 function getTodayIso(): string {
   const now = new Date();
   const y = now.getFullYear();
-  const m = String(now.getMonth() + 1).padStart(2, '0');
-  const d = String(now.getDate()).padStart(2, '0');
+  const m = String(now.getMonth() + 1).padStart(2, "0");
+  const d = String(now.getDate()).padStart(2, "0");
   return `${y}-${m}-${d}`;
 }
 
@@ -117,10 +117,7 @@ export function PaymentReminder({ year }: PaymentReminderProps) {
   const data = useLiveQuery(async () => {
     if (!activeProperty?.id) return null;
 
-    const units = await db.units
-      .where('propertyId')
-      .equals(activeProperty.id)
-      .toArray();
+    const units = await db.units.where("propertyId").equals(activeProperty.id).toArray();
 
     const unitIds = units.map((u) => u.id!);
     const allOccupancies = await db.occupancies.toArray();
@@ -128,9 +125,7 @@ export function PaymentReminder({ year }: PaymentReminderProps) {
 
     const tenantIds = [...new Set(occupancies.map((o) => o.tenantId))];
     const tenants = await db.tenants.bulkGet(tenantIds);
-    const tenantMap = new Map(
-      tenants.filter(Boolean).map((t) => [t!.id!, t!]),
-    );
+    const tenantMap = new Map(tenants.filter(Boolean).map((t) => [t!.id!, t!]));
 
     const unitMap = new Map(units.map((u) => [u.id!, u]));
 
@@ -140,12 +135,12 @@ export function PaymentReminder({ year }: PaymentReminderProps) {
       paymentMap.set(`${p.occupancyId}-${p.month}`, p);
     }
 
-    const landlordSetting = await db.settings.get('landlord');
+    const landlordSetting = await db.settings.get("landlord");
     const landlord = (landlordSetting?.value as LandlordInfo) ?? {
-      name: '',
-      address: '',
-      iban: '',
-      taxId: '',
+      name: "",
+      address: "",
+      iban: "",
+      taxId: "",
     };
 
     return { occupancies, unitMap, tenantMap, paymentMap, landlord };
@@ -163,12 +158,11 @@ export function PaymentReminder({ year }: PaymentReminderProps) {
     const now = new Date();
     const currentMonth =
       now.getFullYear() === year
-        ? `${year}-${String(now.getMonth() + 1).padStart(2, '0')}`
+        ? `${year}-${String(now.getMonth() + 1).padStart(2, "0")}`
         : yearEnd;
 
     for (const occ of occupancies) {
-      if (occ.from > yearEnd || (occ.to !== null && occ.to < yearStart))
-        continue;
+      if (occ.from > yearEnd || (occ.to !== null && occ.to < yearStart)) continue;
 
       const unit = unitMap.get(occ.unitId);
       const tenant = tenantMap.get(occ.tenantId);
@@ -177,16 +171,14 @@ export function PaymentReminder({ year }: PaymentReminderProps) {
       const overdueMonths: OverdueMonth[] = [];
 
       for (let m = 1; m <= 12; m++) {
-        const month = `${year}-${String(m).padStart(2, '0')}`;
+        const month = `${year}-${String(m).padStart(2, "0")}`;
         if (month > currentMonth) break;
         if (month < occ.from) continue;
         if (occ.to !== null && month > occ.to) continue;
 
         const expected = occ.rentCold + occ.rentUtilities;
         const payment = paymentMap.get(`${occ.id}-${month}`);
-        const received = payment
-          ? payment.amountCold + payment.amountUtilities
-          : 0;
+        const received = payment ? payment.amountCold + payment.amountUtilities : 0;
 
         if (received < expected) {
           overdueMonths.push({
@@ -199,10 +191,7 @@ export function PaymentReminder({ year }: PaymentReminderProps) {
       }
 
       if (overdueMonths.length > 0) {
-        const totalDifference = overdueMonths.reduce(
-          (sum, om) => sum + om.difference,
-          0,
-        );
+        const totalDifference = overdueMonths.reduce((sum, om) => sum + om.difference, 0);
         result.push({
           id: `${occ.id}`,
           unit,
@@ -244,14 +233,14 @@ export function PaymentReminder({ year }: PaymentReminderProps) {
           {/* Sender (small, above address window) */}
           {landlord.name && (
             <p className="text-xs text-zinc-400 dark:text-zinc-500 print:text-gray-500 mb-1 underline">
-              {landlord.name} - {landlord.address.replace(/\n/g, ', ')}
+              {landlord.name} - {landlord.address.replace(/\n/g, ", ")}
             </p>
           )}
 
           {/* Recipient */}
           <div className="mb-10">
             <p className="font-medium">{item.tenant.name}</p>
-            <p>{activeProperty?.address ?? ''}</p>
+            <p>{activeProperty?.address ?? ""}</p>
             <p>{item.unit.name}</p>
           </div>
 
@@ -261,9 +250,7 @@ export function PaymentReminder({ year }: PaymentReminderProps) {
           </div>
 
           {/* Subject */}
-          <p className="font-bold text-base mb-6">
-            {getMahnSubject(mahnstufe)}
-          </p>
+          <p className="font-bold text-base mb-6">{getMahnSubject(mahnstufe)}</p>
 
           {/* Salutation and body */}
           <p className="mb-4">{getMahnAnrede(item.tenant.name)},</p>
@@ -290,12 +277,8 @@ export function PaymentReminder({ year }: PaymentReminderProps) {
                     className="border-b border-zinc-200 dark:border-zinc-600 print:border-gray-300"
                   >
                     <td className="py-2 px-3">{formatMonth(om.month)}</td>
-                    <td className="py-2 px-3 text-right font-mono">
-                      {formatEuro(om.expected)}
-                    </td>
-                    <td className="py-2 px-3 text-right font-mono">
-                      {formatEuro(om.received)}
-                    </td>
+                    <td className="py-2 px-3 text-right font-mono">{formatEuro(om.expected)}</td>
+                    <td className="py-2 px-3 text-right font-mono">{formatEuro(om.received)}</td>
                     <td className="py-2 px-3 text-right font-mono font-semibold">
                       {formatEuro(om.difference)}
                     </td>
@@ -307,9 +290,7 @@ export function PaymentReminder({ year }: PaymentReminderProps) {
                   <td className="py-2 px-3 font-bold" colSpan={3}>
                     Gesamtbetrag
                   </td>
-                  <td className="py-2 px-3 text-right font-mono font-bold">
-                    {totalFormatted}
-                  </td>
+                  <td className="py-2 px-3 text-right font-mono font-bold">{totalFormatted}</td>
                 </tr>
               </tfoot>
             </table>
@@ -318,25 +299,25 @@ export function PaymentReminder({ year }: PaymentReminderProps) {
           {/* Payment details */}
           <div className="mb-6 p-4 bg-zinc-50 dark:bg-zinc-700 print:bg-gray-50 rounded-lg print:border print:border-gray-300">
             <p className="font-semibold mb-2">Zahlungsverbindung:</p>
-            <p>Empfänger: {landlord.name || '–'}</p>
+            <p>Empfänger: {landlord.name || "–"}</p>
             {landlord.iban && (
-              <p>IBAN: <span className="font-mono">{landlord.iban}</span></p>
+              <p>
+                IBAN: <span className="font-mono">{landlord.iban}</span>
+              </p>
             )}
             <p>
               Verwendungszweck: Miete {item.unit.name} - {item.tenant.name}
             </p>
-            <p className="mt-2 font-semibold">
-              Zahlungsfrist: {formatDate(deadlineIso)}
-            </p>
+            <p className="mt-2 font-semibold">Zahlungsfrist: {formatDate(deadlineIso)}</p>
           </div>
 
           {/* Closing */}
           <p className="mb-12">
             {mahnstufe === 1
-              ? 'Für Rückfragen stehen wir Ihnen gerne zur Verfügung.'
+              ? "Für Rückfragen stehen wir Ihnen gerne zur Verfügung."
               : mahnstufe === 2
-                ? 'Wir erwarten Ihre umgehende Zahlung.'
-                : 'Wir erwarten Ihre umgehende Zahlung und behalten uns alle weiteren rechtlichen Schritte vor.'}
+                ? "Wir erwarten Ihre umgehende Zahlung."
+                : "Wir erwarten Ihre umgehende Zahlung und behalten uns alle weiteren rechtlichen Schritte vor."}
           </p>
 
           <p className="mb-2">Mit freundlichen Grüßen</p>
@@ -345,7 +326,7 @@ export function PaymentReminder({ year }: PaymentReminderProps) {
           <div className="mt-10">
             <div className="w-64 border-b border-zinc-400 print:border-black mb-1" />
             <p className="text-xs text-zinc-500 dark:text-zinc-400 print:text-gray-600">
-              {landlord.name || 'Vermieter/in'}
+              {landlord.name || "Vermieter/in"}
             </p>
           </div>
         </div>
@@ -361,6 +342,7 @@ export function PaymentReminder({ year }: PaymentReminderProps) {
         {/* Controls - hidden on print */}
         <div className="no-print flex items-center justify-between">
           <button
+            type="button"
             onClick={closeLetter}
             className="px-4 py-2 text-sm border border-zinc-300 dark:border-zinc-600 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors text-zinc-700 dark:text-zinc-200"
           >
@@ -384,6 +366,7 @@ export function PaymentReminder({ year }: PaymentReminderProps) {
               ))}
             </select>
             <button
+              type="button"
               onClick={print}
               className="px-4 py-2 text-sm bg-zinc-800 dark:bg-zinc-600 text-white rounded-lg hover:bg-zinc-900 dark:hover:bg-zinc-500 transition-colors"
             >
@@ -393,9 +376,7 @@ export function PaymentReminder({ year }: PaymentReminderProps) {
         </div>
 
         {/* Letter preview */}
-        <Card>
-          {letterContent}
-        </Card>
+        <Card>{letterContent}</Card>
       </div>
     );
   }
@@ -441,21 +422,22 @@ export function PaymentReminder({ year }: PaymentReminderProps) {
                     {item.tenant.name}
                   </span>
                   <StatusBadge
-                    status={item.overdueMonths.length >= 3 ? 'red' : 'yellow'}
-                    label={`${item.overdueMonths.length} ${item.overdueMonths.length === 1 ? 'Monat' : 'Monate'} offen`}
+                    status={item.overdueMonths.length >= 3 ? "red" : "yellow"}
+                    label={`${item.overdueMonths.length} ${item.overdueMonths.length === 1 ? "Monat" : "Monate"} offen`}
                   />
                 </div>
                 <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                  {item.unit.name} &middot; Offen:{' '}
+                  {item.unit.name} &middot; Offen:{" "}
                   <span className="font-mono font-medium text-red-600 dark:text-red-400">
                     {formatEuro(item.totalDifference)}
                   </span>
                 </p>
                 <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5">
-                  {item.overdueMonths.map((om) => formatMonth(om.month)).join(', ')}
+                  {item.overdueMonths.map((om) => formatMonth(om.month)).join(", ")}
                 </p>
               </div>
               <button
+                type="button"
                 onClick={() => openLetter(item)}
                 className="no-print ml-4 shrink-0 px-4 py-2 text-sm bg-zinc-800 dark:bg-zinc-600 text-white rounded-lg hover:bg-zinc-900 dark:hover:bg-zinc-500 transition-colors"
               >
@@ -466,7 +448,7 @@ export function PaymentReminder({ year }: PaymentReminderProps) {
 
           <div className="pt-3 border-t border-zinc-200 dark:border-zinc-700 flex justify-between text-sm">
             <span className="text-zinc-600 dark:text-zinc-300">
-              {items.length} {items.length === 1 ? 'Mieter' : 'Mieter'} mit offenen Posten
+              {items.length} {items.length === 1 ? "Mieter" : "Mieter"} mit offenen Posten
             </span>
             <span className="font-mono font-semibold text-red-600 dark:text-red-400">
               Gesamt: {formatEuro(items.reduce((s, i) => s + i.totalDifference, 0))}

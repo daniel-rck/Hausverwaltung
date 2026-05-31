@@ -1,23 +1,23 @@
-import { useMemo } from 'react';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../../db';
-import { useProperty } from '../../hooks/useProperty';
-import { Card } from '../../components/shared/Card';
-import { DataTable, type Column } from '../../components/shared/DataTable';
-import { EmptyState } from '../../components/shared/EmptyState';
-import { ClipboardList } from '../../components/ui/icons';
-import { StatusBadge } from '../../components/shared/StatusBadge';
-import { formatDate, formatEuro } from '../../utils/format';
-import type { MaintenanceItem, Unit } from '../../db/schema';
+import { useLiveQuery } from "dexie-react-hooks";
+import { useMemo } from "react";
+import { Card } from "../../components/shared/Card";
+import { type Column, DataTable } from "../../components/shared/DataTable";
+import { EmptyState } from "../../components/shared/EmptyState";
+import { StatusBadge } from "../../components/shared/StatusBadge";
+import { ClipboardList } from "../../components/ui/icons";
+import { db } from "../../db";
+import type { MaintenanceItem, Unit } from "../../db/schema";
+import { useProperty } from "../../hooks/useProperty";
+import { formatDate, formatEuro } from "../../utils/format";
 
-const CATEGORY_LABELS: Record<MaintenanceItem['category'], string> = {
-  repair: 'Reparatur',
-  maintenance: 'Wartung',
-  inspection: 'Prüfung',
-  modernization: 'Modernisierung',
+const CATEGORY_LABELS: Record<MaintenanceItem["category"], string> = {
+  repair: "Reparatur",
+  maintenance: "Wartung",
+  inspection: "Prüfung",
+  modernization: "Modernisierung",
 };
 
-type DueStatus = 'green' | 'yellow' | 'red';
+type DueStatus = "green" | "yellow" | "red";
 
 interface DueRow {
   item: MaintenanceItem;
@@ -32,15 +32,15 @@ function getDueStatus(nextDue: string, today: string): { daysUntilDue: number; s
   const diffMs = dueDate.getTime() - todayDate.getTime();
   const daysUntilDue = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
 
-  if (daysUntilDue < 0) return { daysUntilDue, status: 'red' };
-  if (daysUntilDue <= 30) return { daysUntilDue, status: 'yellow' };
-  return { daysUntilDue, status: 'green' };
+  if (daysUntilDue < 0) return { daysUntilDue, status: "red" };
+  if (daysUntilDue <= 30) return { daysUntilDue, status: "yellow" };
+  return { daysUntilDue, status: "green" };
 }
 
 const STATUS_LABELS: Record<DueStatus, string> = {
-  red: 'Überfällig',
-  yellow: 'Bald fällig',
-  green: 'Geplant',
+  red: "Überfällig",
+  yellow: "Bald fällig",
+  green: "Geplant",
 };
 
 export function UpcomingDue() {
@@ -49,7 +49,7 @@ export function UpcomingDue() {
   const units = useLiveQuery(
     () =>
       activeProperty?.id
-        ? db.units.where('propertyId').equals(activeProperty.id).toArray()
+        ? db.units.where("propertyId").equals(activeProperty.id).toArray()
         : Promise.resolve([] as Unit[]),
     [activeProperty?.id],
   );
@@ -65,19 +65,16 @@ export function UpcomingDue() {
 
   const today = new Date().toISOString().slice(0, 10);
 
-  const items = useLiveQuery(
-    async () => {
-      if (!activeProperty?.id) return [];
-      const all = await db.maintenanceItems.toArray();
-      return all.filter(
-        (item) =>
-          item.nextDue !== undefined &&
-          item.nextDue !== '' &&
-          (item.unitId === null || unitIds.includes(item.unitId)),
-      );
-    },
-    [activeProperty?.id, unitIds],
-  );
+  const items = useLiveQuery(async () => {
+    if (!activeProperty?.id) return [];
+    const all = await db.maintenanceItems.toArray();
+    return all.filter(
+      (item) =>
+        item.nextDue !== undefined &&
+        item.nextDue !== "" &&
+        (item.unitId === null || unitIds.includes(item.unitId)),
+    );
+  }, [activeProperty?.id, unitIds]);
 
   const rows: DueRow[] = useMemo(() => {
     if (!items) return [];
@@ -87,37 +84,35 @@ export function UpcomingDue() {
         return {
           item,
           unitName:
-            item.unitId === null
-              ? 'Gemeinschaft'
-              : (unitMap.get(item.unitId)?.name ?? 'Unbekannt'),
+            item.unitId === null ? "Gemeinschaft" : (unitMap.get(item.unitId)?.name ?? "Unbekannt"),
           daysUntilDue,
           status,
         };
       })
-      .filter((r) => r.status === 'red' || r.status === 'yellow')
+      .filter((r) => r.status === "red" || r.status === "yellow")
       .sort((a, b) => a.daysUntilDue - b.daysUntilDue);
   }, [items, unitMap, today]);
 
   const columns: Column<DueRow>[] = [
     {
-      key: 'status',
-      header: 'Status',
+      key: "status",
+      header: "Status",
       render: (r) => <StatusBadge status={r.status} label={STATUS_LABELS[r.status]} />,
       sortValue: (r) => r.daysUntilDue,
     },
     {
-      key: 'nextDue',
-      header: 'Fällig am',
+      key: "nextDue",
+      header: "Fällig am",
       render: (r) => (
-        <span className={r.status === 'red' ? 'text-red-600 font-semibold' : ''}>
+        <span className={r.status === "red" ? "text-red-600 font-semibold" : ""}>
           {formatDate(r.item.nextDue!)}
         </span>
       ),
       sortValue: (r) => r.item.nextDue!,
     },
     {
-      key: 'days',
-      header: 'Tage',
+      key: "days",
+      header: "Tage",
       render: (r) => {
         if (r.daysUntilDue < 0) {
           return (
@@ -131,41 +126,41 @@ export function UpcomingDue() {
         }
         return (
           <span className="text-amber-600">
-            noch {r.daysUntilDue} Tag{r.daysUntilDue !== 1 ? 'e' : ''}
+            noch {r.daysUntilDue} Tag{r.daysUntilDue !== 1 ? "e" : ""}
           </span>
         );
       },
       sortValue: (r) => r.daysUntilDue,
-      align: 'center',
+      align: "center",
     },
     {
-      key: 'title',
-      header: 'Aufgabe',
+      key: "title",
+      header: "Aufgabe",
       render: (r) => <span className="font-medium">{r.item.title}</span>,
       sortValue: (r) => r.item.title,
     },
     {
-      key: 'unit',
-      header: 'Wohnung',
+      key: "unit",
+      header: "Wohnung",
       render: (r) => (
-        <span className={r.item.unitId === null ? 'text-zinc-500 dark:text-zinc-400 italic' : ''}>
+        <span className={r.item.unitId === null ? "text-zinc-500 dark:text-zinc-400 italic" : ""}>
           {r.unitName}
         </span>
       ),
       sortValue: (r) => r.unitName,
     },
     {
-      key: 'category',
-      header: 'Kategorie',
+      key: "category",
+      header: "Kategorie",
       render: (r) => CATEGORY_LABELS[r.item.category],
       sortValue: (r) => CATEGORY_LABELS[r.item.category],
     },
     {
-      key: 'cost',
-      header: 'Kosten',
+      key: "cost",
+      header: "Kosten",
       render: (r) => <span className="font-mono">{formatEuro(r.item.cost)}</span>,
       sortValue: (r) => r.item.cost,
-      align: 'right',
+      align: "right",
     },
   ];
 
@@ -180,19 +175,11 @@ export function UpcomingDue() {
       ) : (
         <>
           <div className="mb-3 flex gap-3 text-sm text-zinc-600 dark:text-zinc-300">
-            <span>
-              {rows.filter((r) => r.status === 'red').length} überfällig
-            </span>
+            <span>{rows.filter((r) => r.status === "red").length} überfällig</span>
             <span className="text-zinc-300">|</span>
-            <span>
-              {rows.filter((r) => r.status === 'yellow').length} in den nächsten 30 Tagen
-            </span>
+            <span>{rows.filter((r) => r.status === "yellow").length} in den nächsten 30 Tagen</span>
           </div>
-          <DataTable
-            columns={columns}
-            data={rows}
-            keyFn={(r) => r.item.id!}
-          />
+          <DataTable columns={columns} data={rows} keyFn={(r) => r.item.id!} />
         </>
       )}
     </Card>

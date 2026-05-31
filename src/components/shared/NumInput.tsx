@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback } from 'react';
+import { useCallback, useId, useRef, useState } from "react";
 
 interface NumInputProps {
   value: number;
@@ -24,21 +24,22 @@ export function NumInput({
   min,
   max,
   step = 0.01,
-  className = '',
+  className = "",
   disabled = false,
 }: NumInputProps) {
   const [editing, setEditing] = useState(false);
-  const [rawValue, setRawValue] = useState('');
+  const [rawValue, setRawValue] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
+  const inputId = useId();
 
-  const formatted = new Intl.NumberFormat('de-DE', {
+  const formatted = new Intl.NumberFormat("de-DE", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(value);
 
   const handleFocus = useCallback(() => {
     setEditing(true);
-    setRawValue(value === 0 ? '' : String(value));
+    setRawValue(value === 0 ? "" : String(value));
   }, [value]);
 
   const handleBlur = useCallback(() => {
@@ -48,22 +49,25 @@ export function NumInput({
     // Wenn ausschließlich Punkte vorhanden sind und der letzte 1–3 Nachkommastellen
     // hat, behandeln wir ihn als Dezimaltrenner (englische Eingabe).
     let normalized = rawValue.trim();
-    if (normalized.includes(',')) {
-      normalized = normalized.replace(/\./g, '').replace(',', '.');
+    if (normalized.includes(",")) {
+      normalized = normalized.replace(/\./g, "").replace(",", ".");
     } else {
-      const parts = normalized.split('.');
+      const parts = normalized.split(".");
       if (parts.length > 1) {
         const last = parts[parts.length - 1];
-        if (last.length === 3 && parts.slice(0, -1).every((p) => p.length === 3 || /^\d{1,3}$/.test(p))) {
+        if (
+          last.length === 3 &&
+          parts.slice(0, -1).every((p) => p.length === 3 || /^\d{1,3}$/.test(p))
+        ) {
           // "1.234" oder "1.234.567" — Tausender, kein Dezimal
-          normalized = parts.join('');
+          normalized = parts.join("");
         } else {
-          normalized = parts.slice(0, -1).join('') + '.' + last;
+          normalized = `${parts.slice(0, -1).join("")}.${last}`;
         }
       }
     }
     const parsed = parseFloat(normalized);
-    if (!isNaN(parsed)) {
+    if (!Number.isNaN(parsed)) {
       let clamped = parsed;
       if (min !== undefined) clamped = Math.max(min, clamped);
       if (max !== undefined) clamped = Math.min(max, clamped);
@@ -74,14 +78,18 @@ export function NumInput({
   return (
     <div className={className}>
       {label && (
-        <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
+        <label
+          htmlFor={inputId}
+          className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1"
+        >
           {label}
         </label>
       )}
       <div className="relative">
         <input
+          id={inputId}
           ref={inputRef}
-          type={editing ? 'text' : 'text'}
+          type={editing ? "text" : "text"}
           inputMode="decimal"
           value={editing ? rawValue : formatted}
           onChange={(e) => setRawValue(e.target.value)}

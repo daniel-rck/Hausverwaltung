@@ -1,7 +1,7 @@
-import type { ReactNode } from 'react';
-import { moduleAccent, type ModulKey } from '../ui/moduleAccent';
+import type { ReactNode } from "react";
+import { type ModulKey, moduleAccent } from "../ui/moduleAccent";
 
-type Padding = 'none' | 'xs' | 'sm' | 'md' | 'lg';
+type Padding = "none" | "xs" | "sm" | "md" | "lg";
 
 interface CardProps {
   title?: ReactNode;
@@ -13,37 +13,40 @@ interface CardProps {
   accent?: ModulKey;
   padding?: Padding;
   interactive?: boolean;
-  as?: 'div' | 'section' | 'article';
+  as?: "div" | "section" | "article";
 }
 
 const padMap: Record<Padding, string> = {
-  none: '',
-  xs: 'px-3 py-2',
-  sm: 'px-3 py-3',
-  md: 'px-5 py-4',
-  lg: 'px-6 py-5',
+  none: "",
+  xs: "px-3 py-2",
+  sm: "px-3 py-3",
+  md: "px-5 py-4",
+  lg: "px-6 py-5",
 };
 
 export function Card({
   title,
   description,
   children,
-  className = '',
+  className = "",
   action,
   footer,
   accent,
-  padding = 'md',
+  padding = "md",
   interactive = false,
-  as: Tag = 'section',
+  as: Tag = "section",
 }: CardProps) {
   const a = moduleAccent(accent);
   const accentBar = a ? (
-    <span aria-hidden="true" className={`absolute left-0 top-0 bottom-0 w-0.5 ${a.bar} rounded-l-lg`} />
+    <span
+      aria-hidden="true"
+      className={`absolute left-0 top-0 bottom-0 w-0.5 ${a.bar} rounded-l-lg`}
+    />
   ) : null;
 
   const interactiveCls = interactive
-    ? 'transition-colors hover:border-zinc-300 dark:hover:border-zinc-700 cursor-pointer'
-    : '';
+    ? "transition-colors hover:border-zinc-300 dark:hover:border-zinc-700 cursor-pointer"
+    : "";
 
   return (
     <Tag
@@ -54,7 +57,7 @@ export function Card({
         <header className="flex items-start justify-between gap-3 px-5 py-3 border-b border-zinc-100 dark:border-zinc-800">
           <div className="min-w-0">
             {title &&
-              (typeof title === 'string' ? (
+              (typeof title === "string" ? (
                 <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 tracking-tight truncate">
                   {title}
                 </h2>

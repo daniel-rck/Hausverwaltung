@@ -1,30 +1,30 @@
-import { useState, useMemo } from 'react';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db, deleteWithTombstone } from '../../db';
-import { useProperty } from '../../hooks/useProperty';
-import { Card } from '../../components/shared/Card';
-import { DataTable, type Column } from '../../components/shared/DataTable';
-import { EmptyState } from '../../components/shared/EmptyState';
-import { Wrench } from '../../components/ui/icons';
-import { ConfirmDialog } from '../../components/shared/ConfirmDialog';
-import { NumInput } from '../../components/shared/NumInput';
-import { formatEuro, formatDate } from '../../utils/format';
-import type { MaintenanceItem, Unit } from '../../db/schema';
+import { useLiveQuery } from "dexie-react-hooks";
+import { useMemo, useState } from "react";
+import { Card } from "../../components/shared/Card";
+import { ConfirmDialog } from "../../components/shared/ConfirmDialog";
+import { type Column, DataTable } from "../../components/shared/DataTable";
+import { EmptyState } from "../../components/shared/EmptyState";
+import { NumInput } from "../../components/shared/NumInput";
+import { Wrench } from "../../components/ui/icons";
+import { db, deleteWithTombstone } from "../../db";
+import type { MaintenanceItem, Unit } from "../../db/schema";
+import { useProperty } from "../../hooks/useProperty";
+import { formatDate, formatEuro } from "../../utils/format";
 
-type Category = MaintenanceItem['category'];
+type Category = MaintenanceItem["category"];
 
 const CATEGORY_LABELS: Record<Category, string> = {
-  repair: 'Reparatur',
-  maintenance: 'Wartung',
-  inspection: 'Prüfung',
-  modernization: 'Modernisierung',
+  repair: "Reparatur",
+  maintenance: "Wartung",
+  inspection: "Prüfung",
+  modernization: "Modernisierung",
 };
 
 const CATEGORY_COLORS: Record<Category, string> = {
-  repair: 'text-red-600 bg-red-50 dark:bg-red-900/30 dark:text-red-400',
-  maintenance: 'text-amber-600 bg-amber-50 dark:bg-amber-900/30 dark:text-amber-400',
-  inspection: 'text-blue-600 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400',
-  modernization: 'text-purple-600 bg-purple-50 dark:bg-purple-900/30 dark:text-purple-400',
+  repair: "text-red-600 bg-red-50 dark:bg-red-900/30 dark:text-red-400",
+  maintenance: "text-amber-600 bg-amber-50 dark:bg-amber-900/30 dark:text-amber-400",
+  inspection: "text-blue-600 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400",
+  modernization: "text-purple-600 bg-purple-50 dark:bg-purple-900/30 dark:text-purple-400",
 };
 
 interface MaintenanceRow {
@@ -47,17 +47,17 @@ interface FormState {
 }
 
 const emptyForm: FormState = {
-  unitId: '',
+  unitId: "",
   date: new Date().toISOString().slice(0, 10),
-  category: 'repair',
-  title: '',
-  description: '',
-  contractor: '',
+  category: "repair",
+  title: "",
+  description: "",
+  contractor: "",
   cost: 0,
   recurring: false,
-  recurringInterval: '',
-  nextDue: '',
-  notes: '',
+  recurringInterval: "",
+  nextDue: "",
+  notes: "",
 };
 
 export function MaintenanceList() {
@@ -66,12 +66,12 @@ export function MaintenanceList() {
   const [editItem, setEditItem] = useState<MaintenanceItem | null>(null);
   const [form, setForm] = useState<FormState>(emptyForm);
   const [deleteId, setDeleteId] = useState<number | null>(null);
-  const [filterCategory, setFilterCategory] = useState<Category | ''>('');
+  const [filterCategory, setFilterCategory] = useState<Category | "">("");
 
   const units = useLiveQuery(
     () =>
       activeProperty?.id
-        ? db.units.where('propertyId').equals(activeProperty.id).toArray()
+        ? db.units.where("propertyId").equals(activeProperty.id).toArray()
         : Promise.resolve([] as Unit[]),
     [activeProperty?.id],
   );
@@ -85,16 +85,11 @@ export function MaintenanceList() {
     return map;
   }, [units]);
 
-  const items = useLiveQuery(
-    async () => {
-      if (!activeProperty?.id) return [];
-      const all = await db.maintenanceItems.toArray();
-      return all.filter(
-        (item) => item.unitId === null || unitIds.includes(item.unitId),
-      );
-    },
-    [activeProperty?.id, unitIds],
-  );
+  const items = useLiveQuery(async () => {
+    if (!activeProperty?.id) return [];
+    const all = await db.maintenanceItems.toArray();
+    return all.filter((item) => item.unitId === null || unitIds.includes(item.unitId));
+  }, [activeProperty?.id, unitIds]);
 
   const rows: MaintenanceRow[] = useMemo(() => {
     if (!items) return [];
@@ -106,7 +101,8 @@ export function MaintenanceList() {
       .sort((a, b) => b.date.localeCompare(a.date))
       .map((item) => ({
         item,
-        unitName: item.unitId === null ? 'Gemeinschaft' : (unitMap.get(item.unitId)?.name ?? 'Unbekannt'),
+        unitName:
+          item.unitId === null ? "Gemeinschaft" : (unitMap.get(item.unitId)?.name ?? "Unbekannt"),
       }));
   }, [items, unitMap, filterCategory]);
 
@@ -120,17 +116,17 @@ export function MaintenanceList() {
     const i = row.item;
     setEditItem(i);
     setForm({
-      unitId: i.unitId === null ? '' : String(i.unitId),
+      unitId: i.unitId === null ? "" : String(i.unitId),
       date: i.date,
       category: i.category,
       title: i.title,
-      description: i.description ?? '',
-      contractor: i.contractor ?? '',
+      description: i.description ?? "",
+      contractor: i.contractor ?? "",
       cost: i.cost,
       recurring: i.recurring,
-      recurringInterval: i.recurringInterval ? String(i.recurringInterval) : '',
-      nextDue: i.nextDue ?? '',
-      notes: i.notes ?? '',
+      recurringInterval: i.recurringInterval ? String(i.recurringInterval) : "",
+      nextDue: i.nextDue ?? "",
+      notes: i.notes ?? "",
     });
     setShowForm(true);
   };
@@ -138,8 +134,8 @@ export function MaintenanceList() {
   const handleSave = async () => {
     if (!form.title.trim() || !form.date) return;
 
-    const data: Omit<MaintenanceItem, 'id'> = {
-      unitId: form.unitId === '' ? null : parseInt(form.unitId),
+    const data: Omit<MaintenanceItem, "id"> = {
+      unitId: form.unitId === "" ? null : parseInt(form.unitId, 10),
       date: form.date,
       category: form.category,
       title: form.title.trim(),
@@ -147,9 +143,8 @@ export function MaintenanceList() {
       contractor: form.contractor || undefined,
       cost: form.cost,
       recurring: form.recurring,
-      recurringInterval: form.recurring && form.recurringInterval
-        ? parseInt(form.recurringInterval)
-        : undefined,
+      recurringInterval:
+        form.recurring && form.recurringInterval ? parseInt(form.recurringInterval, 10) : undefined,
       nextDue: form.nextDue || undefined,
       notes: form.notes || undefined,
     };
@@ -167,31 +162,31 @@ export function MaintenanceList() {
 
   const handleDelete = async () => {
     if (deleteId !== null) {
-      await deleteWithTombstone('maintenanceItems', deleteId);
+      await deleteWithTombstone("maintenanceItems", deleteId);
       setDeleteId(null);
     }
   };
 
   const columns: Column<MaintenanceRow>[] = [
     {
-      key: 'date',
-      header: 'Datum',
+      key: "date",
+      header: "Datum",
       render: (r) => formatDate(r.item.date),
       sortValue: (r) => r.item.date,
     },
     {
-      key: 'unit',
-      header: 'Wohnung',
+      key: "unit",
+      header: "Wohnung",
       render: (r) => (
-        <span className={r.item.unitId === null ? 'text-zinc-500 dark:text-zinc-400 italic' : ''}>
+        <span className={r.item.unitId === null ? "text-zinc-500 dark:text-zinc-400 italic" : ""}>
           {r.unitName}
         </span>
       ),
       sortValue: (r) => r.unitName,
     },
     {
-      key: 'category',
-      header: 'Kategorie',
+      key: "category",
+      header: "Kategorie",
       render: (r) => (
         <span
           className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${CATEGORY_COLORS[r.item.category]}`}
@@ -202,30 +197,32 @@ export function MaintenanceList() {
       sortValue: (r) => CATEGORY_LABELS[r.item.category],
     },
     {
-      key: 'title',
-      header: 'Titel',
+      key: "title",
+      header: "Titel",
       render: (r) => <span className="font-medium">{r.item.title}</span>,
       sortValue: (r) => r.item.title,
     },
     {
-      key: 'cost',
-      header: 'Kosten',
+      key: "cost",
+      header: "Kosten",
       render: (r) => <span className="font-mono">{formatEuro(r.item.cost)}</span>,
       sortValue: (r) => r.item.cost,
-      align: 'right',
+      align: "right",
     },
     {
-      key: 'contractor',
-      header: 'Handwerker',
-      render: (r) => r.item.contractor ?? <span className="text-zinc-400 dark:text-zinc-500">–</span>,
-      sortValue: (r) => r.item.contractor ?? '',
+      key: "contractor",
+      header: "Handwerker",
+      render: (r) =>
+        r.item.contractor ?? <span className="text-zinc-400 dark:text-zinc-500">–</span>,
+      sortValue: (r) => r.item.contractor ?? "",
     },
     {
-      key: 'actions',
-      header: '',
+      key: "actions",
+      header: "",
       render: (r) => (
         <div className="flex gap-2">
           <button
+            type="button"
             onClick={(e) => {
               e.stopPropagation();
               openEdit(r);
@@ -235,6 +232,7 @@ export function MaintenanceList() {
             Bearbeiten
           </button>
           <button
+            type="button"
             onClick={(e) => {
               e.stopPropagation();
               setDeleteId(r.item.id!);
@@ -249,7 +247,7 @@ export function MaintenanceList() {
   ];
 
   const inputCls =
-    'w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500';
+    "w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500";
 
   return (
     <>
@@ -259,15 +257,18 @@ export function MaintenanceList() {
           <div className="flex gap-2 items-center">
             <select
               value={filterCategory}
-              onChange={(e) => setFilterCategory(e.target.value as Category | '')}
+              onChange={(e) => setFilterCategory(e.target.value as Category | "")}
               className="text-sm border border-zinc-300 dark:border-zinc-600 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
             >
               <option value="">Alle Kategorien</option>
               {(Object.entries(CATEGORY_LABELS) as [Category, string][]).map(([k, v]) => (
-                <option key={k} value={k}>{v}</option>
+                <option key={k} value={k}>
+                  {v}
+                </option>
               ))}
             </select>
             <button
+              type="button"
               onClick={openAdd}
               className="text-sm px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
             >
@@ -279,52 +280,72 @@ export function MaintenanceList() {
         {showForm && (
           <div className="mb-4 p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-lg border border-zinc-200 dark:border-zinc-700">
             <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-200 mb-3">
-              {editItem ? 'Maßnahme bearbeiten' : 'Neue Maßnahme'}
+              {editItem ? "Maßnahme bearbeiten" : "Neue Maßnahme"}
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               <div>
-                <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">Titel *</label>
-                <input
-                  type="text"
-                  value={form.title}
-                  onChange={(e) => setForm({ ...form, title: e.target.value })}
-                  placeholder="z.B. Heizungswartung"
-                  className={inputCls}
-                />
+                <label className="block">
+                  <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
+                    Titel *
+                  </span>
+                  <input
+                    type="text"
+                    value={form.title}
+                    onChange={(e) => setForm({ ...form, title: e.target.value })}
+                    placeholder="z.B. Heizungswartung"
+                    className={inputCls}
+                  />
+                </label>
               </div>
               <div>
-                <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">Datum *</label>
-                <input
-                  type="date"
-                  value={form.date}
-                  onChange={(e) => setForm({ ...form, date: e.target.value })}
-                  className={inputCls}
-                />
+                <label className="block">
+                  <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
+                    Datum *
+                  </span>
+                  <input
+                    type="date"
+                    value={form.date}
+                    onChange={(e) => setForm({ ...form, date: e.target.value })}
+                    className={inputCls}
+                  />
+                </label>
               </div>
               <div>
-                <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">Kategorie</label>
-                <select
-                  value={form.category}
-                  onChange={(e) => setForm({ ...form, category: e.target.value as Category })}
-                  className={inputCls}
-                >
-                  {(Object.entries(CATEGORY_LABELS) as [Category, string][]).map(([k, v]) => (
-                    <option key={k} value={k}>{v}</option>
-                  ))}
-                </select>
+                <label className="block">
+                  <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
+                    Kategorie
+                  </span>
+                  <select
+                    value={form.category}
+                    onChange={(e) => setForm({ ...form, category: e.target.value as Category })}
+                    className={inputCls}
+                  >
+                    {(Object.entries(CATEGORY_LABELS) as [Category, string][]).map(([k, v]) => (
+                      <option key={k} value={k}>
+                        {v}
+                      </option>
+                    ))}
+                  </select>
+                </label>
               </div>
               <div>
-                <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">Wohnung</label>
-                <select
-                  value={form.unitId}
-                  onChange={(e) => setForm({ ...form, unitId: e.target.value })}
-                  className={inputCls}
-                >
-                  <option value="">Gemeinschaft</option>
-                  {(units ?? []).map((u) => (
-                    <option key={u.id} value={u.id}>{u.name}</option>
-                  ))}
-                </select>
+                <label className="block">
+                  <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
+                    Wohnung
+                  </span>
+                  <select
+                    value={form.unitId}
+                    onChange={(e) => setForm({ ...form, unitId: e.target.value })}
+                    className={inputCls}
+                  >
+                    <option value="">Gemeinschaft</option>
+                    {(units ?? []).map((u) => (
+                      <option key={u.id} value={u.id}>
+                        {u.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
               </div>
               <NumInput
                 label="Kosten (EUR)"
@@ -333,23 +354,31 @@ export function MaintenanceList() {
                 min={0}
               />
               <div>
-                <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">Handwerker</label>
-                <input
-                  type="text"
-                  value={form.contractor}
-                  onChange={(e) => setForm({ ...form, contractor: e.target.value })}
-                  placeholder="Firmenname"
-                  className={inputCls}
-                />
+                <label className="block">
+                  <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
+                    Handwerker
+                  </span>
+                  <input
+                    type="text"
+                    value={form.contractor}
+                    onChange={(e) => setForm({ ...form, contractor: e.target.value })}
+                    placeholder="Firmenname"
+                    className={inputCls}
+                  />
+                </label>
               </div>
               <div className="sm:col-span-2 lg:col-span-3">
-                <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">Beschreibung</label>
-                <textarea
-                  value={form.description}
-                  onChange={(e) => setForm({ ...form, description: e.target.value })}
-                  rows={2}
-                  className={inputCls}
-                />
+                <label className="block">
+                  <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
+                    Beschreibung
+                  </span>
+                  <textarea
+                    value={form.description}
+                    onChange={(e) => setForm({ ...form, description: e.target.value })}
+                    rows={2}
+                    className={inputCls}
+                  />
+                </label>
               </div>
               <div className="flex items-end">
                 <label className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-300 pb-1.5">
@@ -365,49 +394,59 @@ export function MaintenanceList() {
               {form.recurring && (
                 <>
                   <div>
-                    <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-                      Intervall (Monate)
+                    <label className="block">
+                      <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
+                        Intervall (Monate)
+                      </span>
+                      <input
+                        type="number"
+                        min="1"
+                        value={form.recurringInterval}
+                        onChange={(e) => setForm({ ...form, recurringInterval: e.target.value })}
+                        placeholder="z.B. 12"
+                        className={inputCls}
+                      />
                     </label>
-                    <input
-                      type="number"
-                      min="1"
-                      value={form.recurringInterval}
-                      onChange={(e) => setForm({ ...form, recurringInterval: e.target.value })}
-                      placeholder="z.B. 12"
-                      className={inputCls}
-                    />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-                      Nächste Fälligkeit
+                    <label className="block">
+                      <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
+                        Nächste Fälligkeit
+                      </span>
+                      <input
+                        type="date"
+                        value={form.nextDue}
+                        onChange={(e) => setForm({ ...form, nextDue: e.target.value })}
+                        className={inputCls}
+                      />
                     </label>
-                    <input
-                      type="date"
-                      value={form.nextDue}
-                      onChange={(e) => setForm({ ...form, nextDue: e.target.value })}
-                      className={inputCls}
-                    />
                   </div>
                 </>
               )}
               <div className="sm:col-span-2 lg:col-span-3">
-                <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">Notizen</label>
-                <textarea
-                  value={form.notes}
-                  onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                  rows={2}
-                  className={inputCls}
-                />
+                <label className="block">
+                  <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
+                    Notizen
+                  </span>
+                  <textarea
+                    value={form.notes}
+                    onChange={(e) => setForm({ ...form, notes: e.target.value })}
+                    rows={2}
+                    className={inputCls}
+                  />
+                </label>
               </div>
             </div>
             <div className="flex gap-2 mt-3">
               <button
+                type="button"
                 onClick={handleSave}
                 className="px-4 py-1.5 text-sm bg-zinc-800 text-white rounded-lg hover:bg-zinc-900 transition-colors"
               >
                 Speichern
               </button>
               <button
+                type="button"
                 onClick={() => {
                   setShowForm(false);
                   setEditItem(null);
@@ -425,7 +464,7 @@ export function MaintenanceList() {
             icon={<Wrench size={24} strokeWidth={1.75} />}
             title="Keine Maßnahmen"
             description="Legen Sie Reparaturen, Wartungen und Prüfungen an."
-            action={{ label: '+ Neue Maßnahme', onClick: openAdd }}
+            action={{ label: "+ Neue Maßnahme", onClick: openAdd }}
           />
         ) : (
           <DataTable

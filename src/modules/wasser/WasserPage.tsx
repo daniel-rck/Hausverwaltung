@@ -1,28 +1,28 @@
-import { useState } from 'react';
-import { useProperty } from '../../hooks/useProperty';
-import { EmptyState } from '../../components/shared/EmptyState';
-import { Card } from '../../components/shared/Card';
-import { FormField, KpiTile, Select, Tabs, type TabItem } from '../../components/ui';
-import { PageHeader } from '../../components/layout/PageHeader';
-import { Droplet, Thermometer } from '../../components/ui/icons';
-import { Flame, Zap } from 'lucide-react';
-import { SupplierInput } from './SupplierInput';
-import { DifferenzAnalyse } from './DifferenzAnalyse';
-import { ProKopfChart } from './ProKopfChart';
-import { WarmKaltRatio } from './WarmKaltRatio';
-import { AnomalyAlerts } from './AnomalyAlerts';
-import { formatEuro } from '../../utils/format';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../../db';
-import type { SupplierBill } from '../../db/schema';
+import { useLiveQuery } from "dexie-react-hooks";
+import { Flame, Zap } from "lucide-react";
+import { useState } from "react";
+import { PageHeader } from "../../components/layout/PageHeader";
+import { Card } from "../../components/shared/Card";
+import { EmptyState } from "../../components/shared/EmptyState";
+import { FormField, KpiTile, Select, type TabItem, Tabs } from "../../components/ui";
+import { Droplet, Thermometer } from "../../components/ui/icons";
+import { db } from "../../db";
+import type { SupplierBill } from "../../db/schema";
+import { useProperty } from "../../hooks/useProperty";
+import { formatEuro } from "../../utils/format";
+import { AnomalyAlerts } from "./AnomalyAlerts";
+import { DifferenzAnalyse } from "./DifferenzAnalyse";
+import { ProKopfChart } from "./ProKopfChart";
+import { SupplierInput } from "./SupplierInput";
+import { WarmKaltRatio } from "./WarmKaltRatio";
 
-type SupplierType = 'water' | 'gas' | 'electricity' | 'heating';
+type SupplierType = "water" | "gas" | "electricity" | "heating";
 
 const TAB_ITEMS: TabItem<SupplierType>[] = [
-  { id: 'water', label: 'Wasser', icon: <Droplet size={14} strokeWidth={1.75} /> },
-  { id: 'gas', label: 'Gas', icon: <Flame size={14} strokeWidth={1.75} /> },
-  { id: 'electricity', label: 'Strom', icon: <Zap size={14} strokeWidth={1.75} /> },
-  { id: 'heating', label: 'Fernwärme', icon: <Thermometer size={14} strokeWidth={1.75} /> },
+  { id: "water", label: "Wasser", icon: <Droplet size={14} strokeWidth={1.75} /> },
+  { id: "gas", label: "Gas", icon: <Flame size={14} strokeWidth={1.75} /> },
+  { id: "electricity", label: "Strom", icon: <Zap size={14} strokeWidth={1.75} /> },
+  { id: "heating", label: "Fernwärme", icon: <Thermometer size={14} strokeWidth={1.75} /> },
 ];
 
 const currentYear = new Date().getFullYear();
@@ -43,7 +43,7 @@ function ConsumptionSummary({ year, type }: { year: number; type: SupplierType }
     () =>
       propertyId != null
         ? db.supplierBills
-            .where('[year+type]')
+            .where("[year+type]")
             .equals([year, type])
             .filter((b) => b.propertyId === propertyId)
             .toArray()
@@ -63,7 +63,7 @@ function ConsumptionSummary({ year, type }: { year: number; type: SupplierType }
 
   const totalAmount = bills.reduce((sum, b) => sum + b.totalAmount, 0);
   const totalConsumption = bills.reduce((sum, b) => sum + b.totalConsumption, 0);
-  const unit = bills[0]?.unit ?? '';
+  const unit = bills[0]?.unit ?? "";
 
   return (
     <Card title="Verbrauchsübersicht">
@@ -71,7 +71,7 @@ function ConsumptionSummary({ year, type }: { year: number; type: SupplierType }
         <KpiTile label="Gesamtkosten" value={formatEuro(totalAmount)} accent="wasser" />
         <KpiTile
           label="Gesamtverbrauch"
-          value={`${totalConsumption.toLocaleString('de-DE')} ${unit}`}
+          value={`${totalConsumption.toLocaleString("de-DE")} ${unit}`}
           accent="wasser"
         />
         <KpiTile label="Rechnungen" value={bills.length} />
@@ -83,12 +83,16 @@ function ConsumptionSummary({ year, type }: { year: number; type: SupplierType }
 export function WasserPage() {
   const { activeProperty } = useProperty();
   const [year, setYear] = useState(currentYear);
-  const [supplierType, setSupplierType] = useState<SupplierType>('water');
+  const [supplierType, setSupplierType] = useState<SupplierType>("water");
 
   if (!activeProperty) {
     return (
       <div className="space-y-4">
-        <PageHeader title="Versorger & Verbrauch" icon={<Droplet size={20} strokeWidth={1.75} />} accent="wasser" />
+        <PageHeader
+          title="Versorger & Verbrauch"
+          icon={<Droplet size={20} strokeWidth={1.75} />}
+          accent="wasser"
+        />
         <Card>
           <EmptyState
             icon={<Droplet size={24} strokeWidth={1.75} />}
@@ -131,7 +135,7 @@ export function WasserPage() {
 
       <div className="space-y-6">
         <SupplierInput year={year} type={supplierType} />
-        {supplierType === 'water' ? (
+        {supplierType === "water" ? (
           <>
             <DifferenzAnalyse year={year} />
             <ProKopfChart year={year} />

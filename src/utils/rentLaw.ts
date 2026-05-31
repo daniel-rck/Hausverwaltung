@@ -1,4 +1,4 @@
-import type { RentChange } from '../db/schema';
+import type { RentChange } from "../db/schema";
 
 /**
  * §558 BGB — Validierung einer Vergleichsmieten-Erhöhung.
@@ -17,7 +17,7 @@ import type { RentChange } from '../db/schema';
  */
 
 export interface RentLawIssue {
-  level: 'warn' | 'error';
+  level: "warn" | "error";
   message: string;
 }
 
@@ -25,7 +25,7 @@ export interface RentLawCheckInput {
   effectiveDate: string; // YYYY-MM
   newRentCold: number;
   oldRentCold: number;
-  reason: 'mietspiegel' | 'index' | 'modernization' | 'agreement';
+  reason: "mietspiegel" | "index" | "modernization" | "agreement";
   occupancyFrom: string; // YYYY-MM
   history: RentChange[]; // bestehende Änderungen, beliebige Reihenfolge
   cappingPct?: number; // default 20
@@ -33,20 +33,20 @@ export interface RentLawCheckInput {
 
 /** "YYYY-MM" → Datum 1. des Monats (lokale Zeit, ausreichend für Monatsdiff) */
 function ymToDate(ym: string): Date {
-  const [y, m] = ym.split('-').map(Number);
+  const [y, m] = ym.split("-").map(Number);
   return new Date(y, (m ?? 1) - 1, 1);
 }
 
 function monthsBetween(fromYM: string, toYM: string): number {
-  const [y1, m1] = fromYM.split('-').map(Number);
-  const [y2, m2] = toYM.split('-').map(Number);
+  const [y1, m1] = fromYM.split("-").map(Number);
+  const [y2, m2] = toYM.split("-").map(Number);
   return (y2 - y1) * 12 + (m2 - m1);
 }
 
 export function checkRentIncrease(input: RentLawCheckInput): RentLawIssue[] {
   const issues: RentLawIssue[] = [];
 
-  if (input.reason !== 'mietspiegel') return issues;
+  if (input.reason !== "mietspiegel") return issues;
   if (input.newRentCold <= input.oldRentCold) return issues;
 
   const cappingPct = input.cappingPct ?? 20;
@@ -60,7 +60,7 @@ export function checkRentIncrease(input: RentLawCheckInput): RentLawIssue[] {
   const monthsSinceLast = monthsBetween(lastIncreaseDate, input.effectiveDate);
   if (monthsSinceLast < 12) {
     issues.push({
-      level: 'error',
+      level: "error",
       message: `12-Monats-Sperrfrist nicht eingehalten — seit der letzten Erhöhung (${lastIncreaseDate}) sind erst ${monthsSinceLast} Monate vergangen.`,
     });
   }
@@ -70,7 +70,7 @@ export function checkRentIncrease(input: RentLawCheckInput): RentLawIssue[] {
     const sinceMoveIn = monthsBetween(input.occupancyFrom, input.effectiveDate);
     if (sinceMoveIn < 15) {
       issues.push({
-        level: 'error',
+        level: "error",
         message: `Erste Mieterhöhung frühestens 15 Monate nach Mietbeginn zulässig (aktuell ${sinceMoveIn} Monate).`,
       });
     }
@@ -79,7 +79,7 @@ export function checkRentIncrease(input: RentLawCheckInput): RentLawIssue[] {
   // Kappungsgrenze: Vergleich mit Miete, die 36 Monate vor effectiveDate galt
   const refDate = ymToDate(input.effectiveDate);
   refDate.setMonth(refDate.getMonth() - 36);
-  const refYM = `${refDate.getFullYear()}-${String(refDate.getMonth() + 1).padStart(2, '0')}`;
+  const refYM = `${refDate.getFullYear()}-${String(refDate.getMonth() + 1).padStart(2, "0")}`;
 
   // Welche Kaltmiete galt zum Zeitpunkt refYM?
   // History enthält "neueRente ab effectiveDate". Wenn nichts früher als refYM existiert,
@@ -99,12 +99,12 @@ export function checkRentIncrease(input: RentLawCheckInput): RentLawIssue[] {
     const totalIncreasePct = ((input.newRentCold - rentBeforeRef) / rentBeforeRef) * 100;
     if (totalIncreasePct > cappingPct) {
       issues.push({
-        level: 'error',
+        level: "error",
         message: `Kappungsgrenze überschritten — Erhöhung um ${totalIncreasePct.toFixed(1)}% in 3 Jahren (max. ${cappingPct}%).`,
       });
     } else if (totalIncreasePct > cappingPct - 2) {
       issues.push({
-        level: 'warn',
+        level: "warn",
         message: `Kappungsgrenze nahezu erreicht (${totalIncreasePct.toFixed(1)}% von max. ${cappingPct}%).`,
       });
     }

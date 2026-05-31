@@ -1,6 +1,6 @@
-import { useCallback } from 'react';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db, deleteWithTombstone, SYNCABLE_TABLES } from '../db';
+import { useLiveQuery } from "dexie-react-hooks";
+import { useCallback } from "react";
+import { db, deleteWithTombstone, SYNCABLE_TABLES } from "../db";
 
 type TableName = keyof typeof db & string;
 type SyncableTable = (typeof SYNCABLE_TABLES)[number];
@@ -19,13 +19,16 @@ export function useDB<T extends { id?: number }>(
     const tbl = db.table(table);
     if (filter) {
       const [key, value] = Object.entries(filter)[0];
-      return tbl.where(key).equals(value as string | number).toArray();
+      return tbl
+        .where(key)
+        .equals(value as string | number)
+        .toArray();
     }
     return tbl.toArray();
-  }, [table, filter ? JSON.stringify(filter) : '']) as T[] | undefined;
+  }, [table, filter ? JSON.stringify(filter) : ""]) as T[] | undefined;
 
   const add = useCallback(
-    async (item: Omit<T, 'id'>) => {
+    async (item: Omit<T, "id">) => {
       return db.table(table).add(item);
     },
     [table],

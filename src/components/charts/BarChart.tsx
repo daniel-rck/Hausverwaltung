@@ -1,23 +1,16 @@
-import { Bar } from 'react-chartjs-2';
 import {
+  BarElement,
+  CategoryScale,
   Chart as ChartJS,
-  CategoryScale,
+  Legend,
   LinearScale,
-  BarElement,
   Title,
   Tooltip,
-  Legend,
-} from 'chart.js';
-import { useChartTheme } from './useChartTheme';
+} from "chart.js";
+import { Bar } from "react-chartjs-2";
+import { useChartTheme } from "./useChartTheme";
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-);
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 interface BarChartProps {
   labels: string[];
@@ -30,13 +23,8 @@ interface BarChartProps {
   height?: number;
 }
 
-export function BarChart({
-  labels,
-  datasets,
-  stacked = false,
-  height = 250,
-}: BarChartProps) {
-  const colors = ['#78716c', '#d97706', '#0891b2', '#16a34a', '#7c3aed'];
+export function BarChart({ labels, datasets, stacked = false, height = 250 }: BarChartProps) {
+  const colors = ["#78716c", "#d97706", "#0891b2", "#16a34a", "#7c3aed"];
   const theme = useChartTheme();
 
   return (
@@ -55,11 +43,16 @@ export function BarChart({
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: { position: 'bottom', labels: { color: theme.text } },
+          legend: { position: "bottom", labels: { color: theme.text } },
         },
         scales: {
           x: { stacked, ticks: { color: theme.text }, grid: { color: theme.grid } },
-          y: { stacked, beginAtZero: true, ticks: { color: theme.text }, grid: { color: theme.grid } },
+          y: {
+            stacked,
+            beginAtZero: true,
+            ticks: { color: theme.text },
+            grid: { color: theme.grid },
+          },
         },
       }}
     />

@@ -1,14 +1,14 @@
-import { useState, useCallback } from 'react';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db, deleteWithTombstone } from '../../db';
-import type { SupplierBill } from '../../db/schema';
-import { Card } from '../../components/shared/Card';
-import { DataTable, type Column } from '../../components/shared/DataTable';
-import { NumInput } from '../../components/shared/NumInput';
-import { formatEuro, formatNumber, formatDate } from '../../utils/format';
-import { useProperty } from '../../hooks/useProperty';
+import { useLiveQuery } from "dexie-react-hooks";
+import { useCallback, useState } from "react";
+import { Card } from "../../components/shared/Card";
+import { type Column, DataTable } from "../../components/shared/DataTable";
+import { NumInput } from "../../components/shared/NumInput";
+import { db, deleteWithTombstone } from "../../db";
+import type { SupplierBill } from "../../db/schema";
+import { useProperty } from "../../hooks/useProperty";
+import { formatDate, formatEuro, formatNumber } from "../../utils/format";
 
-type SupplierType = 'water' | 'gas' | 'electricity' | 'heating';
+type SupplierType = "water" | "gas" | "electricity" | "heating";
 
 interface SupplierInputProps {
   year: number;
@@ -26,21 +26,21 @@ interface BillForm {
 }
 
 const typeConfig: Record<SupplierType, { label: string; defaultUnit: string; units: string[] }> = {
-  water: { label: 'Wasserversorger', defaultUnit: 'm³', units: ['m³'] },
-  gas: { label: 'Gasversorger', defaultUnit: 'm³', units: ['m³', 'kWh'] },
-  electricity: { label: 'Stromversorger', defaultUnit: 'kWh', units: ['kWh'] },
-  heating: { label: 'Fernwärme/Heizung', defaultUnit: 'kWh', units: ['kWh', 'MWh'] },
+  water: { label: "Wasserversorger", defaultUnit: "m³", units: ["m³"] },
+  gas: { label: "Gasversorger", defaultUnit: "m³", units: ["m³", "kWh"] },
+  electricity: { label: "Stromversorger", defaultUnit: "kWh", units: ["kWh"] },
+  heating: { label: "Fernwärme/Heizung", defaultUnit: "kWh", units: ["kWh", "MWh"] },
 };
 
 function makeEmptyForm(type: SupplierType): BillForm {
   return {
-    supplier: '',
+    supplier: "",
     totalAmount: 0,
     totalConsumption: 0,
     unit: typeConfig[type].defaultUnit,
-    billingFrom: '',
-    billingTo: '',
-    notes: '',
+    billingFrom: "",
+    billingTo: "",
+    notes: "",
   };
 }
 
@@ -56,7 +56,7 @@ export function SupplierInput({ year, type }: SupplierInputProps) {
     () =>
       propertyId != null
         ? db.supplierBills
-            .where('[year+type]')
+            .where("[year+type]")
             .equals([year, type])
             .filter((b) => b.propertyId === propertyId)
             .toArray()
@@ -68,7 +68,7 @@ export function SupplierInput({ year, type }: SupplierInputProps) {
     if (!propertyId || !form.supplier.trim() || !form.billingFrom || !form.billingTo) return;
     setSaving(true);
     try {
-      const bill: Omit<SupplierBill, 'id'> = {
+      const bill: Omit<SupplierBill, "id"> = {
         propertyId,
         year,
         type,
@@ -88,48 +88,49 @@ export function SupplierInput({ year, type }: SupplierInputProps) {
   }, [propertyId, year, type, form]);
 
   const handleDelete = useCallback(async (id: number) => {
-    await deleteWithTombstone('supplierBills', id);
+    await deleteWithTombstone("supplierBills", id);
   }, []);
 
   const columns: Column<SupplierBill>[] = [
     {
-      key: 'supplier',
-      header: 'Versorger',
+      key: "supplier",
+      header: "Versorger",
       render: (row) => row.supplier,
       sortValue: (row) => row.supplier,
     },
     {
-      key: 'totalAmount',
-      header: 'Betrag',
-      align: 'right',
+      key: "totalAmount",
+      header: "Betrag",
+      align: "right",
       render: (row) => formatEuro(row.totalAmount),
       sortValue: (row) => row.totalAmount,
     },
     {
-      key: 'totalConsumption',
-      header: 'Verbrauch',
-      align: 'right',
+      key: "totalConsumption",
+      header: "Verbrauch",
+      align: "right",
       render: (row) => `${formatNumber(row.totalConsumption)} ${row.unit}`,
       sortValue: (row) => row.totalConsumption,
     },
     {
-      key: 'billingFrom',
-      header: 'Von',
+      key: "billingFrom",
+      header: "Von",
       render: (row) => formatDate(row.billingFrom),
       sortValue: (row) => row.billingFrom,
     },
     {
-      key: 'billingTo',
-      header: 'Bis',
+      key: "billingTo",
+      header: "Bis",
       render: (row) => formatDate(row.billingTo),
       sortValue: (row) => row.billingTo,
     },
     {
-      key: 'actions',
-      header: '',
-      align: 'center',
+      key: "actions",
+      header: "",
+      align: "center",
       render: (row) => (
         <button
+          type="button"
           onClick={() => row.id != null && handleDelete(row.id)}
           className="text-red-500 hover:text-red-700 text-xs"
           title="Löschen"
@@ -151,16 +152,18 @@ export function SupplierInput({ year, type }: SupplierInputProps) {
     <Card title={`${config.label} – Daten eingeben`}>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
         <div>
-          <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-            {config.label}
+          <label className="block">
+            <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
+              {config.label}
+            </span>
+            <input
+              type="text"
+              value={form.supplier}
+              onChange={(e) => setForm((f) => ({ ...f, supplier: e.target.value }))}
+              placeholder="z.B. Stadtwerke"
+              className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+            />
           </label>
-          <input
-            type="text"
-            value={form.supplier}
-            onChange={(e) => setForm((f) => ({ ...f, supplier: e.target.value }))}
-            placeholder="z.B. Stadtwerke"
-            className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
-          />
         </div>
         <NumInput
           label="Gesamtbetrag"
@@ -192,47 +195,54 @@ export function SupplierInput({ year, type }: SupplierInputProps) {
           )}
         </div>
         <div>
-          <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-            Abrechnungszeitraum von
+          <label className="block">
+            <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
+              Abrechnungszeitraum von
+            </span>
+            <input
+              type="date"
+              value={form.billingFrom}
+              onChange={(e) => setForm((f) => ({ ...f, billingFrom: e.target.value }))}
+              className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+            />
           </label>
-          <input
-            type="date"
-            value={form.billingFrom}
-            onChange={(e) => setForm((f) => ({ ...f, billingFrom: e.target.value }))}
-            className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
-          />
         </div>
         <div>
-          <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-            Abrechnungszeitraum bis
+          <label className="block">
+            <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
+              Abrechnungszeitraum bis
+            </span>
+            <input
+              type="date"
+              value={form.billingTo}
+              onChange={(e) => setForm((f) => ({ ...f, billingTo: e.target.value }))}
+              className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+            />
           </label>
-          <input
-            type="date"
-            value={form.billingTo}
-            onChange={(e) => setForm((f) => ({ ...f, billingTo: e.target.value }))}
-            className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
-          />
         </div>
         <div>
-          <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-            Hinweise
+          <label className="block">
+            <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
+              Hinweise
+            </span>
+            <input
+              type="text"
+              value={form.notes}
+              onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
+              placeholder="optional"
+              className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+            />
           </label>
-          <input
-            type="text"
-            value={form.notes}
-            onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
-            placeholder="optional"
-            className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
-          />
         </div>
       </div>
       <div className="flex justify-end mb-6">
         <button
+          type="button"
           onClick={handleSave}
           disabled={!isValid || saving}
           className="px-4 py-2 text-sm bg-zinc-800 text-white rounded-lg hover:bg-zinc-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {saving ? 'Speichern...' : 'Rechnung speichern'}
+          {saving ? "Speichern..." : "Rechnung speichern"}
         </button>
       </div>
 

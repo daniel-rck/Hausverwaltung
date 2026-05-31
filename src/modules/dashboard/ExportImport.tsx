@@ -1,28 +1,28 @@
-import { useRef, useState } from 'react';
-import { exportDatabase, importDatabase, downloadJson, exportAsUrl } from '../../db/export-import';
-import { Card } from '../../components/shared/Card';
-import { ConfirmDialog } from '../../components/shared/ConfirmDialog';
-import { syncService } from '../../sync/service';
-import { useSyncStatus } from '../../sync/useSyncStatus';
+import { useRef, useState } from "react";
+import { Card } from "../../components/shared/Card";
+import { ConfirmDialog } from "../../components/shared/ConfirmDialog";
+import { downloadJson, exportAsUrl, exportDatabase, importDatabase } from "../../db/export-import";
+import { syncService } from "../../sync/service";
+import { useSyncStatus } from "../../sync/useSyncStatus";
 
 export function ExportImport() {
   const fileInput = useRef<HTMLInputElement>(null);
   const [importing, setImporting] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingFile, setPendingFile] = useState<string | null>(null);
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const syncState = useSyncStatus();
-  const syncActive = syncState.status !== 'disconnected';
+  const syncActive = syncState.status !== "disconnected";
 
   const handleExport = async () => {
     try {
       const json = await exportDatabase();
       const date = new Date().toISOString().slice(0, 10);
       downloadJson(json, `hausverwaltung-backup-${date}.json`);
-      setMessage({ type: 'success', text: 'Backup erfolgreich heruntergeladen.' });
+      setMessage({ type: "success", text: "Backup erfolgreich heruntergeladen." });
     } catch {
-      setMessage({ type: 'error', text: 'Export fehlgeschlagen.' });
+      setMessage({ type: "error", text: "Export fehlgeschlagen." });
     }
   };
 
@@ -36,10 +36,10 @@ export function ExportImport() {
       setPendingFile(text);
       setConfirmOpen(true);
     } catch {
-      setMessage({ type: 'error', text: 'Ungültige JSON-Datei.' });
+      setMessage({ type: "error", text: "Ungültige JSON-Datei." });
     }
 
-    e.target.value = '';
+    e.target.value = "";
   };
 
   const handleConfirmImport = async () => {
@@ -52,16 +52,19 @@ export function ExportImport() {
       // Sync VOR dem Import abklemmen, sonst pusht der Debounce-Timer
       // den (potenziell alten) Backup-Stand hoch und überschreibt damit
       // den Datenbestand auf allen verknüpften Geräten.
-      if (syncService.getState().status !== 'disconnected') {
+      if (syncService.getState().status !== "disconnected") {
         await syncService.disconnect();
       }
       await importDatabase(pendingFile);
-      setMessage({ type: 'success', text: 'Daten erfolgreich importiert. Seite wird neu geladen...' });
+      setMessage({
+        type: "success",
+        text: "Daten erfolgreich importiert. Seite wird neu geladen...",
+      });
       setTimeout(() => window.location.reload(), 1500);
     } catch (err) {
       setMessage({
-        type: 'error',
-        text: err instanceof Error ? err.message : 'Import fehlgeschlagen.',
+        type: "error",
+        text: err instanceof Error ? err.message : "Import fehlgeschlagen.",
       });
     } finally {
       setImporting(false);
@@ -74,9 +77,9 @@ export function ExportImport() {
       const url = await exportAsUrl();
       setShareUrl(url);
       await navigator.clipboard.writeText(url);
-      setMessage({ type: 'success', text: 'Transfer-Link in Zwischenablage kopiert.' });
+      setMessage({ type: "success", text: "Transfer-Link in Zwischenablage kopiert." });
     } catch {
-      setMessage({ type: 'error', text: 'Link-Erstellung fehlgeschlagen.' });
+      setMessage({ type: "error", text: "Link-Erstellung fehlgeschlagen." });
     }
   };
 
@@ -85,17 +88,19 @@ export function ExportImport() {
       <Card title="Daten-Backup">
         <div className="flex flex-col sm:flex-row gap-3">
           <button
+            type="button"
             onClick={handleExport}
             className="flex-1 px-4 py-2 text-sm bg-zinc-800 text-white rounded-lg hover:bg-zinc-900 transition-colors"
           >
             Export (JSON)
           </button>
           <button
+            type="button"
             onClick={() => fileInput.current?.click()}
             disabled={importing}
             className="flex-1 px-4 py-2 text-sm border border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-200 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors disabled:opacity-50"
           >
-            {importing ? 'Importiert...' : 'Import (JSON)'}
+            {importing ? "Importiert..." : "Import (JSON)"}
           </button>
           <input
             ref={fileInput}
@@ -108,6 +113,7 @@ export function ExportImport() {
 
         <div className="mt-3 pt-3 border-t border-zinc-100 dark:border-zinc-700">
           <button
+            type="button"
             onClick={handleShareUrl}
             className="w-full px-4 py-2 text-sm border border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-200 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors"
           >
@@ -132,7 +138,7 @@ export function ExportImport() {
         {message && (
           <p
             className={`mt-3 text-sm ${
-              message.type === 'success' ? 'text-green-600' : 'text-red-600'
+              message.type === "success" ? "text-green-600" : "text-red-600"
             }`}
           >
             {message.text}
@@ -145,8 +151,8 @@ export function ExportImport() {
         title="Daten importieren?"
         message={
           syncActive
-            ? 'Alle vorhandenen Daten werden durch den Import überschrieben und der Multi-Device-Sync wird zurückgesetzt — sonst würden die alten Backup-Daten auf alle verknüpften Geräte gepusht. Du kannst dich danach wieder verknüpfen. Diese Aktion kann nicht rückgängig gemacht werden.'
-            : 'Alle vorhandenen Daten werden durch den Import überschrieben. Diese Aktion kann nicht rückgängig gemacht werden.'
+            ? "Alle vorhandenen Daten werden durch den Import überschrieben und der Multi-Device-Sync wird zurückgesetzt — sonst würden die alten Backup-Daten auf alle verknüpften Geräte gepusht. Du kannst dich danach wieder verknüpfen. Diese Aktion kann nicht rückgängig gemacht werden."
+            : "Alle vorhandenen Daten werden durch den Import überschrieben. Diese Aktion kann nicht rückgängig gemacht werden."
         }
         confirmLabel="Importieren"
         onConfirm={handleConfirmImport}

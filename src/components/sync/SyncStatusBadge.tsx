@@ -1,8 +1,8 @@
-import { useSyncStatus } from '../../sync/useSyncStatus';
+import { useSyncStatus } from "../../sync/useSyncStatus";
 
 function formatRelative(ms: number): string {
   const diff = Date.now() - ms;
-  if (diff < 60_000) return 'gerade eben';
+  if (diff < 60_000) return "gerade eben";
   if (diff < 3_600_000) return `vor ${Math.floor(diff / 60_000)}m`;
   if (diff < 86_400_000) return `vor ${Math.floor(diff / 3_600_000)}h`;
   return `vor ${Math.floor(diff / 86_400_000)}d`;
@@ -11,31 +11,31 @@ function formatRelative(ms: number): string {
 export function SyncStatusBadge() {
   const state = useSyncStatus();
 
-  if (state.status === 'disconnected') {
+  if (state.status === "disconnected") {
     return null;
   }
 
   const dotClass =
-    state.status === 'idle'
-      ? 'bg-green-500'
-      : state.status === 'syncing' || state.status === 'connecting'
-        ? 'bg-amber-400 animate-pulse'
-        : state.status === 'offline'
-          ? 'bg-zinc-400'
-          : 'bg-red-500';
+    state.status === "idle"
+      ? "bg-green-500"
+      : state.status === "syncing" || state.status === "connecting"
+        ? "bg-amber-400 animate-pulse"
+        : state.status === "offline"
+          ? "bg-zinc-400"
+          : "bg-red-500";
 
   const label =
-    state.status === 'idle'
+    state.status === "idle"
       ? state.lastSyncedAt
         ? `Sync ${formatRelative(state.lastSyncedAt)}`
-        : 'Synchronisiert'
-      : state.status === 'syncing'
-        ? 'Synchronisiere…'
-        : state.status === 'connecting'
-          ? 'Verbinde…'
-          : state.status === 'offline'
-            ? 'Offline'
-            : 'Sync-Fehler';
+        : "Synchronisiert"
+      : state.status === "syncing"
+        ? "Synchronisiere…"
+        : state.status === "connecting"
+          ? "Verbinde…"
+          : state.status === "offline"
+            ? "Offline"
+            : "Sync-Fehler";
 
   return (
     <div

@@ -1,4 +1,4 @@
-import { useRef, useEffect, useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from "react";
 
 interface SignatureCanvasProps {
   label: string;
@@ -14,13 +14,13 @@ export function SignatureCanvas({ label, value, onChange }: SignatureCanvasProps
   const getCtx = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return null;
-    return canvas.getContext('2d');
+    return canvas.getContext("2d");
   }, []);
 
   const initCanvas = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     // Set canvas size to match CSS size for crisp drawing
@@ -30,10 +30,10 @@ export function SignatureCanvas({ label, value, onChange }: SignatureCanvasProps
     canvas.height = rect.height * dpr;
     ctx.scale(dpr, dpr);
 
-    ctx.strokeStyle = '#1c1917';
+    ctx.strokeStyle = "#1c1917";
     ctx.lineWidth = 2;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
 
     // If there's an existing value, draw it
     if (value) {
@@ -55,7 +55,7 @@ export function SignatureCanvas({ label, value, onChange }: SignatureCanvasProps
       if (!canvas) return null;
       const rect = canvas.getBoundingClientRect();
 
-      if ('touches' in e) {
+      if ("touches" in e) {
         const touch = e.touches[0];
         if (!touch) return null;
         return {
@@ -105,7 +105,7 @@ export function SignatureCanvas({ label, value, onChange }: SignatureCanvasProps
       setIsDrawing(false);
       const canvas = canvasRef.current;
       if (canvas && hasDrawnRef.current) {
-        onChange(canvas.toDataURL('image/png'));
+        onChange(canvas.toDataURL("image/png"));
       }
     },
     [isDrawing, onChange],
@@ -114,7 +114,7 @@ export function SignatureCanvas({ label, value, onChange }: SignatureCanvasProps
   const handleClear = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     if (!ctx) return;
     const dpr = window.devicePixelRatio || 1;
     ctx.clearRect(0, 0, canvas.width / dpr, canvas.height / dpr);
@@ -125,7 +125,7 @@ export function SignatureCanvas({ label, value, onChange }: SignatureCanvasProps
   return (
     <div>
       <div className="flex items-center justify-between mb-2">
-        <label className="text-sm font-semibold text-zinc-700 dark:text-zinc-200">{label}</label>
+        <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-200">{label}</span>
         <button
           type="button"
           onClick={handleClear}

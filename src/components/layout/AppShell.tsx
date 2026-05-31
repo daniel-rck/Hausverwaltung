@@ -1,16 +1,16 @@
-import { useCallback, useState, type ReactNode } from 'react';
-import { Link } from 'react-router-dom';
-import { SidebarNav, BottomNav } from './Nav';
-import { PropertySelector } from './PropertySelector';
-import { UpdatePrompt } from './UpdatePrompt';
-import { useTheme } from '../../hooks/useTheme';
-import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
-import { SyncStatusBadge } from '../sync/SyncStatusBadge';
-import { IconButton } from '../ui/IconButton';
-import { ShortcutsModal } from '../ui/ShortcutsModal';
-import { Sun, Moon, Building2, Search } from '../ui/icons';
+import { type ReactNode, useCallback, useState } from "react";
+import { Link } from "react-router-dom";
+import { useKeyboardShortcuts } from "../../hooks/useKeyboardShortcuts";
+import { useTheme } from "../../hooks/useTheme";
+import { SyncStatusBadge } from "../sync/SyncStatusBadge";
+import { IconButton } from "../ui/IconButton";
+import { Building2, Moon, Search, Sun } from "../ui/icons";
+import { ShortcutsModal } from "../ui/ShortcutsModal";
+import { BottomNav, SidebarNav } from "./Nav";
+import { PropertySelector } from "./PropertySelector";
+import { UpdatePrompt } from "./UpdatePrompt";
 
-const buildDate = new Date(__BUILD_DATE__).toLocaleDateString('de-DE');
+const buildDate = new Date(__BUILD_DATE__).toLocaleDateString("de-DE");
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { theme, toggle } = useTheme();
@@ -60,10 +60,10 @@ export function AppShell({ children }: { children: ReactNode }) {
               variant="ghost"
               size="sm"
               onClick={toggle}
-              aria-label={theme === 'light' ? 'Dunkelmodus aktivieren' : 'Hellmodus aktivieren'}
-              title={theme === 'light' ? 'Dunkelmodus' : 'Hellmodus'}
+              aria-label={theme === "light" ? "Dunkelmodus aktivieren" : "Hellmodus aktivieren"}
+              title={theme === "light" ? "Dunkelmodus" : "Hellmodus"}
               icon={
-                theme === 'light' ? (
+                theme === "light" ? (
                   <Moon size={16} strokeWidth={1.75} />
                 ) : (
                   <Sun size={16} strokeWidth={1.75} />

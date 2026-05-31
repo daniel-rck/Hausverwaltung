@@ -1,14 +1,14 @@
-import { useRef, useState } from 'react';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db, deleteWithTombstone } from '../../db';
-import { Card } from '../../components/shared/Card';
-import { EmptyState } from '../../components/shared/EmptyState';
-import { FileText } from '../../components/ui/icons';
-import { ConfirmDialog } from '../../components/shared/ConfirmDialog';
-import type { AppDocument } from '../../db/schema';
+import { useLiveQuery } from "dexie-react-hooks";
+import { useRef, useState } from "react";
+import { Card } from "../../components/shared/Card";
+import { ConfirmDialog } from "../../components/shared/ConfirmDialog";
+import { EmptyState } from "../../components/shared/EmptyState";
+import { FileText } from "../../components/ui/icons";
+import { db, deleteWithTombstone } from "../../db";
+import type { AppDocument } from "../../db/schema";
 
 interface DocumentStoreProps {
-  entityType: 'unit' | 'occupancy' | 'property' | 'maintenance';
+  entityType: "unit" | "occupancy" | "property" | "maintenance";
   entityId: number;
   title?: string;
 }
@@ -22,27 +22,27 @@ function formatSize(bytes: number): string {
 }
 
 function isPdf(mimeType: string): boolean {
-  return mimeType === 'application/pdf';
+  return mimeType === "application/pdf";
 }
 
 function isImage(mimeType: string): boolean {
-  return mimeType.startsWith('image/');
+  return mimeType.startsWith("image/");
 }
 
 const ALLOWED_MIME_TYPES = new Set([
-  'application/pdf',
-  'image/jpeg',
-  'image/png',
-  'image/webp',
-  'image/gif',
+  "application/pdf",
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif",
 ]);
 
 /** Konvertiert eine Data-URL ("data:application/pdf;base64,...") in einen Blob. */
 function dataUrlToBlob(dataUrl: string): Blob {
   const match = /^data:([^;,]+)(;base64)?,(.*)$/.exec(dataUrl);
-  if (!match) throw new Error('Ungültige Data-URL');
+  if (!match) throw new Error("Ungültige Data-URL");
   const mime = match[1];
-  const isBase64 = match[2] === ';base64';
+  const isBase64 = match[2] === ";base64";
   const payload = match[3];
   if (isBase64) {
     const binary = atob(payload);
@@ -53,28 +53,19 @@ function dataUrlToBlob(dataUrl: string): Blob {
   return new Blob([decodeURIComponent(payload)], { type: mime });
 }
 
-export function DocumentStore({
-  entityType,
-  entityId,
-  title = 'Dokumente',
-}: DocumentStoreProps) {
+export function DocumentStore({ entityType, entityId, title = "Dokumente" }: DocumentStoreProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [deleteDoc, setDeleteDoc] = useState<AppDocument | null>(null);
   const [previewDoc, setPreviewDoc] = useState<AppDocument | null>(null);
 
-  const documents = useLiveQuery(
-    async () => {
-      const docs = await db.documents
-        .where('[entityType+entityId]')
-        .equals([entityType, entityId])
-        .toArray();
-      return docs.sort(
-        (a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime(),
-      );
-    },
-    [entityType, entityId],
-  );
+  const documents = useLiveQuery(async () => {
+    const docs = await db.documents
+      .where("[entityType+entityId]")
+      .equals([entityType, entityId])
+      .toArray();
+    return docs.sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime());
+  }, [entityType, entityId]);
 
   const totalSize = documents?.reduce((sum, d) => sum + d.size, 0) ?? 0;
   const docCount = documents?.length ?? 0;
@@ -89,7 +80,7 @@ export function DocumentStore({
     if (!file) return;
 
     // Reset input so the same file can be re-selected
-    e.target.value = '';
+    e.target.value = "";
 
     if (file.size > MAX_FILE_SIZE) {
       setError(`Datei zu groß (${formatSize(file.size)}). Maximal 5 MB erlaubt.`);
@@ -97,7 +88,7 @@ export function DocumentStore({
     }
 
     if (!ALLOWED_MIME_TYPES.has(file.type)) {
-      setError(`Dateityp nicht unterstützt (${file.type || 'unbekannt'}).`);
+      setError(`Dateityp nicht unterstützt (${file.type || "unbekannt"}).`);
       return;
     }
 
@@ -109,7 +100,7 @@ export function DocumentStore({
     });
 
     if (!data.startsWith(`data:${file.type};base64,`)) {
-      setError('Datei konnte nicht gelesen werden.');
+      setError("Datei konnte nicht gelesen werden.");
       return;
     }
 
@@ -133,14 +124,14 @@ export function DocumentStore({
       try {
         const blob = dataUrlToBlob(doc.data);
         const url = URL.createObjectURL(blob);
-        const win = window.open(url, '_blank', 'noopener,noreferrer');
+        const win = window.open(url, "_blank", "noopener,noreferrer");
         // Nach kurzer Zeit revoken — Blob-URLs leben sonst bis Tab-Close
         setTimeout(() => URL.revokeObjectURL(url), 60_000);
         if (!win) {
-          setError('Pop-up wurde blockiert. Bitte in den Browser-Einstellungen erlauben.');
+          setError("Pop-up wurde blockiert. Bitte in den Browser-Einstellungen erlauben.");
         }
       } catch {
-        setError('PDF konnte nicht geöffnet werden.');
+        setError("PDF konnte nicht geöffnet werden.");
       }
     } else if (isImage(doc.mimeType)) {
       setPreviewDoc(doc);
@@ -149,7 +140,7 @@ export function DocumentStore({
 
   const handleDelete = async () => {
     if (deleteDoc?.id) {
-      await deleteWithTombstone('documents', deleteDoc.id);
+      await deleteWithTombstone("documents", deleteDoc.id);
       setDeleteDoc(null);
     }
   };
@@ -160,6 +151,7 @@ export function DocumentStore({
         title={title}
         action={
           <button
+            type="button"
             onClick={handleUpload}
             className="text-sm px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
           >
@@ -186,7 +178,7 @@ export function DocumentStore({
             icon={<FileText size={24} strokeWidth={1.75} />}
             title="Keine Dokumente vorhanden"
             description="Laden Sie PDF- oder Bilddateien hoch."
-            action={{ label: 'Datei hochladen', onClick: handleUpload }}
+            action={{ label: "Datei hochladen", onClick: handleUpload }}
           />
         ) : (
           <>
@@ -224,6 +216,7 @@ export function DocumentStore({
                               fill="currentColor"
                               className="w-5 h-5 inline-block"
                             >
+                              <title>PDF</title>
                               <path
                                 fillRule="evenodd"
                                 d="M4.5 2A1.5 1.5 0 003 3.5v13A1.5 1.5 0 004.5 18h11a1.5 1.5 0 001.5-1.5V7.621a1.5 1.5 0 00-.44-1.06l-4.12-4.122A1.5 1.5 0 0011.378 2H4.5zM10 8a.75.75 0 01.75.75v1.5h1.5a.75.75 0 010 1.5h-1.5v1.5a.75.75 0 01-1.5 0v-1.5h-1.5a.75.75 0 010-1.5h1.5v-1.5A.75.75 0 0110 8z"
@@ -239,6 +232,7 @@ export function DocumentStore({
                               fill="currentColor"
                               className="w-5 h-5 inline-block"
                             >
+                              <title>Bild</title>
                               <path
                                 fillRule="evenodd"
                                 d="M1 5.25A2.25 2.25 0 013.25 3h13.5A2.25 2.25 0 0119 5.25v9.5A2.25 2.25 0 0116.75 17H3.25A2.25 2.25 0 011 14.75v-9.5zm1.5 5.81v3.69c0 .414.336.75.75.75h13.5a.75.75 0 00.75-.75v-2.69l-2.22-2.219a.75.75 0 00-1.06 0l-1.91 1.909-4.221-4.22a.75.75 0 00-1.06 0L2.5 11.06zm6.72-4.06a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"
@@ -250,6 +244,7 @@ export function DocumentStore({
                       </td>
                       <td className="py-2 px-2">
                         <button
+                          type="button"
                           onClick={() => handlePreview(doc)}
                           className="text-zinc-800 dark:text-zinc-200 hover:text-blue-600 dark:hover:text-blue-400 hover:underline text-left truncate max-w-[200px] block"
                           title={doc.name}
@@ -261,10 +256,11 @@ export function DocumentStore({
                         {formatSize(doc.size)}
                       </td>
                       <td className="py-2 px-2 text-zinc-500 dark:text-zinc-400 text-xs">
-                        {new Date(doc.uploadedAt).toLocaleDateString('de-DE')}
+                        {new Date(doc.uploadedAt).toLocaleDateString("de-DE")}
                       </td>
                       <td className="py-2 px-2 text-right">
                         <button
+                          type="button"
                           onClick={() => setDeleteDoc(doc)}
                           className="text-xs text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
                         >
@@ -278,8 +274,8 @@ export function DocumentStore({
             </div>
 
             <div className="mt-3 pt-3 border-t border-zinc-100 dark:border-zinc-700 text-xs text-zinc-500 dark:text-zinc-400">
-              Speicher: {formatSize(totalSize)} ({docCount}{' '}
-              {docCount === 1 ? 'Dokument' : 'Dokumente'})
+              Speicher: {formatSize(totalSize)} ({docCount}{" "}
+              {docCount === 1 ? "Dokument" : "Dokumente"})
             </div>
           </>
         )}
@@ -297,19 +293,21 @@ export function DocumentStore({
       />
 
       {previewDoc && isImage(previewDoc.mimeType) && (
-        <div
-          className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4"
-          onClick={() => setPreviewDoc(null)}
-        >
-          <div
-            className="bg-white dark:bg-zinc-800 rounded-lg shadow-lg max-w-3xl w-full max-h-[90vh] flex flex-col"
-            onClick={(e) => e.stopPropagation()}
-          >
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+          <button
+            type="button"
+            aria-label="Schließen"
+            tabIndex={-1}
+            className="absolute inset-0 cursor-default"
+            onClick={() => setPreviewDoc(null)}
+          />
+          <div className="relative bg-white dark:bg-zinc-800 rounded-lg shadow-lg max-w-3xl w-full max-h-[90vh] flex flex-col">
             <div className="flex items-center justify-between px-5 py-3 border-b border-zinc-100 dark:border-zinc-700">
               <h3 className="text-sm font-semibold text-zinc-800 dark:text-zinc-100 truncate">
                 {previewDoc.name}
               </h3>
               <button
+                type="button"
                 onClick={() => setPreviewDoc(null)}
                 className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 text-lg leading-none"
               >

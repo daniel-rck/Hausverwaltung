@@ -1,8 +1,8 @@
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../../db';
-import { Card } from '../../components/shared/Card';
-import { LineChart } from '../../components/charts/LineChart';
-import type { FinancingData } from './FinancingInput';
+import { useLiveQuery } from "dexie-react-hooks";
+import { LineChart } from "../../components/charts/LineChart";
+import { Card } from "../../components/shared/Card";
+import { db } from "../../db";
+import type { FinancingData } from "./FinancingInput";
 
 interface CashflowChartProps {
   propertyId: number;
@@ -16,10 +16,7 @@ export function CashflowChart({ propertyId }: CashflowChartProps) {
     const jaehrlicheKreditrate = financing?.jaehrlicheKreditrate ?? 0;
     const nichtUmlagefaehig = financing?.nichtUmlagefaehigeKosten ?? 0;
 
-    const units = await db.units
-      .where('propertyId')
-      .equals(propertyId)
-      .toArray();
+    const units = await db.units.where("propertyId").equals(propertyId).toArray();
     const unitIds = units.map((u) => u.id!);
 
     if (unitIds.length === 0) {
@@ -28,16 +25,12 @@ export function CashflowChart({ propertyId }: CashflowChartProps) {
 
     // Get all occupancies for this property's units
     const allOccupancies = await db.occupancies.toArray();
-    const propertyOccupancies = allOccupancies.filter((o) =>
-      unitIds.includes(o.unitId),
-    );
+    const propertyOccupancies = allOccupancies.filter((o) => unitIds.includes(o.unitId));
     const occupancyIds = propertyOccupancies.map((o) => o.id!);
 
     // Get all payments for those occupancies
     const allPayments = await db.payments.toArray();
-    const propertyPayments = allPayments.filter((p) =>
-      occupancyIds.includes(p.occupancyId),
-    );
+    const propertyPayments = allPayments.filter((p) => occupancyIds.includes(p.occupancyId));
 
     // Group payments by year
     const paymentsByYear = new Map<number, number>();
@@ -50,9 +43,7 @@ export function CashflowChart({ propertyId }: CashflowChartProps) {
     // Determine the range: last 5 years or available data
     const currentYear = new Date().getFullYear();
     const allYears = Array.from(paymentsByYear.keys());
-    const minYear = allYears.length > 0
-      ? Math.min(...allYears)
-      : currentYear - 4;
+    const minYear = allYears.length > 0 ? Math.min(...allYears) : currentYear - 4;
     const startYear = Math.max(minYear, currentYear - 4);
 
     const labels: string[] = [];
@@ -85,14 +76,14 @@ export function CashflowChart({ propertyId }: CashflowChartProps) {
         labels={chartData.labels}
         datasets={[
           {
-            label: 'Mieteinnahmen',
+            label: "Mieteinnahmen",
             data: chartData.einnahmen,
-            color: '#16a34a',
+            color: "#16a34a",
           },
           {
-            label: 'Cashflow',
+            label: "Cashflow",
             data: chartData.cashflow,
-            color: '#0891b2',
+            color: "#0891b2",
           },
         ]}
         height={280}

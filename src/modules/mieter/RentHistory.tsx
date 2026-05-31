@@ -1,14 +1,14 @@
-import { useMemo, useState } from 'react';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../../db';
-import { Card } from '../../components/shared/Card';
-import { DataTable, type Column } from '../../components/shared/DataTable';
-import { NumInput } from '../../components/shared/NumInput';
-import { EmptyState } from '../../components/shared/EmptyState';
-import { TrendingUp } from '../../components/ui/icons';
-import { formatEuro, formatMonth } from '../../utils/format';
-import { checkRentIncrease } from '../../utils/rentLaw';
-import type { Occupancy, Unit, RentChange, RentChangeReason } from '../../db/schema';
+import { useLiveQuery } from "dexie-react-hooks";
+import { useMemo, useState } from "react";
+import { Card } from "../../components/shared/Card";
+import { type Column, DataTable } from "../../components/shared/DataTable";
+import { EmptyState } from "../../components/shared/EmptyState";
+import { NumInput } from "../../components/shared/NumInput";
+import { TrendingUp } from "../../components/ui/icons";
+import { db } from "../../db";
+import type { Occupancy, RentChange, RentChangeReason, Unit } from "../../db/schema";
+import { formatEuro, formatMonth } from "../../utils/format";
+import { checkRentIncrease } from "../../utils/rentLaw";
 
 interface RentHistoryProps {
   occupancy: Occupancy;
@@ -16,25 +16,25 @@ interface RentHistoryProps {
 }
 
 const REASON_LABELS: Record<RentChangeReason, string> = {
-  mietspiegel: 'Mietspiegel',
-  index: 'Indexanpassung',
-  modernization: 'Modernisierung',
-  agreement: 'Vereinbarung',
+  mietspiegel: "Mietspiegel",
+  index: "Indexanpassung",
+  modernization: "Modernisierung",
+  agreement: "Vereinbarung",
 };
 
 export function RentHistory({ occupancy, unit }: RentHistoryProps) {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({
-    effectiveDate: '',
+    effectiveDate: "",
     newRentCold: occupancy.rentCold,
-    reason: 'mietspiegel' as RentChangeReason,
-    notes: '',
+    reason: "mietspiegel" as RentChangeReason,
+    notes: "",
   });
 
   const changes = useLiveQuery(
     () =>
       db.rentChanges
-        .where('occupancyId')
+        .where("occupancyId")
         .equals(occupancy.id!)
         .toArray()
         .then((rows) => rows.sort((a, b) => b.effectiveDate.localeCompare(a.effectiveDate))),
@@ -53,7 +53,7 @@ export function RentHistory({ occupancy, unit }: RentHistoryProps) {
     });
   }, [form, occupancy, changes]);
 
-  const hasErrors = issues.some((i) => i.level === 'error');
+  const hasErrors = issues.some((i) => i.level === "error");
   const [overrideErrors, setOverrideErrors] = useState(false);
 
   const handleSave = async () => {
@@ -72,10 +72,10 @@ export function RentHistory({ occupancy, unit }: RentHistoryProps) {
     await db.occupancies.update(occupancy.id!, { rentCold: form.newRentCold });
 
     setForm({
-      effectiveDate: '',
+      effectiveDate: "",
       newRentCold: form.newRentCold,
-      reason: 'mietspiegel',
-      notes: '',
+      reason: "mietspiegel",
+      notes: "",
     });
     setOverrideErrors(false);
     setShowForm(false);
@@ -83,46 +83,56 @@ export function RentHistory({ occupancy, unit }: RentHistoryProps) {
 
   const columns: Column<RentChange>[] = [
     {
-      key: 'effectiveDate',
-      header: 'Datum',
+      key: "effectiveDate",
+      header: "Datum",
       render: (r) => formatMonth(r.effectiveDate),
       sortValue: (r) => r.effectiveDate,
     },
     {
-      key: 'oldRentCold',
-      header: 'Alte Miete',
+      key: "oldRentCold",
+      header: "Alte Miete",
       render: (r) => <span className="font-mono">{formatEuro(r.oldRentCold)}</span>,
-      align: 'right',
+      align: "right",
       sortValue: (r) => r.oldRentCold,
     },
     {
-      key: 'newRentCold',
-      header: 'Neue Miete',
+      key: "newRentCold",
+      header: "Neue Miete",
       render: (r) => <span className="font-mono">{formatEuro(r.newRentCold)}</span>,
-      align: 'right',
+      align: "right",
       sortValue: (r) => r.newRentCold,
     },
     {
-      key: 'diff',
-      header: 'Differenz',
+      key: "diff",
+      header: "Differenz",
       render: (r) => {
         const diff = r.newRentCold - r.oldRentCold;
-        const cls = diff > 0 ? 'text-red-600 dark:text-red-400' : diff < 0 ? 'text-green-600 dark:text-green-400' : '';
-        return <span className={`font-mono ${cls}`}>{diff > 0 ? '+' : ''}{formatEuro(diff)}</span>;
+        const cls =
+          diff > 0
+            ? "text-red-600 dark:text-red-400"
+            : diff < 0
+              ? "text-green-600 dark:text-green-400"
+              : "";
+        return (
+          <span className={`font-mono ${cls}`}>
+            {diff > 0 ? "+" : ""}
+            {formatEuro(diff)}
+          </span>
+        );
       },
-      align: 'right',
+      align: "right",
     },
     {
-      key: 'reason',
-      header: 'Grund',
+      key: "reason",
+      header: "Grund",
       render: (r) => REASON_LABELS[r.reason],
     },
     {
-      key: 'notes',
-      header: 'Notiz',
+      key: "notes",
+      header: "Notiz",
       render: (r) => (
         <span className="text-zinc-500 dark:text-zinc-400 truncate max-w-[200px] inline-block">
-          {r.notes ?? '–'}
+          {r.notes ?? "–"}
         </span>
       ),
     },
@@ -134,6 +144,7 @@ export function RentHistory({ occupancy, unit }: RentHistoryProps) {
       action={
         !showForm ? (
           <button
+            type="button"
             onClick={() => setShowForm(true)}
             className="text-sm px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
           >
@@ -145,7 +156,7 @@ export function RentHistory({ occupancy, unit }: RentHistoryProps) {
       {/* Current rent display */}
       <div className="mb-4 p-3 bg-zinc-50 dark:bg-zinc-700/30 rounded-lg">
         <p className="text-sm text-zinc-600 dark:text-zinc-300">
-          Aktuelle Kaltmiete:{' '}
+          Aktuelle Kaltmiete:{" "}
           <span className="font-semibold font-mono text-zinc-800 dark:text-zinc-100">
             {formatEuro(occupancy.rentCold)}
           </span>
@@ -160,15 +171,17 @@ export function RentHistory({ occupancy, unit }: RentHistoryProps) {
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-                Wirksam ab *
+              <label className="block">
+                <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
+                  Wirksam ab *
+                </span>
+                <input
+                  type="month"
+                  value={form.effectiveDate}
+                  onChange={(e) => setForm({ ...form, effectiveDate: e.target.value })}
+                  className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm bg-white dark:bg-zinc-800 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+                />
               </label>
-              <input
-                type="month"
-                value={form.effectiveDate}
-                onChange={(e) => setForm({ ...form, effectiveDate: e.target.value })}
-                className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm bg-white dark:bg-zinc-800 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
-              />
             </div>
             <NumInput
               label="Neue Kaltmiete *"
@@ -178,41 +191,45 @@ export function RentHistory({ occupancy, unit }: RentHistoryProps) {
               min={0}
             />
             <div>
-              <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-                Grund *
+              <label className="block">
+                <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
+                  Grund *
+                </span>
+                <select
+                  value={form.reason}
+                  onChange={(e) => setForm({ ...form, reason: e.target.value as RentChangeReason })}
+                  className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm bg-white dark:bg-zinc-800 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+                >
+                  <option value="mietspiegel">Mietspiegel</option>
+                  <option value="index">Indexanpassung</option>
+                  <option value="modernization">Modernisierung</option>
+                  <option value="agreement">Vereinbarung</option>
+                </select>
               </label>
-              <select
-                value={form.reason}
-                onChange={(e) => setForm({ ...form, reason: e.target.value as RentChangeReason })}
-                className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm bg-white dark:bg-zinc-800 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
-              >
-                <option value="mietspiegel">Mietspiegel</option>
-                <option value="index">Indexanpassung</option>
-                <option value="modernization">Modernisierung</option>
-                <option value="agreement">Vereinbarung</option>
-              </select>
             </div>
             <div>
-              <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-                Notiz
+              <label className="block">
+                <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
+                  Notiz
+                </span>
+                <input
+                  type="text"
+                  value={form.notes}
+                  onChange={(e) => setForm({ ...form, notes: e.target.value })}
+                  className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm bg-white dark:bg-zinc-800 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+                />
               </label>
-              <input
-                type="text"
-                value={form.notes}
-                onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm bg-white dark:bg-zinc-800 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
-              />
             </div>
           </div>
           {issues.length > 0 && (
             <div className="mt-3 space-y-1.5">
-              {issues.map((issue, idx) => (
+              {issues.map((issue) => (
                 <div
-                  key={idx}
+                  key={issue.message}
                   className={`text-xs px-3 py-2 rounded-lg border ${
-                    issue.level === 'error'
-                      ? 'bg-red-50 border-red-300 text-red-800 dark:bg-red-950/40 dark:border-red-800 dark:text-red-200'
-                      : 'bg-amber-50 border-amber-300 text-amber-800 dark:bg-amber-950/40 dark:border-amber-800 dark:text-amber-200'
+                    issue.level === "error"
+                      ? "bg-red-50 border-red-300 text-red-800 dark:bg-red-950/40 dark:border-red-800 dark:text-red-200"
+                      : "bg-amber-50 border-amber-300 text-amber-800 dark:bg-amber-950/40 dark:border-amber-800 dark:text-amber-200"
                   }`}
                 >
                   {issue.message}
@@ -232,6 +249,7 @@ export function RentHistory({ occupancy, unit }: RentHistoryProps) {
           )}
           <div className="flex gap-2 mt-3">
             <button
+              type="button"
               onClick={handleSave}
               disabled={hasErrors && !overrideErrors}
               className="px-4 py-1.5 text-sm bg-zinc-800 dark:bg-zinc-600 text-white rounded-lg hover:bg-zinc-900 dark:hover:bg-zinc-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -239,6 +257,7 @@ export function RentHistory({ occupancy, unit }: RentHistoryProps) {
               Speichern
             </button>
             <button
+              type="button"
               onClick={() => {
                 setShowForm(false);
                 setOverrideErrors(false);

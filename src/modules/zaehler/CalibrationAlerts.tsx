@@ -1,20 +1,20 @@
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../../db';
-import { useProperty } from '../../hooks/useProperty';
-import { Card } from '../../components/shared/Card';
-import { StatusBadge } from '../../components/shared/StatusBadge';
-import { DataTable, type Column } from '../../components/shared/DataTable';
-import { EmptyState } from '../../components/shared/EmptyState';
-import { CheckCircle2 } from '../../components/ui/icons';
-import { formatDate } from '../../utils/format';
-import type { Meter, MeterType, Unit } from '../../db/schema';
+import { useLiveQuery } from "dexie-react-hooks";
+import { Card } from "../../components/shared/Card";
+import { type Column, DataTable } from "../../components/shared/DataTable";
+import { EmptyState } from "../../components/shared/EmptyState";
+import { StatusBadge } from "../../components/shared/StatusBadge";
+import { CheckCircle2 } from "../../components/ui/icons";
+import { db } from "../../db";
+import type { Meter, MeterType, Unit } from "../../db/schema";
+import { useProperty } from "../../hooks/useProperty";
+import { formatDate } from "../../utils/format";
 
 interface AlertRow {
   meter: Meter;
   meterType: MeterType;
   unit: Unit | null;
   daysUntilDue: number;
-  status: 'green' | 'yellow' | 'red';
+  status: "green" | "yellow" | "red";
   statusLabel: string;
 }
 
@@ -26,17 +26,12 @@ export function CalibrationAlerts() {
   const alerts = useLiveQuery(async () => {
     if (!activeProperty?.id) return [];
 
-    const units = await db.units
-      .where('propertyId')
-      .equals(activeProperty.id)
-      .toArray();
+    const units = await db.units.where("propertyId").equals(activeProperty.id).toArray();
     const unitIds = units.map((u) => u.id!);
     const unitMap = new Map(units.map((u) => [u.id!, u]));
 
     const allMeters = await db.meters.toArray();
-    const propertyMeters = allMeters.filter(
-      (m) => m.unitId === null || unitIds.includes(m.unitId),
-    );
+    const propertyMeters = allMeters.filter((m) => m.unitId === null || unitIds.includes(m.unitId));
 
     const meterTypes = await db.meterTypes.toArray();
     const typeMap = new Map(meterTypes.map((t) => [t.id!, t]));
@@ -49,31 +44,31 @@ export function CalibrationAlerts() {
     for (const meter of propertyMeters) {
       if (!meter.calibrationDue) continue;
 
-      const dueDate = new Date(meter.calibrationDue + 'T00:00:00');
+      const dueDate = new Date(`${meter.calibrationDue}T00:00:00`);
       const diffMs = dueDate.getTime() - today.getTime();
       const daysUntilDue = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
 
       const mt = typeMap.get(meter.meterTypeId);
       if (!mt) continue;
 
-      let status: 'green' | 'yellow' | 'red';
+      let status: "green" | "yellow" | "red";
       let statusLabel: string;
 
       if (daysUntilDue < 0) {
-        status = 'red';
-        statusLabel = 'Abgelaufen';
+        status = "red";
+        statusLabel = "Abgelaufen";
       } else if (daysUntilDue <= ALERT_DAYS) {
-        status = 'yellow';
+        status = "yellow";
         statusLabel = `${daysUntilDue} Tage`;
       } else {
-        status = 'green';
-        statusLabel = 'OK';
+        status = "green";
+        statusLabel = "OK";
       }
 
       rows.push({
         meter,
         meterType: mt,
-        unit: meter.unitId ? unitMap.get(meter.unitId) ?? null : null,
+        unit: meter.unitId ? (unitMap.get(meter.unitId) ?? null) : null,
         daysUntilDue,
         status,
         statusLabel,
@@ -87,24 +82,24 @@ export function CalibrationAlerts() {
     return rows;
   }, [activeProperty?.id]);
 
-  const alertRows = alerts?.filter((r) => r.status !== 'green') ?? [];
+  const alertRows = alerts?.filter((r) => r.status !== "green") ?? [];
 
   const columns: Column<AlertRow>[] = [
     {
-      key: 'serial',
-      header: 'Seriennr.',
+      key: "serial",
+      header: "Seriennr.",
       render: (r) => <span className="font-mono text-xs">{r.meter.serialNumber}</span>,
       sortValue: (r) => r.meter.serialNumber,
     },
     {
-      key: 'type',
-      header: 'Typ',
+      key: "type",
+      header: "Typ",
       render: (r) => r.meterType.name,
       sortValue: (r) => r.meterType.name,
     },
     {
-      key: 'location',
-      header: 'Zuordnung',
+      key: "location",
+      header: "Zuordnung",
       render: (r) =>
         r.unit ? (
           r.unit.name
@@ -113,15 +108,14 @@ export function CalibrationAlerts() {
         ),
     },
     {
-      key: 'due',
-      header: 'Eichfrist',
-      render: (r) =>
-        r.meter.calibrationDue ? formatDate(r.meter.calibrationDue) : '–',
-      sortValue: (r) => r.meter.calibrationDue ?? '',
+      key: "due",
+      header: "Eichfrist",
+      render: (r) => (r.meter.calibrationDue ? formatDate(r.meter.calibrationDue) : "–"),
+      sortValue: (r) => r.meter.calibrationDue ?? "",
     },
     {
-      key: 'status',
-      header: 'Status',
+      key: "status",
+      header: "Status",
       render: (r) => <StatusBadge status={r.status} label={r.statusLabel} />,
       sortValue: (r) => r.daysUntilDue,
     },

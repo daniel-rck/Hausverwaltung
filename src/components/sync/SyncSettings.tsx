@@ -1,17 +1,17 @@
-import { useEffect, useState } from 'react';
-import { Card } from '../shared/Card';
-import { Button } from '../ui/Button';
-import { useSyncStatus } from '../../sync/useSyncStatus';
-import { syncService } from '../../sync/service';
+import { useEffect, useState } from "react";
+import { syncService } from "../../sync/service";
+import { useSyncStatus } from "../../sync/useSyncStatus";
+import { Card } from "../shared/Card";
+import { Button } from "../ui/Button";
 
 function formatAbsolute(ms: number): string {
   const d = new Date(ms);
-  return d.toLocaleString('de-DE', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
+  return d.toLocaleString("de-DE", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   });
 }
 
@@ -19,19 +19,19 @@ function formatCountdown(msRemaining: number): string {
   const sec = Math.max(0, Math.floor(msRemaining / 1000));
   const m = Math.floor(sec / 60);
   const s = sec % 60;
-  return `${m}:${s.toString().padStart(2, '0')}`;
+  return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
-type Mode = 'idle' | 'showing-otp' | 'entering-otp';
+type Mode = "idle" | "showing-otp" | "entering-otp";
 
 export function SyncSettings() {
   const state = useSyncStatus();
   const [busy, setBusy] = useState(false);
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-  const [mode, setMode] = useState<Mode>('idle');
+  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [mode, setMode] = useState<Mode>("idle");
   const [pairing, setPairing] = useState<{ otp: string; expiresAt: number } | null>(null);
   const [now, setNow] = useState(() => Date.now());
-  const [otpInput, setOtpInput] = useState('');
+  const [otpInput, setOtpInput] = useState("");
 
   // While a pairing OTP is active: tick `now` every second for the countdown,
   // and schedule a one-shot timer to auto-clear exactly when the OTP expires.
@@ -39,10 +39,13 @@ export function SyncSettings() {
     if (!pairing) return;
     const tick = setInterval(() => setNow(Date.now()), 1000);
     const remaining = pairing.expiresAt - Date.now();
-    const expire = setTimeout(() => {
-      setPairing(null);
-      setMode('idle');
-    }, Math.max(0, remaining));
+    const expire = setTimeout(
+      () => {
+        setPairing(null);
+        setMode("idle");
+      },
+      Math.max(0, remaining),
+    );
     return () => {
       clearInterval(tick);
       clearTimeout(expire);
@@ -54,11 +57,11 @@ export function SyncSettings() {
     setBusy(true);
     try {
       await syncService.connect();
-      setMessage({ type: 'success', text: 'Sync aktiviert.' });
+      setMessage({ type: "success", text: "Sync aktiviert." });
     } catch (err) {
       setMessage({
-        type: 'error',
-        text: err instanceof Error ? err.message : 'Aktivierung fehlgeschlagen.',
+        type: "error",
+        text: err instanceof Error ? err.message : "Aktivierung fehlgeschlagen.",
       });
     } finally {
       setBusy(false);
@@ -71,8 +74,8 @@ export function SyncSettings() {
     try {
       await syncService.disconnect();
       setPairing(null);
-      setMode('idle');
-      setMessage({ type: 'success', text: 'Sync zurückgesetzt.' });
+      setMode("idle");
+      setMessage({ type: "success", text: "Sync zurückgesetzt." });
     } finally {
       setBusy(false);
     }
@@ -93,11 +96,11 @@ export function SyncSettings() {
     try {
       const ticket = await syncService.createPairing();
       setPairing(ticket);
-      setMode('showing-otp');
+      setMode("showing-otp");
     } catch (err) {
       setMessage({
-        type: 'error',
-        text: err instanceof Error ? err.message : 'Pairing fehlgeschlagen.',
+        type: "error",
+        text: err instanceof Error ? err.message : "Pairing fehlgeschlagen.",
       });
     } finally {
       setBusy(false);
@@ -106,7 +109,7 @@ export function SyncSettings() {
 
   const handleCancelPairing = () => {
     setPairing(null);
-    setMode('idle');
+    setMode("idle");
   };
 
   const handleClaim = async () => {
@@ -114,44 +117,49 @@ export function SyncSettings() {
     setBusy(true);
     try {
       await syncService.claimPairing(otpInput);
-      setOtpInput('');
-      setMode('idle');
-      setMessage({ type: 'success', text: 'Mit anderem Gerät verknüpft.' });
+      setOtpInput("");
+      setMode("idle");
+      setMessage({ type: "success", text: "Mit anderem Gerät verknüpft." });
     } catch (err) {
       setMessage({
-        type: 'error',
-        text: err instanceof Error ? err.message : 'Code ungültig oder abgelaufen.',
+        type: "error",
+        text: err instanceof Error ? err.message : "Code ungültig oder abgelaufen.",
       });
     } finally {
       setBusy(false);
     }
   };
 
-  const enabled = state.status !== 'disconnected';
+  const enabled = state.status !== "disconnected";
 
   return (
     <Card title="Multi-Device-Sync">
       <p className="text-sm text-zinc-600 dark:text-zinc-300 mb-4">
-        Daten zwischen mehreren Geräten synchronisieren — verschlüsselt über
-        deinen privaten Sync-Speicher. Kein Konto, keine E-Mail.
+        Daten zwischen mehreren Geräten synchronisieren — verschlüsselt über deinen privaten
+        Sync-Speicher. Kein Konto, keine E-Mail.
       </p>
 
-      {!enabled && mode === 'idle' && (
+      {!enabled && mode === "idle" && (
         <div className="space-y-2">
           <Button variant="primary" fullWidth onClick={handleEnable} loading={busy}>
-            {busy ? 'Aktiviere…' : 'Sync aktivieren'}
+            {busy ? "Aktiviere…" : "Sync aktivieren"}
           </Button>
-          <Button variant="secondary" fullWidth onClick={() => setMode('entering-otp')} disabled={busy}>
+          <Button
+            variant="secondary"
+            fullWidth
+            onClick={() => setMode("entering-otp")}
+            disabled={busy}
+          >
             Mit anderem Gerät verknüpfen
           </Button>
           <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-2">
-            Beim Aktivieren wird dieses Gerät zum Sync-Owner. Weitere Geräte
-            verknüpfst du anschließend über einen 6-stelligen Code.
+            Beim Aktivieren wird dieses Gerät zum Sync-Owner. Weitere Geräte verknüpfst du
+            anschließend über einen 6-stelligen Code.
           </p>
         </div>
       )}
 
-      {!enabled && mode === 'entering-otp' && (
+      {!enabled && mode === "entering-otp" && (
         <div className="space-y-3">
           <div className="text-sm text-zinc-700 dark:text-zinc-200">
             Code vom anderen Gerät eingeben:
@@ -161,10 +169,10 @@ export function SyncSettings() {
             inputMode="numeric"
             pattern="[0-9]*"
             autoComplete="off"
-            autoFocus
+            ref={(el) => el?.focus()}
             maxLength={6}
             value={otpInput}
-            onChange={(e) => setOtpInput(e.target.value.replace(/\D/g, '').slice(0, 6))}
+            onChange={(e) => setOtpInput(e.target.value.replace(/\D/g, "").slice(0, 6))}
             placeholder="123456"
             className="w-full px-4 py-3 text-center text-2xl font-mono tracking-widest border border-zinc-300 dark:border-zinc-700 rounded-md bg-white dark:bg-zinc-800 text-zinc-800 dark:text-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--color-accent]/40 focus-visible:border-[--color-accent]"
           />
@@ -176,14 +184,14 @@ export function SyncSettings() {
               loading={busy}
               disabled={otpInput.length !== 6}
             >
-              {busy ? 'Verknüpfe…' : 'Verknüpfen'}
+              {busy ? "Verknüpfe…" : "Verknüpfen"}
             </Button>
             <Button
               variant="secondary"
               className="flex-1"
               onClick={() => {
-                setMode('idle');
-                setOtpInput('');
+                setMode("idle");
+                setOtpInput("");
               }}
               disabled={busy}
             >
@@ -193,11 +201,10 @@ export function SyncSettings() {
         </div>
       )}
 
-      {enabled && mode === 'showing-otp' && pairing && (
+      {enabled && mode === "showing-otp" && pairing && (
         <div className="space-y-3">
           <div className="text-sm text-zinc-700 dark:text-zinc-200">
-            Code am anderen Gerät eingeben (gültig{' '}
-            {formatCountdown(pairing.expiresAt - now)}):
+            Code am anderen Gerät eingeben (gültig {formatCountdown(pairing.expiresAt - now)}):
           </div>
           <div className="text-4xl sm:text-5xl text-center font-mono font-semibold tracking-[0.2em] py-6 bg-zinc-50 dark:bg-zinc-800/60 rounded-lg text-zinc-900 dark:text-zinc-100 border border-zinc-200 dark:border-zinc-800">
             {pairing.otp.slice(0, 3)} {pairing.otp.slice(3)}
@@ -211,17 +218,16 @@ export function SyncSettings() {
         </div>
       )}
 
-      {enabled && mode === 'idle' && (
+      {enabled && mode === "idle" && (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <div>
               <div className="text-xs text-zinc-500 dark:text-zinc-400">
-                Status:{' '}
-                {state.status === 'idle' && 'synchronisiert'}
-                {state.status === 'syncing' && 'synchronisiere…'}
-                {state.status === 'connecting' && 'verbinde…'}
-                {state.status === 'offline' && 'offline (Daten werden später synchronisiert)'}
-                {state.status === 'error' && `Fehler: ${state.lastError ?? 'unbekannt'}`}
+                Status: {state.status === "idle" && "synchronisiert"}
+                {state.status === "syncing" && "synchronisiere…"}
+                {state.status === "connecting" && "verbinde…"}
+                {state.status === "offline" && "offline (Daten werden später synchronisiert)"}
+                {state.status === "error" && `Fehler: ${state.lastError ?? "unbekannt"}`}
               </div>
               {state.lastSyncedAt && (
                 <div className="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5">
@@ -241,7 +247,7 @@ export function SyncSettings() {
               variant="secondary"
               className="flex-1"
               onClick={handleSyncNow}
-              disabled={busy || state.status === 'syncing'}
+              disabled={busy || state.status === "syncing"}
             >
               Jetzt synchronisieren
             </Button>
@@ -253,12 +259,7 @@ export function SyncSettings() {
             >
               Weiteres Gerät verknüpfen
             </Button>
-            <Button
-              variant="secondary"
-              className="flex-1"
-              onClick={handleDisable}
-              disabled={busy}
-            >
+            <Button variant="secondary" className="flex-1" onClick={handleDisable} disabled={busy}>
               Sync zurücksetzen
             </Button>
           </div>
@@ -277,7 +278,7 @@ export function SyncSettings() {
       {message && (
         <p
           className={`mt-3 text-sm ${
-            message.type === 'success' ? 'text-green-600' : 'text-red-600'
+            message.type === "success" ? "text-green-600" : "text-red-600"
           }`}
         >
           {message.text}

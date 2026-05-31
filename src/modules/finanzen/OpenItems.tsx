@@ -1,14 +1,14 @@
-import { useMemo } from 'react';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../../db';
-import { useProperty } from '../../hooks/useProperty';
-import { Card } from '../../components/shared/Card';
-import { DataTable, type Column } from '../../components/shared/DataTable';
-import { StatusBadge } from '../../components/shared/StatusBadge';
-import { EmptyState } from '../../components/shared/EmptyState';
-import { CheckCircle2 } from '../../components/ui/icons';
-import { formatEuro, formatMonth } from '../../utils/format';
-import type { Occupancy, Unit, Tenant, Payment } from '../../db/schema';
+import { useLiveQuery } from "dexie-react-hooks";
+import { useMemo } from "react";
+import { Card } from "../../components/shared/Card";
+import { type Column, DataTable } from "../../components/shared/DataTable";
+import { EmptyState } from "../../components/shared/EmptyState";
+import { StatusBadge } from "../../components/shared/StatusBadge";
+import { CheckCircle2 } from "../../components/ui/icons";
+import { db } from "../../db";
+import type { Occupancy, Payment, Tenant, Unit } from "../../db/schema";
+import { useProperty } from "../../hooks/useProperty";
+import { formatEuro, formatMonth } from "../../utils/format";
 
 interface OpenItem {
   id: string;
@@ -19,7 +19,7 @@ interface OpenItem {
   expected: number;
   received: number;
   difference: number;
-  status: 'red' | 'yellow';
+  status: "red" | "yellow";
 }
 
 interface OpenItemsProps {
@@ -32,10 +32,7 @@ export function OpenItems({ year }: OpenItemsProps) {
   const data = useLiveQuery(async () => {
     if (!activeProperty?.id) return null;
 
-    const units = await db.units
-      .where('propertyId')
-      .equals(activeProperty.id)
-      .toArray();
+    const units = await db.units.where("propertyId").equals(activeProperty.id).toArray();
 
     const unitIds = units.map((u) => u.id!);
     const allOccupancies = await db.occupancies.toArray();
@@ -43,9 +40,7 @@ export function OpenItems({ year }: OpenItemsProps) {
 
     const tenantIds = [...new Set(occupancies.map((o) => o.tenantId))];
     const tenants = await db.tenants.bulkGet(tenantIds);
-    const tenantMap = new Map(
-      tenants.filter(Boolean).map((t) => [t!.id!, t!])
-    );
+    const tenantMap = new Map(tenants.filter(Boolean).map((t) => [t!.id!, t!]));
 
     const unitMap = new Map(units.map((u) => [u.id!, u]));
 
@@ -71,28 +66,25 @@ export function OpenItems({ year }: OpenItemsProps) {
     const now = new Date();
     const currentMonth =
       now.getFullYear() === year
-        ? `${year}-${String(now.getMonth() + 1).padStart(2, '0')}`
+        ? `${year}-${String(now.getMonth() + 1).padStart(2, "0")}`
         : yearEnd;
 
     for (const occ of occupancies) {
-      if (occ.from > yearEnd || (occ.to !== null && occ.to < yearStart))
-        continue;
+      if (occ.from > yearEnd || (occ.to !== null && occ.to < yearStart)) continue;
 
       const unit = unitMap.get(occ.unitId);
       const tenant = tenantMap.get(occ.tenantId);
       if (!unit || !tenant) continue;
 
       for (let m = 1; m <= 12; m++) {
-        const month = `${year}-${String(m).padStart(2, '0')}`;
+        const month = `${year}-${String(m).padStart(2, "0")}`;
         if (month > currentMonth) break;
         if (month < occ.from) continue;
         if (occ.to !== null && month > occ.to) continue;
 
         const expected = occ.rentCold + occ.rentUtilities;
         const payment = paymentMap.get(`${occ.id}-${month}`);
-        const received = payment
-          ? payment.amountCold + payment.amountUtilities
-          : 0;
+        const received = payment ? payment.amountCold + payment.amountUtilities : 0;
 
         if (received < expected) {
           result.push({
@@ -104,7 +96,7 @@ export function OpenItems({ year }: OpenItemsProps) {
             expected,
             received,
             difference: expected - received,
-            status: received > 0 ? 'yellow' : 'red',
+            status: received > 0 ? "yellow" : "red",
           });
         }
       }
@@ -120,62 +112,53 @@ export function OpenItems({ year }: OpenItemsProps) {
 
   const columns: Column<OpenItem>[] = [
     {
-      key: 'unit',
-      header: 'Einheit',
+      key: "unit",
+      header: "Einheit",
       render: (row) => (
         <span className="font-medium text-zinc-700 dark:text-zinc-200">{row.unit.name}</span>
       ),
       sortValue: (row) => row.unit.name,
     },
     {
-      key: 'tenant',
-      header: 'Mieter',
+      key: "tenant",
+      header: "Mieter",
       render: (row) => row.tenant.name,
       sortValue: (row) => row.tenant.name,
     },
     {
-      key: 'month',
-      header: 'Monat',
+      key: "month",
+      header: "Monat",
       render: (row) => formatMonth(row.month),
       sortValue: (row) => row.month,
     },
     {
-      key: 'expected',
-      header: 'Soll',
-      align: 'right',
-      render: (row) => (
-        <span className="font-mono">{formatEuro(row.expected)}</span>
-      ),
+      key: "expected",
+      header: "Soll",
+      align: "right",
+      render: (row) => <span className="font-mono">{formatEuro(row.expected)}</span>,
       sortValue: (row) => row.expected,
     },
     {
-      key: 'received',
-      header: 'Ist',
-      align: 'right',
-      render: (row) => (
-        <span className="font-mono">{formatEuro(row.received)}</span>
-      ),
+      key: "received",
+      header: "Ist",
+      align: "right",
+      render: (row) => <span className="font-mono">{formatEuro(row.received)}</span>,
       sortValue: (row) => row.received,
     },
     {
-      key: 'difference',
-      header: 'Differenz',
-      align: 'right',
+      key: "difference",
+      header: "Differenz",
+      align: "right",
       render: (row) => (
-        <span className="font-mono font-medium text-red-600">
-          {formatEuro(row.difference)}
-        </span>
+        <span className="font-mono font-medium text-red-600">{formatEuro(row.difference)}</span>
       ),
       sortValue: (row) => row.difference,
     },
     {
-      key: 'status',
-      header: 'Status',
+      key: "status",
+      header: "Status",
       render: (row) => (
-        <StatusBadge
-          status={row.status}
-          label={row.status === 'red' ? 'Offen' : 'Teilweise'}
-        />
+        <StatusBadge status={row.status} label={row.status === "red" ? "Offen" : "Teilweise"} />
       ),
     },
   ];

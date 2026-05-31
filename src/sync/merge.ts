@@ -1,5 +1,5 @@
-import type { SyncSnapshot } from './snapshot';
-import type { Tombstone } from '../db/schema';
+import type { Tombstone } from "../db/schema";
+import type { SyncSnapshot } from "./snapshot";
 
 /**
  * Merge zweier Snapshots nach Last-Write-Wins-Semantik:
@@ -7,10 +7,7 @@ import type { Tombstone } from '../db/schema';
  *  - Tombstones gewinnen, wenn ihr `deletedAt` >= `updatedAt` des Records ist.
  *  - Tombstones selbst werden per max(deletedAt) zusammengeführt.
  */
-export function mergeSnapshots(
-  local: SyncSnapshot,
-  remote: SyncSnapshot,
-): SyncSnapshot {
+export function mergeSnapshots(local: SyncSnapshot, remote: SyncSnapshot): SyncSnapshot {
   // 1. Tombstones mergen
   const tombstoneMap = new Map<string, Tombstone>();
   for (const t of [...local.tombstones, ...remote.tombstones]) {
@@ -21,10 +18,7 @@ export function mergeSnapshots(
   }
 
   // 2. Pro Tabelle: Records mergen, dann gegen Tombstones filtern
-  const tableNames = new Set([
-    ...Object.keys(local.tables),
-    ...Object.keys(remote.tables),
-  ]);
+  const tableNames = new Set([...Object.keys(local.tables), ...Object.keys(remote.tables)]);
 
   const mergedTables: Record<string, Record<string, unknown>[]> = {};
   for (const tableName of tableNames) {
@@ -51,7 +45,7 @@ export function mergeSnapshots(
 
   return {
     version: 1,
-    app: 'hausverwaltung',
+    app: "hausverwaltung",
     exportedAt: Date.now(),
     tables: mergedTables,
     tombstones: [...tombstoneMap.values()],
@@ -66,16 +60,10 @@ export function mergeSnapshots(
 export function snapshotSignature(snap: SyncSnapshot): string {
   const parts: string[] = [];
   for (const [name, rows] of Object.entries(snap.tables)) {
-    const maxUpdated = rows.reduce(
-      (m, r) => Math.max(m, (r.updatedAt as number) ?? 0),
-      0,
-    );
+    const maxUpdated = rows.reduce((m, r) => Math.max(m, (r.updatedAt as number) ?? 0), 0);
     parts.push(`${name}:${rows.length}:${maxUpdated}`);
   }
-  const maxDel = snap.tombstones.reduce(
-    (m, t) => Math.max(m, t.deletedAt),
-    0,
-  );
+  const maxDel = snap.tombstones.reduce((m, t) => Math.max(m, t.deletedAt), 0);
   parts.push(`ts:${snap.tombstones.length}:${maxDel}`);
-  return parts.sort().join('|');
+  return parts.sort().join("|");
 }

@@ -1,11 +1,11 @@
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../../db';
-import { Card } from '../../components/shared/Card';
-import { NumInput } from '../../components/shared/NumInput';
-import { EmptyState } from '../../components/shared/EmptyState';
-import { BarChart3, Loader2, Users } from '../../components/ui/icons';
-import { formatEuro } from '../../utils/format';
-import type { CostType, Cost, CostShare, Occupancy, Tenant, Unit } from '../../db/schema';
+import { useLiveQuery } from "dexie-react-hooks";
+import { Card } from "../../components/shared/Card";
+import { EmptyState } from "../../components/shared/EmptyState";
+import { NumInput } from "../../components/shared/NumInput";
+import { BarChart3, Loader2, Users } from "../../components/ui/icons";
+import { db } from "../../db";
+import type { Cost, CostShare, CostType, Occupancy, Tenant, Unit } from "../../db/schema";
+import { formatEuro } from "../../utils/format";
 
 interface MessdienstInputProps {
   propertyId: number;
@@ -26,27 +26,23 @@ interface CostWithShares {
 
 export function MessdienstInput({ propertyId, year }: MessdienstInputProps) {
   const messdienstName = useLiveQuery(async () => {
-    const setting = await db.settings.get('messdienstName');
-    return (setting?.value as string) ?? 'Messdienstleister';
+    const setting = await db.settings.get("messdienstName");
+    return (setting?.value as string) ?? "Messdienstleister";
   });
 
-  const costTypes = useLiveQuery(
-    () =>
-      db.costTypes
-        .orderBy('sortOrder')
-        .toArray()
-        .then((all) =>
-          all.filter(
-            (ct) =>
-              ct.distribution === 'messdienst' || ct.distribution === 'direct',
-          ),
-        ),
+  const costTypes = useLiveQuery(() =>
+    db.costTypes
+      .orderBy("sortOrder")
+      .toArray()
+      .then((all) =>
+        all.filter((ct) => ct.distribution === "messdienst" || ct.distribution === "direct"),
+      ),
   );
 
   const costs = useLiveQuery(
     () =>
       db.costs
-        .where('propertyId')
+        .where("propertyId")
         .equals(propertyId)
         .toArray()
         .then((all) => all.filter((c) => c.year === year)),
@@ -54,24 +50,16 @@ export function MessdienstInput({ propertyId, year }: MessdienstInputProps) {
   );
 
   const occupancies = useLiveQuery(async () => {
-    const units = await db.units
-      .where('propertyId')
-      .equals(propertyId)
-      .toArray();
+    const units = await db.units.where("propertyId").equals(propertyId).toArray();
 
     const yearStart = `${year}-01`;
     const yearEnd = `${year}-12`;
     const result: OccupancyInfo[] = [];
 
     for (const unit of units) {
-      const occs = await db.occupancies
-        .where('unitId')
-        .equals(unit.id!)
-        .toArray();
+      const occs = await db.occupancies.where("unitId").equals(unit.id!).toArray();
 
-      const active = occs.filter(
-        (o) => o.from <= yearEnd && (o.to === null || o.to >= yearStart),
-      );
+      const active = occs.filter((o) => o.from <= yearEnd && (o.to === null || o.to >= yearStart));
 
       for (const occ of active) {
         const tenant = (await db.tenants.get(occ.tenantId)) ?? null;
@@ -93,18 +81,12 @@ export function MessdienstInput({ propertyId, year }: MessdienstInputProps) {
     costTypes && costs && costShares
       ? costTypes.map((ct) => {
           const cost = costs.find((c) => c.costTypeId === ct.id!);
-          const shares = cost?.id
-            ? costShares.filter((s) => s.costId === cost.id!)
-            : [];
+          const shares = cost?.id ? costShares.filter((s) => s.costId === cost.id!) : [];
           return { costType: ct, cost, shares };
         })
       : null;
 
-  const handleShareChange = async (
-    costTypeId: number,
-    occupancyId: number,
-    amount: number,
-  ) => {
+  const handleShareChange = async (costTypeId: number, occupancyId: number, amount: number) => {
     const cost = costs?.find((c) => c.costTypeId === costTypeId);
     if (!cost?.id) return;
 
@@ -165,20 +147,15 @@ export function MessdienstInput({ propertyId, year }: MessdienstInputProps) {
         const sharesTotal = shares.reduce((sum, s) => sum + s.amount, 0);
 
         return (
-          <Card
-            key={costType.id}
-            title={`${costType.name} – ${messdienstName}-Anteil`}
-          >
+          <Card key={costType.id} title={`${costType.name} – ${messdienstName}-Anteil`}>
             {!cost ? (
               <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                Bitte erfassen Sie zuerst den Gesamtbetrag unter
-                &quot;Kosten erfassen&quot;.
+                Bitte erfassen Sie zuerst den Gesamtbetrag unter &quot;Kosten erfassen&quot;.
               </p>
             ) : (
               <div className="space-y-3">
                 <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                  Gesamtbetrag: {formatEuro(cost.totalAmount)} | Verteilt:{' '}
-                  {formatEuro(sharesTotal)}{' '}
+                  Gesamtbetrag: {formatEuro(cost.totalAmount)} | Verteilt: {formatEuro(sharesTotal)}{" "}
                   {Math.abs(cost.totalAmount - sharesTotal) > 0.01 && (
                     <span className="text-amber-600 font-medium">
                       (Differenz: {formatEuro(cost.totalAmount - sharesTotal)})
@@ -202,30 +179,22 @@ export function MessdienstInput({ propertyId, year }: MessdienstInputProps) {
                     </thead>
                     <tbody>
                       {occupancies.map(({ occupancy, tenant, unit }) => {
-                        const share = shares.find(
-                          (s) => s.occupancyId === occupancy.id!,
-                        );
+                        const share = shares.find((s) => s.occupancyId === occupancy.id!);
                         return (
                           <tr
                             key={occupancy.id}
                             className="border-b border-zinc-100 dark:border-zinc-700"
                           >
                             <td className="py-2 px-3 text-zinc-700 dark:text-zinc-200">
-                              {unit?.name ?? '–'}
+                              {unit?.name ?? "–"}
                             </td>
                             <td className="py-2 px-3 text-zinc-700 dark:text-zinc-200">
-                              {tenant?.name ?? '–'}
+                              {tenant?.name ?? "–"}
                             </td>
                             <td className="py-2 px-3">
                               <NumInput
                                 value={share?.amount ?? 0}
-                                onChange={(v) =>
-                                  handleShareChange(
-                                    costType.id!,
-                                    occupancy.id!,
-                                    v,
-                                  )
-                                }
+                                onChange={(v) => handleShareChange(costType.id!, occupancy.id!, v)}
                                 suffix="€"
                                 min={0}
                                 className="w-32 ml-auto"

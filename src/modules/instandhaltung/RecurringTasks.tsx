@@ -1,20 +1,20 @@
-import { useMemo } from 'react';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../../db';
-import { useProperty } from '../../hooks/useProperty';
-import { Card } from '../../components/shared/Card';
-import { DataTable, type Column } from '../../components/shared/DataTable';
-import { EmptyState } from '../../components/shared/EmptyState';
-import { Repeat } from '../../components/ui/icons';
-import { StatusBadge } from '../../components/shared/StatusBadge';
-import { formatDate } from '../../utils/format';
-import type { MaintenanceItem, Unit } from '../../db/schema';
+import { useLiveQuery } from "dexie-react-hooks";
+import { useMemo } from "react";
+import { Card } from "../../components/shared/Card";
+import { type Column, DataTable } from "../../components/shared/DataTable";
+import { EmptyState } from "../../components/shared/EmptyState";
+import { StatusBadge } from "../../components/shared/StatusBadge";
+import { Repeat } from "../../components/ui/icons";
+import { db } from "../../db";
+import type { MaintenanceItem, Unit } from "../../db/schema";
+import { useProperty } from "../../hooks/useProperty";
+import { formatDate } from "../../utils/format";
 
-const CATEGORY_LABELS: Record<MaintenanceItem['category'], string> = {
-  repair: 'Reparatur',
-  maintenance: 'Wartung',
-  inspection: 'Prüfung',
-  modernization: 'Modernisierung',
+const CATEGORY_LABELS: Record<MaintenanceItem["category"], string> = {
+  repair: "Reparatur",
+  maintenance: "Wartung",
+  inspection: "Prüfung",
+  modernization: "Modernisierung",
 };
 
 interface RecurringRow {
@@ -29,7 +29,7 @@ export function RecurringTasks() {
   const units = useLiveQuery(
     () =>
       activeProperty?.id
-        ? db.units.where('propertyId').equals(activeProperty.id).toArray()
+        ? db.units.where("propertyId").equals(activeProperty.id).toArray()
         : Promise.resolve([] as Unit[]),
     [activeProperty?.id],
   );
@@ -43,18 +43,13 @@ export function RecurringTasks() {
     return map;
   }, [units]);
 
-  const items = useLiveQuery(
-    async () => {
-      if (!activeProperty?.id) return [];
-      const all = await db.maintenanceItems.toArray();
-      return all.filter(
-        (item) =>
-          item.recurring &&
-          (item.unitId === null || unitIds.includes(item.unitId)),
-      );
-    },
-    [activeProperty?.id, unitIds],
-  );
+  const items = useLiveQuery(async () => {
+    if (!activeProperty?.id) return [];
+    const all = await db.maintenanceItems.toArray();
+    return all.filter(
+      (item) => item.recurring && (item.unitId === null || unitIds.includes(item.unitId)),
+    );
+  }, [activeProperty?.id, unitIds]);
 
   const today = new Date().toISOString().slice(0, 10);
 
@@ -64,79 +59,77 @@ export function RecurringTasks() {
       .map((item) => ({
         item,
         unitName:
-          item.unitId === null
-            ? 'Gemeinschaft'
-            : (unitMap.get(item.unitId)?.name ?? 'Unbekannt'),
+          item.unitId === null ? "Gemeinschaft" : (unitMap.get(item.unitId)?.name ?? "Unbekannt"),
         isOverdue: item.nextDue ? item.nextDue < today : false,
       }))
       .sort((a, b) => {
         // Overdue first, then by next due date
         if (a.isOverdue !== b.isOverdue) return a.isOverdue ? -1 : 1;
-        const aDue = a.item.nextDue ?? '9999-12-31';
-        const bDue = b.item.nextDue ?? '9999-12-31';
+        const aDue = a.item.nextDue ?? "9999-12-31";
+        const bDue = b.item.nextDue ?? "9999-12-31";
         return aDue.localeCompare(bDue);
       });
   }, [items, unitMap, today]);
 
   const columns: Column<RecurringRow>[] = [
     {
-      key: 'title',
-      header: 'Aufgabe',
+      key: "title",
+      header: "Aufgabe",
       render: (r) => (
-        <span className={`font-medium ${r.isOverdue ? 'text-red-700' : ''}`}>
-          {r.item.title}
-        </span>
+        <span className={`font-medium ${r.isOverdue ? "text-red-700" : ""}`}>{r.item.title}</span>
       ),
       sortValue: (r) => r.item.title,
     },
     {
-      key: 'unit',
-      header: 'Wohnung',
+      key: "unit",
+      header: "Wohnung",
       render: (r) => (
-        <span className={r.item.unitId === null ? 'text-zinc-500 dark:text-zinc-400 italic' : ''}>
+        <span className={r.item.unitId === null ? "text-zinc-500 dark:text-zinc-400 italic" : ""}>
           {r.unitName}
         </span>
       ),
       sortValue: (r) => r.unitName,
     },
     {
-      key: 'category',
-      header: 'Kategorie',
+      key: "category",
+      header: "Kategorie",
       render: (r) => CATEGORY_LABELS[r.item.category],
       sortValue: (r) => CATEGORY_LABELS[r.item.category],
     },
     {
-      key: 'interval',
-      header: 'Intervall',
+      key: "interval",
+      header: "Intervall",
       render: (r) =>
-        r.item.recurringInterval
-          ? `${r.item.recurringInterval} Monat${r.item.recurringInterval > 1 ? 'e' : ''}`
-          : <span className="text-zinc-400 dark:text-zinc-500">–</span>,
+        r.item.recurringInterval ? (
+          `${r.item.recurringInterval} Monat${r.item.recurringInterval > 1 ? "e" : ""}`
+        ) : (
+          <span className="text-zinc-400 dark:text-zinc-500">–</span>
+        ),
       sortValue: (r) => r.item.recurringInterval ?? 0,
-      align: 'center',
+      align: "center",
     },
     {
-      key: 'lastDone',
-      header: 'Zuletzt erledigt',
+      key: "lastDone",
+      header: "Zuletzt erledigt",
       render: (r) => formatDate(r.item.date),
       sortValue: (r) => r.item.date,
     },
     {
-      key: 'nextDue',
-      header: 'Nächste Fälligkeit',
+      key: "nextDue",
+      header: "Nächste Fälligkeit",
       render: (r) => {
         if (!r.item.nextDue) return <span className="text-zinc-400 dark:text-zinc-500">–</span>;
         return (
-          <span className={r.isOverdue ? 'text-red-600 font-semibold' : ''}>
+          <span className={r.isOverdue ? "text-red-600 font-semibold" : ""}>
             {formatDate(r.item.nextDue)}
           </span>
         );
       },
-      sortValue: (r) => r.item.nextDue ?? '9999-12-31',
+      sortValue: (r) => r.item.nextDue ?? "9999-12-31",
     },
     {
-      key: 'status',
-      header: 'Status',
+      key: "status",
+      header: "Status",
       render: (r) => {
         if (!r.item.nextDue) {
           return <StatusBadge status="gray" label="Kein Termin" />;
@@ -172,11 +165,7 @@ export function RecurringTasks() {
               {rows.filter((r) => r.isOverdue).length} Aufgabe(n) überfällig
             </div>
           )}
-          <DataTable
-            columns={columns}
-            data={rows}
-            keyFn={(r) => r.item.id!}
-          />
+          <DataTable columns={columns} data={rows} keyFn={(r) => r.item.id!} />
         </>
       )}
     </Card>

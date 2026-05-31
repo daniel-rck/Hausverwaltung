@@ -1,37 +1,24 @@
-import { db } from './index';
-import type { Occupancy, Unit } from './schema';
+import { db } from "./index";
+import type { Occupancy, Unit } from "./schema";
 
 /** Aktuelle Belegung einer Wohneinheit zu einem Stichtag */
 export async function getActiveOccupancy(
   unitId: number,
   date: string = new Date().toISOString().slice(0, 7),
 ): Promise<Occupancy | undefined> {
-  const occupancies = await db.occupancies
-    .where('unitId')
-    .equals(unitId)
-    .toArray();
+  const occupancies = await db.occupancies.where("unitId").equals(unitId).toArray();
 
-  return occupancies.find(
-    (o) => o.from <= date && (o.to === null || o.to >= date),
-  );
+  return occupancies.find((o) => o.from <= date && (o.to === null || o.to >= date));
 }
 
 /** Alle Belegungen einer Wohneinheit in einem bestimmten Jahr */
-export async function getOccupanciesForYear(
-  unitId: number,
-  year: number,
-): Promise<Occupancy[]> {
+export async function getOccupanciesForYear(unitId: number, year: number): Promise<Occupancy[]> {
   const yearStart = `${year}-01`;
   const yearEnd = `${year}-12`;
 
-  const occupancies = await db.occupancies
-    .where('unitId')
-    .equals(unitId)
-    .toArray();
+  const occupancies = await db.occupancies.where("unitId").equals(unitId).toArray();
 
-  return occupancies.filter(
-    (o) => o.from <= yearEnd && (o.to === null || o.to >= yearStart),
-  );
+  return occupancies.filter((o) => o.from <= yearEnd && (o.to === null || o.to >= yearStart));
 }
 
 /** Leerstandszeiträume einer Wohneinheit in einem Jahr */
@@ -71,10 +58,7 @@ export async function getVacancyPeriods(
 }
 
 /** Personenmonate für eine Wohneinheit in einem Jahr */
-export async function getPersonMonths(
-  unitId: number,
-  year: number,
-): Promise<number> {
+export async function getPersonMonths(unitId: number, year: number): Promise<number> {
   const occupancies = await getOccupanciesForYear(unitId, year);
   const yearStart = `${year}-01`;
   const yearEnd = `${year}-12`;
@@ -97,9 +81,9 @@ export async function getConsumption(
   to: string,
 ): Promise<number | null> {
   const readings = await db.meterReadings
-    .where('[meterId+date]')
+    .where("[meterId+date]")
     .between([meterId, from], [meterId, to], true, true)
-    .sortBy('date');
+    .sortBy("date");
 
   if (readings.length < 2) return null;
 
@@ -113,25 +97,19 @@ export async function getOpenPayments(
   propertyId: number,
   month: string,
 ): Promise<{ unit: Unit; occupancy: Occupancy }[]> {
-  const units = await db.units.where('propertyId').equals(propertyId).toArray();
+  const units = await db.units.where("propertyId").equals(propertyId).toArray();
   const unitIds = new Set(units.map((u) => u.id!));
   const unitMap = new Map(units.map((u) => [u.id!, u]));
 
   const allOccupancies = await db.occupancies.toArray();
   const active = allOccupancies.filter(
-    (o) =>
-      unitIds.has(o.unitId) &&
-      o.from <= month &&
-      (o.to === null || o.to >= month),
+    (o) => unitIds.has(o.unitId) && o.from <= month && (o.to === null || o.to >= month),
   );
 
   const open: { unit: Unit; occupancy: Occupancy }[] = [];
 
   for (const occ of active) {
-    const payment = await db.payments
-      .where('[occupancyId+month]')
-      .equals([occ.id!, month])
-      .first();
+    const payment = await db.payments.where("[occupancyId+month]").equals([occ.id!, month]).first();
 
     if (!payment) {
       const unit = unitMap.get(occ.unitId);
@@ -145,7 +123,7 @@ export async function getOpenPayments(
 }
 
 function monthDiff(from: string, to: string): number {
-  const [y1, m1] = from.split('-').map(Number);
-  const [y2, m2] = to.split('-').map(Number);
+  const [y1, m1] = from.split("-").map(Number);
+  const [y2, m2] = to.split("-").map(Number);
   return (y2 - y1) * 12 + (m2 - m1);
 }

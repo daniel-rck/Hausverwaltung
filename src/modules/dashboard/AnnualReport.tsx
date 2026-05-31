@@ -1,11 +1,11 @@
-import { useState, useMemo } from 'react';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../../db';
-import { Card } from '../../components/shared/Card';
-import { EmptyState } from '../../components/shared/EmptyState';
-import { BarChart3 } from '../../components/ui/icons';
-import { formatEuro, formatPercent } from '../../utils/format';
-import type { FinancingData } from '../../db/schema';
+import { useLiveQuery } from "dexie-react-hooks";
+import { useId, useMemo, useState } from "react";
+import { Card } from "../../components/shared/Card";
+import { EmptyState } from "../../components/shared/EmptyState";
+import { BarChart3 } from "../../components/ui/icons";
+import { db } from "../../db";
+import type { FinancingData } from "../../db/schema";
+import { formatEuro, formatPercent } from "../../utils/format";
 
 interface AnnualReportProps {
   propertyId: number;
@@ -14,12 +14,10 @@ interface AnnualReportProps {
 export function AnnualReport({ propertyId }: AnnualReportProps) {
   const currentYear = new Date().getFullYear();
   const [year, setYear] = useState(currentYear);
+  const yearId = useId();
 
   const data = useLiveQuery(async () => {
-    const units = await db.units
-      .where('propertyId')
-      .equals(propertyId)
-      .toArray();
+    const units = await db.units.where("propertyId").equals(propertyId).toArray();
 
     const unitIds = units.map((u) => u.id!);
     if (unitIds.length === 0) return null;
@@ -45,54 +43,32 @@ export function AnnualReport({ propertyId }: AnnualReportProps) {
       (p) => p.month.startsWith(`${year}-`) && occIds.has(p.occupancyId),
     );
 
-    const totalColdReceived = yearPayments.reduce(
-      (s, p) => s + p.amountCold,
-      0,
-    );
-    const totalUtilitiesReceived = yearPayments.reduce(
-      (s, p) => s + p.amountUtilities,
-      0,
-    );
+    const totalColdReceived = yearPayments.reduce((s, p) => s + p.amountCold, 0);
+    const totalUtilitiesReceived = yearPayments.reduce((s, p) => s + p.amountUtilities, 0);
     const totalEinnahmen = totalColdReceived + totalUtilitiesReceived;
 
     // --- Ausgaben ---
     // Costs from cost table
-    const allCosts = await db.costs
-      .where('propertyId')
-      .equals(propertyId)
-      .toArray();
+    const allCosts = await db.costs.where("propertyId").equals(propertyId).toArray();
     const yearCosts = allCosts.filter((c) => c.year === year);
-    const totalNebenkosten = yearCosts.reduce(
-      (s, c) => s + c.totalAmount,
-      0,
-    );
+    const totalNebenkosten = yearCosts.reduce((s, c) => s + c.totalAmount, 0);
 
     // Maintenance costs
     const allMaintenance = await db.maintenanceItems.toArray();
     const yearMaintenance = allMaintenance.filter(
-      (m) =>
-        m.date.startsWith(`${year}`) &&
-        (m.unitId === null || unitIds.includes(m.unitId)),
+      (m) => m.date.startsWith(`${year}`) && (m.unitId === null || unitIds.includes(m.unitId)),
     );
-    const totalInstandhaltung = yearMaintenance.reduce(
-      (s, m) => s + m.cost,
-      0,
-    );
+    const totalInstandhaltung = yearMaintenance.reduce((s, m) => s + m.cost, 0);
 
     // Financing: Schuldzinsen + AfA
     const financingSetting = await db.settings.get(`financing_${propertyId}`);
     const financing = (financingSetting?.value as FinancingData) ?? null;
 
-    const schuldzinsen = financing
-      ? (financing.kreditbetrag * financing.zinssatz) / 100
-      : 0;
+    const schuldzinsen = financing ? (financing.kreditbetrag * financing.zinssatz) / 100 : 0;
     const afa =
-      financing && financing.afaSatz > 0
-        ? (financing.kaufpreis * financing.afaSatz) / 100
-        : 0;
+      financing && financing.afaSatz > 0 ? (financing.kaufpreis * financing.afaSatz) / 100 : 0;
 
-    const totalAusgaben =
-      totalNebenkosten + totalInstandhaltung + schuldzinsen + afa;
+    const totalAusgaben = totalNebenkosten + totalInstandhaltung + schuldzinsen + afa;
 
     // --- Ergebnis ---
     const ergebnis = totalEinnahmen - totalAusgaben;
@@ -103,12 +79,10 @@ export function AnnualReport({ propertyId }: AnnualReportProps) {
     const totalMonths = totalUnits * 12;
 
     for (let m = 1; m <= 12; m++) {
-      const month = `${year}-${String(m).padStart(2, '0')}`;
+      const month = `${year}-${String(m).padStart(2, "0")}`;
       const occupiedUnitIds = new Set(
         relevantOccs
-          .filter(
-            (o) => o.from <= month && (o.to === null || o.to >= month),
-          )
+          .filter((o) => o.from <= month && (o.to === null || o.to >= month))
           .map((o) => o.unitId),
       );
       vacantMonths += totalUnits - occupiedUnitIds.size;
@@ -128,12 +102,12 @@ export function AnnualReport({ propertyId }: AnnualReportProps) {
     const now = new Date();
     const currentMonth =
       now.getFullYear() === year
-        ? `${year}-${String(now.getMonth() + 1).padStart(2, '0')}`
+        ? `${year}-${String(now.getMonth() + 1).padStart(2, "0")}`
         : yearEnd;
 
     for (const occ of relevantOccs) {
       for (let m = 1; m <= 12; m++) {
-        const month = `${year}-${String(m).padStart(2, '0')}`;
+        const month = `${year}-${String(m).padStart(2, "0")}`;
         if (month > currentMonth) break;
         if (month < occ.from) continue;
         if (occ.to !== null && month > occ.to) continue;
@@ -149,8 +123,7 @@ export function AnnualReport({ propertyId }: AnnualReportProps) {
 
     // --- Rendite ---
     const kaufpreis = financing?.kaufpreis ?? 0;
-    const bruttomietrendite =
-      kaufpreis > 0 ? (totalColdReceived / kaufpreis) : null;
+    const bruttomietrendite = kaufpreis > 0 ? totalColdReceived / kaufpreis : null;
 
     return {
       totalColdReceived,
@@ -194,18 +167,18 @@ export function AnnualReport({ propertyId }: AnnualReportProps) {
   }
 
   const ergebnisPositive = data.ergebnis >= 0;
-  const vacancyRate =
-    data.totalMonths > 0 ? data.vacantMonths / data.totalMonths : 0;
+  const vacancyRate = data.totalMonths > 0 ? data.vacantMonths / data.totalMonths : 0;
 
   return (
     <div className="space-y-4">
       {/* Year selector + print button */}
       <div className="no-print flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <label className="text-sm font-medium text-zinc-600 dark:text-zinc-300">
+          <label htmlFor={yearId} className="text-sm font-medium text-zinc-600 dark:text-zinc-300">
             Jahr:
           </label>
           <select
+            id={yearId}
             value={year}
             onChange={(e) => setYear(Number(e.target.value))}
             className="border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm bg-white dark:bg-zinc-800 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
@@ -218,6 +191,7 @@ export function AnnualReport({ propertyId }: AnnualReportProps) {
           </select>
         </div>
         <button
+          type="button"
           onClick={() => window.print()}
           className="px-4 py-2 text-sm bg-zinc-800 dark:bg-zinc-600 text-white rounded-lg hover:bg-zinc-900 dark:hover:bg-zinc-500 transition-colors"
         >
@@ -229,9 +203,7 @@ export function AnnualReport({ propertyId }: AnnualReportProps) {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <Card>
           <div className="text-center">
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">
-              Einnahmen
-            </p>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Einnahmen</p>
             <p className="text-xl font-semibold font-mono font-tabular text-green-600">
               {formatEuro(data.totalEinnahmen)}
             </p>
@@ -239,9 +211,7 @@ export function AnnualReport({ propertyId }: AnnualReportProps) {
         </Card>
         <Card>
           <div className="text-center">
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">
-              Ausgaben
-            </p>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Ausgaben</p>
             <p className="text-xl font-semibold font-mono font-tabular text-red-600">
               {formatEuro(data.totalAusgaben)}
             </p>
@@ -249,12 +219,10 @@ export function AnnualReport({ propertyId }: AnnualReportProps) {
         </Card>
         <Card>
           <div className="text-center">
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">
-              Ergebnis
-            </p>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Ergebnis</p>
             <p
               className={`text-xl font-bold font-mono font-tabular ${
-                ergebnisPositive ? 'text-green-600' : 'text-red-600'
+                ergebnisPositive ? "text-green-600" : "text-red-600"
               }`}
             >
               {formatEuro(data.ergebnis)}
@@ -263,14 +231,10 @@ export function AnnualReport({ propertyId }: AnnualReportProps) {
         </Card>
         <Card>
           <div className="text-center">
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">
-              Leerstand
-            </p>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Leerstand</p>
             <p
               className={`text-xl font-semibold font-mono font-tabular ${
-                data.vacantMonths > 0
-                  ? 'text-amber-600'
-                  : 'text-zinc-400 dark:text-zinc-500'
+                data.vacantMonths > 0 ? "text-amber-600" : "text-zinc-400 dark:text-zinc-500"
               }`}
             >
               {data.vacantMonths} / {data.totalMonths} Mon.
@@ -296,9 +260,7 @@ export function AnnualReport({ propertyId }: AnnualReportProps) {
             </thead>
             <tbody>
               <tr className="border-b border-zinc-100 dark:border-zinc-700">
-                <td className="py-2 px-3 text-zinc-600 dark:text-zinc-300">
-                  Kaltmiete (erhalten)
-                </td>
+                <td className="py-2 px-3 text-zinc-600 dark:text-zinc-300">Kaltmiete (erhalten)</td>
                 <td className="py-2 px-3 text-right font-mono text-zinc-700 dark:text-zinc-200">
                   {formatEuro(data.totalColdReceived)}
                 </td>
@@ -312,9 +274,7 @@ export function AnnualReport({ propertyId }: AnnualReportProps) {
                 </td>
               </tr>
               <tr className="border-b-2 border-zinc-300 dark:border-zinc-600 font-semibold">
-                <td className="py-2 px-3 text-zinc-800 dark:text-zinc-100">
-                  Summe Einnahmen
-                </td>
+                <td className="py-2 px-3 text-zinc-800 dark:text-zinc-100">Summe Einnahmen</td>
                 <td className="py-2 px-3 text-right font-mono text-green-600">
                   {formatEuro(data.totalEinnahmen)}
                 </td>
@@ -351,9 +311,7 @@ export function AnnualReport({ propertyId }: AnnualReportProps) {
               </tr>
               {data.schuldzinsen > 0 && (
                 <tr className="border-b border-zinc-100 dark:border-zinc-700">
-                  <td className="py-2 px-3 text-zinc-600 dark:text-zinc-300">
-                    Schuldzinsen
-                  </td>
+                  <td className="py-2 px-3 text-zinc-600 dark:text-zinc-300">Schuldzinsen</td>
                   <td className="py-2 px-3 text-right font-mono text-zinc-700 dark:text-zinc-200">
                     {formatEuro(data.schuldzinsen)}
                   </td>
@@ -361,18 +319,14 @@ export function AnnualReport({ propertyId }: AnnualReportProps) {
               )}
               {data.afa > 0 && (
                 <tr className="border-b border-zinc-100 dark:border-zinc-700">
-                  <td className="py-2 px-3 text-zinc-600 dark:text-zinc-300">
-                    Abschreibung (AfA)
-                  </td>
+                  <td className="py-2 px-3 text-zinc-600 dark:text-zinc-300">Abschreibung (AfA)</td>
                   <td className="py-2 px-3 text-right font-mono text-zinc-700 dark:text-zinc-200">
                     {formatEuro(data.afa)}
                   </td>
                 </tr>
               )}
               <tr className="border-b-2 border-zinc-300 dark:border-zinc-600 font-semibold">
-                <td className="py-2 px-3 text-zinc-800 dark:text-zinc-100">
-                  Summe Ausgaben
-                </td>
+                <td className="py-2 px-3 text-zinc-800 dark:text-zinc-100">Summe Ausgaben</td>
                 <td className="py-2 px-3 text-right font-mono text-red-600">
                   {formatEuro(data.totalAusgaben)}
                 </td>
@@ -387,7 +341,7 @@ export function AnnualReport({ propertyId }: AnnualReportProps) {
                 </td>
                 <td
                   className={`py-3 px-3 text-right font-mono font-bold text-base ${
-                    ergebnisPositive ? 'text-green-600' : 'text-red-600'
+                    ergebnisPositive ? "text-green-600" : "text-red-600"
                   }`}
                 >
                   {formatEuro(data.ergebnis)}
@@ -401,9 +355,7 @@ export function AnnualReport({ propertyId }: AnnualReportProps) {
         <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
           {/* Leerstand */}
           <div className="p-3 bg-zinc-50 dark:bg-zinc-700/30 rounded-lg">
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">
-              Leerstand
-            </p>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Leerstand</p>
             <p className="font-semibold font-mono text-zinc-800 dark:text-zinc-100">
               {data.vacantMonths} von {data.totalMonths} Monaten
             </p>
@@ -414,31 +366,25 @@ export function AnnualReport({ propertyId }: AnnualReportProps) {
 
           {/* Offene Posten */}
           <div className="p-3 bg-zinc-50 dark:bg-zinc-700/30 rounded-lg">
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">
-              Offene Posten
-            </p>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Offene Posten</p>
             <p
               className={`font-semibold font-mono ${
-                data.openCount > 0
-                  ? 'text-red-600'
-                  : 'text-zinc-800 dark:text-zinc-100'
+                data.openCount > 0 ? "text-red-600" : "text-zinc-800 dark:text-zinc-100"
               }`}
             >
               {data.openCount > 0
                 ? `${data.openCount} offen (${formatEuro(data.openSum)})`
-                : 'Keine'}
+                : "Keine"}
             </p>
           </div>
 
           {/* Rendite */}
           <div className="p-3 bg-zinc-50 dark:bg-zinc-700/30 rounded-lg">
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">
-              Bruttomietrendite
-            </p>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Bruttomietrendite</p>
             <p className="font-semibold font-mono text-zinc-800 dark:text-zinc-100">
               {data.hasFinancing && data.bruttomietrendite !== null
                 ? formatPercent(data.bruttomietrendite)
-                : 'k. A.'}
+                : "k. A."}
             </p>
             {!data.hasFinancing && (
               <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5">

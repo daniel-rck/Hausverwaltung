@@ -1,12 +1,12 @@
-import { useDeferredValue, useId, useMemo, useState, type ReactNode } from 'react';
-import { Search, ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from '../ui/icons';
+import { type ReactNode, useDeferredValue, useId, useMemo, useState } from "react";
+import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Search } from "../ui/icons";
 
 export interface Column<T> {
   key: string;
   header: string;
   render: (row: T) => ReactNode;
   sortValue?: (row: T) => string | number;
-  align?: 'left' | 'right' | 'center';
+  align?: "left" | "right" | "center";
   /** Optional: alternativer Mobile-Label (sonst wird `header` verwendet). */
   mobileLabel?: string;
   /** Bei `true` wird die Zelle auf Mobile zur Hauptzeile (oben fett). */
@@ -27,7 +27,7 @@ interface DataTableProps<T> {
   searchFn?: (row: T, query: string) => boolean;
   searchPlaceholder?: string;
   pageSize?: number;
-  density?: 'compact' | 'comfortable';
+  density?: "compact" | "comfortable";
   /** Optionaler Toolbar-Slot, wird neben der Search-Bar gerendert. */
   toolbar?: ReactNode;
   /** Sticky Toolbar oberhalb der Tabelle (top-14 unter Header). */
@@ -41,22 +41,22 @@ export function DataTable<T>({
   columns,
   data,
   keyFn,
-  emptyMessage = 'Keine Daten vorhanden.',
+  emptyMessage = "Keine Daten vorhanden.",
   onRowClick,
   searchable = false,
   searchableFields,
   searchFn,
-  searchPlaceholder = 'Suchen…',
+  searchPlaceholder = "Suchen…",
   pageSize,
-  density = 'compact',
+  density = "compact",
   toolbar,
   stickyToolbar = false,
   zebra = false,
-  className = '',
+  className = "",
 }: DataTableProps<T>) {
   const [sortKey, setSortKey] = useState<string | null>(null);
-  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
-  const [query, setQuery] = useState('');
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
+  const [query, setQuery] = useState("");
   const [page, setPage] = useState(0);
   const deferredQuery = useDeferredValue(query);
   const reactId = useId();
@@ -68,7 +68,11 @@ export function DataTable<T>({
     if (searchFn) return data.filter((row) => searchFn(row, q));
     if (searchableFields) {
       return data.filter((row) =>
-        searchableFields.some((f) => String(row[f] ?? '').toLowerCase().includes(q)),
+        searchableFields.some((f) =>
+          String(row[f] ?? "")
+            .toLowerCase()
+            .includes(q),
+        ),
       );
     }
     return data;
@@ -82,7 +86,7 @@ export function DataTable<T>({
       const va = col.sortValue!(a);
       const vb = col.sortValue!(b);
       const cmp = va < vb ? -1 : va > vb ? 1 : 0;
-      return sortDir === 'asc' ? cmp : -cmp;
+      return sortDir === "asc" ? cmp : -cmp;
     });
   }, [filtered, sortKey, sortDir, columns]);
 
@@ -97,21 +101,21 @@ export function DataTable<T>({
     const col = columns.find((c) => c.key === key);
     if (!col?.sortValue) return;
     if (sortKey === key) {
-      setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
     } else {
       setSortKey(key);
-      setSortDir('asc');
+      setSortDir("asc");
     }
   };
 
-  const padY = density === 'compact' ? 'py-1.5' : 'py-2.5';
+  const padY = density === "compact" ? "py-1.5" : "py-2.5";
 
-  const alignClass = (a: Column<T>['align']) =>
-    a === 'right' ? 'text-right' : a === 'center' ? 'text-center' : 'text-left';
+  const alignClass = (a: Column<T>["align"]) =>
+    a === "right" ? "text-right" : a === "center" ? "text-center" : "text-left";
 
   const toolbarCls = stickyToolbar
-    ? 'sticky top-14 z-10 -mx-3 md:-mx-5 px-3 md:px-5 py-2 bg-zinc-50/95 dark:bg-zinc-900/95 backdrop-blur border-b border-zinc-200/60 dark:border-zinc-800/60'
-    : '';
+    ? "sticky top-14 z-10 -mx-3 md:-mx-5 px-3 md:px-5 py-2 bg-zinc-50/95 dark:bg-zinc-900/95 backdrop-blur border-b border-zinc-200/60 dark:border-zinc-800/60"
+    : "";
 
   return (
     <div className={`space-y-3 ${className}`}>
@@ -171,28 +175,28 @@ export function DataTable<T>({
                       onClick={() => toggleSort(col.key)}
                       className={`${padY} px-3 text-[11px] uppercase tracking-wide font-medium text-zinc-500 dark:text-zinc-400 ${alignClass(col.align)} ${
                         col.sortValue
-                          ? 'cursor-pointer select-none hover:text-zinc-900 dark:hover:text-zinc-100'
-                          : ''
+                          ? "cursor-pointer select-none hover:text-zinc-900 dark:hover:text-zinc-100"
+                          : ""
                       }`}
                       aria-sort={
                         col.sortValue
                           ? sortKey === col.key
-                            ? sortDir === 'asc'
-                              ? 'ascending'
-                              : 'descending'
-                            : 'none'
+                            ? sortDir === "asc"
+                              ? "ascending"
+                              : "descending"
+                            : "none"
                           : undefined
                       }
                     >
                       <span className="inline-flex items-center gap-1">
                         {col.header}
-                        {col.sortValue && sortKey === col.key && (
-                          sortDir === 'asc' ? (
+                        {col.sortValue &&
+                          sortKey === col.key &&
+                          (sortDir === "asc" ? (
                             <ChevronUp size={12} strokeWidth={2} aria-hidden="true" />
                           ) : (
                             <ChevronDown size={12} strokeWidth={2} aria-hidden="true" />
-                          )
-                        )}
+                          ))}
                       </span>
                     </th>
                   ))}
@@ -204,9 +208,9 @@ export function DataTable<T>({
                     key={keyFn(row)}
                     onClick={() => onRowClick?.(row)}
                     className={`border-b border-zinc-100 dark:border-zinc-800/60 ${
-                      zebra && idx % 2 === 1 ? 'bg-zinc-50/50 dark:bg-zinc-900/30' : ''
+                      zebra && idx % 2 === 1 ? "bg-zinc-50/50 dark:bg-zinc-900/30" : ""
                     } ${
-                      onRowClick ? 'cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800/40' : ''
+                      onRowClick ? "cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800/40" : ""
                     }`}
                   >
                     {columns.map((col) => (
@@ -232,9 +236,19 @@ export function DataTable<T>({
               return (
                 <li
                   key={keyFn(row)}
-                  onClick={() => onRowClick?.(row)}
+                  {...(onRowClick && {
+                    onClick: () => onRowClick(row),
+                    onKeyDown: (e: React.KeyboardEvent) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        onRowClick(row);
+                      }
+                    },
+                    role: "button",
+                    tabIndex: 0,
+                  })}
                   className={`rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-2.5 ${
-                    onRowClick ? 'cursor-pointer active:bg-zinc-50 dark:active:bg-zinc-800/60' : ''
+                    onRowClick ? "cursor-pointer active:bg-zinc-50 dark:active:bg-zinc-800/60" : ""
                   }`}
                 >
                   {primaryCol && (
@@ -256,8 +270,11 @@ export function DataTable<T>({
                   </dl>
                   {actionCols.length > 0 && (
                     <div
+                      role="toolbar"
+                      aria-label="Aktionen"
                       className="flex flex-wrap items-center gap-1 mt-2 pt-2 border-t border-zinc-100 dark:border-zinc-800/60"
                       onClick={(e) => e.stopPropagation()}
+                      onKeyDown={(e) => e.stopPropagation()}
                     >
                       {actionCols.map((col) => (
                         <span key={col.key}>{col.render(row)}</span>

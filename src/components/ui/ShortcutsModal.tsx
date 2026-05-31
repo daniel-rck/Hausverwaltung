@@ -1,4 +1,4 @@
-import { Modal } from './Modal';
+import { Modal } from "./Modal";
 
 interface ShortcutsModalProps {
   open: boolean;
@@ -12,25 +12,25 @@ interface Shortcut {
 
 const SHORTCUTS: { group: string; items: Shortcut[] }[] = [
   {
-    group: 'Navigation',
+    group: "Navigation",
     items: [
-      { keys: ['g', 'd'], description: 'Dashboard' },
-      { keys: ['g', 'm'], description: 'Mieter' },
-      { keys: ['g', 'z'], description: 'Zähler' },
-      { keys: ['g', 'w'], description: 'Versorger' },
-      { keys: ['g', 'n'], description: 'Nebenkosten' },
-      { keys: ['g', 'f'], description: 'Finanzen' },
-      { keys: ['g', 'r'], description: 'Rendite' },
-      { keys: ['g', 'i'], description: 'Instandhaltung' },
-      { keys: ['g', 'u'], description: 'Übergabe' },
-      { keys: ['g', 'e'], description: 'Einstellungen' },
+      { keys: ["g", "d"], description: "Dashboard" },
+      { keys: ["g", "m"], description: "Mieter" },
+      { keys: ["g", "z"], description: "Zähler" },
+      { keys: ["g", "w"], description: "Versorger" },
+      { keys: ["g", "n"], description: "Nebenkosten" },
+      { keys: ["g", "f"], description: "Finanzen" },
+      { keys: ["g", "r"], description: "Rendite" },
+      { keys: ["g", "i"], description: "Instandhaltung" },
+      { keys: ["g", "u"], description: "Übergabe" },
+      { keys: ["g", "e"], description: "Einstellungen" },
     ],
   },
   {
-    group: 'Allgemein',
+    group: "Allgemein",
     items: [
-      { keys: ['?'], description: 'Diese Übersicht öffnen' },
-      { keys: ['Esc'], description: 'Modal/Drawer schließen' },
+      { keys: ["?"], description: "Diese Übersicht öffnen" },
+      { keys: ["Esc"], description: "Modal/Drawer schließen" },
     ],
   },
 ];
@@ -60,11 +60,11 @@ export function ShortcutsModal({ open, onClose }: ShortcutsModalProps) {
             </h3>
             <dl className="space-y-1.5">
               {group.items.map((s) => (
-                <div key={s.keys.join('-')} className="flex items-center justify-between gap-3">
+                <div key={s.keys.join("-")} className="flex items-center justify-between gap-3">
                   <dt className="text-sm text-zinc-700 dark:text-zinc-200">{s.description}</dt>
                   <dd className="flex items-center gap-1 shrink-0">
-                    {s.keys.map((k, i) => (
-                      <Kbd key={i}>{k}</Kbd>
+                    {s.keys.map((k) => (
+                      <Kbd key={k}>{k}</Kbd>
                     ))}
                   </dd>
                 </div>

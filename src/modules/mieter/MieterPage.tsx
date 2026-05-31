@@ -1,18 +1,24 @@
-import { useState } from 'react';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../../db';
-import { useProperty } from '../../hooks/useProperty';
-import { EmptyState } from '../../components/shared/EmptyState';
-import { PageHeader } from '../../components/layout/PageHeader';
-import { Building2, Users } from '../../components/ui/icons';
-import { UnitList } from './UnitList';
-import { TenantForm } from './TenantForm';
-import { RentBenchmark } from './RentBenchmark';
-import type { Unit } from '../../db/schema';
+import { useLiveQuery } from "dexie-react-hooks";
+import { useState } from "react";
+import { PageHeader } from "../../components/layout/PageHeader";
+import { EmptyState } from "../../components/shared/EmptyState";
+import { Building2, Users } from "../../components/ui/icons";
+import { db } from "../../db";
+import type { Unit } from "../../db/schema";
+import { useProperty } from "../../hooks/useProperty";
+import { RentBenchmark } from "./RentBenchmark";
+import { TenantForm } from "./TenantForm";
+import { UnitList } from "./UnitList";
 
-function MieterOverview({ propertyId, onSelectUnit }: { propertyId: number; onSelectUnit: (u: Unit) => void }) {
+function MieterOverview({
+  propertyId,
+  onSelectUnit,
+}: {
+  propertyId: number;
+  onSelectUnit: (u: Unit) => void;
+}) {
   const units = useLiveQuery(
-    () => db.units.where('propertyId').equals(propertyId).toArray(),
+    () => db.units.where("propertyId").equals(propertyId).toArray(),
     [propertyId],
   );
   const occupancies = useLiveQuery(async () => {
@@ -26,11 +32,7 @@ function MieterOverview({ propertyId, onSelectUnit }: { propertyId: number; onSe
     <div className="space-y-6">
       <UnitList onSelectUnit={onSelectUnit} />
       {units && units.length > 0 && occupancies && (
-        <RentBenchmark
-          propertyId={propertyId}
-          units={units}
-          occupancies={occupancies}
-        />
+        <RentBenchmark propertyId={propertyId} units={units} occupancies={occupancies} />
       )}
     </div>
   );
@@ -47,8 +49,8 @@ export function MieterPage() {
         title="Kein Objekt vorhanden"
         description="Lege zuerst ein Mietobjekt an."
         action={{
-          label: 'Objekt anlegen',
-          onClick: () => addProperty({ name: 'Mein Haus', address: '', units: 0 }),
+          label: "Objekt anlegen",
+          onClick: () => addProperty({ name: "Mein Haus", address: "", units: 0 }),
         }}
       />
     );
@@ -58,15 +60,16 @@ export function MieterPage() {
     <div className="space-y-4">
       <PageHeader
         title="Mieterverwaltung"
-        description={selectedUnit ? `Wohnung: ${selectedUnit.name}` : 'Wohnungen, Mieter und Mietverhältnisse pflegen.'}
+        description={
+          selectedUnit
+            ? `Wohnung: ${selectedUnit.name}`
+            : "Wohnungen, Mieter und Mietverhältnisse pflegen."
+        }
         icon={<Users size={20} strokeWidth={1.75} />}
         accent="mieter"
         breadcrumbs={
           selectedUnit
-            ? [
-                { label: 'Mieter', to: '/mieter' },
-                { label: selectedUnit.name },
-              ]
+            ? [{ label: "Mieter", to: "/mieter" }, { label: selectedUnit.name }]
             : undefined
         }
       />

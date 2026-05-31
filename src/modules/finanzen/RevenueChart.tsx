@@ -1,12 +1,12 @@
-import { useMemo } from 'react';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../../db';
-import { useProperty } from '../../hooks/useProperty';
-import { Card } from '../../components/shared/Card';
-import { BarChart } from '../../components/charts/BarChart';
-import { EmptyState } from '../../components/shared/EmptyState';
-import { BarChart3 } from '../../components/ui/icons';
-import { formatEuro, MONTH_NAMES } from '../../utils/format';
+import { useLiveQuery } from "dexie-react-hooks";
+import { useMemo } from "react";
+import { BarChart } from "../../components/charts/BarChart";
+import { Card } from "../../components/shared/Card";
+import { EmptyState } from "../../components/shared/EmptyState";
+import { BarChart3 } from "../../components/ui/icons";
+import { db } from "../../db";
+import { useProperty } from "../../hooks/useProperty";
+import { formatEuro, MONTH_NAMES } from "../../utils/format";
 
 interface RevenueChartProps {
   year: number;
@@ -18,10 +18,7 @@ export function RevenueChart({ year }: RevenueChartProps) {
   const data = useLiveQuery(async () => {
     if (!activeProperty?.id) return null;
 
-    const units = await db.units
-      .where('propertyId')
-      .equals(activeProperty.id)
-      .toArray();
+    const units = await db.units.where("propertyId").equals(activeProperty.id).toArray();
 
     const unitIds = units.map((u) => u.id!);
     const allOccupancies = await db.occupancies.toArray();
@@ -44,13 +41,12 @@ export function RevenueChart({ year }: RevenueChartProps) {
 
     // Calculate expected per month from occupancies
     for (const occ of occupancies) {
-      if (occ.from > yearEnd || (occ.to !== null && occ.to < yearStart))
-        continue;
+      if (occ.from > yearEnd || (occ.to !== null && occ.to < yearStart)) continue;
 
       const monthlyRent = occ.rentCold + occ.rentUtilities;
 
       for (let m = 1; m <= 12; m++) {
-        const month = `${year}-${String(m).padStart(2, '0')}`;
+        const month = `${year}-${String(m).padStart(2, "0")}`;
         if (month < occ.from) continue;
         if (occ.to !== null && month > occ.to) continue;
         expected[m - 1] += monthlyRent;
@@ -77,8 +73,7 @@ export function RevenueChart({ year }: RevenueChartProps) {
 
   if (!data || !chartData) return null;
 
-  const hasData =
-    chartData.totalExpected > 0 || chartData.totalReceived > 0;
+  const hasData = chartData.totalExpected > 0 || chartData.totalReceived > 0;
 
   return (
     <Card
@@ -87,18 +82,18 @@ export function RevenueChart({ year }: RevenueChartProps) {
         hasData ? (
           <div className="flex gap-4 text-xs text-zinc-500 dark:text-zinc-400">
             <span>
-              Soll:{' '}
+              Soll:{" "}
               <strong className="text-zinc-700 dark:text-zinc-200">
                 {formatEuro(chartData.totalExpected)}
               </strong>
             </span>
             <span>
-              Ist:{' '}
+              Ist:{" "}
               <strong
                 className={
                   chartData.totalReceived >= chartData.totalExpected
-                    ? 'text-green-600'
-                    : 'text-amber-600'
+                    ? "text-green-600"
+                    : "text-amber-600"
                 }
               >
                 {formatEuro(chartData.totalReceived)}
@@ -120,14 +115,14 @@ export function RevenueChart({ year }: RevenueChartProps) {
             labels={MONTH_NAMES.map((n) => n.slice(0, 3))}
             datasets={[
               {
-                label: 'Soll',
+                label: "Soll",
                 data: chartData.expected,
-                color: '#d6d3d1',
+                color: "#d6d3d1",
               },
               {
-                label: 'Ist',
+                label: "Ist",
                 data: chartData.received,
-                color: '#16a34a',
+                color: "#16a34a",
               },
             ]}
             height={300}

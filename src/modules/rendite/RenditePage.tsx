@@ -1,11 +1,11 @@
-import { useProperty } from '../../hooks/useProperty';
-import { EmptyState } from '../../components/shared/EmptyState';
-import { PageHeader } from '../../components/layout/PageHeader';
-import { TrendingUp } from '../../components/ui/icons';
-import { FinancingInput } from './FinancingInput';
-import { YieldCalculation } from './YieldCalculation';
-import { CashflowChart } from './CashflowChart';
-import { CostDonut } from './CostDonut';
+import { PageHeader } from "../../components/layout/PageHeader";
+import { EmptyState } from "../../components/shared/EmptyState";
+import { TrendingUp } from "../../components/ui/icons";
+import { useProperty } from "../../hooks/useProperty";
+import { CashflowChart } from "./CashflowChart";
+import { CostDonut } from "./CostDonut";
+import { FinancingInput } from "./FinancingInput";
+import { YieldCalculation } from "./YieldCalculation";
 
 export function RenditePage() {
   const { activeProperty } = useProperty();

@@ -1,6 +1,6 @@
-import { Doughnut } from 'react-chartjs-2';
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
-import { useChartTheme } from './useChartTheme';
+import { ArcElement, Chart as ChartJS, Legend, Tooltip } from "chart.js";
+import { Doughnut } from "react-chartjs-2";
+import { useChartTheme } from "./useChartTheme";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -12,15 +12,15 @@ interface DonutChartProps {
 }
 
 const defaultColors = [
-  '#78716c',
-  '#d97706',
-  '#0891b2',
-  '#16a34a',
-  '#7c3aed',
-  '#e11d48',
-  '#059669',
-  '#2563eb',
-  '#ca8a04',
+  "#78716c",
+  "#d97706",
+  "#0891b2",
+  "#16a34a",
+  "#7c3aed",
+  "#e11d48",
+  "#059669",
+  "#2563eb",
+  "#ca8a04",
 ];
 
 export function DonutChart({
@@ -49,7 +49,7 @@ export function DonutChart({
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: { position: 'bottom', labels: { color: theme.text } },
+          legend: { position: "bottom", labels: { color: theme.text } },
         },
       }}
     />

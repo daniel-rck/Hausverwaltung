@@ -1,6 +1,6 @@
-import { db, SYNCABLE_TABLES } from '../db';
-import type { Tombstone } from '../db/schema';
-import { FK_MAP, resolveDynamicFkTarget } from './fk-map';
+import { db, SYNCABLE_TABLES } from "../db";
+import type { Tombstone } from "../db/schema";
+import { FK_MAP, resolveDynamicFkTarget } from "./fk-map";
 
 /**
  * Snapshot-Format für den Sync.
@@ -16,7 +16,7 @@ import { FK_MAP, resolveDynamicFkTarget } from './fk-map';
  */
 export interface SyncSnapshot {
   version: 1;
-  app: 'hausverwaltung';
+  app: "hausverwaltung";
   exportedAt: number;
   /** Pro Tabelle: Records mit FKs in syncId-Form, ohne lokale `id`-Felder. */
   tables: Record<string, Record<string, unknown>[]>;
@@ -41,7 +41,7 @@ export async function buildLocalSnapshot(): Promise<SyncSnapshot> {
 
   return {
     version: 1,
-    app: 'hausverwaltung',
+    app: "hausverwaltung",
     exportedAt: Date.now(),
     tables,
     tombstones,
@@ -59,7 +59,7 @@ export async function buildLocalSnapshot(): Promise<SyncSnapshot> {
 export async function applySnapshot(snapshot: SyncSnapshot): Promise<void> {
   // Schritt 1: Tombstones anwenden (vor Records, damit wir nichts unnötig einfügen,
   // was gleich wieder gelöscht würde).
-  await db.transaction('rw', db.tombstones, async () => {
+  await db.transaction("rw", db.tombstones, async () => {
     if (snapshot.tombstones.length > 0) {
       await db.tombstones.bulkPut(snapshot.tombstones);
     }
@@ -76,7 +76,7 @@ export async function applySnapshot(snapshot: SyncSnapshot): Promise<void> {
   for (const rows of Object.values(snapshot.tables)) {
     for (const r of rows) {
       const sid = r.syncId;
-      if (typeof sid === 'string') survivingSyncIds.add(sid);
+      if (typeof sid === "string") survivingSyncIds.add(sid);
     }
   }
   const syncableSet = new Set<string>(SYNCABLE_TABLES);
@@ -84,17 +84,16 @@ export async function applySnapshot(snapshot: SyncSnapshot): Promise<void> {
     if (survivingSyncIds.has(ts.syncId)) continue;
     if (!syncableSet.has(ts.tableName)) continue;
     const table = db.table(ts.tableName);
-    await db.transaction('rw', table, async () => {
-      const existing = (await table
-        .where('syncId')
-        .equals(ts.syncId)
-        .first()) as AnyRecord | undefined;
+    await db.transaction("rw", table, async () => {
+      const existing = (await table.where("syncId").equals(ts.syncId).first()) as
+        | AnyRecord
+        | undefined;
       if (!existing) return;
-      if (ts.tableName === 'settings') {
-        if (typeof existing.key === 'string') {
+      if (ts.tableName === "settings") {
+        if (typeof existing.key === "string") {
           await table.delete(existing.key);
         }
-      } else if (typeof existing.id === 'number') {
+      } else if (typeof existing.id === "number") {
         await table.delete(existing.id);
       }
     });
@@ -109,7 +108,7 @@ export async function applySnapshot(snapshot: SyncSnapshot): Promise<void> {
   for (const tableName of SYNCABLE_TABLES) {
     const existing = (await db.table(tableName).toArray()) as AnyRecord[];
     for (const r of existing) {
-      if (typeof r.syncId === 'string' && typeof r.id === 'number') {
+      if (typeof r.syncId === "string" && typeof r.id === "number") {
         syncIdToLocalId.set(r.syncId, r.id);
       }
     }
@@ -123,21 +122,20 @@ export async function applySnapshot(snapshot: SyncSnapshot): Promise<void> {
     // ASC nach updatedAt sortieren stellt sicher, dass der höchste Wert
     // zuletzt geschrieben wird (= LWW gewinnt).
     const orderedRows =
-      tableName === 'settings'
+      tableName === "settings"
         ? [...remoteRows].sort(
-            (a, b) =>
-              ((a.updatedAt as number) ?? 0) - ((b.updatedAt as number) ?? 0),
+            (a, b) => ((a.updatedAt as number) ?? 0) - ((b.updatedAt as number) ?? 0),
           )
         : remoteRows;
 
-    await db.transaction('rw', db.table(tableName), async () => {
+    await db.transaction("rw", db.table(tableName), async () => {
       for (const wire of orderedRows) {
         const syncId = wire.syncId as string;
         if (!syncId) continue;
 
         const localRecord = translateRowFromWire(tableName, wire, syncIdToLocalId);
 
-        if (tableName === 'settings') {
+        if (tableName === "settings") {
           // Settings haben `key` als Primärschlüssel (kein Auto-Inc).
           // `put` upserted nach `key`; falls lokal bereits ein Record mit
           // gleichem `key` existiert, gewinnt der Wert aus dem Snapshot —
@@ -146,11 +144,9 @@ export async function applySnapshot(snapshot: SyncSnapshot): Promise<void> {
           continue;
         }
 
-        const existing = (await db
-          .table(tableName)
-          .where('syncId')
-          .equals(syncId)
-          .first()) as AnyRecord | undefined;
+        const existing = (await db.table(tableName).where("syncId").equals(syncId).first()) as
+          | AnyRecord
+          | undefined;
 
         if (existing?.id !== undefined) {
           // Update: lokale ID beibehalten
@@ -159,10 +155,8 @@ export async function applySnapshot(snapshot: SyncSnapshot): Promise<void> {
           syncIdToLocalId.set(syncId, existing.id as number);
         } else {
           // Insert: lokale Auto-ID wird vergeben
-          const newId = (await db.table(tableName).add(localRecord)) as
-            | number
-            | string;
-          if (typeof newId === 'number') {
+          const newId = (await db.table(tableName).add(localRecord)) as number | string;
+          if (typeof newId === "number") {
             syncIdToLocalId.set(syncId, newId);
           }
         }
@@ -181,7 +175,7 @@ async function buildIdToSyncIdMap(): Promise<Record<string, Map<number, string>>
     const m = new Map<number, string>();
     const rows = (await db.table(tableName).toArray()) as AnyRecord[];
     for (const r of rows) {
-      if (typeof r.id === 'number' && typeof r.syncId === 'string') {
+      if (typeof r.id === "number" && typeof r.syncId === "string") {
         m.set(r.id, r.syncId);
       }
     }
@@ -204,7 +198,7 @@ function translateRowToWire(
   const fkFields = FK_MAP[tableName] ?? {};
   for (const [field, targetTable] of Object.entries(fkFields)) {
     const val = out[field];
-    if (typeof val === 'number') {
+    if (typeof val === "number") {
       const syncId = idToSyncId[targetTable]?.get(val);
       if (syncId) {
         out[`${field}__sync`] = syncId;
@@ -219,7 +213,7 @@ function translateRowToWire(
 
   // Dynamische FKs (z.B. documents.entityId)
   const dynamicTarget = resolveDynamicFkTarget(tableName, row);
-  if (dynamicTarget && typeof row.entityId === 'number') {
+  if (dynamicTarget && typeof row.entityId === "number") {
     const syncId = idToSyncId[dynamicTarget]?.get(row.entityId);
     if (syncId) {
       out.entityId__sync = syncId;
@@ -247,7 +241,7 @@ function translateRowFromWire(
   for (const field of Object.keys(fkFields)) {
     const syncKey = `${field}__sync`;
     const syncVal = out[syncKey];
-    if (typeof syncVal === 'string') {
+    if (typeof syncVal === "string") {
       const localId = syncIdToLocalId.get(syncVal);
       if (localId !== undefined) {
         out[field] = localId;
@@ -257,7 +251,7 @@ function translateRowFromWire(
   }
 
   // Dynamische FKs zurückübersetzen
-  if (tableName === 'documents' && typeof out.entityId__sync === 'string') {
+  if (tableName === "documents" && typeof out.entityId__sync === "string") {
     const localId = syncIdToLocalId.get(out.entityId__sync as string);
     if (localId !== undefined) {
       out.entityId = localId;
@@ -277,24 +271,24 @@ function translateRowFromWire(
  */
 function topologicalOrder(): readonly string[] {
   return [
-    'properties',
-    'costTypes',
-    'meterTypes',
-    'units',
-    'tenants',
-    'meters',
-    'occupancies',
-    'costs',
-    'maintenanceItems',
-    'supplierBills',
-    'costShares',
-    'prepayments',
-    'meterReadings',
-    'payments',
-    'handoverProtocols',
-    'rentChanges',
-    'depositEvents',
-    'documents',
-    'settings',
+    "properties",
+    "costTypes",
+    "meterTypes",
+    "units",
+    "tenants",
+    "meters",
+    "occupancies",
+    "costs",
+    "maintenanceItems",
+    "supplierBills",
+    "costShares",
+    "prepayments",
+    "meterReadings",
+    "payments",
+    "handoverProtocols",
+    "rentChanges",
+    "depositEvents",
+    "documents",
+    "settings",
   ];
 }

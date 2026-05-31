@@ -1,15 +1,15 @@
-import { useMemo } from 'react';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../../db';
-import type { Unit, Meter, MeterType, MeterReading } from '../../db/schema';
-import { Card } from '../../components/shared/Card';
-import { EmptyState } from '../../components/shared/EmptyState';
-import { Thermometer } from '../../components/ui/icons';
-import { StatusBadge } from '../../components/shared/StatusBadge';
-import { BarChart } from '../../components/charts/BarChart';
-import { formatNumber } from '../../utils/format';
-import { useProperty } from '../../hooks/useProperty';
-import { WARM_WATER_RATIO_MIN, WARM_WATER_RATIO_MAX } from '../../utils/constants';
+import { useLiveQuery } from "dexie-react-hooks";
+import { useMemo } from "react";
+import { BarChart } from "../../components/charts/BarChart";
+import { Card } from "../../components/shared/Card";
+import { EmptyState } from "../../components/shared/EmptyState";
+import { StatusBadge } from "../../components/shared/StatusBadge";
+import { Thermometer } from "../../components/ui/icons";
+import { db } from "../../db";
+import type { Meter, MeterReading, MeterType, Unit } from "../../db/schema";
+import { useProperty } from "../../hooks/useProperty";
+import { WARM_WATER_RATIO_MAX, WARM_WATER_RATIO_MIN } from "../../utils/constants";
+import { formatNumber } from "../../utils/format";
 
 interface WarmKaltRatioProps {
   year: number;
@@ -21,24 +21,27 @@ interface UnitRatio {
   coldM3: number;
   totalM3: number;
   warmPercent: number;
-  status: 'green' | 'yellow' | 'red';
+  status: "green" | "yellow" | "red";
   statusLabel: string;
 }
 
-function getRatioStatus(warmPercent: number): { status: 'green' | 'yellow' | 'red'; label: string } {
+function getRatioStatus(warmPercent: number): {
+  status: "green" | "yellow" | "red";
+  label: string;
+} {
   if (warmPercent >= WARM_WATER_RATIO_MIN && warmPercent <= WARM_WATER_RATIO_MAX) {
-    return { status: 'green', label: 'Normal' };
+    return { status: "green", label: "Normal" };
   }
   if (warmPercent > 50) {
-    return { status: 'red', label: 'Zu hoch' };
+    return { status: "red", label: "Zu hoch" };
   }
   if (warmPercent > WARM_WATER_RATIO_MAX) {
-    return { status: 'yellow', label: 'Leicht erhöht' };
+    return { status: "yellow", label: "Leicht erhöht" };
   }
   if (warmPercent < WARM_WATER_RATIO_MIN && warmPercent >= 20) {
-    return { status: 'yellow', label: 'Leicht niedrig' };
+    return { status: "yellow", label: "Leicht niedrig" };
   }
-  return { status: 'red', label: 'Auffällig' };
+  return { status: "red", label: "Auffällig" };
 }
 
 export function WarmKaltRatio({ year }: WarmKaltRatioProps) {
@@ -48,60 +51,57 @@ export function WarmKaltRatio({ year }: WarmKaltRatioProps) {
   const units = useLiveQuery(
     () =>
       propertyId != null
-        ? db.units.where('propertyId').equals(propertyId).toArray()
+        ? db.units.where("propertyId").equals(propertyId).toArray()
         : Promise.resolve([] as Unit[]),
     [propertyId],
   );
 
   const meterTypes = useLiveQuery(() => db.meterTypes.toArray(), []);
 
-  const allData = useLiveQuery(
-    async () => {
-      if (!units || units.length === 0 || !meterTypes || meterTypes.length === 0) {
-        return null;
-      }
+  const allData = useLiveQuery(async () => {
+    if (!units || units.length === 0 || !meterTypes || meterTypes.length === 0) {
+      return null;
+    }
 
-      const waterTypes = meterTypes.filter((mt) => mt.category === 'water');
-      if (waterTypes.length === 0) return null;
+    const waterTypes = meterTypes.filter((mt) => mt.category === "water");
+    if (waterTypes.length === 0) return null;
 
-      const waterTypeIds = waterTypes.map((mt) => mt.id!);
-      const yearStart = `${year}-01-01`;
-      const yearEnd = `${year}-12-31`;
+    const waterTypeIds = waterTypes.map((mt) => mt.id!);
+    const yearStart = `${year}-01-01`;
+    const yearEnd = `${year}-12-31`;
 
-      const result: {
-        unit: Unit;
-        meters: (Meter & { meterType: MeterType })[];
-        readings: MeterReading[];
-      }[] = [];
+    const result: {
+      unit: Unit;
+      meters: (Meter & { meterType: MeterType })[];
+      readings: MeterReading[];
+    }[] = [];
 
-      for (const unit of units) {
-        const unitMeters = await db.meters
-          .where('unitId')
-          .equals(unit.id!)
-          .filter((m) => waterTypeIds.includes(m.meterTypeId))
+    for (const unit of units) {
+      const unitMeters = await db.meters
+        .where("unitId")
+        .equals(unit.id!)
+        .filter((m) => waterTypeIds.includes(m.meterTypeId))
+        .toArray();
+
+      const metersWithTypes = unitMeters.map((m) => ({
+        ...m,
+        meterType: waterTypes.find((mt) => mt.id === m.meterTypeId)!,
+      }));
+
+      const readings: MeterReading[] = [];
+      for (const meter of unitMeters) {
+        const meterReadings = await db.meterReadings
+          .where("[meterId+date]")
+          .between([meter.id!, yearStart], [meter.id!, yearEnd], true, true)
           .toArray();
-
-        const metersWithTypes = unitMeters.map((m) => ({
-          ...m,
-          meterType: waterTypes.find((mt) => mt.id === m.meterTypeId)!,
-        }));
-
-        const readings: MeterReading[] = [];
-        for (const meter of unitMeters) {
-          const meterReadings = await db.meterReadings
-            .where('[meterId+date]')
-            .between([meter.id!, yearStart], [meter.id!, yearEnd], true, true)
-            .toArray();
-          readings.push(...meterReadings);
-        }
-
-        result.push({ unit, meters: metersWithTypes, readings });
+        readings.push(...meterReadings);
       }
 
-      return result;
-    },
-    [units, meterTypes, year],
-  );
+      result.push({ unit, meters: metersWithTypes, readings });
+    }
+
+    return result;
+  }, [units, meterTypes, year]);
 
   const unitRatios = useMemo((): UnitRatio[] => {
     if (!allData) return [];
@@ -123,7 +123,7 @@ export function WarmKaltRatio({ year }: WarmKaltRatioProps) {
           const consumption = last.value - first.value;
 
           const typeName = meter.meterType.name.toLowerCase();
-          if (typeName.includes('warm')) {
+          if (typeName.includes("warm")) {
             warmTotal += consumption;
           } else {
             coldTotal += consumption;
@@ -168,7 +168,7 @@ export function WarmKaltRatio({ year }: WarmKaltRatioProps) {
   return (
     <Card title="Warm/Kalt-Verhältnis">
       <p className="text-sm text-zinc-600 dark:text-zinc-300 mb-4">
-        Anteil Warmwasser am Gesamtverbrauch pro Einheit. Normalbereich:{' '}
+        Anteil Warmwasser am Gesamtverbrauch pro Einheit. Normalbereich:{" "}
         <span className="font-semibold">
           {WARM_WATER_RATIO_MIN}–{WARM_WATER_RATIO_MAX} %
         </span>
@@ -179,14 +179,14 @@ export function WarmKaltRatio({ year }: WarmKaltRatioProps) {
           labels={labels}
           datasets={[
             {
-              label: 'Warmwasser (m³)',
+              label: "Warmwasser (m³)",
               data: unitRatios.map((u) => Math.round(u.warmM3 * 100) / 100),
-              color: '#dc2626',
+              color: "#dc2626",
             },
             {
-              label: 'Kaltwasser (m³)',
+              label: "Kaltwasser (m³)",
               data: unitRatios.map((u) => Math.round(u.coldM3 * 100) / 100),
-              color: '#0891b2',
+              color: "#0891b2",
             },
           ]}
           stacked
@@ -222,15 +222,9 @@ export function WarmKaltRatio({ year }: WarmKaltRatioProps) {
             {unitRatios.map((ur) => (
               <tr key={ur.unitName} className="border-b border-zinc-100 dark:border-zinc-700">
                 <td className="py-2.5 px-3">{ur.unitName}</td>
-                <td className="py-2.5 px-3 text-right font-mono">
-                  {formatNumber(ur.warmM3)}
-                </td>
-                <td className="py-2.5 px-3 text-right font-mono">
-                  {formatNumber(ur.coldM3)}
-                </td>
-                <td className="py-2.5 px-3 text-right font-mono">
-                  {formatNumber(ur.totalM3)}
-                </td>
+                <td className="py-2.5 px-3 text-right font-mono">{formatNumber(ur.warmM3)}</td>
+                <td className="py-2.5 px-3 text-right font-mono">{formatNumber(ur.coldM3)}</td>
+                <td className="py-2.5 px-3 text-right font-mono">{formatNumber(ur.totalM3)}</td>
                 <td className="py-2.5 px-3 text-right font-mono">
                   {formatNumber(ur.warmPercent)} %
                 </td>

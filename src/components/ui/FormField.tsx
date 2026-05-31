@@ -1,4 +1,4 @@
-import { cloneElement, isValidElement, useId, type ReactElement, type ReactNode } from 'react';
+import { cloneElement, isValidElement, type ReactElement, type ReactNode, useId } from "react";
 
 interface FormFieldProps {
   label?: ReactNode;
@@ -28,16 +28,16 @@ export function FormField({
   const fieldId = htmlFor ?? reactId;
   const errorId = error ? `${fieldId}-error` : undefined;
   const descId = description ? `${fieldId}-desc` : undefined;
-  const describedBy = [descId, errorId].filter(Boolean).join(' ') || undefined;
+  const describedBy = [descId, errorId].filter(Boolean).join(" ") || undefined;
 
   let enhanced: ReactNode = children;
   if (isValidElement(children)) {
     const el = children as ReactElement<Record<string, unknown>>;
     enhanced = cloneElement(el, {
       id: (el.props.id as string | undefined) ?? fieldId,
-      'aria-describedby': describedBy ?? (el.props['aria-describedby'] as string | undefined),
-      'aria-invalid': error ? true : (el.props['aria-invalid'] as boolean | undefined),
-      'aria-required': required || (el.props['aria-required'] as boolean | undefined),
+      "aria-describedby": describedBy ?? (el.props["aria-describedby"] as string | undefined),
+      "aria-invalid": error ? true : (el.props["aria-invalid"] as boolean | undefined),
+      "aria-required": required || (el.props["aria-required"] as boolean | undefined),
       invalid: error ? true : (el.props.invalid as boolean | undefined),
     });
   }
@@ -45,10 +45,7 @@ export function FormField({
   return (
     <div className="flex flex-col gap-1">
       {label && (
-        <label
-          htmlFor={fieldId}
-          className="text-xs font-medium text-zinc-600 dark:text-zinc-300"
-        >
+        <label htmlFor={fieldId} className="text-xs font-medium text-zinc-600 dark:text-zinc-300">
           {label}
           {required && (
             <span className="text-red-600 dark:text-red-400 ml-0.5" aria-hidden="true">

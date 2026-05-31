@@ -1,9 +1,6 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState } from "react";
 
-export type Validator<TValues> = (
-  value: unknown,
-  values: TValues,
-) => string | null | undefined;
+export type Validator<TValues> = (value: unknown, values: TValues) => string | null | undefined;
 
 export type ValidationSchema<TValues> = Partial<{
   [K in keyof TValues]: Validator<TValues>;
@@ -74,14 +71,14 @@ export function useFormValidation<TValues extends Record<string, unknown>>(
 
 /* Häufige Validatoren */
 export const required =
-  (message = 'Pflichtfeld'): Validator<unknown> =>
+  (message = "Pflichtfeld"): Validator<unknown> =>
   (value) =>
-    value == null || (typeof value === 'string' && value.trim() === '') ? message : null;
+    value == null || (typeof value === "string" && value.trim() === "") ? message : null;
 
 export const email =
-  (message = 'Ungültige E-Mail'): Validator<unknown> =>
+  (message = "Ungültige E-Mail"): Validator<unknown> =>
   (value) => {
-    if (typeof value !== 'string' || value.trim() === '') return null;
+    if (typeof value !== "string" || value.trim() === "") return null;
     const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
     return ok ? null : message;
   };
@@ -89,14 +86,14 @@ export const email =
 export const minLength =
   (n: number, message?: string): Validator<unknown> =>
   (value) => {
-    if (typeof value !== 'string') return null;
+    if (typeof value !== "string") return null;
     return value.trim().length >= n ? null : (message ?? `Mindestens ${n} Zeichen`);
   };
 
 export const min =
   (n: number, message?: string): Validator<unknown> =>
   (value) => {
-    const num = typeof value === 'number' ? value : Number(value);
+    const num = typeof value === "number" ? value : Number(value);
     if (Number.isNaN(num)) return null;
     return num >= n ? null : (message ?? `Mindestens ${n}`);
   };

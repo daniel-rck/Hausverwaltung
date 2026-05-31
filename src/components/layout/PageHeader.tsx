@@ -1,8 +1,8 @@
 /* eslint-disable react-refresh/only-export-components */
-import type { ReactNode } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { moduleAccent, type ModulKey } from '../ui/moduleAccent';
-import { ChevronRight } from '../ui/icons';
+import type { ReactNode } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { ChevronRight } from "../ui/icons";
+import { type ModulKey, moduleAccent } from "../ui/moduleAccent";
 
 interface BreadcrumbItem {
   label: string;
@@ -33,12 +33,7 @@ export function PageHeader({
 
   return (
     <header className="space-y-3">
-      {a && (
-        <span
-          aria-hidden="true"
-          className={`block w-8 h-0.5 rounded-full ${a.bar}`}
-        />
-      )}
+      {a && <span aria-hidden="true" className={`block w-8 h-0.5 rounded-full ${a.bar}`} />}
       {breadcrumbs && breadcrumbs.length > 0 && <Breadcrumbs items={breadcrumbs} />}
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div className="min-w-0 flex items-start gap-3">
@@ -73,21 +68,29 @@ export function Breadcrumbs({ items }: { items: BreadcrumbItem[] }) {
         {items.map((item, idx) => {
           const last = idx === items.length - 1;
           return (
-            <li key={`${item.label}-${idx}`} className="flex items-center gap-1">
+            <li key={item.to ?? item.label} className="flex items-center gap-1">
               {item.to && !last ? (
-                <Link to={item.to} className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">
+                <Link
+                  to={item.to}
+                  className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+                >
                   {item.label}
                 </Link>
               ) : (
                 <span
-                  className={last ? 'text-zinc-700 dark:text-zinc-200 font-medium' : ''}
-                  aria-current={last ? 'page' : undefined}
+                  className={last ? "text-zinc-700 dark:text-zinc-200 font-medium" : ""}
+                  aria-current={last ? "page" : undefined}
                 >
                   {item.label}
                 </span>
               )}
               {!last && (
-                <ChevronRight size={12} strokeWidth={1.75} className="text-zinc-400" aria-hidden="true" />
+                <ChevronRight
+                  size={12}
+                  strokeWidth={1.75}
+                  className="text-zinc-400"
+                  aria-hidden="true"
+                />
               )}
             </li>
           );
@@ -100,9 +103,9 @@ export function Breadcrumbs({ items }: { items: BreadcrumbItem[] }) {
 /** Simple Auto-Breadcrumb-Komponente, falls man die Routen automatisch ableiten will. */
 export function useAutoBreadcrumbs(routeLabels: Record<string, string>): BreadcrumbItem[] {
   const { pathname } = useLocation();
-  const segments = pathname.split('/').filter(Boolean);
-  const items: BreadcrumbItem[] = [{ label: 'Start', to: '/' }];
-  let acc = '';
+  const segments = pathname.split("/").filter(Boolean);
+  const items: BreadcrumbItem[] = [{ label: "Start", to: "/" }];
+  let acc = "";
   for (const seg of segments) {
     acc += `/${seg}`;
     items.push({ label: routeLabels[seg] ?? seg, to: acc });

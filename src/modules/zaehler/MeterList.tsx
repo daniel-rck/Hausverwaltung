@@ -1,16 +1,16 @@
-import { useState } from 'react';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../../db';
-import { cascadeDeleteMeter } from '../../db/cascade';
-import { useProperty } from '../../hooks/useProperty';
-import { Card } from '../../components/shared/Card';
-import { DataTable, type Column } from '../../components/shared/DataTable';
-import { EmptyState } from '../../components/shared/EmptyState';
-import { Gauge } from '../../components/ui/icons';
-import { ConfirmDialog } from '../../components/shared/ConfirmDialog';
-import { StatusBadge } from '../../components/shared/StatusBadge';
-import { formatDate, formatNumber } from '../../utils/format';
-import type { Meter, MeterType, MeterReading, Unit } from '../../db/schema';
+import { useLiveQuery } from "dexie-react-hooks";
+import { useState } from "react";
+import { Card } from "../../components/shared/Card";
+import { ConfirmDialog } from "../../components/shared/ConfirmDialog";
+import { type Column, DataTable } from "../../components/shared/DataTable";
+import { EmptyState } from "../../components/shared/EmptyState";
+import { StatusBadge } from "../../components/shared/StatusBadge";
+import { Gauge } from "../../components/ui/icons";
+import { db } from "../../db";
+import { cascadeDeleteMeter } from "../../db/cascade";
+import type { Meter, MeterReading, MeterType, Unit } from "../../db/schema";
+import { useProperty } from "../../hooks/useProperty";
+import { formatDate, formatNumber } from "../../utils/format";
 
 interface MeterRow {
   meter: Meter;
@@ -29,12 +29,12 @@ interface MeterFormData {
 }
 
 const EMPTY_FORM: MeterFormData = {
-  meterTypeId: '',
-  serialNumber: '',
-  unitId: '',
-  installDate: '',
-  calibrationDue: '',
-  notes: '',
+  meterTypeId: "",
+  serialNumber: "",
+  unitId: "",
+  installDate: "",
+  calibrationDue: "",
+  notes: "",
 };
 
 export function MeterList() {
@@ -46,19 +46,17 @@ export function MeterList() {
 
   const meterTypes = useLiveQuery(() => db.meterTypes.toArray()) ?? [];
 
-  const units = useLiveQuery(async () => {
-    if (!activeProperty?.id) return [];
-    return db.units
-      .where('propertyId')
-      .equals(activeProperty.id)
-      .toArray();
-  }, [activeProperty?.id]) ?? [];
+  const units =
+    useLiveQuery(async () => {
+      if (!activeProperty?.id) return [];
+      return db.units.where("propertyId").equals(activeProperty.id).toArray();
+    }, [activeProperty?.id]) ?? [];
 
   const meterRows = useLiveQuery(async (): Promise<MeterRow[]> => {
     if (!activeProperty?.id) return [];
 
     const [propertyUnits, allMeters, types, allReadings] = await Promise.all([
-      db.units.where('propertyId').equals(activeProperty.id).toArray(),
+      db.units.where("propertyId").equals(activeProperty.id).toArray(),
       db.meters.toArray(),
       db.meterTypes.toArray(),
       db.meterReadings.toArray(),
@@ -68,12 +66,10 @@ export function MeterList() {
     const unitMap = new Map(propertyUnits.map((u) => [u.id!, u]));
     const typeMap = new Map(types.map((t) => [t.id!, t]));
 
-    const propertyMeters = allMeters.filter(
-      (m) => m.unitId === null || unitIds.has(m.unitId),
-    );
+    const propertyMeters = allMeters.filter((m) => m.unitId === null || unitIds.has(m.unitId));
 
     // Letzten Reading je Meter in einem Pass: O(n_readings) statt O(n_meters * log n)
-    const lastByMeter = new Map<number, MeterRow['lastReading']>();
+    const lastByMeter = new Map<number, MeterRow["lastReading"]>();
     for (const r of allReadings) {
       const prev = lastByMeter.get(r.meterId);
       if (!prev || r.date > prev.date) {
@@ -88,7 +84,7 @@ export function MeterList() {
       rows.push({
         meter,
         meterType: mt,
-        unit: meter.unitId ? unitMap.get(meter.unitId) ?? null : null,
+        unit: meter.unitId ? (unitMap.get(meter.unitId) ?? null) : null,
         lastReading: lastByMeter.get(meter.id!) ?? null,
       });
     }
@@ -109,10 +105,10 @@ export function MeterList() {
     setForm({
       meterTypeId: String(meter.meterTypeId),
       serialNumber: meter.serialNumber,
-      unitId: meter.unitId !== null ? String(meter.unitId) : '',
-      installDate: meter.installDate ?? '',
-      calibrationDue: meter.calibrationDue ?? '',
-      notes: meter.notes ?? '',
+      unitId: meter.unitId !== null ? String(meter.unitId) : "",
+      installDate: meter.installDate ?? "",
+      calibrationDue: meter.calibrationDue ?? "",
+      notes: meter.notes ?? "",
     });
     setShowForm(true);
   };
@@ -120,7 +116,7 @@ export function MeterList() {
   const handleSave = async () => {
     if (!form.meterTypeId || !form.serialNumber.trim()) return;
 
-    const data: Omit<Meter, 'id'> = {
+    const data: Omit<Meter, "id"> = {
       meterTypeId: Number(form.meterTypeId),
       serialNumber: form.serialNumber.trim(),
       unitId: form.unitId ? Number(form.unitId) : null,
@@ -148,45 +144,47 @@ export function MeterList() {
     setEditMeter(null);
   };
 
-  const getCalibrationStatus = (meter: Meter): { status: 'green' | 'yellow' | 'red' | 'gray'; label: string } => {
-    if (!meter.calibrationDue) return { status: 'gray', label: 'Keine Eichfrist' };
+  const getCalibrationStatus = (
+    meter: Meter,
+  ): { status: "green" | "yellow" | "red" | "gray"; label: string } => {
+    if (!meter.calibrationDue) return { status: "gray", label: "Keine Eichfrist" };
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const due = new Date(meter.calibrationDue + 'T00:00:00');
+    const due = new Date(`${meter.calibrationDue}T00:00:00`);
     const diffMs = due.getTime() - today.getTime();
     const days = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-    if (days < 0) return { status: 'red', label: 'Abgelaufen' };
-    if (days <= 90) return { status: 'yellow', label: `${days} Tage` };
-    return { status: 'green', label: 'OK' };
+    if (days < 0) return { status: "red", label: "Abgelaufen" };
+    if (days <= 90) return { status: "yellow", label: `${days} Tage` };
+    return { status: "green", label: "OK" };
   };
 
   const makeColumns = (): Column<MeterRow>[] => [
     {
-      key: 'serial',
-      header: 'Seriennr.',
+      key: "serial",
+      header: "Seriennr.",
       render: (r) => <span className="font-mono text-xs">{r.meter.serialNumber}</span>,
       sortValue: (r) => r.meter.serialNumber,
     },
     {
-      key: 'type',
-      header: 'Zählertyp',
+      key: "type",
+      header: "Zählertyp",
       render: (r) => r.meterType.name,
       sortValue: (r) => r.meterType.name,
     },
     {
-      key: 'location',
-      header: 'Zuordnung',
+      key: "location",
+      header: "Zuordnung",
       render: (r) =>
         r.unit ? (
           r.unit.name
         ) : (
           <span className="text-zinc-500 dark:text-zinc-400 italic">Hauptzähler</span>
         ),
-      sortValue: (r) => r.unit?.name ?? '',
+      sortValue: (r) => r.unit?.name ?? "",
     },
     {
-      key: 'lastReading',
-      header: 'Letzter Stand',
+      key: "lastReading",
+      header: "Letzter Stand",
       render: (r) =>
         r.lastReading ? (
           <span className="font-mono text-xs">
@@ -199,11 +197,11 @@ export function MeterList() {
           <span className="text-zinc-400 dark:text-zinc-500">–</span>
         ),
       sortValue: (r) => r.lastReading?.value ?? 0,
-      align: 'right',
+      align: "right",
     },
     {
-      key: 'calibration',
-      header: 'Eichfrist',
+      key: "calibration",
+      header: "Eichfrist",
       render: (r) => {
         const { status, label } = getCalibrationStatus(r.meter);
         return (
@@ -217,14 +215,15 @@ export function MeterList() {
           </div>
         );
       },
-      sortValue: (r) => r.meter.calibrationDue ?? 'zzzz',
+      sortValue: (r) => r.meter.calibrationDue ?? "zzzz",
     },
     {
-      key: 'actions',
-      header: '',
+      key: "actions",
+      header: "",
       render: (r) => (
         <div className="flex gap-2">
           <button
+            type="button"
             onClick={(e) => {
               e.stopPropagation();
               handleOpenEdit(r.meter);
@@ -234,6 +233,7 @@ export function MeterList() {
             Bearbeiten
           </button>
           <button
+            type="button"
             onClick={(e) => {
               e.stopPropagation();
               setDeleteTarget(r.meter);
@@ -250,92 +250,105 @@ export function MeterList() {
   const formContent = (
     <div className="mb-4 p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-lg border border-zinc-200 dark:border-zinc-700">
       <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-200 mb-3">
-        {editMeter ? 'Zähler bearbeiten' : 'Neuer Zähler'}
+        {editMeter ? "Zähler bearbeiten" : "Neuer Zähler"}
       </h3>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         <div>
-          <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-            Zählertyp *
+          <label className="block">
+            <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
+              Zählertyp *
+            </span>
+            <select
+              value={form.meterTypeId}
+              onChange={(e) => setForm({ ...form, meterTypeId: e.target.value })}
+              className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+            >
+              <option value="">– Typ wählen –</option>
+              {meterTypes.map((mt) => (
+                <option key={mt.id!} value={mt.id!}>
+                  {mt.name} ({mt.unit})
+                </option>
+              ))}
+            </select>
           </label>
-          <select
-            value={form.meterTypeId}
-            onChange={(e) => setForm({ ...form, meterTypeId: e.target.value })}
-            className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
-          >
-            <option value="">– Typ wählen –</option>
-            {meterTypes.map((mt) => (
-              <option key={mt.id!} value={mt.id!}>
-                {mt.name} ({mt.unit})
-              </option>
-            ))}
-          </select>
         </div>
         <div>
-          <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-            Seriennummer *
+          <label className="block">
+            <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
+              Seriennummer *
+            </span>
+            <input
+              type="text"
+              value={form.serialNumber}
+              onChange={(e) => setForm({ ...form, serialNumber: e.target.value })}
+              placeholder="z.B. WZ-2024-001"
+              className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+            />
           </label>
-          <input
-            type="text"
-            value={form.serialNumber}
-            onChange={(e) => setForm({ ...form, serialNumber: e.target.value })}
-            placeholder="z.B. WZ-2024-001"
-            className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
-          />
         </div>
         <div>
-          <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-            Zuordnung
+          <label className="block">
+            <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
+              Zuordnung
+            </span>
+            <select
+              value={form.unitId}
+              onChange={(e) => setForm({ ...form, unitId: e.target.value })}
+              className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+            >
+              <option value="">Hauptzähler (kein Wohnungsbezug)</option>
+              {units.map((u) => (
+                <option key={u.id!} value={u.id!}>
+                  {u.name}
+                </option>
+              ))}
+            </select>
           </label>
-          <select
-            value={form.unitId}
-            onChange={(e) => setForm({ ...form, unitId: e.target.value })}
-            className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
-          >
-            <option value="">Hauptzähler (kein Wohnungsbezug)</option>
-            {units.map((u) => (
-              <option key={u.id!} value={u.id!}>
-                {u.name}
-              </option>
-            ))}
-          </select>
         </div>
         <div>
-          <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-            Einbaudatum
+          <label className="block">
+            <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
+              Einbaudatum
+            </span>
+            <input
+              type="date"
+              value={form.installDate}
+              onChange={(e) => setForm({ ...form, installDate: e.target.value })}
+              className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+            />
           </label>
-          <input
-            type="date"
-            value={form.installDate}
-            onChange={(e) => setForm({ ...form, installDate: e.target.value })}
-            className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
-          />
         </div>
         <div>
-          <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-            Eichfrist bis
+          <label className="block">
+            <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
+              Eichfrist bis
+            </span>
+            <input
+              type="date"
+              value={form.calibrationDue}
+              onChange={(e) => setForm({ ...form, calibrationDue: e.target.value })}
+              className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+            />
           </label>
-          <input
-            type="date"
-            value={form.calibrationDue}
-            onChange={(e) => setForm({ ...form, calibrationDue: e.target.value })}
-            className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
-          />
         </div>
         <div>
-          <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-            Notizen
+          <label className="block">
+            <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
+              Notizen
+            </span>
+            <input
+              type="text"
+              value={form.notes}
+              onChange={(e) => setForm({ ...form, notes: e.target.value })}
+              placeholder="Optionale Bemerkungen"
+              className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+            />
           </label>
-          <input
-            type="text"
-            value={form.notes}
-            onChange={(e) => setForm({ ...form, notes: e.target.value })}
-            placeholder="Optionale Bemerkungen"
-            className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
-          />
         </div>
       </div>
       <div className="flex gap-2 mt-3">
         <button
+          type="button"
           onClick={handleSave}
           disabled={!form.meterTypeId || !form.serialNumber.trim()}
           className="px-4 py-1.5 text-sm bg-zinc-800 text-white rounded-lg hover:bg-zinc-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -343,6 +356,7 @@ export function MeterList() {
           Speichern
         </button>
         <button
+          type="button"
           onClick={() => {
             setShowForm(false);
             setEditMeter(null);
@@ -361,6 +375,7 @@ export function MeterList() {
         title="Zähler-Übersicht"
         action={
           <button
+            type="button"
             onClick={handleOpenAdd}
             className="text-sm px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
           >
@@ -375,11 +390,7 @@ export function MeterList() {
             <h3 className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide mb-2">
               Hauptzähler
             </h3>
-            <DataTable
-              columns={makeColumns()}
-              data={hauptzaehler}
-              keyFn={(r) => r.meter.id!}
-            />
+            <DataTable columns={makeColumns()} data={hauptzaehler} keyFn={(r) => r.meter.id!} />
           </div>
         )}
 
@@ -388,11 +399,7 @@ export function MeterList() {
             <h3 className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide mb-2">
               Wohnungszähler
             </h3>
-            <DataTable
-              columns={makeColumns()}
-              data={wohnungszaehler}
-              keyFn={(r) => r.meter.id!}
-            />
+            <DataTable columns={makeColumns()} data={wohnungszaehler} keyFn={(r) => r.meter.id!} />
           </div>
         )}
 
@@ -401,7 +408,7 @@ export function MeterList() {
             icon={<Gauge size={24} strokeWidth={1.75} />}
             title="Keine Zähler"
             description="Legen Sie Ihre Zähler an, um Ablesungen zu erfassen."
-            action={{ label: 'Zähler anlegen', onClick: handleOpenAdd }}
+            action={{ label: "Zähler anlegen", onClick: handleOpenAdd }}
           />
         )}
       </Card>
@@ -409,7 +416,7 @@ export function MeterList() {
       <ConfirmDialog
         open={deleteTarget !== null}
         title="Zähler löschen"
-        message={`Möchten Sie den Zähler „${deleteTarget?.serialNumber ?? ''}" wirklich löschen? Alle zugehörigen Ablesungen werden ebenfalls gelöscht.`}
+        message={`Möchten Sie den Zähler „${deleteTarget?.serialNumber ?? ""}" wirklich löschen? Alle zugehörigen Ablesungen werden ebenfalls gelöscht.`}
         confirmLabel="Löschen"
         cancelLabel="Abbrechen"
         danger

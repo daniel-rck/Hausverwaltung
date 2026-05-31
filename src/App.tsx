@@ -1,46 +1,46 @@
-import { lazy, Suspense } from 'react';
-import { HashRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { PropertyProvider } from './hooks/useProperty';
-import { AppShell } from './components/layout/AppShell';
-import { Skeleton, ErrorBoundary } from './components/ui';
+import { lazy, Suspense } from "react";
+import { HashRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { AppShell } from "./components/layout/AppShell";
+import { ErrorBoundary, Skeleton } from "./components/ui";
+import { PropertyProvider } from "./hooks/useProperty";
 
 const DashboardPage = lazy(() =>
-  import('./modules/dashboard/DashboardPage').then((m) => ({ default: m.DashboardPage })),
+  import("./modules/dashboard/DashboardPage").then((m) => ({ default: m.DashboardPage })),
 );
 const MieterPage = lazy(() =>
-  import('./modules/mieter/MieterPage').then((m) => ({ default: m.MieterPage })),
+  import("./modules/mieter/MieterPage").then((m) => ({ default: m.MieterPage })),
 );
 const NebenkostenPage = lazy(() =>
-  import('./modules/nebenkosten/NebenkostenPage').then((m) => ({ default: m.NebenkostenPage })),
+  import("./modules/nebenkosten/NebenkostenPage").then((m) => ({ default: m.NebenkostenPage })),
 );
 const ZaehlerPage = lazy(() =>
-  import('./modules/zaehler/ZaehlerPage').then((m) => ({ default: m.ZaehlerPage })),
+  import("./modules/zaehler/ZaehlerPage").then((m) => ({ default: m.ZaehlerPage })),
 );
 const WasserPage = lazy(() =>
-  import('./modules/wasser/WasserPage').then((m) => ({ default: m.WasserPage })),
+  import("./modules/wasser/WasserPage").then((m) => ({ default: m.WasserPage })),
 );
 const FinanzenPage = lazy(() =>
-  import('./modules/finanzen/FinanzenPage').then((m) => ({ default: m.FinanzenPage })),
+  import("./modules/finanzen/FinanzenPage").then((m) => ({ default: m.FinanzenPage })),
 );
 const InstandhaltungPage = lazy(() =>
-  import('./modules/instandhaltung/InstandhaltungPage').then((m) => ({
+  import("./modules/instandhaltung/InstandhaltungPage").then((m) => ({
     default: m.InstandhaltungPage,
   })),
 );
 const UebergabePage = lazy(() =>
-  import('./modules/uebergabe/UebergabePage').then((m) => ({ default: m.UebergabePage })),
+  import("./modules/uebergabe/UebergabePage").then((m) => ({ default: m.UebergabePage })),
 );
 const RenditePage = lazy(() =>
-  import('./modules/rendite/RenditePage').then((m) => ({ default: m.RenditePage })),
+  import("./modules/rendite/RenditePage").then((m) => ({ default: m.RenditePage })),
 );
 const ImportPage = lazy(() =>
-  import('./modules/dashboard/ImportPage').then((m) => ({ default: m.ImportPage })),
+  import("./modules/dashboard/ImportPage").then((m) => ({ default: m.ImportPage })),
 );
 const DatenschutzPage = lazy(() =>
-  import('./modules/legal/DatenschutzPage').then((m) => ({ default: m.DatenschutzPage })),
+  import("./modules/legal/DatenschutzPage").then((m) => ({ default: m.DatenschutzPage })),
 );
 const EinstellungenPage = lazy(() =>
-  import('./modules/einstellungen/EinstellungenPage').then((m) => ({
+  import("./modules/einstellungen/EinstellungenPage").then((m) => ({
     default: m.EinstellungenPage,
   })),
 );

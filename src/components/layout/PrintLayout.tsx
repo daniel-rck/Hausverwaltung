@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { ReactNode } from "react";
 
 interface PrintLayoutProps {
   title: string;
@@ -16,7 +16,7 @@ export function PrintLayout({ title, subtitle, children }: PrintLayoutProps) {
       </div>
       {children}
       <div className="print-only mt-8 text-xs text-zinc-400">
-        Erstellt am {new Date().toLocaleDateString('de-DE')} | Hausverwaltung
+        Erstellt am {new Date().toLocaleDateString("de-DE")} | Hausverwaltung
       </div>
     </div>
   );

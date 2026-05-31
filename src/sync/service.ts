@@ -1,26 +1,20 @@
-import { db, onLocalWrite, withoutWriteEvents } from '../db';
-import { applySnapshot, buildLocalSnapshot, type SyncSnapshot } from './snapshot';
-import { mergeSnapshots, snapshotSignature } from './merge';
+import { db, onLocalWrite, withoutWriteEvents } from "../db";
 import {
   claimPairing,
   createPairing,
   disable,
   downloadSyncFile,
-  enableAsOwner,
   EtagConflictError,
+  enableAsOwner,
   getSyncId,
   isEnabled,
-  uploadSyncFile,
   type PairingTicket,
-} from './cf-client';
+  uploadSyncFile,
+} from "./cf-client";
+import { mergeSnapshots, snapshotSignature } from "./merge";
+import { applySnapshot, buildLocalSnapshot, type SyncSnapshot } from "./snapshot";
 
-export type SyncStatus =
-  | 'disconnected'
-  | 'connecting'
-  | 'syncing'
-  | 'idle'
-  | 'error'
-  | 'offline';
+export type SyncStatus = "disconnected" | "connecting" | "syncing" | "idle" | "error" | "offline";
 
 export interface SyncState {
   status: SyncStatus;
@@ -33,17 +27,17 @@ export interface SyncState {
 type Listener = (state: SyncState) => void;
 
 const DEBOUNCE_WRITE_MS = 2_000;
-const LS_ETAG_KEY = 'hv-sync-etag';
-const LS_LAST_SYNC_KEY = 'hv-sync-last';
-const LS_SIGNATURE_KEY = 'hv-sync-sig';
-const LS_AUTO_KEY = 'hv-sync-auto';
+const LS_ETAG_KEY = "hv-sync-etag";
+const LS_LAST_SYNC_KEY = "hv-sync-last";
+const LS_SIGNATURE_KEY = "hv-sync-sig";
+const LS_AUTO_KEY = "hv-sync-auto";
 // Tombstones, die älter als das TTL sind, werden nach erfolgreichem Push
 // gelöscht — sie haben ihren Zweck erfüllt und blähen sonst den Snapshot.
 const TOMBSTONE_TTL_MS = 90 * 24 * 60 * 60 * 1000; // 90 Tage
 
 class SyncService {
   private state: SyncState = {
-    status: 'disconnected',
+    status: "disconnected",
     syncId: null,
     lastSyncedAt: null,
     lastError: null,
@@ -80,17 +74,17 @@ class SyncService {
     this.initialized = true;
 
     const storedAuto = localStorage.getItem(LS_AUTO_KEY);
-    this.state.autoSync = storedAuto !== 'false';
+    this.state.autoSync = storedAuto !== "false";
     const storedLast = Number(localStorage.getItem(LS_LAST_SYNC_KEY) ?? 0);
     this.state.lastSyncedAt = Number.isFinite(storedLast) && storedLast > 0 ? storedLast : null;
 
     if (!isEnabled()) {
-      this.setState({ status: 'disconnected' });
+      this.setState({ status: "disconnected" });
       return;
     }
 
     this.setState({
-      status: 'idle',
+      status: "idle",
       syncId: getSyncId(),
     });
     this.hookDbWrites();
@@ -99,11 +93,11 @@ class SyncService {
   }
 
   async connect(): Promise<void> {
-    this.setState({ status: 'connecting', lastError: null });
+    this.setState({ status: "connecting", lastError: null });
     try {
       const { id } = await enableAsOwner();
       this.setState({
-        status: 'idle',
+        status: "idle",
         syncId: id,
         lastError: null,
       });
@@ -111,7 +105,7 @@ class SyncService {
       await this.runSync();
     } catch (err) {
       this.setState({
-        status: 'error',
+        status: "error",
         lastError: err instanceof Error ? err.message : String(err),
       });
       throw err;
@@ -134,7 +128,7 @@ class SyncService {
     localStorage.removeItem(LS_SIGNATURE_KEY);
     localStorage.removeItem(LS_LAST_SYNC_KEY);
     this.setState({
-      status: 'disconnected',
+      status: "disconnected",
       syncId: null,
       lastSyncedAt: null,
       lastError: null,
@@ -146,7 +140,7 @@ class SyncService {
   }
 
   async claimPairing(otp: string): Promise<void> {
-    this.setState({ status: 'connecting', lastError: null });
+    this.setState({ status: "connecting", lastError: null });
     try {
       const { id } = await claimPairing(otp);
       // Bestehender ETag/Signature/lastSyncedAt gehört zu einem anderen
@@ -156,7 +150,7 @@ class SyncService {
       localStorage.removeItem(LS_SIGNATURE_KEY);
       localStorage.removeItem(LS_LAST_SYNC_KEY);
       this.setState({
-        status: 'idle',
+        status: "idle",
         syncId: id,
         lastSyncedAt: null,
         lastError: null,
@@ -165,7 +159,7 @@ class SyncService {
       await this.runSync();
     } catch (err) {
       this.setState({
-        status: 'error',
+        status: "error",
         lastError: err instanceof Error ? err.message : String(err),
       });
       throw err;
@@ -193,9 +187,9 @@ class SyncService {
    */
   private async runSync(): Promise<void> {
     if (this.isRunning) return;
-    if (this.state.status === 'disconnected') return;
+    if (this.state.status === "disconnected") return;
     if (!navigator.onLine) {
-      this.setState({ status: 'offline' });
+      this.setState({ status: "offline" });
       return;
     }
 
@@ -209,7 +203,7 @@ class SyncService {
     // wird.
     const wasDirty = this.dirty;
     this.dirty = false;
-    this.setState({ status: 'syncing', lastError: null });
+    this.setState({ status: "syncing", lastError: null });
 
     const isStale = (): boolean => myEpoch !== this.runEpoch;
 
@@ -217,7 +211,7 @@ class SyncService {
       await this.syncOnce(wasDirty);
       if (isStale()) return;
       this.setState({
-        status: 'idle',
+        status: "idle",
         lastSyncedAt: Date.now(),
       });
       localStorage.setItem(LS_LAST_SYNC_KEY, String(this.state.lastSyncedAt));
@@ -229,7 +223,7 @@ class SyncService {
           await this.syncOnce(wasDirty);
           if (isStale()) return;
           this.setState({
-            status: 'idle',
+            status: "idle",
             lastSyncedAt: Date.now(),
           });
           localStorage.setItem(LS_LAST_SYNC_KEY, String(this.state.lastSyncedAt));
@@ -237,16 +231,15 @@ class SyncService {
           if (isStale()) return;
           this.dirty = true;
           this.setState({
-            status: 'error',
+            status: "error",
             lastError: retryErr instanceof Error ? retryErr.message : String(retryErr),
           });
         }
       } else {
         this.dirty = true;
-        const isNetwork =
-          err instanceof TypeError && /fetch|network/i.test(err.message);
+        const isNetwork = err instanceof TypeError && /fetch|network/i.test(err.message);
         this.setState({
-          status: isNetwork ? 'offline' : 'error',
+          status: isNetwork ? "offline" : "error",
           lastError: err instanceof Error ? err.message : String(err),
         });
       }
@@ -255,12 +248,7 @@ class SyncService {
       // Wenn während des Syncs lokal geschrieben wurde, setzt der Hook
       // dirty wieder auf true — dann brauchen wir noch eine Runde.
       // Nach Disconnect (epoch mismatch) nichts mehr scheduln.
-      if (
-        !isStale() &&
-        this.dirty &&
-        this.state.autoSync &&
-        this.state.syncId !== null
-      ) {
+      if (!isStale() && this.dirty && this.state.autoSync && this.state.syncId !== null) {
         this.scheduleDebouncedPush();
       }
     }
@@ -278,7 +266,7 @@ class SyncService {
 
     if (remote === null) {
       // Keine Remote-Datei — nur pushen, keine Merge nötig
-    } else if (remote === 'not-modified') {
+    } else if (remote === "not-modified") {
       // Remote unverändert — nur lokalen Dirty-Zustand pushen, wenn nötig
     } else {
       remoteEtag = remote.etag;
@@ -298,21 +286,14 @@ class SyncService {
     const newSig = snapshotSignature(finalSnap);
     const prevSig = localStorage.getItem(LS_SIGNATURE_KEY);
     const needsPush =
-      wasDirty ||
-      this.dirty ||
-      mergedFromRemote ||
-      remote === null ||
-      newSig !== prevSig;
+      wasDirty || this.dirty || mergedFromRemote || remote === null || newSig !== prevSig;
 
     if (needsPush) {
-      const newEtag = await uploadSyncFile(
-        JSON.stringify(finalSnap),
-        remoteEtag,
-      );
+      const newEtag = await uploadSyncFile(JSON.stringify(finalSnap), remoteEtag);
       localStorage.setItem(LS_ETAG_KEY, newEtag);
       localStorage.setItem(LS_SIGNATURE_KEY, newSig);
       await this.cleanupOldTombstones();
-    } else if (remote && remote !== 'not-modified') {
+    } else if (remote && remote !== "not-modified") {
       localStorage.setItem(LS_ETAG_KEY, remote.etag);
     }
   }
@@ -321,7 +302,7 @@ class SyncService {
     const cutoff = Date.now() - TOMBSTONE_TTL_MS;
     try {
       await withoutWriteEvents(async () => {
-        await db.tombstones.where('deletedAt').below(cutoff).delete();
+        await db.tombstones.where("deletedAt").below(cutoff).delete();
       });
     } catch {
       // Cleanup ist best-effort, bei Fehler nicht stören
@@ -367,9 +348,9 @@ export const syncService = new SyncService();
 
 // Online-Event als zusätzlicher Trigger: pending Pushes nach einer
 // Offline-Phase nachholen, sobald die Verbindung wieder steht.
-if (typeof window !== 'undefined') {
-  window.addEventListener('online', () => {
-    if (syncService.getState().status !== 'disconnected') {
+if (typeof window !== "undefined") {
+  window.addEventListener("online", () => {
+    if (syncService.getState().status !== "disconnected") {
       void syncService.syncNow();
     }
   });

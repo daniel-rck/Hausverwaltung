@@ -1,10 +1,5 @@
-import { formatDate } from '../../utils/format';
-import type {
-  HandoverProtocol,
-  RoomCondition,
-  Rating,
-  LandlordInfo,
-} from '../../db/schema';
+import type { HandoverProtocol, LandlordInfo, Rating, RoomCondition } from "../../db/schema";
+import { formatDate } from "../../utils/format";
 
 interface ProtocolContext {
   protocol: HandoverProtocol;
@@ -29,61 +24,52 @@ interface UebergabePrintProps {
 
 function ratingLabel(r: Rating): string {
   switch (r) {
-    case 'good':
-      return 'Gut';
-    case 'fair':
-      return 'Mittel';
-    case 'poor':
-      return 'Schlecht';
+    case "good":
+      return "Gut";
+    case "fair":
+      return "Mittel";
+    case "poor":
+      return "Schlecht";
   }
 }
 
 function ratingPrintClass(r: Rating): string {
   switch (r) {
-    case 'good':
-      return 'text-green-700';
-    case 'fair':
-      return 'text-amber-700';
-    case 'poor':
-      return 'text-red-700';
+    case "good":
+      return "text-green-700";
+    case "fair":
+      return "text-amber-700";
+    case "poor":
+      return "text-red-700";
   }
 }
 
 function RoomTable({ rooms }: { rooms: RoomCondition[] }) {
   const aspects = [
-    { key: 'walls' as const, label: 'Wände' },
-    { key: 'floor' as const, label: 'Boden' },
-    { key: 'ceiling' as const, label: 'Decke' },
-    { key: 'windows' as const, label: 'Fenster' },
-    { key: 'doors' as const, label: 'Türen' },
+    { key: "walls" as const, label: "Wände" },
+    { key: "floor" as const, label: "Boden" },
+    { key: "ceiling" as const, label: "Decke" },
+    { key: "windows" as const, label: "Fenster" },
+    { key: "doors" as const, label: "Türen" },
   ];
 
   return (
     <table className="w-full text-sm border-collapse">
       <thead>
         <tr className="bg-zinc-100">
-          <th className="border border-zinc-300 px-2 py-1.5 text-left font-medium">
-            Raum
-          </th>
+          <th className="border border-zinc-300 px-2 py-1.5 text-left font-medium">Raum</th>
           {aspects.map((a) => (
-            <th
-              key={a.key}
-              className="border border-zinc-300 px-2 py-1.5 text-center font-medium"
-            >
+            <th key={a.key} className="border border-zinc-300 px-2 py-1.5 text-center font-medium">
               {a.label}
             </th>
           ))}
-          <th className="border border-zinc-300 px-2 py-1.5 text-left font-medium">
-            Bemerkungen
-          </th>
+          <th className="border border-zinc-300 px-2 py-1.5 text-left font-medium">Bemerkungen</th>
         </tr>
       </thead>
       <tbody>
-        {rooms.map((room, i) => (
-          <tr key={i}>
-            <td className="border border-zinc-300 px-2 py-1.5 font-medium">
-              {room.name}
-            </td>
+        {rooms.map((room) => (
+          <tr key={room.name}>
+            <td className="border border-zinc-300 px-2 py-1.5 font-medium">{room.name}</td>
             {aspects.map((a) => (
               <td
                 key={a.key}
@@ -93,7 +79,7 @@ function RoomTable({ rooms }: { rooms: RoomCondition[] }) {
               </td>
             ))}
             <td className="border border-zinc-300 px-2 py-1.5 text-zinc-600">
-              {room.notes || '–'}
+              {room.notes || "–"}
             </td>
           </tr>
         ))}
@@ -103,21 +89,16 @@ function RoomTable({ rooms }: { rooms: RoomCondition[] }) {
 }
 
 export function UebergabePrint({ data }: UebergabePrintProps) {
-  const { protocol, landlord, propertyName, unitName, tenantName, meterDetails } =
-    data;
+  const { protocol, landlord, propertyName, unitName, tenantName, meterDetails } = data;
 
-  const typeLabel = protocol.type === 'move-in' ? 'Einzug' : 'Auszug';
+  const typeLabel = protocol.type === "move-in" ? "Einzug" : "Auszug";
 
   return (
     <div className="print-only print-container font-sans text-zinc-800">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-xl font-bold mb-1">
-          Übergabeprotokoll – {typeLabel}
-        </h1>
-        <p className="text-sm text-zinc-500">
-          Erstellt am {formatDate(protocol.date)}
-        </p>
+        <h1 className="text-xl font-bold mb-1">Übergabeprotokoll – {typeLabel}</h1>
+        <p className="text-sm text-zinc-500">Erstellt am {formatDate(protocol.date)}</p>
       </div>
 
       {/* Parties */}
@@ -177,9 +158,7 @@ export function UebergabePrint({ data }: UebergabePrintProps) {
                 <th className="border border-zinc-300 px-2 py-1.5 text-left font-medium">
                   Zähler-Nr.
                 </th>
-                <th className="border border-zinc-300 px-2 py-1.5 text-right font-medium">
-                  Stand
-                </th>
+                <th className="border border-zinc-300 px-2 py-1.5 text-right font-medium">Stand</th>
                 <th className="border border-zinc-300 px-2 py-1.5 text-left font-medium">
                   Einheit
                 </th>
@@ -188,18 +167,12 @@ export function UebergabePrint({ data }: UebergabePrintProps) {
             <tbody>
               {meterDetails.map((m) => (
                 <tr key={m.meterId}>
-                  <td className="border border-zinc-300 px-2 py-1.5">
-                    {m.typeName}
-                  </td>
-                  <td className="border border-zinc-300 px-2 py-1.5 font-mono">
-                    {m.serialNumber}
-                  </td>
+                  <td className="border border-zinc-300 px-2 py-1.5">{m.typeName}</td>
+                  <td className="border border-zinc-300 px-2 py-1.5 font-mono">{m.serialNumber}</td>
                   <td className="border border-zinc-300 px-2 py-1.5 text-right font-mono">
-                    {m.value.toLocaleString('de-DE')}
+                    {m.value.toLocaleString("de-DE")}
                   </td>
-                  <td className="border border-zinc-300 px-2 py-1.5">
-                    {m.typeUnit}
-                  </td>
+                  <td className="border border-zinc-300 px-2 py-1.5">{m.typeUnit}</td>
                 </tr>
               ))}
             </tbody>
@@ -223,11 +196,9 @@ export function UebergabePrint({ data }: UebergabePrintProps) {
               </tr>
             </thead>
             <tbody>
-              {protocol.keys.map((k, i) => (
-                <tr key={i}>
-                  <td className="border border-zinc-300 px-2 py-1.5">
-                    {k.type}
-                  </td>
+              {protocol.keys.map((k) => (
+                <tr key={k.type}>
+                  <td className="border border-zinc-300 px-2 py-1.5">{k.type}</td>
                   <td className="border border-zinc-300 px-2 py-1.5 text-center font-mono">
                     {k.count}
                   </td>
@@ -264,12 +235,8 @@ export function UebergabePrint({ data }: UebergabePrintProps) {
             ) : (
               <div className="h-24 border-b border-zinc-400" />
             )}
-            <p className="text-xs text-zinc-500 mt-1">
-              {landlord?.name ?? 'Vermieter'}
-            </p>
-            <p className="text-xs text-zinc-400">
-              Ort, Datum: ______________________
-            </p>
+            <p className="text-xs text-zinc-500 mt-1">{landlord?.name ?? "Vermieter"}</p>
+            <p className="text-xs text-zinc-400">Ort, Datum: ______________________</p>
           </div>
           <div>
             <p className="text-sm font-medium text-zinc-700 mb-2">Mieter</p>
@@ -283,9 +250,7 @@ export function UebergabePrint({ data }: UebergabePrintProps) {
               <div className="h-24 border-b border-zinc-400" />
             )}
             <p className="text-xs text-zinc-500 mt-1">{tenantName}</p>
-            <p className="text-xs text-zinc-400">
-              Ort, Datum: ______________________
-            </p>
+            <p className="text-xs text-zinc-400">Ort, Datum: ______________________</p>
           </div>
         </div>
       </div>
@@ -293,4 +258,4 @@ export function UebergabePrint({ data }: UebergabePrintProps) {
   );
 }
 
-export type { ProtocolContext, MeterDetail };
+export type { MeterDetail, ProtocolContext };

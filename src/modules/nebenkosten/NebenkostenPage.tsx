@@ -1,20 +1,20 @@
-import { useState, useMemo } from 'react';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../../db';
-import { useProperty } from '../../hooks/useProperty';
-import { Card } from '../../components/shared/Card';
-import { EmptyState } from '../../components/shared/EmptyState';
-import { Button, FormField, Select, Tabs, type TabItem } from '../../components/ui';
-import { PageHeader } from '../../components/layout/PageHeader';
-import { Building2, Receipt, Users } from '../../components/ui/icons';
-import { CostEntry } from './CostEntry';
-import { MessdienstInput } from './MessdienstInput';
-import { PrepaymentInput } from './PrepaymentInput';
-import { AbrechnungView } from './AbrechnungView';
-import { AbrechnungPrint } from './AbrechnungPrint';
-import type { Occupancy, Tenant, Unit } from '../../db/schema';
+import { useLiveQuery } from "dexie-react-hooks";
+import { useMemo, useState } from "react";
+import { PageHeader } from "../../components/layout/PageHeader";
+import { Card } from "../../components/shared/Card";
+import { EmptyState } from "../../components/shared/EmptyState";
+import { Button, FormField, Select, type TabItem, Tabs } from "../../components/ui";
+import { Building2, Receipt, Users } from "../../components/ui/icons";
+import { db } from "../../db";
+import type { Occupancy, Tenant, Unit } from "../../db/schema";
+import { useProperty } from "../../hooks/useProperty";
+import { AbrechnungPrint } from "./AbrechnungPrint";
+import { AbrechnungView } from "./AbrechnungView";
+import { CostEntry } from "./CostEntry";
+import { MessdienstInput } from "./MessdienstInput";
+import { PrepaymentInput } from "./PrepaymentInput";
 
-type Tab = 'kosten' | 'messdienst' | 'vorauszahlung' | 'abrechnung';
+type Tab = "kosten" | "messdienst" | "vorauszahlung" | "abrechnung";
 
 interface OccupancyInfo {
   occupancy: Occupancy;
@@ -23,20 +23,18 @@ interface OccupancyInfo {
 }
 
 const TAB_ITEMS: TabItem<Tab>[] = [
-  { id: 'kosten', label: 'Kosten erfassen' },
-  { id: 'messdienst', label: 'Messdienst' },
-  { id: 'vorauszahlung', label: 'Vorauszahlungen' },
-  { id: 'abrechnung', label: 'Abrechnung anzeigen' },
+  { id: "kosten", label: "Kosten erfassen" },
+  { id: "messdienst", label: "Messdienst" },
+  { id: "vorauszahlung", label: "Vorauszahlungen" },
+  { id: "abrechnung", label: "Abrechnung anzeigen" },
 ];
 
 export function NebenkostenPage() {
   const { activeProperty, addProperty } = useProperty();
   const currentYear = new Date().getFullYear();
   const [year, setYear] = useState(currentYear - 1);
-  const [activeTab, setActiveTab] = useState<Tab>('kosten');
-  const [selectedOccupancyId, setSelectedOccupancyId] = useState<number | null>(
-    null,
-  );
+  const [activeTab, setActiveTab] = useState<Tab>("kosten");
+  const [selectedOccupancyId, setSelectedOccupancyId] = useState<number | null>(null);
   const [showPrintAll, setShowPrintAll] = useState(false);
 
   const yearOptions = useMemo(() => {
@@ -50,24 +48,16 @@ export function NebenkostenPage() {
   const occupancies = useLiveQuery(async () => {
     if (!activeProperty?.id) return [];
 
-    const units = await db.units
-      .where('propertyId')
-      .equals(activeProperty.id)
-      .toArray();
+    const units = await db.units.where("propertyId").equals(activeProperty.id).toArray();
 
     const yearStart = `${year}-01`;
     const yearEnd = `${year}-12`;
     const result: OccupancyInfo[] = [];
 
     for (const unit of units) {
-      const occs = await db.occupancies
-        .where('unitId')
-        .equals(unit.id!)
-        .toArray();
+      const occs = await db.occupancies.where("unitId").equals(unit.id!).toArray();
 
-      const active = occs.filter(
-        (o) => o.from <= yearEnd && (o.to === null || o.to >= yearStart),
-      );
+      const active = occs.filter((o) => o.from <= yearEnd && (o.to === null || o.to >= yearStart));
 
       for (const occ of active) {
         const tenant = (await db.tenants.get(occ.tenantId)) ?? null;
@@ -85,9 +75,8 @@ export function NebenkostenPage() {
         title="Kein Objekt vorhanden"
         description="Lege zuerst ein Mietobjekt an."
         action={{
-          label: 'Objekt anlegen',
-          onClick: () =>
-            addProperty({ name: 'Mein Haus', address: '', units: 0 }),
+          label: "Objekt anlegen",
+          onClick: () => addProperty({ name: "Mein Haus", address: "", units: 0 }),
         }}
       />
     );
@@ -104,15 +93,13 @@ export function NebenkostenPage() {
     );
   }
 
-  const selectedOccupancy = occupancies?.find(
-    (o) => o.occupancy.id === selectedOccupancyId,
-  );
+  const selectedOccupancy = occupancies?.find((o) => o.occupancy.id === selectedOccupancyId);
 
   return (
     <div className="space-y-4">
       <PageHeader
         title="Nebenkostenabrechnung"
-        description={`${activeProperty.name}${activeProperty.address ? ` – ${activeProperty.address}` : ''}`}
+        description={`${activeProperty.name}${activeProperty.address ? ` – ${activeProperty.address}` : ""}`}
         icon={<Receipt size={20} strokeWidth={1.75} />}
         accent="nebenkosten"
         actions={
@@ -145,25 +132,23 @@ export function NebenkostenPage() {
           ariaLabel="Nebenkosten-Bereiche"
           onChange={(id) => {
             setActiveTab(id);
-            if (id !== 'abrechnung') setSelectedOccupancyId(null);
+            if (id !== "abrechnung") setSelectedOccupancyId(null);
           }}
         />
       </div>
 
       {/* Tab content */}
-      {activeTab === 'kosten' && (
-        <CostEntry propertyId={activeProperty.id!} year={year} />
-      )}
+      {activeTab === "kosten" && <CostEntry propertyId={activeProperty.id!} year={year} />}
 
-      {activeTab === 'messdienst' && (
+      {activeTab === "messdienst" && (
         <MessdienstInput propertyId={activeProperty.id!} year={year} />
       )}
 
-      {activeTab === 'vorauszahlung' && (
+      {activeTab === "vorauszahlung" && (
         <PrepaymentInput propertyId={activeProperty.id!} year={year} />
       )}
 
-      {activeTab === 'abrechnung' && (
+      {activeTab === "abrechnung" && (
         <div className="space-y-4">
           {/* Occupancy selector */}
           <Card>
@@ -171,17 +156,15 @@ export function NebenkostenPage() {
               <div className="flex-1 min-w-[200px]">
                 <FormField label="Mieter auswählen">
                   <Select
-                    value={selectedOccupancyId ?? ''}
+                    value={selectedOccupancyId ?? ""}
                     onChange={(e) =>
-                      setSelectedOccupancyId(
-                        e.target.value ? Number(e.target.value) : null,
-                      )
+                      setSelectedOccupancyId(e.target.value ? Number(e.target.value) : null)
                     }
                   >
                     <option value="">Bitte wählen…</option>
                     {occupancies?.map((info) => (
                       <option key={info.occupancy.id} value={info.occupancy.id}>
-                        {info.unit.name} – {info.tenant?.name ?? 'Unbekannt'}
+                        {info.unit.name} – {info.tenant?.name ?? "Unbekannt"}
                       </option>
                     ))}
                   </Select>

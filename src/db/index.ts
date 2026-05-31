@@ -1,56 +1,56 @@
-import Dexie, { type EntityTable } from 'dexie';
-import type * as S from './schema';
+import Dexie, { type EntityTable } from "dexie";
+import type * as S from "./schema";
 
-export const db = new Dexie('hausverwaltung') as Dexie & {
-  properties: EntityTable<S.Property, 'id'>;
-  units: EntityTable<S.Unit, 'id'>;
-  tenants: EntityTable<S.Tenant, 'id'>;
-  occupancies: EntityTable<S.Occupancy, 'id'>;
-  costTypes: EntityTable<S.CostType, 'id'>;
-  costs: EntityTable<S.Cost, 'id'>;
-  costShares: EntityTable<S.CostShare, 'id'>;
-  prepayments: EntityTable<S.Prepayment, 'id'>;
-  meterTypes: EntityTable<S.MeterType, 'id'>;
-  meters: EntityTable<S.Meter, 'id'>;
-  meterReadings: EntityTable<S.MeterReading, 'id'>;
-  supplierBills: EntityTable<S.SupplierBill, 'id'>;
-  maintenanceItems: EntityTable<S.MaintenanceItem, 'id'>;
-  payments: EntityTable<S.Payment, 'id'>;
-  handoverProtocols: EntityTable<S.HandoverProtocol, 'id'>;
-  settings: EntityTable<S.Setting, 'key'>;
-  rentChanges: EntityTable<S.RentChange, 'id'>;
-  depositEvents: EntityTable<S.DepositEvent, 'id'>;
-  documents: EntityTable<S.AppDocument, 'id'>;
-  tombstones: EntityTable<S.Tombstone, 'syncId'>;
+export const db = new Dexie("hausverwaltung") as Dexie & {
+  properties: EntityTable<S.Property, "id">;
+  units: EntityTable<S.Unit, "id">;
+  tenants: EntityTable<S.Tenant, "id">;
+  occupancies: EntityTable<S.Occupancy, "id">;
+  costTypes: EntityTable<S.CostType, "id">;
+  costs: EntityTable<S.Cost, "id">;
+  costShares: EntityTable<S.CostShare, "id">;
+  prepayments: EntityTable<S.Prepayment, "id">;
+  meterTypes: EntityTable<S.MeterType, "id">;
+  meters: EntityTable<S.Meter, "id">;
+  meterReadings: EntityTable<S.MeterReading, "id">;
+  supplierBills: EntityTable<S.SupplierBill, "id">;
+  maintenanceItems: EntityTable<S.MaintenanceItem, "id">;
+  payments: EntityTable<S.Payment, "id">;
+  handoverProtocols: EntityTable<S.HandoverProtocol, "id">;
+  settings: EntityTable<S.Setting, "key">;
+  rentChanges: EntityTable<S.RentChange, "id">;
+  depositEvents: EntityTable<S.DepositEvent, "id">;
+  documents: EntityTable<S.AppDocument, "id">;
+  tombstones: EntityTable<S.Tombstone, "syncId">;
 };
 
 db.version(1).stores({
-  properties: '++id',
-  units: '++id, propertyId',
-  tenants: '++id, unitId',
-  occupancies: '++id, [unitId+from], tenantId, unitId',
-  costTypes: '++id',
-  costs: '++id, [year+costTypeId], propertyId',
-  costShares: '++id, [costId+occupancyId]',
-  prepayments: '++id, [occupancyId+year]',
-  meterTypes: '++id',
-  meters: '++id, unitId, meterTypeId',
-  meterReadings: '++id, [meterId+date]',
-  supplierBills: '++id, [year+type], propertyId',
-  maintenanceItems: '++id, unitId, date',
-  payments: '++id, [occupancyId+month], month',
-  handoverProtocols: '++id, occupancyId',
-  settings: 'key',
+  properties: "++id",
+  units: "++id, propertyId",
+  tenants: "++id, unitId",
+  occupancies: "++id, [unitId+from], tenantId, unitId",
+  costTypes: "++id",
+  costs: "++id, [year+costTypeId], propertyId",
+  costShares: "++id, [costId+occupancyId]",
+  prepayments: "++id, [occupancyId+year]",
+  meterTypes: "++id",
+  meters: "++id, unitId, meterTypeId",
+  meterReadings: "++id, [meterId+date]",
+  supplierBills: "++id, [year+type], propertyId",
+  maintenanceItems: "++id, unitId, date",
+  payments: "++id, [occupancyId+month], month",
+  handoverProtocols: "++id, occupancyId",
+  settings: "key",
 });
 
 db.version(2).stores({
-  rentChanges: '++id, occupancyId',
-  depositEvents: '++id, occupancyId',
-  documents: '++id, [entityType+entityId]',
+  rentChanges: "++id, occupancyId",
+  depositEvents: "++id, occupancyId",
+  documents: "++id, [entityType+entityId]",
 });
 
 db.version(3).stores({
-  costTypes: '++id, sortOrder',
+  costTypes: "++id, sortOrder",
 });
 
 /**
@@ -68,49 +68,49 @@ db.version(3).stores({
  * Single-Backup-pro-Gerät-Workflow ist der Fall nicht erreichbar.
  */
 const SYNCABLE_TABLES = [
-  'properties',
-  'units',
-  'tenants',
-  'occupancies',
-  'costTypes',
-  'costs',
-  'costShares',
-  'prepayments',
-  'meterTypes',
-  'meters',
-  'meterReadings',
-  'supplierBills',
-  'maintenanceItems',
-  'payments',
-  'handoverProtocols',
-  'settings',
-  'rentChanges',
-  'depositEvents',
-  'documents',
+  "properties",
+  "units",
+  "tenants",
+  "occupancies",
+  "costTypes",
+  "costs",
+  "costShares",
+  "prepayments",
+  "meterTypes",
+  "meters",
+  "meterReadings",
+  "supplierBills",
+  "maintenanceItems",
+  "payments",
+  "handoverProtocols",
+  "settings",
+  "rentChanges",
+  "depositEvents",
+  "documents",
 ] as const;
 
 db.version(4)
   .stores({
-    properties: '++id, syncId, updatedAt',
-    units: '++id, propertyId, syncId, updatedAt',
-    tenants: '++id, unitId, syncId, updatedAt',
-    occupancies: '++id, [unitId+from], tenantId, unitId, syncId, updatedAt',
-    costTypes: '++id, sortOrder, syncId, updatedAt',
-    costs: '++id, [year+costTypeId], propertyId, syncId, updatedAt',
-    costShares: '++id, [costId+occupancyId], syncId, updatedAt',
-    prepayments: '++id, [occupancyId+year], syncId, updatedAt',
-    meterTypes: '++id, syncId, updatedAt',
-    meters: '++id, unitId, meterTypeId, syncId, updatedAt',
-    meterReadings: '++id, [meterId+date], syncId, updatedAt',
-    supplierBills: '++id, [year+type], propertyId, syncId, updatedAt',
-    maintenanceItems: '++id, unitId, date, syncId, updatedAt',
-    payments: '++id, [occupancyId+month], month, syncId, updatedAt',
-    handoverProtocols: '++id, occupancyId, syncId, updatedAt',
-    settings: 'key, syncId, updatedAt',
-    rentChanges: '++id, occupancyId, syncId, updatedAt',
-    depositEvents: '++id, occupancyId, syncId, updatedAt',
-    documents: '++id, [entityType+entityId], syncId, updatedAt',
-    tombstones: 'syncId, [tableName+deletedAt], deletedAt',
+    properties: "++id, syncId, updatedAt",
+    units: "++id, propertyId, syncId, updatedAt",
+    tenants: "++id, unitId, syncId, updatedAt",
+    occupancies: "++id, [unitId+from], tenantId, unitId, syncId, updatedAt",
+    costTypes: "++id, sortOrder, syncId, updatedAt",
+    costs: "++id, [year+costTypeId], propertyId, syncId, updatedAt",
+    costShares: "++id, [costId+occupancyId], syncId, updatedAt",
+    prepayments: "++id, [occupancyId+year], syncId, updatedAt",
+    meterTypes: "++id, syncId, updatedAt",
+    meters: "++id, unitId, meterTypeId, syncId, updatedAt",
+    meterReadings: "++id, [meterId+date], syncId, updatedAt",
+    supplierBills: "++id, [year+type], propertyId, syncId, updatedAt",
+    maintenanceItems: "++id, unitId, date, syncId, updatedAt",
+    payments: "++id, [occupancyId+month], month, syncId, updatedAt",
+    handoverProtocols: "++id, occupancyId, syncId, updatedAt",
+    settings: "key, syncId, updatedAt",
+    rentChanges: "++id, occupancyId, syncId, updatedAt",
+    depositEvents: "++id, occupancyId, syncId, updatedAt",
+    documents: "++id, [entityType+entityId], syncId, updatedAt",
+    tombstones: "syncId, [tableName+deletedAt], deletedAt",
   })
   .upgrade(async (tx) => {
     const now = Date.now();
@@ -134,15 +134,15 @@ db.version(4)
  */
 db.version(5)
   .stores({
-    occupancies: '++id, &[unitId+from], tenantId, unitId, syncId, updatedAt',
-    payments: '++id, &[occupancyId+month], month, syncId, updatedAt',
+    occupancies: "++id, &[unitId+from], tenantId, unitId, syncId, updatedAt",
+    payments: "++id, &[occupancyId+month], month, syncId, updatedAt",
   })
   .upgrade(async (tx) => {
     type Occ = { id?: number; unitId: number; from: string };
     type Pay = { id?: number; occupancyId: number; month: string };
 
     const dedupe = async <T extends { id?: number }>(
-      tableName: 'occupancies' | 'payments',
+      tableName: "occupancies" | "payments",
       keyFn: (rec: T) => string,
     ) => {
       const all = (await tx.table(tableName).toArray()) as T[];
@@ -164,8 +164,8 @@ db.version(5)
       }
     };
 
-    await dedupe<Occ>('occupancies', (r) => `${r.unitId}_${r.from}`);
-    await dedupe<Pay>('payments', (r) => `${r.occupancyId}_${r.month}`);
+    await dedupe<Occ>("occupancies", (r) => `${r.unitId}_${r.from}`);
+    await dedupe<Pay>("payments", (r) => `${r.occupancyId}_${r.month}`);
   });
 
 // Listener-Liste für lokale Schreibvorgänge. Wird vom Sync-Service abonniert,
@@ -208,23 +208,23 @@ function notifyLocalWrite(): void {
 for (const tableName of SYNCABLE_TABLES) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const table = db.table(tableName) as any;
-  table.hook('creating', (_pk: unknown, obj: Record<string, unknown>) => {
+  table.hook("creating", (_pk: unknown, obj: Record<string, unknown>) => {
     if (!obj.syncId) obj.syncId = crypto.randomUUID();
     // Beim Sync-Apply liefert der Snapshot bereits `updatedAt` aus der
     // Quelle — sonst würde das Last-Write-Wins-Argument verloren gehen.
-    if (typeof obj.updatedAt !== 'number') obj.updatedAt = Date.now();
+    if (typeof obj.updatedAt !== "number") obj.updatedAt = Date.now();
     queueMicrotask(notifyLocalWrite);
   });
-  table.hook('updating', (mods: Record<string, unknown>) => {
+  table.hook("updating", (mods: Record<string, unknown>) => {
     queueMicrotask(notifyLocalWrite);
     // Sync-interne Updates (z.B. beim Merge) setzen updatedAt selbst —
     // nur automatisch setzen, wenn nicht bereits im Patch enthalten.
-    if (!('updatedAt' in mods)) {
+    if (!("updatedAt" in mods)) {
       return { ...mods, updatedAt: Date.now() };
     }
     return mods;
   });
-  table.hook('deleting', () => {
+  table.hook("deleting", () => {
     queueMicrotask(notifyLocalWrite);
   });
 }
@@ -242,10 +242,8 @@ export async function deleteWithTombstone(
   tableName: (typeof SYNCABLE_TABLES)[number],
   id: number | string,
 ): Promise<void> {
-  await db.transaction('rw', db.table(tableName), db.tombstones, async () => {
-    const record = (await db.table(tableName).get(id)) as
-      | { syncId?: string }
-      | undefined;
+  await db.transaction("rw", db.table(tableName), db.tombstones, async () => {
+    const record = (await db.table(tableName).get(id)) as { syncId?: string } | undefined;
     if (record?.syncId) {
       await db.tombstones.put({
         syncId: record.syncId,
@@ -266,11 +264,8 @@ export async function bulkDeleteWithTombstones(
   ids: (number | string)[],
 ): Promise<void> {
   if (ids.length === 0) return;
-  await db.transaction('rw', db.table(tableName), db.tombstones, async () => {
-    const records = (await db.table(tableName).bulkGet(ids)) as (
-      | { syncId?: string }
-      | undefined
-    )[];
+  await db.transaction("rw", db.table(tableName), db.tombstones, async () => {
+    const records = (await db.table(tableName).bulkGet(ids)) as ({ syncId?: string } | undefined)[];
     const tombstones = records
       .filter((r): r is { syncId: string } => Boolean(r?.syncId))
       .map((r) => ({
@@ -294,17 +289,14 @@ export async function deleteWhereWithTombstones(
   indexField: string,
   value: number | string,
 ): Promise<void> {
-  await db.transaction('rw', db.table(tableName), db.tombstones, async () => {
-    const records = (await db
-      .table(tableName)
-      .where(indexField)
-      .equals(value)
-      .toArray()) as { id?: number; syncId?: string }[];
+  await db.transaction("rw", db.table(tableName), db.tombstones, async () => {
+    const records = (await db.table(tableName).where(indexField).equals(value).toArray()) as {
+      id?: number;
+      syncId?: string;
+    }[];
     if (records.length === 0) return;
     const tombstones = records
-      .filter((r): r is { id: number; syncId: string } =>
-        Boolean(r.syncId && r.id !== undefined),
-      )
+      .filter((r): r is { id: number; syncId: string } => Boolean(r.syncId && r.id !== undefined))
       .map((r) => ({
         syncId: r.syncId,
         tableName,

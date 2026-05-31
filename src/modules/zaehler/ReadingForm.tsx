@@ -1,12 +1,12 @@
-import { useState } from 'react';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../../db';
-import { useProperty } from '../../hooks/useProperty';
-import { Card } from '../../components/shared/Card';
-import { NumInput } from '../../components/shared/NumInput';
-import { DataTable, type Column } from '../../components/shared/DataTable';
-import { formatDate, formatNumber } from '../../utils/format';
-import type { Meter, MeterType, MeterReading, Unit } from '../../db/schema';
+import { useLiveQuery } from "dexie-react-hooks";
+import { useState } from "react";
+import { Card } from "../../components/shared/Card";
+import { type Column, DataTable } from "../../components/shared/DataTable";
+import { NumInput } from "../../components/shared/NumInput";
+import { db } from "../../db";
+import type { Meter, MeterReading, MeterType, Unit } from "../../db/schema";
+import { useProperty } from "../../hooks/useProperty";
+import { formatDate, formatNumber } from "../../utils/format";
 
 interface MeterOption {
   meter: Meter;
@@ -15,10 +15,10 @@ interface MeterOption {
   label: string;
 }
 
-const SOURCE_LABELS: Record<MeterReading['source'], string> = {
-  self: 'Eigene Ablesung',
-  messdienst: 'Messdienstleister',
-  versorger: 'Versorger',
+const SOURCE_LABELS: Record<MeterReading["source"], string> = {
+  self: "Eigene Ablesung",
+  messdienst: "Messdienstleister",
+  versorger: "Versorger",
 };
 
 interface ReadingFormProps {
@@ -32,36 +32,31 @@ export function ReadingForm({ selectedMeterId, onMeterChange }: ReadingFormProps
 
   const [date, setDate] = useState(today);
   const [value, setValue] = useState(0);
-  const [source, setSource] = useState<MeterReading['source']>('self');
+  const [source, setSource] = useState<MeterReading["source"]>("self");
   const [saving, setSaving] = useState(false);
 
   const meterOptions = useLiveQuery(async (): Promise<MeterOption[]> => {
     if (!activeProperty?.id) return [];
 
-    const units = await db.units
-      .where('propertyId')
-      .equals(activeProperty.id)
-      .toArray();
+    const units = await db.units.where("propertyId").equals(activeProperty.id).toArray();
     const unitIds = units.map((u) => u.id!);
     const unitMap = new Map(units.map((u) => [u.id!, u]));
 
     const allMeters = await db.meters.toArray();
-    const propertyMeters = allMeters.filter(
-      (m) => m.unitId === null || unitIds.includes(m.unitId),
-    );
+    const propertyMeters = allMeters.filter((m) => m.unitId === null || unitIds.includes(m.unitId));
 
     const meterTypes = await db.meterTypes.toArray();
     const typeMap = new Map(meterTypes.map((t) => [t.id!, t]));
 
     return propertyMeters.map((meter) => {
       const mt = typeMap.get(meter.meterTypeId);
-      const unit = meter.unitId ? unitMap.get(meter.unitId) ?? null : null;
-      const locationLabel = unit ? unit.name : 'Hauptzähler';
+      const unit = meter.unitId ? (unitMap.get(meter.unitId) ?? null) : null;
+      const locationLabel = unit ? unit.name : "Hauptzähler";
       return {
         meter,
-        meterType: mt ?? { id: 0, name: 'Unbekannt', unit: '', category: 'water' as const },
+        meterType: mt ?? { id: 0, name: "Unbekannt", unit: "", category: "water" as const },
         unit,
-        label: `${mt?.name ?? 'Unbekannt'} – ${meter.serialNumber} (${locationLabel})`,
+        label: `${mt?.name ?? "Unbekannt"} – ${meter.serialNumber} (${locationLabel})`,
       };
     });
   }, [activeProperty?.id]);
@@ -69,11 +64,11 @@ export function ReadingForm({ selectedMeterId, onMeterChange }: ReadingFormProps
   const recentReadings = useLiveQuery(async () => {
     if (!selectedMeterId) return [];
     return db.meterReadings
-      .where('[meterId+date]')
-      .between([selectedMeterId, ''], [selectedMeterId, '\uffff'])
+      .where("[meterId+date]")
+      .between([selectedMeterId, ""], [selectedMeterId, "\uffff"])
       .reverse()
       .limit(10)
-      .sortBy('date')
+      .sortBy("date")
       .then((arr) => arr.reverse());
   }, [selectedMeterId]);
 
@@ -96,7 +91,7 @@ export function ReadingForm({ selectedMeterId, onMeterChange }: ReadingFormProps
       });
       setValue(0);
       setDate(today);
-      setSource('self');
+      setSource("self");
     } finally {
       setSaving(false);
     }
@@ -104,25 +99,25 @@ export function ReadingForm({ selectedMeterId, onMeterChange }: ReadingFormProps
 
   const readingColumns: Column<MeterReading>[] = [
     {
-      key: 'date',
-      header: 'Datum',
+      key: "date",
+      header: "Datum",
       render: (r) => formatDate(r.date),
       sortValue: (r) => r.date,
     },
     {
-      key: 'value',
-      header: 'Zählerstand',
+      key: "value",
+      header: "Zählerstand",
       render: (r) => (
         <span className="font-mono">
-          {formatNumber(r.value)} {selectedMeterType?.unit ?? ''}
+          {formatNumber(r.value)} {selectedMeterType?.unit ?? ""}
         </span>
       ),
       sortValue: (r) => r.value,
-      align: 'right',
+      align: "right",
     },
     {
-      key: 'source',
-      header: 'Quelle',
+      key: "source",
+      header: "Quelle",
       render: (r) => SOURCE_LABELS[r.source],
     },
   ];
@@ -132,35 +127,39 @@ export function ReadingForm({ selectedMeterId, onMeterChange }: ReadingFormProps
       <div className="space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-              Zähler *
+            <label className="block">
+              <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
+                Zähler *
+              </span>
+              <select
+                value={selectedMeterId ?? ""}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  onMeterChange(val ? Number(val) : null);
+                }}
+                className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+              >
+                <option value="">– Zähler wählen –</option>
+                {(meterOptions ?? []).map((opt) => (
+                  <option key={opt.meter.id!} value={opt.meter.id!}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
             </label>
-            <select
-              value={selectedMeterId ?? ''}
-              onChange={(e) => {
-                const val = e.target.value;
-                onMeterChange(val ? Number(val) : null);
-              }}
-              className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
-            >
-              <option value="">– Zähler wählen –</option>
-              {(meterOptions ?? []).map((opt) => (
-                <option key={opt.meter.id!} value={opt.meter.id!}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
           </div>
           <div>
-            <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-              Datum *
+            <label className="block">
+              <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
+                Datum *
+              </span>
+              <input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+              />
             </label>
-            <input
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
-            />
           </div>
         </div>
 
@@ -168,33 +167,36 @@ export function ReadingForm({ selectedMeterId, onMeterChange }: ReadingFormProps
           <NumInput
             value={value}
             onChange={setValue}
-            label={`Zählerstand${selectedMeterType?.unit ? ` (${selectedMeterType.unit})` : ''} *`}
+            label={`Zählerstand${selectedMeterType?.unit ? ` (${selectedMeterType.unit})` : ""} *`}
             suffix={selectedMeterType?.unit}
             min={0}
           />
           <div>
-            <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-              Quelle *
+            <label className="block">
+              <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
+                Quelle *
+              </span>
+              <select
+                value={source}
+                onChange={(e) => setSource(e.target.value as MeterReading["source"])}
+                className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+              >
+                <option value="self">Eigene Ablesung</option>
+                <option value="messdienst">Messdienstleister</option>
+                <option value="versorger">Versorger</option>
+              </select>
             </label>
-            <select
-              value={source}
-              onChange={(e) => setSource(e.target.value as MeterReading['source'])}
-              className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
-            >
-              <option value="self">Eigene Ablesung</option>
-              <option value="messdienst">Messdienstleister</option>
-              <option value="versorger">Versorger</option>
-            </select>
           </div>
         </div>
 
         <div className="flex gap-2">
           <button
+            type="button"
             onClick={handleSave}
             disabled={!selectedMeterId || !date || saving}
             className="px-4 py-1.5 text-sm bg-zinc-800 text-white rounded-lg hover:bg-zinc-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {saving ? 'Speichere...' : 'Ablesung speichern'}
+            {saving ? "Speichere..." : "Ablesung speichern"}
           </button>
         </div>
 

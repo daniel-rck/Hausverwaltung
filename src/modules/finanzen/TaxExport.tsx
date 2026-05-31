@@ -1,14 +1,14 @@
-import { useMemo } from 'react';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../../db';
-import { useProperty } from '../../hooks/useProperty';
-import { Card } from '../../components/shared/Card';
-import { EmptyState } from '../../components/shared/EmptyState';
-import { FileText } from '../../components/ui/icons';
-import { PrintLayout } from '../../components/layout/PrintLayout';
-import { usePrint } from '../../hooks/usePrint';
-import { formatEuro, formatArea } from '../../utils/format';
-import type { FinancingData } from '../../db/schema';
+import { useLiveQuery } from "dexie-react-hooks";
+import { useMemo } from "react";
+import { PrintLayout } from "../../components/layout/PrintLayout";
+import { Card } from "../../components/shared/Card";
+import { EmptyState } from "../../components/shared/EmptyState";
+import { FileText } from "../../components/ui/icons";
+import { db } from "../../db";
+import type { FinancingData } from "../../db/schema";
+import { usePrint } from "../../hooks/usePrint";
+import { useProperty } from "../../hooks/useProperty";
+import { formatArea, formatEuro } from "../../utils/format";
 
 interface TaxRow {
   id: string;
@@ -32,10 +32,7 @@ export function TaxExport({ year }: TaxExportProps) {
   const data = useLiveQuery(async () => {
     if (!activeProperty?.id) return null;
 
-    const units = await db.units
-      .where('propertyId')
-      .equals(activeProperty.id)
-      .toArray();
+    const units = await db.units.where("propertyId").equals(activeProperty.id).toArray();
 
     const unitIds = units.map((u) => u.id!);
     const allOccupancies = await db.occupancies.toArray();
@@ -43,9 +40,7 @@ export function TaxExport({ year }: TaxExportProps) {
 
     const tenantIds = [...new Set(occupancies.map((o) => o.tenantId))];
     const tenants = await db.tenants.bulkGet(tenantIds);
-    const tenantMap = new Map(
-      tenants.filter(Boolean).map((t) => [t!.id!, t!])
-    );
+    const tenantMap = new Map(tenants.filter(Boolean).map((t) => [t!.id!, t!]));
 
     const unitMap = new Map(units.map((u) => [u.id!, u]));
 
@@ -59,18 +54,24 @@ export function TaxExport({ year }: TaxExportProps) {
     if (!activeProperty?.id) return null;
     const propertyId = activeProperty.id;
 
-    const units = await db.units.where('propertyId').equals(propertyId).toArray();
+    const units = await db.units.where("propertyId").equals(propertyId).toArray();
     const totalArea = units.reduce((s, u) => s + u.area, 0);
 
     const costTypes = await db.costTypes.toArray();
-    const costs = await db.costs.where('propertyId').equals(propertyId).toArray();
+    const costs = await db.costs.where("propertyId").equals(propertyId).toArray();
     const yearCosts = costs.filter((c) => c.year === year);
 
-    const taxTypeIds = costTypes.filter((ct) => ct.category === 'tax').map((ct) => ct.id!);
-    const insuranceTypeIds = costTypes.filter((ct) => ct.category === 'insurance').map((ct) => ct.id!);
+    const taxTypeIds = costTypes.filter((ct) => ct.category === "tax").map((ct) => ct.id!);
+    const insuranceTypeIds = costTypes
+      .filter((ct) => ct.category === "insurance")
+      .map((ct) => ct.id!);
 
-    const grundsteuer = yearCosts.filter((c) => taxTypeIds.includes(c.costTypeId)).reduce((s, c) => s + c.totalAmount, 0);
-    const versicherungen = yearCosts.filter((c) => insuranceTypeIds.includes(c.costTypeId)).reduce((s, c) => s + c.totalAmount, 0);
+    const grundsteuer = yearCosts
+      .filter((c) => taxTypeIds.includes(c.costTypeId))
+      .reduce((s, c) => s + c.totalAmount, 0);
+    const versicherungen = yearCosts
+      .filter((c) => insuranceTypeIds.includes(c.costTypeId))
+      .reduce((s, c) => s + c.totalAmount, 0);
 
     const financingSetting = await db.settings.get(`financing_${propertyId}`);
     const financing = financingSetting?.value as FinancingData | undefined;
@@ -78,16 +79,21 @@ export function TaxExport({ year }: TaxExportProps) {
     // AfA: jährlicher Satz × Kaufpreis. AfA-Satz wird auf 0–5% begrenzt
     // (Gebäude-AfA liegt typisch zwischen 2% und 3%).
     const afaSatz = financing ? Math.min(5, Math.max(0, financing.afaSatz)) : 0;
-    const afa = financing && afaSatz > 0 ? financing.kaufpreis * afaSatz / 100 : 0;
+    const afa = financing && afaSatz > 0 ? (financing.kaufpreis * afaSatz) / 100 : 0;
     // Schuldzinsen: Näherung kreditbetrag × zinssatz — ignoriert Tilgung über
     // die Jahre. Für die Anlage V müssen die TATSÄCHLICH gezahlten Zinsen
     // angegeben werden; die UI weist explizit darauf hin.
-    const schuldzinsen = financing ? financing.kreditbetrag * financing.zinssatz / 100 : 0;
+    const schuldzinsen = financing ? (financing.kreditbetrag * financing.zinssatz) / 100 : 0;
 
     const unitIds = units.map((u) => u.id!);
     const allMaintenance = await db.maintenanceItems.toArray();
     const erhaltung = allMaintenance
-      .filter((m) => m.date.startsWith(`${year}`) && m.category === 'repair' && (m.unitId === null || unitIds.includes(m.unitId!)))
+      .filter(
+        (m) =>
+          m.date.startsWith(`${year}`) &&
+          m.category === "repair" &&
+          (m.unitId === null || unitIds.includes(m.unitId!)),
+      )
       .reduce((s, m) => s + m.cost, 0);
 
     return { totalArea, grundsteuer, versicherungen, afa, schuldzinsen, erhaltung };
@@ -116,8 +122,7 @@ export function TaxExport({ year }: TaxExportProps) {
     }
 
     for (const occ of occupancies) {
-      if (occ.from > yearEnd || (occ.to !== null && occ.to < yearStart))
-        continue;
+      if (occ.from > yearEnd || (occ.to !== null && occ.to < yearStart)) continue;
 
       const unit = unitMap.get(occ.unitId);
       const tenant = tenantMap.get(occ.tenantId);
@@ -180,17 +185,13 @@ export function TaxExport({ year }: TaxExportProps) {
         <tbody>
           {rows.map((row) => {
             const fromDisplay = formatPeriod(row.occupancyFrom);
-            const toDisplay = row.occupancyTo
-              ? formatPeriod(row.occupancyTo)
-              : 'laufend';
+            const toDisplay = row.occupancyTo ? formatPeriod(row.occupancyTo) : "laufend";
             return (
               <tr key={row.id} className="border-b border-zinc-100 dark:border-zinc-700">
                 <td className="py-2.5 px-3 font-medium text-zinc-700 dark:text-zinc-200">
                   {row.unitName}
                 </td>
-                <td className="py-2.5 px-3 text-zinc-600 dark:text-zinc-300">
-                  {row.tenantName}
-                </td>
+                <td className="py-2.5 px-3 text-zinc-600 dark:text-zinc-300">{row.tenantName}</td>
                 <td className="py-2.5 px-3 text-zinc-500 dark:text-zinc-400 text-xs">
                   {fromDisplay} – {toDisplay}
                 </td>
@@ -209,10 +210,7 @@ export function TaxExport({ year }: TaxExportProps) {
         </tbody>
         <tfoot>
           <tr className="border-t-2 border-zinc-300 dark:border-zinc-600">
-            <td
-              colSpan={3}
-              className="py-3 px-3 font-semibold text-zinc-800 dark:text-zinc-100"
-            >
+            <td colSpan={3} className="py-3 px-3 font-semibold text-zinc-800 dark:text-zinc-100">
               Summe {year}
             </td>
             <td className="py-3 px-3 text-right font-mono font-semibold text-zinc-800 dark:text-zinc-100">
@@ -231,47 +229,89 @@ export function TaxExport({ year }: TaxExportProps) {
   );
 
   const werbungskosten = anlageV
-    ? anlageV.grundsteuer + anlageV.afa + anlageV.schuldzinsen + anlageV.erhaltung + anlageV.versicherungen
+    ? anlageV.grundsteuer +
+      anlageV.afa +
+      anlageV.schuldzinsen +
+      anlageV.erhaltung +
+      anlageV.versicherungen
     : 0;
   const einnahmenGesamt = grandTotalCold + grandTotalUtilities;
   const einkuenfte = einnahmenGesamt - werbungskosten;
 
-  const anlageVRows: { zeile: string; label: string; value: string; bold?: boolean; highlight?: boolean }[] = anlageV ? [
-    { zeile: '9', label: 'Lage des Grundstücks', value: activeProperty?.address || '–' },
-    { zeile: '13', label: 'Gesamtwohnfläche', value: formatArea(anlageV.totalArea) },
-    { zeile: '33', label: 'Mieteinnahmen für Wohnungen', value: formatEuro(grandTotalCold) },
-    { zeile: '35', label: 'Umlagen (NK erhalten)', value: formatEuro(grandTotalUtilities) },
-    { zeile: '37', label: 'Vereinnahmte Mieten gesamt', value: formatEuro(einnahmenGesamt), bold: true },
-    { zeile: '47', label: 'Grundsteuer', value: formatEuro(anlageV.grundsteuer) },
-    { zeile: '48', label: 'AfA (Absetzung für Abnutzung)', value: anlageV.afa > 0 ? formatEuro(anlageV.afa) : '–' },
-    { zeile: '49', label: 'Schuldzinsen', value: anlageV.schuldzinsen > 0 ? formatEuro(anlageV.schuldzinsen) : '–' },
-    { zeile: '50', label: 'Erhaltungsaufwendungen', value: formatEuro(anlageV.erhaltung) },
-    { zeile: '52', label: 'Versicherungen', value: formatEuro(anlageV.versicherungen) },
-    { zeile: '56', label: 'Summe Werbungskosten', value: formatEuro(werbungskosten), bold: true },
-    { zeile: '57', label: 'Einkünfte aus V+V', value: formatEuro(einkuenfte), highlight: true },
-  ] : [];
+  const anlageVRows: {
+    zeile: string;
+    label: string;
+    value: string;
+    bold?: boolean;
+    highlight?: boolean;
+  }[] = anlageV
+    ? [
+        { zeile: "9", label: "Lage des Grundstücks", value: activeProperty?.address || "–" },
+        { zeile: "13", label: "Gesamtwohnfläche", value: formatArea(anlageV.totalArea) },
+        { zeile: "33", label: "Mieteinnahmen für Wohnungen", value: formatEuro(grandTotalCold) },
+        { zeile: "35", label: "Umlagen (NK erhalten)", value: formatEuro(grandTotalUtilities) },
+        {
+          zeile: "37",
+          label: "Vereinnahmte Mieten gesamt",
+          value: formatEuro(einnahmenGesamt),
+          bold: true,
+        },
+        { zeile: "47", label: "Grundsteuer", value: formatEuro(anlageV.grundsteuer) },
+        {
+          zeile: "48",
+          label: "AfA (Absetzung für Abnutzung)",
+          value: anlageV.afa > 0 ? formatEuro(anlageV.afa) : "–",
+        },
+        {
+          zeile: "49",
+          label: "Schuldzinsen",
+          value: anlageV.schuldzinsen > 0 ? formatEuro(anlageV.schuldzinsen) : "–",
+        },
+        { zeile: "50", label: "Erhaltungsaufwendungen", value: formatEuro(anlageV.erhaltung) },
+        { zeile: "52", label: "Versicherungen", value: formatEuro(anlageV.versicherungen) },
+        {
+          zeile: "56",
+          label: "Summe Werbungskosten",
+          value: formatEuro(werbungskosten),
+          bold: true,
+        },
+        { zeile: "57", label: "Einkünfte aus V+V", value: formatEuro(einkuenfte), highlight: true },
+      ]
+    : [];
 
   const anlageVContent = anlageV && (
     <Card title="Anlage V – Übertragungshilfe für Elster">
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b-2 border-zinc-300 dark:border-zinc-600">
-            <th className="py-2 px-2 text-left font-medium text-zinc-500 dark:text-zinc-400 w-16">Zeile</th>
-            <th className="py-2 px-3 text-left font-medium text-zinc-600 dark:text-zinc-300">Bezeichnung</th>
-            <th className="py-2 px-3 text-right font-medium text-zinc-600 dark:text-zinc-300">Wert</th>
+            <th className="py-2 px-2 text-left font-medium text-zinc-500 dark:text-zinc-400 w-16">
+              Zeile
+            </th>
+            <th className="py-2 px-3 text-left font-medium text-zinc-600 dark:text-zinc-300">
+              Bezeichnung
+            </th>
+            <th className="py-2 px-3 text-right font-medium text-zinc-600 dark:text-zinc-300">
+              Wert
+            </th>
           </tr>
         </thead>
         <tbody>
           {anlageVRows.map((row) => (
             <tr
               key={row.zeile}
-              className={`border-b border-zinc-100 dark:border-zinc-700 ${row.highlight ? 'bg-emerald-50 dark:bg-emerald-900/20' : ''}`}
+              className={`border-b border-zinc-100 dark:border-zinc-700 ${row.highlight ? "bg-emerald-50 dark:bg-emerald-900/20" : ""}`}
             >
-              <td className="py-2 px-2 text-xs text-zinc-400 dark:text-zinc-500 font-mono">{row.zeile}</td>
-              <td className={`py-2 px-3 ${row.bold || row.highlight ? 'font-semibold' : ''} text-zinc-700 dark:text-zinc-200`}>
+              <td className="py-2 px-2 text-xs text-zinc-400 dark:text-zinc-500 font-mono">
+                {row.zeile}
+              </td>
+              <td
+                className={`py-2 px-3 ${row.bold || row.highlight ? "font-semibold" : ""} text-zinc-700 dark:text-zinc-200`}
+              >
                 {row.label}
               </td>
-              <td className={`py-2 px-3 text-right font-mono ${row.highlight ? 'font-bold text-emerald-700 dark:text-emerald-400' : row.bold ? 'font-semibold text-zinc-800 dark:text-zinc-100' : 'text-zinc-700 dark:text-zinc-200'}`}>
+              <td
+                className={`py-2 px-3 text-right font-mono ${row.highlight ? "font-bold text-emerald-700 dark:text-emerald-400" : row.bold ? "font-semibold text-zinc-800 dark:text-zinc-100" : "text-zinc-700 dark:text-zinc-200"}`}
+              >
                 {row.value}
               </td>
             </tr>
@@ -281,27 +321,23 @@ export function TaxExport({ year }: TaxExportProps) {
       <div className="mt-4 p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 text-xs text-amber-900 dark:text-amber-200 space-y-1">
         <p className="font-semibold">Hinweis zur Anlage V — Näherungswerte</p>
         <p>
-          AfA und Schuldzinsen werden hier näherungsweise berechnet
-          (Kaufpreis × AfA-Satz bzw. Kreditbetrag × Zinssatz). Beide Werte
-          ändern sich über die Laufzeit (Tilgung reduziert die Zinslast,
-          AfA bleibt konstant). Für ELSTER bitte die <strong>tatsächlich
-          gezahlten Zinsen</strong> aus der Bank-Jahresabrechnung übernehmen
-          und die AfA gegen Steuerberater/Vorjahres-Bescheid prüfen.
+          AfA und Schuldzinsen werden hier näherungsweise berechnet (Kaufpreis × AfA-Satz bzw.
+          Kreditbetrag × Zinssatz). Beide Werte ändern sich über die Laufzeit (Tilgung reduziert die
+          Zinslast, AfA bleibt konstant). Für ELSTER bitte die{" "}
+          <strong>tatsächlich gezahlten Zinsen</strong> aus der Bank-Jahresabrechnung übernehmen und
+          die AfA gegen Steuerberater/Vorjahres-Bescheid prüfen.
         </p>
       </div>
       <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-2">
-        Die Angaben dienen als Ausfüllhilfe für die Anlage V der Einkommensteuererklärung.
-        Bitte prüfen Sie alle Werte vor der Übertragung in ELSTER.
+        Die Angaben dienen als Ausfüllhilfe für die Anlage V der Einkommensteuererklärung. Bitte
+        prüfen Sie alle Werte vor der Übertragung in ELSTER.
       </p>
     </Card>
   );
 
   if (isPrinting) {
     return (
-      <PrintLayout
-        title={`Mieteinnahmen ${year}`}
-        subtitle={activeProperty?.name ?? ''}
-      >
+      <PrintLayout title={`Mieteinnahmen ${year}`} subtitle={activeProperty?.name ?? ""}>
         {tableContent}
         {anlageVContent}
       </PrintLayout>
@@ -315,6 +351,7 @@ export function TaxExport({ year }: TaxExportProps) {
         action={
           rows.length > 0 ? (
             <button
+              type="button"
               onClick={print}
               className="px-3 py-1.5 text-xs bg-zinc-800 text-white rounded-lg hover:bg-zinc-900 transition-colors"
             >
@@ -345,6 +382,6 @@ export function TaxExport({ year }: TaxExportProps) {
 
 /** Format "2024-03" to "03/2024" for compact display */
 function formatPeriod(ym: string): string {
-  const [y, m] = ym.split('-');
+  const [y, m] = ym.split("-");
   return `${m}/${y}`;
 }

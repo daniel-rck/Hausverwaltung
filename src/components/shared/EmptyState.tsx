@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react';
-import { Button } from '../ui/Button';
+import type { ReactNode } from "react";
+import { Button } from "../ui/Button";
 
 interface EmptyStateProps {
   /** Lucide-Icon-Element (z.B. `<Users size={24} />`) oder beliebiger ReactNode. */
@@ -10,13 +10,13 @@ interface EmptyStateProps {
 }
 
 function isActionObject(
-  action: EmptyStateProps['action'],
+  action: EmptyStateProps["action"],
 ): action is { label: string; onClick: () => void } {
   return (
-    typeof action === 'object' &&
+    typeof action === "object" &&
     action !== null &&
-    'label' in (action as Record<string, unknown>) &&
-    'onClick' in (action as Record<string, unknown>)
+    "label" in (action as Record<string, unknown>) &&
+    "onClick" in (action as Record<string, unknown>)
   );
 }
 

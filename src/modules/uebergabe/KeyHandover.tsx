@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import { Card } from '../../components/shared/Card';
+import { Card } from "../../components/shared/Card";
 
 interface KeyEntry {
   type: string;
@@ -11,7 +11,7 @@ interface KeyHandoverProps {
   onChange: (keys: KeyEntry[]) => void;
 }
 
-const DEFAULT_KEY_TYPES = ['Haustür', 'Wohnungstür', 'Briefkasten', 'Keller'];
+const DEFAULT_KEY_TYPES = ["Haustür", "Wohnungstür", "Briefkasten", "Keller"];
 
 export function createDefaultKeys(): KeyEntry[] {
   return DEFAULT_KEY_TYPES.map((type) => ({ type, count: 0 }));
@@ -19,9 +19,7 @@ export function createDefaultKeys(): KeyEntry[] {
 
 export function KeyHandover({ keys, onChange }: KeyHandoverProps) {
   const updateKey = (index: number, updates: Partial<KeyEntry>) => {
-    const updated = keys.map((key, i) =>
-      i === index ? { ...key, ...updates } : key,
-    );
+    const updated = keys.map((key, i) => (i === index ? { ...key, ...updates } : key));
     onChange(updated);
   };
 
@@ -30,7 +28,7 @@ export function KeyHandover({ keys, onChange }: KeyHandoverProps) {
   };
 
   const addKey = () => {
-    onChange([...keys, { type: '', count: 0 }]);
+    onChange([...keys, { type: "", count: 0 }]);
   };
 
   return (
@@ -45,10 +43,8 @@ export function KeyHandover({ keys, onChange }: KeyHandoverProps) {
 
         {/* Rows */}
         {keys.map((key, index) => (
-          <div
-            key={index}
-            className="grid grid-cols-[1fr_80px_40px] gap-2 items-center"
-          >
+          // biome-ignore lint/suspicious/noArrayIndexKey: editierbare Positionsliste ohne stabile ID (stabile IDs folgen mit dem Schema-Umbau in Phase 4)
+          <div key={index} className="grid grid-cols-[1fr_80px_40px] gap-2 items-center">
             <input
               type="text"
               value={key.type}
@@ -59,10 +55,8 @@ export function KeyHandover({ keys, onChange }: KeyHandoverProps) {
             <input
               type="number"
               min="0"
-              value={key.count || ''}
-              onChange={(e) =>
-                updateKey(index, { count: parseInt(e.target.value) || 0 })
-              }
+              value={key.count || ""}
+              onChange={(e) => updateKey(index, { count: parseInt(e.target.value, 10) || 0 })}
               className="border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm text-center font-mono focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
             />
             <button

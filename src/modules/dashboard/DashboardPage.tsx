@@ -1,28 +1,28 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../../db';
-import { seedDatabase } from '../../db/seed';
-import { useProperty } from '../../hooks/useProperty';
-import { Card } from '../../components/shared/Card';
-import { EmptyState } from '../../components/shared/EmptyState';
+import { useLiveQuery } from "dexie-react-hooks";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { PageHeader } from "../../components/layout/PageHeader";
+import { Card } from "../../components/shared/Card";
+import { EmptyState } from "../../components/shared/EmptyState";
 import {
   Button,
   FormField,
   Input,
   KpiTile,
   Modal,
-  useToast,
-  useConfirm,
   type ModulKey,
-} from '../../components/ui';
-import { useFormValidation, required } from '../../components/ui/useFormValidation';
-import { PageHeader } from '../../components/layout/PageHeader';
-import { ModulIcons, type ModulIconKey, Building2 } from '../../components/ui/icons';
-import { QuickStats } from './QuickStats';
-import { AlertsList } from './AlertsList';
-import { AnnualReport } from './AnnualReport';
-import { formatEuro } from '../../utils/format';
+  useConfirm,
+  useToast,
+} from "../../components/ui";
+import { Building2, type ModulIconKey, ModulIcons } from "../../components/ui/icons";
+import { required, useFormValidation } from "../../components/ui/useFormValidation";
+import { db } from "../../db";
+import { seedDatabase } from "../../db/seed";
+import { useProperty } from "../../hooks/useProperty";
+import { formatEuro } from "../../utils/format";
+import { AlertsList } from "./AlertsList";
+import { AnnualReport } from "./AnnualReport";
+import { QuickStats } from "./QuickStats";
 
 interface ModuleLink {
   path: string;
@@ -33,14 +33,62 @@ interface ModuleLink {
 }
 
 const moduleLinks: ModuleLink[] = [
-  { path: '/mieter', label: 'Mieter', iconKey: 'mieter', desc: 'Wohnungen & Mieter verwalten', accent: 'mieter' },
-  { path: '/nebenkosten', label: 'Nebenkosten', iconKey: 'nebenkosten', desc: 'Abrechnungen erstellen', accent: 'nebenkosten' },
-  { path: '/zaehler', label: 'Zähler', iconKey: 'zaehler', desc: 'Zählerstände erfassen', accent: 'zaehler' },
-  { path: '/wasser', label: 'Versorger', iconKey: 'wasser', desc: 'Verbrauch analysieren', accent: 'wasser' },
-  { path: '/finanzen', label: 'Finanzen', iconKey: 'finanzen', desc: 'Mieteinnahmen tracken', accent: 'finanzen' },
-  { path: '/instandhaltung', label: 'Instandhaltung', iconKey: 'instandhaltung', desc: 'Reparaturen & Wartungen', accent: 'instandhaltung' },
-  { path: '/uebergabe', label: 'Übergabe', iconKey: 'uebergabe', desc: 'Protokolle erstellen', accent: 'uebergabe' },
-  { path: '/rendite', label: 'Rendite', iconKey: 'rendite', desc: 'Wirtschaftlichkeit prüfen', accent: 'rendite' },
+  {
+    path: "/mieter",
+    label: "Mieter",
+    iconKey: "mieter",
+    desc: "Wohnungen & Mieter verwalten",
+    accent: "mieter",
+  },
+  {
+    path: "/nebenkosten",
+    label: "Nebenkosten",
+    iconKey: "nebenkosten",
+    desc: "Abrechnungen erstellen",
+    accent: "nebenkosten",
+  },
+  {
+    path: "/zaehler",
+    label: "Zähler",
+    iconKey: "zaehler",
+    desc: "Zählerstände erfassen",
+    accent: "zaehler",
+  },
+  {
+    path: "/wasser",
+    label: "Versorger",
+    iconKey: "wasser",
+    desc: "Verbrauch analysieren",
+    accent: "wasser",
+  },
+  {
+    path: "/finanzen",
+    label: "Finanzen",
+    iconKey: "finanzen",
+    desc: "Mieteinnahmen tracken",
+    accent: "finanzen",
+  },
+  {
+    path: "/instandhaltung",
+    label: "Instandhaltung",
+    iconKey: "instandhaltung",
+    desc: "Reparaturen & Wartungen",
+    accent: "instandhaltung",
+  },
+  {
+    path: "/uebergabe",
+    label: "Übergabe",
+    iconKey: "uebergabe",
+    desc: "Protokolle erstellen",
+    accent: "uebergabe",
+  },
+  {
+    path: "/rendite",
+    label: "Rendite",
+    iconKey: "rendite",
+    desc: "Wirtschaftlichkeit prüfen",
+    accent: "rendite",
+  },
 ];
 
 export function DashboardPage() {
@@ -59,7 +107,7 @@ export function DashboardPage() {
           title="Willkommen bei Hausverwaltung"
           description="Lege dein erstes Mietobjekt an, um zu starten."
           action={{
-            label: 'Objekt anlegen',
+            label: "Objekt anlegen",
             onClick: () => setWelcomeOpen(true),
           }}
         />
@@ -126,11 +174,11 @@ function PropertyCard() {
   const { activeProperty, updateProperty, deleteProperty, properties } = useProperty();
   const [editing, setEditing] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [form, setForm] = useState({ name: '', address: '' });
+  const [form, setForm] = useState({ name: "", address: "" });
   const toast = useToast();
   const confirm = useConfirm();
   const { errors, validate } = useFormValidation<typeof form>({
-    name: required('Bitte Name angeben'),
+    name: required("Bitte Name angeben"),
   });
 
   if (!activeProperty) return null;
@@ -149,10 +197,10 @@ function PropertyCard() {
         name: form.name.trim() || activeProperty.name,
         address: form.address,
       });
-      toast.success('Objekt aktualisiert.');
+      toast.success("Objekt aktualisiert.");
       setEditing(false);
     } catch (err) {
-      toast.error('Speichern fehlgeschlagen.');
+      toast.error("Speichern fehlgeschlagen.");
       console.error(err);
     } finally {
       setBusy(false);
@@ -161,17 +209,17 @@ function PropertyCard() {
 
   const handleDelete = async () => {
     const ok = await confirm({
-      title: 'Objekt löschen?',
+      title: "Objekt löschen?",
       message: `„${activeProperty.name}“ und alle zugehörigen Daten (Wohnungen, Mieter, etc.) werden gelöscht. Diese Aktion kann nicht rückgängig gemacht werden.`,
-      confirmLabel: 'Endgültig löschen',
+      confirmLabel: "Endgültig löschen",
       danger: true,
     });
     if (!ok) return;
     try {
       await deleteProperty(activeProperty.id!);
-      toast.success('Objekt gelöscht.');
+      toast.success("Objekt gelöscht.");
     } catch (err) {
-      toast.error('Löschen fehlgeschlagen.');
+      toast.error("Löschen fehlgeschlagen.");
       console.error(err);
     }
   };
@@ -198,7 +246,10 @@ function PropertyCard() {
           <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
         </FormField>
         <FormField label="Adresse">
-          <Input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} />
+          <Input
+            value={form.address}
+            onChange={(e) => setForm({ ...form, address: e.target.value })}
+          />
         </FormField>
         <div className="flex gap-2">
           <Button variant="primary" onClick={handleSave} loading={busy}>
@@ -227,11 +278,11 @@ interface WelcomeModalProps {
 }
 
 function WelcomeModal({ open, onClose, onCreate }: WelcomeModalProps) {
-  const [form, setForm] = useState({ name: '', address: '', units: 1 });
+  const [form, setForm] = useState({ name: "", address: "", units: 1 });
   const [busy, setBusy] = useState(false);
   const toast = useToast();
   const { errors, validate } = useFormValidation<typeof form>({
-    name: required('Bitte Name angeben'),
+    name: required("Bitte Name angeben"),
   });
 
   const handleCreate = async () => {
@@ -243,10 +294,10 @@ function WelcomeModal({ open, onClose, onCreate }: WelcomeModalProps) {
         address: form.address.trim(),
         units: Math.max(0, Number(form.units) || 0),
       });
-      toast.success('Objekt angelegt.');
+      toast.success("Objekt angelegt.");
       onClose();
     } catch (err) {
-      toast.error('Anlegen fehlgeschlagen.');
+      toast.error("Anlegen fehlgeschlagen.");
       console.error(err);
     } finally {
       setBusy(false);
@@ -310,17 +361,14 @@ function PortfolioOverview() {
     let totalMonthlyRent = 0;
 
     for (const prop of properties) {
-      const units = await db.units.where('propertyId').equals(prop.id!).toArray();
+      const units = await db.units.where("propertyId").equals(prop.id!).toArray();
 
       const unitIds = units.map((u) => u.id!);
       totalUnits += units.length;
 
       const occupancies = await db.occupancies.toArray();
       const active = occupancies.filter(
-        (o) =>
-          unitIds.includes(o.unitId) &&
-          o.from <= now &&
-          (o.to === null || o.to >= now),
+        (o) => unitIds.includes(o.unitId) && o.from <= now && (o.to === null || o.to >= now),
       );
 
       const occupied = new Set(active.map((o) => o.unitId)).size;
@@ -348,7 +396,7 @@ function PortfolioOverview() {
         <KpiTile
           label="Leerstand"
           value={portfolioData.totalVacant}
-          accent={portfolioData.totalVacant > 0 ? 'nebenkosten' : undefined}
+          accent={portfolioData.totalVacant > 0 ? "nebenkosten" : undefined}
         />
         <KpiTile
           label="Monatsmiete gesamt"

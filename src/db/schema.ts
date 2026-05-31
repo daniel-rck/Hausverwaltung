@@ -51,8 +51,8 @@ export interface Occupancy extends SyncFields {
   notes?: string;
 }
 
-export type DistributionKey = 'area' | 'persons' | 'units' | 'messdienst' | 'direct';
-export type CostCategory = 'water' | 'heating' | 'insurance' | 'tax' | 'cleaning' | 'misc';
+export type DistributionKey = "area" | "persons" | "units" | "messdienst" | "direct";
+export type CostCategory = "water" | "heating" | "insurance" | "tax" | "cleaning" | "misc";
 
 export interface CostType extends SyncFields {
   id?: number;
@@ -88,7 +88,7 @@ export interface MeterType extends SyncFields {
   id?: number;
   name: string;
   unit: string;
-  category: 'water' | 'energy';
+  category: "water" | "energy";
 }
 
 export interface Meter extends SyncFields {
@@ -106,14 +106,14 @@ export interface MeterReading extends SyncFields {
   meterId: number;
   date: string;
   value: number;
-  source: 'self' | 'messdienst' | 'versorger';
+  source: "self" | "messdienst" | "versorger";
 }
 
 export interface SupplierBill extends SyncFields {
   id?: number;
   propertyId: number;
   year: number;
-  type: 'water' | 'gas' | 'electricity' | 'heating';
+  type: "water" | "gas" | "electricity" | "heating";
   supplier: string;
   totalAmount: number;
   totalConsumption: number;
@@ -127,7 +127,7 @@ export interface MaintenanceItem extends SyncFields {
   id?: number;
   unitId: number | null;
   date: string;
-  category: 'repair' | 'maintenance' | 'inspection' | 'modernization';
+  category: "repair" | "maintenance" | "inspection" | "modernization";
   title: string;
   description?: string;
   contractor?: string;
@@ -145,14 +145,14 @@ export interface Payment extends SyncFields {
   amountCold: number;
   amountUtilities: number;
   receivedDate?: string;
-  method: 'transfer' | 'cash' | 'debit';
+  method: "transfer" | "cash" | "debit";
   notes?: string;
 }
 
 export interface HandoverProtocol extends SyncFields {
   id?: number;
   occupancyId: number;
-  type: 'move-in' | 'move-out';
+  type: "move-in" | "move-out";
   date: string;
   rooms: RoomCondition[];
   meterReadings: { meterId: number; value: number }[];
@@ -174,7 +174,7 @@ export interface RoomCondition {
   notes?: string;
 }
 
-export type Rating = 'good' | 'fair' | 'poor';
+export type Rating = "good" | "fair" | "poor";
 
 export interface Setting extends SyncFields {
   key: string;
@@ -188,7 +188,7 @@ export interface LandlordInfo {
   taxId?: string;
 }
 
-export type RentChangeReason = 'mietspiegel' | 'index' | 'modernization' | 'agreement';
+export type RentChangeReason = "mietspiegel" | "index" | "modernization" | "agreement";
 
 export interface RentChange extends SyncFields {
   id?: number;
@@ -200,7 +200,7 @@ export interface RentChange extends SyncFields {
   notes?: string;
 }
 
-export type DepositEventType = 'payment' | 'interest' | 'deduction' | 'refund';
+export type DepositEventType = "payment" | "interest" | "deduction" | "refund";
 
 export interface DepositEvent extends SyncFields {
   id?: number;
@@ -213,7 +213,7 @@ export interface DepositEvent extends SyncFields {
 
 export interface AppDocument extends SyncFields {
   id?: number;
-  entityType: 'unit' | 'occupancy' | 'property' | 'maintenance';
+  entityType: "unit" | "occupancy" | "property" | "maintenance";
   entityId: number;
   name: string;
   mimeType: string;

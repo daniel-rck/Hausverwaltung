@@ -1,12 +1,12 @@
-import { useMemo } from 'react';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../../db';
-import { Card } from '../../components/shared/Card';
-import { EmptyState } from '../../components/shared/EmptyState';
-import { BarChart3 } from '../../components/ui/icons';
-import { LineChart } from '../../components/charts/LineChart';
-import { formatDate, formatNumber } from '../../utils/format';
-import type { MeterType } from '../../db/schema';
+import { useLiveQuery } from "dexie-react-hooks";
+import { useMemo } from "react";
+import { LineChart } from "../../components/charts/LineChart";
+import { Card } from "../../components/shared/Card";
+import { EmptyState } from "../../components/shared/EmptyState";
+import { BarChart3 } from "../../components/ui/icons";
+import { db } from "../../db";
+import type { MeterType } from "../../db/schema";
+import { formatDate, formatNumber } from "../../utils/format";
 
 interface ConsumptionChartProps {
   meterId: number | null;
@@ -16,9 +16,9 @@ export function ConsumptionChart({ meterId }: ConsumptionChartProps) {
   const readings = useLiveQuery(async () => {
     if (!meterId) return [];
     return db.meterReadings
-      .where('[meterId+date]')
-      .between([meterId, ''], [meterId, '\uffff'])
-      .sortBy('date');
+      .where("[meterId+date]")
+      .between([meterId, ""], [meterId, "\uffff"])
+      .sortBy("date");
   }, [meterId]);
 
   const meterType = useLiveQuery(async (): Promise<MeterType | undefined> => {
@@ -67,21 +67,21 @@ export function ConsumptionChart({ meterId }: ConsumptionChartProps) {
     );
   }
 
-  const unitLabel = meterType?.unit ?? '';
+  const unitLabel = meterType?.unit ?? "";
 
   return (
     <Card title="Verbrauchsverlauf">
       <div className="mb-3">
         <p className="text-xs text-zinc-500 dark:text-zinc-400">
           Verbrauch zwischen aufeinanderfolgenden Ablesungen
-          {unitLabel ? ` (${unitLabel})` : ''}
+          {unitLabel ? ` (${unitLabel})` : ""}
         </p>
       </div>
       <LineChart
         labels={chartData.labels}
         datasets={[
           {
-            label: `Verbrauch${unitLabel ? ` (${unitLabel})` : ''}`,
+            label: `Verbrauch${unitLabel ? ` (${unitLabel})` : ""}`,
             data: chartData.data,
           },
         ]}

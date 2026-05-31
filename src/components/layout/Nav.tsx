@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
-import { Drawer } from '../ui/Drawer';
-import { moduleAccent, type ModulKey } from '../ui/moduleAccent';
-import { ModulIcons, type ModulIconKey, MoreHorizontal } from '../ui/icons';
+import { useState } from "react";
+import { NavLink, useLocation } from "react-router-dom";
+import { Drawer } from "../ui/Drawer";
+import { type ModulIconKey, ModulIcons, MoreHorizontal } from "../ui/icons";
+import { type ModulKey, moduleAccent } from "../ui/moduleAccent";
 
 interface NavItem {
   path: string;
@@ -13,35 +13,53 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { path: '/', label: 'Dashboard', iconKey: 'dashboard', group: 'Übersicht' },
-  { path: '/mieter', label: 'Mieter', iconKey: 'mieter', accent: 'mieter', group: 'Stammdaten' },
-  { path: '/zaehler', label: 'Zähler', iconKey: 'zaehler', accent: 'zaehler', group: 'Verbrauch' },
-  { path: '/wasser', label: 'Versorger', iconKey: 'wasser', accent: 'wasser', group: 'Verbrauch' },
+  { path: "/", label: "Dashboard", iconKey: "dashboard", group: "Übersicht" },
+  { path: "/mieter", label: "Mieter", iconKey: "mieter", accent: "mieter", group: "Stammdaten" },
+  { path: "/zaehler", label: "Zähler", iconKey: "zaehler", accent: "zaehler", group: "Verbrauch" },
+  { path: "/wasser", label: "Versorger", iconKey: "wasser", accent: "wasser", group: "Verbrauch" },
   {
-    path: '/nebenkosten',
-    label: 'Nebenkosten',
-    iconKey: 'nebenkosten',
-    accent: 'nebenkosten',
-    group: 'Buchhaltung',
+    path: "/nebenkosten",
+    label: "Nebenkosten",
+    iconKey: "nebenkosten",
+    accent: "nebenkosten",
+    group: "Buchhaltung",
   },
-  { path: '/finanzen', label: 'Finanzen', iconKey: 'finanzen', accent: 'finanzen', group: 'Buchhaltung' },
-  { path: '/rendite', label: 'Rendite', iconKey: 'rendite', accent: 'rendite', group: 'Buchhaltung' },
   {
-    path: '/instandhaltung',
-    label: 'Instandhaltung',
-    iconKey: 'instandhaltung',
-    accent: 'instandhaltung',
-    group: 'Vorgänge',
+    path: "/finanzen",
+    label: "Finanzen",
+    iconKey: "finanzen",
+    accent: "finanzen",
+    group: "Buchhaltung",
   },
-  { path: '/uebergabe', label: 'Übergabe', iconKey: 'uebergabe', accent: 'uebergabe', group: 'Vorgänge' },
-  { path: '/einstellungen', label: 'Einstellungen', iconKey: 'einstellungen', group: 'System' },
+  {
+    path: "/rendite",
+    label: "Rendite",
+    iconKey: "rendite",
+    accent: "rendite",
+    group: "Buchhaltung",
+  },
+  {
+    path: "/instandhaltung",
+    label: "Instandhaltung",
+    iconKey: "instandhaltung",
+    accent: "instandhaltung",
+    group: "Vorgänge",
+  },
+  {
+    path: "/uebergabe",
+    label: "Übergabe",
+    iconKey: "uebergabe",
+    accent: "uebergabe",
+    group: "Vorgänge",
+  },
+  { path: "/einstellungen", label: "Einstellungen", iconKey: "einstellungen", group: "System" },
 ];
 
-const groupOrder = ['Übersicht', 'Stammdaten', 'Verbrauch', 'Buchhaltung', 'Vorgänge', 'System'];
+const groupOrder = ["Übersicht", "Stammdaten", "Verbrauch", "Buchhaltung", "Vorgänge", "System"];
 
 function activeBar(accent: ModulKey | undefined): string {
   const a = moduleAccent(accent);
-  return a?.bar ?? 'bg-zinc-900 dark:bg-zinc-100';
+  return a?.bar ?? "bg-zinc-900 dark:bg-zinc-100";
 }
 
 export function SidebarNav() {
@@ -66,12 +84,12 @@ export function SidebarNav() {
               <NavLink
                 key={item.path}
                 to={item.path}
-                end={item.path === '/'}
+                end={item.path === "/"}
                 className={({ isActive }) =>
                   `relative flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-[13px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--color-accent]/40 ${
                     isActive
-                      ? 'bg-zinc-100 dark:bg-zinc-800/80 text-zinc-900 dark:text-zinc-50 font-medium'
-                      : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100/60 dark:hover:bg-zinc-800/40 hover:text-zinc-900 dark:hover:text-zinc-100'
+                      ? "bg-zinc-100 dark:bg-zinc-800/80 text-zinc-900 dark:text-zinc-50 font-medium"
+                      : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100/60 dark:hover:bg-zinc-800/40 hover:text-zinc-900 dark:hover:text-zinc-100"
                   }`
                 }
               >
@@ -86,7 +104,11 @@ export function SidebarNav() {
                     <Icon
                       size={16}
                       strokeWidth={1.75}
-                      className={isActive ? 'text-zinc-900 dark:text-zinc-50' : 'text-zinc-500 dark:text-zinc-400'}
+                      className={
+                        isActive
+                          ? "text-zinc-900 dark:text-zinc-50"
+                          : "text-zinc-500 dark:text-zinc-400"
+                      }
                       aria-hidden="true"
                     />
                     <span>{item.label}</span>
@@ -114,7 +136,7 @@ export function BottomNav() {
       <nav
         aria-label="Hauptnavigation Mobile"
         className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border-t border-zinc-200 dark:border-zinc-800 z-40 no-print"
-        style={{ paddingBottom: 'env(safe-area-inset-bottom, 0)' }}
+        style={{ paddingBottom: "env(safe-area-inset-bottom, 0)" }}
       >
         <div className="flex justify-around py-1">
           {bottomMain.map((item) => {
@@ -123,12 +145,12 @@ export function BottomNav() {
               <NavLink
                 key={item.path}
                 to={item.path}
-                end={item.path === '/'}
+                end={item.path === "/"}
                 className={({ isActive }) =>
                   `relative flex flex-col items-center gap-0.5 min-w-[60px] py-2 px-2 text-[10px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--color-accent]/40 rounded-md ${
                     isActive
-                      ? 'text-[--color-accent] dark:text-[--color-accent-dark] font-semibold'
-                      : 'text-zinc-500 dark:text-zinc-400'
+                      ? "text-[--color-accent] dark:text-[--color-accent-dark] font-semibold"
+                      : "text-zinc-500 dark:text-zinc-400"
                   }`
                 }
               >
@@ -154,8 +176,8 @@ export function BottomNav() {
             aria-expanded={open}
             className={`flex flex-col items-center gap-0.5 min-w-[60px] py-2 px-2 text-[10px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--color-accent]/40 rounded-md ${
               moreActive
-                ? 'text-[--color-accent] dark:text-[--color-accent-dark] font-semibold'
-                : 'text-zinc-500 dark:text-zinc-400'
+                ? "text-[--color-accent] dark:text-[--color-accent-dark] font-semibold"
+                : "text-zinc-500 dark:text-zinc-400"
             }`}
           >
             <MoreHorizontal size={20} strokeWidth={1.75} aria-hidden="true" />
@@ -171,13 +193,13 @@ export function BottomNav() {
               <li key={item.path}>
                 <NavLink
                   to={item.path}
-                  end={item.path === '/'}
+                  end={item.path === "/"}
                   onClick={() => setOpen(false)}
                   className={({ isActive }) =>
                     `relative flex items-center gap-3 px-3 py-3 rounded-md text-sm transition-colors ${
                       isActive
-                        ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50 font-medium'
-                        : 'text-zinc-700 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-800/60'
+                        ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50 font-medium"
+                        : "text-zinc-700 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-800/60"
                     }`
                   }
                 >

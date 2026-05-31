@@ -1,4 +1,4 @@
-import { useRegisterSW } from 'virtual:pwa-register/react';
+import { useRegisterSW } from "virtual:pwa-register/react";
 
 export function UpdatePrompt() {
   const {
@@ -6,7 +6,7 @@ export function UpdatePrompt() {
     updateServiceWorker,
   } = useRegisterSW({
     onRegisterError(error) {
-      console.error('SW Registrierung fehlgeschlagen:', error);
+      console.error("SW Registrierung fehlgeschlagen:", error);
     },
   });
 

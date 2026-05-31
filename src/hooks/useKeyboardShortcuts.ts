@@ -1,24 +1,24 @@
-import { useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 
 /** Mapping `g <key>` → Route. */
 const GO_ROUTES: Record<string, string> = {
-  d: '/',
-  m: '/mieter',
-  z: '/zaehler',
-  w: '/wasser',
-  n: '/nebenkosten',
-  f: '/finanzen',
-  r: '/rendite',
-  i: '/instandhaltung',
-  u: '/uebergabe',
-  e: '/einstellungen',
+  d: "/",
+  m: "/mieter",
+  z: "/zaehler",
+  w: "/wasser",
+  n: "/nebenkosten",
+  f: "/finanzen",
+  r: "/rendite",
+  i: "/instandhaltung",
+  u: "/uebergabe",
+  e: "/einstellungen",
 };
 
 function isEditable(target: EventTarget | null): boolean {
   if (!(target instanceof HTMLElement)) return false;
   const tag = target.tagName;
-  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return true;
+  if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return true;
   if (target.isContentEditable) return true;
   return false;
 }
@@ -44,7 +44,7 @@ export function useKeyboardShortcuts(onShowHelp: () => void) {
       if (e.ctrlKey || e.metaKey || e.altKey) return;
       if (isEditable(e.target)) return;
 
-      if (e.key === '?') {
+      if (e.key === "?") {
         e.preventDefault();
         onShowHelpRef.current();
         return;
@@ -52,7 +52,7 @@ export function useKeyboardShortcuts(onShowHelp: () => void) {
 
       const key = e.key.toLowerCase();
 
-      if (key === 'g') {
+      if (key === "g") {
         gPressedAtRef.current = Date.now();
         return;
       }
@@ -65,7 +65,7 @@ export function useKeyboardShortcuts(onShowHelp: () => void) {
       }
     };
 
-    document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
   }, [navigate]);
 }

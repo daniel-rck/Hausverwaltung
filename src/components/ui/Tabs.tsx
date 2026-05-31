@@ -1,5 +1,5 @@
-import { useId, useRef, type KeyboardEvent, type ReactNode } from 'react';
-import { moduleAccent, type ModulKey } from './moduleAccent';
+import { type KeyboardEvent, type ReactNode, useId, useRef } from "react";
+import { type ModulKey, moduleAccent } from "./moduleAccent";
 
 export interface TabItem<T extends string = string> {
   id: T;
@@ -30,8 +30,8 @@ export function Tabs<T extends string>({
   const baseId = useId();
   const a = moduleAccent(accent);
   // Linear-Stil: Active-Text immer neutral, Modul-Akzent nur als 2px-Underline-Bar.
-  const activeText = 'text-zinc-900 dark:text-zinc-50';
-  const activeBar = a?.bar ?? 'bg-zinc-900 dark:bg-zinc-100';
+  const activeText = "text-zinc-900 dark:text-zinc-50";
+  const activeBar = a?.bar ?? "bg-zinc-900 dark:bg-zinc-100";
 
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
@@ -46,16 +46,16 @@ export function Tabs<T extends string>({
     const pos = enabledIndices.indexOf(currentIdx);
 
     switch (e.key) {
-      case 'ArrowRight':
+      case "ArrowRight":
         target = enabledIndices[(pos + 1) % enabledIndices.length];
         break;
-      case 'ArrowLeft':
+      case "ArrowLeft":
         target = enabledIndices[(pos - 1 + enabledIndices.length) % enabledIndices.length];
         break;
-      case 'Home':
+      case "Home":
         target = enabledIndices[0];
         break;
-      case 'End':
+      case "End":
         target = enabledIndices[enabledIndices.length - 1];
         break;
       default:
@@ -69,8 +69,12 @@ export function Tabs<T extends string>({
   };
 
   return (
-    <div role="tablist" aria-label={ariaLabel} className="border-b border-zinc-200 dark:border-zinc-800">
-      <div className={`flex gap-1 ${fullWidth ? 'w-full' : ''} overflow-x-auto`}>
+    <div
+      role="tablist"
+      aria-label={ariaLabel}
+      className="border-b border-zinc-200 dark:border-zinc-800"
+    >
+      <div className={`flex gap-1 ${fullWidth ? "w-full" : ""} overflow-x-auto`}>
         {items.map((item, idx) => {
           const active = item.id === value;
           const tabId = `${baseId}-${item.id}`;
@@ -90,14 +94,14 @@ export function Tabs<T extends string>({
               onClick={() => !item.disabled && onChange(item.id)}
               onKeyDown={(e) => handleKeyDown(e, idx)}
               className={[
-                'relative inline-flex items-center gap-2 px-3 py-2.5 text-sm font-medium whitespace-nowrap transition-colors',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--color-accent]/40 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-900',
-                'disabled:opacity-50 disabled:cursor-not-allowed',
-                fullWidth ? 'flex-1 justify-center' : '',
+                "relative inline-flex items-center gap-2 px-3 py-2.5 text-sm font-medium whitespace-nowrap transition-colors",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--color-accent]/40 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-900",
+                "disabled:opacity-50 disabled:cursor-not-allowed",
+                fullWidth ? "flex-1 justify-center" : "",
                 active
                   ? activeText
-                  : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100',
-              ].join(' ')}
+                  : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100",
+              ].join(" ")}
             >
               {item.icon && (
                 <span aria-hidden="true" className="text-base">
@@ -107,7 +111,7 @@ export function Tabs<T extends string>({
               {item.label}
               <span
                 aria-hidden="true"
-                className={`absolute left-2 right-2 -bottom-px h-0.5 rounded-full transition-opacity ${activeBar} ${active ? 'opacity-100' : 'opacity-0'}`}
+                className={`absolute left-2 right-2 -bottom-px h-0.5 rounded-full transition-opacity ${activeBar} ${active ? "opacity-100" : "opacity-0"}`}
               />
             </button>
           );

@@ -1,4 +1,4 @@
-import { db, bulkDeleteWithTombstones, deleteWithTombstone } from './index';
+import { bulkDeleteWithTombstones, db, deleteWithTombstone } from "./index";
 
 /**
  * Kaskadierte Löschungen mit Tombstones, damit Sync-Layer die Löschung
@@ -23,35 +23,33 @@ async function deleteOccupanciesCascade(occIds: number[]): Promise<void> {
     ]);
 
   await bulkDeleteWithTombstones(
-    'payments',
+    "payments",
     payments.filter((p) => occIdSet.has(p.occupancyId)).map((p) => p.id!),
   );
   await bulkDeleteWithTombstones(
-    'costShares',
+    "costShares",
     costShares.filter((s) => occIdSet.has(s.occupancyId)).map((s) => s.id!),
   );
   await bulkDeleteWithTombstones(
-    'prepayments',
+    "prepayments",
     prepayments.filter((p) => occIdSet.has(p.occupancyId)).map((p) => p.id!),
   );
   await bulkDeleteWithTombstones(
-    'depositEvents',
+    "depositEvents",
     depositEvents.filter((e) => occIdSet.has(e.occupancyId)).map((e) => e.id!),
   );
   await bulkDeleteWithTombstones(
-    'rentChanges',
+    "rentChanges",
     rentChanges.filter((r) => occIdSet.has(r.occupancyId)).map((r) => r.id!),
   );
-  const handoverIds = handovers
-    .filter((h) => occIdSet.has(h.occupancyId))
-    .map((h) => h.id!);
-  await deleteDocumentsForEntity('occupancy', occIds);
-  await bulkDeleteWithTombstones('handoverProtocols', handoverIds);
-  await bulkDeleteWithTombstones('occupancies', occIds);
+  const handoverIds = handovers.filter((h) => occIdSet.has(h.occupancyId)).map((h) => h.id!);
+  await deleteDocumentsForEntity("occupancy", occIds);
+  await bulkDeleteWithTombstones("handoverProtocols", handoverIds);
+  await bulkDeleteWithTombstones("occupancies", occIds);
 }
 
 async function deleteDocumentsForEntity(
-  entityType: 'unit' | 'occupancy' | 'property' | 'maintenance',
+  entityType: "unit" | "occupancy" | "property" | "maintenance",
   entityIds: number[],
 ): Promise<void> {
   if (entityIds.length === 0) return;
@@ -63,7 +61,7 @@ async function deleteDocumentsForEntity(
     .filter((d) => d.entityType === entityType && entitySet.has(d.entityId))
     .map((d) => d.id!)
     .filter((id) => id !== undefined);
-  await bulkDeleteWithTombstones('documents', ids);
+  await bulkDeleteWithTombstones("documents", ids);
 }
 
 async function deleteMetersCascade(meterIds: number[]): Promise<void> {
@@ -71,10 +69,10 @@ async function deleteMetersCascade(meterIds: number[]): Promise<void> {
   const set = new Set(meterIds);
   const readings = await db.meterReadings.toArray();
   await bulkDeleteWithTombstones(
-    'meterReadings',
+    "meterReadings",
     readings.filter((r) => set.has(r.meterId)).map((r) => r.id!),
   );
-  await bulkDeleteWithTombstones('meters', meterIds);
+  await bulkDeleteWithTombstones("meters", meterIds);
 }
 
 async function deleteUnitsCascade(unitIds: number[]): Promise<void> {
@@ -88,13 +86,11 @@ async function deleteUnitsCascade(unitIds: number[]): Promise<void> {
     db.maintenanceItems.toArray(),
   ]);
 
-  const occIds = occupancies
-    .filter((o) => unitIdSet.has(o.unitId))
-    .map((o) => o.id!);
+  const occIds = occupancies.filter((o) => unitIdSet.has(o.unitId)).map((o) => o.id!);
   await deleteOccupanciesCascade(occIds);
 
   await bulkDeleteWithTombstones(
-    'tenants',
+    "tenants",
     tenants.filter((t) => unitIdSet.has(t.unitId)).map((t) => t.id!),
   );
 
@@ -107,10 +103,10 @@ async function deleteUnitsCascade(unitIds: number[]): Promise<void> {
   const maintenanceUnitIds = maintenance
     .filter((m) => m.unitId !== null && unitIdSet.has(m.unitId))
     .map((m) => m.id!);
-  await bulkDeleteWithTombstones('maintenanceItems', maintenanceUnitIds);
+  await bulkDeleteWithTombstones("maintenanceItems", maintenanceUnitIds);
 
-  await deleteDocumentsForEntity('unit', unitIds);
-  await bulkDeleteWithTombstones('units', unitIds);
+  await deleteDocumentsForEntity("unit", unitIds);
+  await bulkDeleteWithTombstones("units", unitIds);
 }
 
 export async function cascadeDeleteUnit(unitId: number): Promise<void> {
@@ -127,9 +123,9 @@ export async function cascadeDeleteMeter(meterId: number): Promise<void> {
 
 export async function cascadeDeleteProperty(propertyId: number): Promise<void> {
   const [units, costs, supplierBills] = await Promise.all([
-    db.units.where('propertyId').equals(propertyId).toArray(),
-    db.costs.where('propertyId').equals(propertyId).toArray(),
-    db.supplierBills.where('propertyId').equals(propertyId).toArray(),
+    db.units.where("propertyId").equals(propertyId).toArray(),
+    db.costs.where("propertyId").equals(propertyId).toArray(),
+    db.supplierBills.where("propertyId").equals(propertyId).toArray(),
   ]);
 
   const unitIds = units.map((u) => u.id!);
@@ -138,23 +134,25 @@ export async function cascadeDeleteProperty(propertyId: number): Promise<void> {
   if (costs.length > 0) {
     const costIds = new Set(costs.map((c) => c.id!));
     const allShares = await db.costShares.toArray();
-    const orphanShareIds = allShares
-      .filter((s) => costIds.has(s.costId))
-      .map((s) => s.id!);
-    await bulkDeleteWithTombstones('costShares', orphanShareIds);
+    const orphanShareIds = allShares.filter((s) => costIds.has(s.costId)).map((s) => s.id!);
+    await bulkDeleteWithTombstones("costShares", orphanShareIds);
   }
 
-  await bulkDeleteWithTombstones('costs', costs.map((c) => c.id!));
-  await bulkDeleteWithTombstones('supplierBills', supplierBills.map((b) => b.id!));
+  await bulkDeleteWithTombstones(
+    "costs",
+    costs.map((c) => c.id!),
+  );
+  await bulkDeleteWithTombstones(
+    "supplierBills",
+    supplierBills.map((b) => b.id!),
+  );
 
   const settings = await db.settings.toArray();
-  const propertyKeys = settings
-    .filter((s) => s.key.endsWith(`_${propertyId}`))
-    .map((s) => s.key);
+  const propertyKeys = settings.filter((s) => s.key.endsWith(`_${propertyId}`)).map((s) => s.key);
   for (const key of propertyKeys) {
-    await deleteWithTombstone('settings', key);
+    await deleteWithTombstone("settings", key);
   }
 
-  await deleteDocumentsForEntity('property', [propertyId]);
-  await deleteWithTombstone('properties', propertyId);
+  await deleteDocumentsForEntity("property", [propertyId]);
+  await deleteWithTombstone("properties", propertyId);
 }

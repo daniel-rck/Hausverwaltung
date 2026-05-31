@@ -1,15 +1,15 @@
-import { useMemo } from 'react';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../../db';
-import type { Unit, Occupancy, Meter, MeterReading } from '../../db/schema';
-import { Card } from '../../components/shared/Card';
-import { EmptyState } from '../../components/shared/EmptyState';
-import { ShowerHead } from '../../components/ui/icons';
-import { BarChart } from '../../components/charts/BarChart';
-import { formatNumber } from '../../utils/format';
-import { useProperty } from '../../hooks/useProperty';
-import { waterPerCapitaPerDay } from '../../utils/calc';
-import { WATER_AVG_LITERS_PER_PERSON_DAY } from '../../utils/constants';
+import { useLiveQuery } from "dexie-react-hooks";
+import { useMemo } from "react";
+import { BarChart } from "../../components/charts/BarChart";
+import { Card } from "../../components/shared/Card";
+import { EmptyState } from "../../components/shared/EmptyState";
+import { ShowerHead } from "../../components/ui/icons";
+import { db } from "../../db";
+import type { Meter, MeterReading, Occupancy, Unit } from "../../db/schema";
+import { useProperty } from "../../hooks/useProperty";
+import { waterPerCapitaPerDay } from "../../utils/calc";
+import { WATER_AVG_LITERS_PER_PERSON_DAY } from "../../utils/constants";
+import { formatNumber } from "../../utils/format";
 
 interface ProKopfChartProps {
   year: number;
@@ -29,67 +29,61 @@ export function ProKopfChart({ year }: ProKopfChartProps) {
   const units = useLiveQuery(
     () =>
       propertyId != null
-        ? db.units.where('propertyId').equals(propertyId).toArray()
+        ? db.units.where("propertyId").equals(propertyId).toArray()
         : Promise.resolve([] as Unit[]),
     [propertyId],
   );
 
   const waterMeterTypes = useLiveQuery(
-    () => db.meterTypes.filter((mt) => mt.category === 'water').toArray(),
+    () => db.meterTypes.filter((mt) => mt.category === "water").toArray(),
     [],
   );
 
-  const allData = useLiveQuery(
-    async () => {
-      if (!units || units.length === 0 || !waterMeterTypes || waterMeterTypes.length === 0) {
-        return null;
+  const allData = useLiveQuery(async () => {
+    if (!units || units.length === 0 || !waterMeterTypes || waterMeterTypes.length === 0) {
+      return null;
+    }
+
+    const waterTypeIds = waterMeterTypes.map((mt) => mt.id!);
+    const yearStart = `${year}-01-01`;
+    const yearEnd = `${year}-12-31`;
+    const yearStartMonth = `${year}-01`;
+    const yearEndMonth = `${year}-12`;
+
+    const result: {
+      unit: Unit;
+      meters: Meter[];
+      readings: MeterReading[];
+      occupancies: Occupancy[];
+    }[] = [];
+
+    for (const unit of units) {
+      const unitMeters = await db.meters
+        .where("unitId")
+        .equals(unit.id!)
+        .filter((m) => waterTypeIds.includes(m.meterTypeId))
+        .toArray();
+
+      const readings: MeterReading[] = [];
+      for (const meter of unitMeters) {
+        const meterReadings = await db.meterReadings
+          .where("[meterId+date]")
+          .between([meter.id!, yearStart], [meter.id!, yearEnd], true, true)
+          .toArray();
+        readings.push(...meterReadings);
       }
 
-      const waterTypeIds = waterMeterTypes.map((mt) => mt.id!);
-      const yearStart = `${year}-01-01`;
-      const yearEnd = `${year}-12-31`;
-      const yearStartMonth = `${year}-01`;
-      const yearEndMonth = `${year}-12`;
+      const allOccupancies = await db.occupancies.where("unitId").equals(unit.id!).toArray();
 
-      const result: {
-        unit: Unit;
-        meters: Meter[];
-        readings: MeterReading[];
-        occupancies: Occupancy[];
-      }[] = [];
+      const occupancies = allOccupancies.filter(
+        (o) => o.from <= yearEndMonth && (o.to === null || o.to >= yearStartMonth),
+      );
 
-      for (const unit of units) {
-        const unitMeters = await db.meters
-          .where('unitId')
-          .equals(unit.id!)
-          .filter((m) => waterTypeIds.includes(m.meterTypeId))
-          .toArray();
+      result.push({ unit, meters: unitMeters, readings, occupancies });
+    }
 
-        const readings: MeterReading[] = [];
-        for (const meter of unitMeters) {
-          const meterReadings = await db.meterReadings
-            .where('[meterId+date]')
-            .between([meter.id!, yearStart], [meter.id!, yearEnd], true, true)
-            .toArray();
-          readings.push(...meterReadings);
-        }
-
-        const allOccupancies = await db.occupancies
-          .where('unitId')
-          .equals(unit.id!)
-          .toArray();
-
-        const occupancies = allOccupancies.filter(
-          (o) => o.from <= yearEndMonth && (o.to === null || o.to >= yearStartMonth),
-        );
-
-        result.push({ unit, meters: unitMeters, readings, occupancies });
-      }
-
-      return result;
-    },
-    [units, waterMeterTypes, year],
-  );
+    return result;
+  }, [units, waterMeterTypes, year]);
 
   const unitConsumptions = useMemo((): UnitConsumption[] => {
     if (!allData) return [];
@@ -121,8 +115,8 @@ export function ProKopfChart({ year }: ProKopfChartProps) {
       for (const occ of occupancies) {
         const start = occ.from < yearStartMonth ? yearStartMonth : occ.from;
         const end = occ.to === null || occ.to > yearEndMonth ? yearEndMonth : occ.to;
-        const [y1, m1] = start.split('-').map(Number);
-        const [y2, m2] = end.split('-').map(Number);
+        const [y1, m1] = start.split("-").map(Number);
+        const [y2, m2] = end.split("-").map(Number);
         const months = Math.max(1, (y2 - y1) * 12 + (m2 - m1) + 1);
         totalPersonMonths += months * occ.persons;
       }
@@ -156,17 +150,13 @@ export function ProKopfChart({ year }: ProKopfChartProps) {
   }
 
   const labels = unitConsumptions.map((u) => u.unitName);
-  const dataValues = unitConsumptions.map((u) =>
-    Math.round(u.litersPerPersonPerDay * 100) / 100,
-  );
-  const referenceLineData = unitConsumptions.map(
-    () => WATER_AVG_LITERS_PER_PERSON_DAY,
-  );
+  const dataValues = unitConsumptions.map((u) => Math.round(u.litersPerPersonPerDay * 100) / 100);
+  const referenceLineData = unitConsumptions.map(() => WATER_AVG_LITERS_PER_PERSON_DAY);
 
   return (
     <Card title="Pro-Kopf-Verbrauch">
       <p className="text-sm text-zinc-600 dark:text-zinc-300 mb-4">
-        Liter pro Person pro Tag nach Wohneinheit. Bundesdurchschnitt:{' '}
+        Liter pro Person pro Tag nach Wohneinheit. Bundesdurchschnitt:{" "}
         <span className="font-semibold">{WATER_AVG_LITERS_PER_PERSON_DAY} l/Person/Tag</span>
       </p>
 
@@ -175,14 +165,14 @@ export function ProKopfChart({ year }: ProKopfChartProps) {
           labels={labels}
           datasets={[
             {
-              label: 'Verbrauch (l/Person/Tag)',
+              label: "Verbrauch (l/Person/Tag)",
               data: dataValues,
-              color: '#0891b2',
+              color: "#0891b2",
             },
             {
               label: `Durchschnitt (${WATER_AVG_LITERS_PER_PERSON_DAY} l)`,
               data: referenceLineData,
-              color: '#d4d4d4',
+              color: "#d4d4d4",
             },
           ]}
           height={250}
@@ -218,30 +208,29 @@ export function ProKopfChart({ year }: ProKopfChartProps) {
                 100;
               const isHigh = deviation > 44;
               return (
-                <tr
-                  key={uc.unitName}
-                  className="border-b border-zinc-100 dark:border-zinc-700"
-                >
+                <tr key={uc.unitName} className="border-b border-zinc-100 dark:border-zinc-700">
                   <td className="py-2.5 px-3">{uc.unitName}</td>
-                  <td className="py-2.5 px-3 text-right font-mono">
-                    {formatNumber(uc.persons)}
-                  </td>
+                  <td className="py-2.5 px-3 text-right font-mono">{formatNumber(uc.persons)}</td>
                   <td className="py-2.5 px-3 text-right font-mono">
                     {formatNumber(uc.consumptionM3)}
                   </td>
                   <td
                     className={`py-2.5 px-3 text-right font-mono ${
-                      isHigh ? 'text-red-600 font-semibold' : ''
+                      isHigh ? "text-red-600 font-semibold" : ""
                     }`}
                   >
                     {formatNumber(uc.litersPerPersonPerDay)}
                   </td>
                   <td
                     className={`py-2.5 px-3 text-right font-mono ${
-                      isHigh ? 'text-red-600 font-semibold' : deviation > 0 ? 'text-amber-600' : 'text-green-600'
+                      isHigh
+                        ? "text-red-600 font-semibold"
+                        : deviation > 0
+                          ? "text-amber-600"
+                          : "text-green-600"
                     }`}
                   >
-                    {deviation >= 0 ? '+' : ''}
+                    {deviation >= 0 ? "+" : ""}
                     {formatNumber(deviation)} %
                   </td>
                 </tr>

@@ -1,12 +1,12 @@
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../../db';
-import { useProperty } from '../../hooks/useProperty';
-import { Card } from '../../components/shared/Card';
-import { Home, Wrench, Gauge, AlertTriangle } from '../../components/ui/icons';
-import type { LucideIcon } from '../../components/ui/icons';
+import { useLiveQuery } from "dexie-react-hooks";
+import { Card } from "../../components/shared/Card";
+import type { LucideIcon } from "../../components/ui/icons";
+import { AlertTriangle, Gauge, Home, Wrench } from "../../components/ui/icons";
+import { db } from "../../db";
+import { useProperty } from "../../hooks/useProperty";
 
-type AlertKind = 'vacant' | 'maintenance' | 'calibration';
-type Severity = 'warning' | 'info';
+type AlertKind = "vacant" | "maintenance" | "calibration";
+type Severity = "warning" | "info";
 
 interface Alert {
   kind: AlertKind;
@@ -30,7 +30,7 @@ export function AlertsList() {
     const now = new Date().toISOString().slice(0, 7);
     const today = new Date().toISOString().slice(0, 10);
 
-    const units = await db.units.where('propertyId').equals(activeProperty.id).toArray();
+    const units = await db.units.where("propertyId").equals(activeProperty.id).toArray();
     const unitIds = units.map((u) => u.id!);
 
     // Leerstand
@@ -45,7 +45,7 @@ export function AlertsList() {
 
     const vacantUnits = units.filter((u) => !occupiedIds.has(u.id!));
     for (const u of vacantUnits) {
-      result.push({ kind: 'vacant', severity: 'warning', message: `${u.name} steht leer` });
+      result.push({ kind: "vacant", severity: "warning", message: `${u.name} steht leer` });
     }
 
     // Fällige Wartungen
@@ -58,8 +58,8 @@ export function AlertsList() {
     );
     for (const m of dueSoon) {
       result.push({
-        kind: 'maintenance',
-        severity: 'info',
+        kind: "maintenance",
+        severity: "info",
         message: `${m.title} fällig am ${m.nextDue}`,
       });
     }
@@ -73,8 +73,8 @@ export function AlertsList() {
     );
     for (const m of soonExpiring) {
       result.push({
-        kind: 'calibration',
-        severity: 'warning',
+        kind: "calibration",
+        severity: "warning",
         message: `Zähler ${m.serialNumber}: Eichfrist läuft ab (${m.calibrationDue})`,
       });
     }
@@ -85,22 +85,30 @@ export function AlertsList() {
   if (!alerts || alerts.length === 0) {
     return (
       <Card title="Heute zu tun">
-        <p className="text-sm text-zinc-500 dark:text-zinc-400">Alles erledigt — keine offenen Hinweise.</p>
+        <p className="text-sm text-zinc-500 dark:text-zinc-400">
+          Alles erledigt — keine offenen Hinweise.
+        </p>
       </Card>
     );
   }
 
   return (
-    <Card title="Heute zu tun" description={`${alerts.length} offene${alerts.length === 1 ? 'r Hinweis' : ' Hinweise'}`}>
+    <Card
+      title="Heute zu tun"
+      description={`${alerts.length} offene${alerts.length === 1 ? "r Hinweis" : " Hinweise"}`}
+    >
       <ul className="space-y-2">
-        {alerts.slice(0, 8).map((alert, i) => {
+        {alerts.slice(0, 8).map((alert) => {
           const Icon = iconMap[alert.kind] ?? AlertTriangle;
           const iconColor =
-            alert.severity === 'warning'
-              ? 'text-amber-600 dark:text-amber-400'
-              : 'text-[--color-accent] dark:text-[--color-accent-dark]';
+            alert.severity === "warning"
+              ? "text-amber-600 dark:text-amber-400"
+              : "text-[--color-accent] dark:text-[--color-accent-dark]";
           return (
-            <li key={i} className="flex items-start gap-3 text-sm text-zinc-700 dark:text-zinc-200">
+            <li
+              key={alert.message}
+              className="flex items-start gap-3 text-sm text-zinc-700 dark:text-zinc-200"
+            >
               <Icon
                 size={16}
                 strokeWidth={1.75}

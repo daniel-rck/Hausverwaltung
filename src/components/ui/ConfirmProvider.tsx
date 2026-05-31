@@ -1,6 +1,14 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useCallback, useContext, useMemo, useRef, useState, type ReactNode } from 'react';
-import { ConfirmDialog } from '../shared/ConfirmDialog';
+import {
+  createContext,
+  type ReactNode,
+  useCallback,
+  useContext,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { ConfirmDialog } from "../shared/ConfirmDialog";
 
 interface ConfirmOptions {
   title: string;
@@ -16,7 +24,7 @@ const ConfirmContext = createContext<ConfirmFn | null>(null);
 
 export function useConfirm(): ConfirmFn {
   const ctx = useContext(ConfirmContext);
-  if (!ctx) throw new Error('useConfirm muss innerhalb von <ConfirmProvider> aufgerufen werden.');
+  if (!ctx) throw new Error("useConfirm muss innerhalb von <ConfirmProvider> aufgerufen werden.");
   return ctx;
 }
 

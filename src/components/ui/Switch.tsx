@@ -1,19 +1,19 @@
-import { forwardRef, useId, type InputHTMLAttributes, type ReactNode } from 'react';
+import { forwardRef, type InputHTMLAttributes, type ReactNode, useId } from "react";
 
-interface SwitchProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> {
+interface SwitchProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "type"> {
   label?: ReactNode;
   description?: ReactNode;
 }
 
 export const Switch = forwardRef<HTMLInputElement, SwitchProps>(
-  ({ label, description, className = '', id, checked, disabled, ...rest }, ref) => {
+  ({ label, description, className = "", id, checked, disabled, ...rest }, ref) => {
     const reactId = useId();
     const inputId = id ?? reactId;
 
     return (
       <label
         htmlFor={inputId}
-        className={`inline-flex items-start gap-3 cursor-pointer select-none ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+        className={`inline-flex items-start gap-3 cursor-pointer select-none ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
       >
         <span className="relative inline-block w-9 h-5 mt-0.5 shrink-0">
           <input
@@ -32,7 +32,9 @@ export const Switch = forwardRef<HTMLInputElement, SwitchProps>(
           <span className="text-sm">
             {label && <span className="text-zinc-700 dark:text-zinc-200">{label}</span>}
             {description && (
-              <span className="block text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">{description}</span>
+              <span className="block text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+                {description}
+              </span>
             )}
           </span>
         )}
@@ -40,4 +42,4 @@ export const Switch = forwardRef<HTMLInputElement, SwitchProps>(
     );
   },
 );
-Switch.displayName = 'Switch';
+Switch.displayName = "Switch";

@@ -1,6 +1,6 @@
-import type { ReactNode } from 'react';
-import type { ModulKey } from './moduleAccent';
-import { Check } from './icons';
+import type { ReactNode } from "react";
+import { Check } from "./icons";
+import type { ModulKey } from "./moduleAccent";
 
 interface WizardStep {
   id: string;
@@ -19,16 +19,20 @@ interface WizardProps {
   ariaLabel?: string;
 }
 
-export function Wizard({ steps, current, ariaLabel = 'Fortschritt' }: WizardProps) {
+export function Wizard({ steps, current, ariaLabel = "Fortschritt" }: WizardProps) {
   return (
     <nav aria-label={ariaLabel}>
       {/* Mobile: kompakt */}
       <div className="md:hidden">
         <div className="flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-400 mb-2">
           <span>
-            Schritt <span className="font-semibold text-zinc-900 dark:text-zinc-50">{current + 1}</span> von {steps.length}
+            Schritt{" "}
+            <span className="font-semibold text-zinc-900 dark:text-zinc-50">{current + 1}</span> von{" "}
+            {steps.length}
           </span>
-          <span className="text-zinc-900 dark:text-zinc-50 font-medium">{steps[current]?.label}</span>
+          <span className="text-zinc-900 dark:text-zinc-50 font-medium">
+            {steps[current]?.label}
+          </span>
         </div>
         <div className="h-1 rounded-full bg-zinc-200 dark:bg-zinc-800 overflow-hidden">
           <div
@@ -49,17 +53,17 @@ export function Wizard({ steps, current, ariaLabel = 'Fortschritt' }: WizardProp
               <span
                 className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-semibold ${
                   active
-                    ? 'bg-[--color-accent] text-white'
+                    ? "bg-[--color-accent] text-white"
                     : done
-                      ? 'bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-200'
-                      : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400'
+                      ? "bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-200"
+                      : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400"
                 }`}
-                aria-current={active ? 'step' : undefined}
+                aria-current={active ? "step" : undefined}
               >
                 {done ? <Check size={12} strokeWidth={2.5} aria-hidden="true" /> : idx + 1}
               </span>
               <span
-                className={`text-xs ${active ? 'text-zinc-900 dark:text-zinc-50 font-medium' : 'text-zinc-500 dark:text-zinc-400'}`}
+                className={`text-xs ${active ? "text-zinc-900 dark:text-zinc-50 font-medium" : "text-zinc-500 dark:text-zinc-400"}`}
               >
                 {step.label}
                 {step.optional && <span className="ml-1 text-zinc-400">(optional)</span>}
@@ -91,8 +95,8 @@ export function WizardFooter({
   onBack,
   onNext,
   onCancel,
-  nextLabel = 'Weiter',
-  backLabel = 'Zurück',
+  nextLabel = "Weiter",
+  backLabel = "Zurück",
   cancelLabel,
   busy = false,
   canBack = true,
@@ -129,7 +133,7 @@ export function WizardFooter({
             disabled={!canNext || busy}
             className="h-9 px-3.5 text-sm rounded-md bg-[--color-accent] text-white hover:bg-[--color-accent-hover] disabled:opacity-50 transition-colors"
           >
-            {busy ? '…' : nextLabel}
+            {busy ? "…" : nextLabel}
           </button>
         )}
       </div>

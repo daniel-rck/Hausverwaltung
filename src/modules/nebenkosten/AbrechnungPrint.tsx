@@ -1,9 +1,9 @@
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../../db';
-import { AbrechnungView } from './AbrechnungView';
-import { EmptyState } from '../../components/shared/EmptyState';
-import { Receipt } from '../../components/ui/icons';
-import type { Occupancy, Tenant, Unit } from '../../db/schema';
+import { useLiveQuery } from "dexie-react-hooks";
+import { EmptyState } from "../../components/shared/EmptyState";
+import { Receipt } from "../../components/ui/icons";
+import { db } from "../../db";
+import type { Occupancy, Tenant, Unit } from "../../db/schema";
+import { AbrechnungView } from "./AbrechnungView";
 
 interface AbrechnungPrintProps {
   propertyId: number;
@@ -17,30 +17,18 @@ interface OccupancyInfo {
   unit: Unit;
 }
 
-export function AbrechnungPrint({
-  propertyId,
-  year,
-  onBack,
-}: AbrechnungPrintProps) {
+export function AbrechnungPrint({ propertyId, year, onBack }: AbrechnungPrintProps) {
   const occupancies = useLiveQuery(async () => {
-    const units = await db.units
-      .where('propertyId')
-      .equals(propertyId)
-      .toArray();
+    const units = await db.units.where("propertyId").equals(propertyId).toArray();
 
     const yearStart = `${year}-01`;
     const yearEnd = `${year}-12`;
     const result: OccupancyInfo[] = [];
 
     for (const unit of units) {
-      const occs = await db.occupancies
-        .where('unitId')
-        .equals(unit.id!)
-        .toArray();
+      const occs = await db.occupancies.where("unitId").equals(unit.id!).toArray();
 
-      const active = occs.filter(
-        (o) => o.from <= yearEnd && (o.to === null || o.to >= yearStart),
-      );
+      const active = occs.filter((o) => o.from <= yearEnd && (o.to === null || o.to >= yearStart));
 
       for (const occ of active) {
         const tenant = (await db.tenants.get(occ.tenantId)) ?? null;
@@ -74,12 +62,14 @@ export function AbrechnungPrint({
       {/* Controls - hidden when printing */}
       <div className="no-print mb-6 flex items-center gap-4">
         <button
+          type="button"
           onClick={onBack}
           className="text-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 flex items-center gap-1"
         >
           ← Zurück
         </button>
         <button
+          type="button"
           onClick={() => window.print()}
           className="px-4 py-2 text-sm bg-zinc-800 text-white rounded-lg hover:bg-zinc-900 transition-colors"
         >
@@ -90,14 +80,11 @@ export function AbrechnungPrint({
       {/* Render each billing view with page breaks */}
       <div className="print-container">
         {occupancies.map((info, idx) => (
-          <div
-            key={info.occupancy.id}
-            className={idx > 0 ? 'page-break' : ''}
-          >
+          <div key={info.occupancy.id} className={idx > 0 ? "page-break" : ""}>
             <div className="no-print mb-2 px-2">
               <p className="text-xs text-zinc-400 dark:text-zinc-500">
-                Abrechnung {idx + 1} von {occupancies.length}:{' '}
-                {info.tenant?.name ?? '–'} ({info.unit.name})
+                Abrechnung {idx + 1} von {occupancies.length}: {info.tenant?.name ?? "–"} (
+                {info.unit.name})
               </p>
             </div>
             <div className="border border-zinc-200 rounded-lg p-6 mb-6 print:border-0 print:p-0 print:mb-0 print:rounded-none">

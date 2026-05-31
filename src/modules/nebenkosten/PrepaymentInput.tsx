@@ -1,12 +1,12 @@
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db, deleteWithTombstone } from '../../db';
-import { Card } from '../../components/shared/Card';
-import { NumInput } from '../../components/shared/NumInput';
-import { EmptyState } from '../../components/shared/EmptyState';
-import { Coins, Loader2 } from '../../components/ui/icons';
-import { formatEuro, formatNumber } from '../../utils/format';
-import { getOccupiedMonthsFractional } from '../../utils/calc';
-import type { Occupancy, Tenant, Unit, Prepayment } from '../../db/schema';
+import { useLiveQuery } from "dexie-react-hooks";
+import { Card } from "../../components/shared/Card";
+import { EmptyState } from "../../components/shared/EmptyState";
+import { NumInput } from "../../components/shared/NumInput";
+import { Coins, Loader2 } from "../../components/ui/icons";
+import { db, deleteWithTombstone } from "../../db";
+import type { Occupancy, Prepayment, Tenant, Unit } from "../../db/schema";
+import { getOccupiedMonthsFractional } from "../../utils/calc";
+import { formatEuro, formatNumber } from "../../utils/format";
 
 interface PrepaymentInputProps {
   propertyId: number;
@@ -28,29 +28,21 @@ function getOccupiedMonths(occupancy: Occupancy, year: number): number {
 
 export function PrepaymentInput({ propertyId, year }: PrepaymentInputProps) {
   const rows = useLiveQuery(async () => {
-    const units = await db.units
-      .where('propertyId')
-      .equals(propertyId)
-      .toArray();
+    const units = await db.units.where("propertyId").equals(propertyId).toArray();
 
     const yearStart = `${year}-01`;
     const yearEnd = `${year}-12`;
     const result: OccupancyRow[] = [];
 
     for (const unit of units) {
-      const occs = await db.occupancies
-        .where('unitId')
-        .equals(unit.id!)
-        .toArray();
+      const occs = await db.occupancies.where("unitId").equals(unit.id!).toArray();
 
-      const active = occs.filter(
-        (o) => o.from <= yearEnd && (o.to === null || o.to >= yearStart),
-      );
+      const active = occs.filter((o) => o.from <= yearEnd && (o.to === null || o.to >= yearStart));
 
       for (const occ of active) {
         const tenant = (await db.tenants.get(occ.tenantId)) ?? null;
         const prepayment = await db.prepayments
-          .where('[occupancyId+year]')
+          .where("[occupancyId+year]")
           .equals([occ.id!, year])
           .first();
 
@@ -73,7 +65,7 @@ export function PrepaymentInput({ propertyId, year }: PrepaymentInputProps) {
 
   const handleChange = async (occupancyId: number, amount: number) => {
     const existing = await db.prepayments
-      .where('[occupancyId+year]')
+      .where("[occupancyId+year]")
       .equals([occupancyId, year])
       .first();
 
@@ -90,12 +82,12 @@ export function PrepaymentInput({ propertyId, year }: PrepaymentInputProps) {
 
   const handleReset = async (occupancyId: number) => {
     const existing = await db.prepayments
-      .where('[occupancyId+year]')
+      .where("[occupancyId+year]")
       .equals([occupancyId, year])
       .first();
 
     if (existing?.id) {
-      await deleteWithTombstone('prepayments', existing.id);
+      await deleteWithTombstone("prepayments", existing.id);
     }
   };
 
@@ -123,16 +115,13 @@ export function PrepaymentInput({ propertyId, year }: PrepaymentInputProps) {
     );
   }
 
-  const totalPrepayments = rows.reduce(
-    (sum, r) => sum + (r.prepayment?.amount ?? r.autoAmount),
-    0,
-  );
+  const totalPrepayments = rows.reduce((sum, r) => sum + (r.prepayment?.amount ?? r.autoAmount), 0);
 
   return (
     <Card title={`Vorauszahlungen ${year}`}>
       <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-4">
-        Automatisch berechnet: NK-Vorauszahlung &times; Monate. Bei Bedarf
-        können Sie den Betrag manuell überschreiben.
+        Automatisch berechnet: NK-Vorauszahlung &times; Monate. Bei Bedarf können Sie den Betrag
+        manuell überschreiben.
       </p>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
@@ -170,10 +159,10 @@ export function PrepaymentInput({ propertyId, year }: PrepaymentInputProps) {
                   className="border-b border-zinc-100 dark:border-zinc-700"
                 >
                   <td className="py-2 px-3 text-zinc-700 dark:text-zinc-200">
-                    {row.unit?.name ?? '–'}
+                    {row.unit?.name ?? "–"}
                   </td>
                   <td className="py-2 px-3 text-zinc-700 dark:text-zinc-200">
-                    {row.tenant?.name ?? '–'}
+                    {row.tenant?.name ?? "–"}
                   </td>
                   <td className="py-2 px-3 text-right font-mono font-tabular text-zinc-600 dark:text-zinc-300">
                     {formatEuro(row.occupancy.rentUtilities)}
@@ -196,6 +185,7 @@ export function PrepaymentInput({ propertyId, year }: PrepaymentInputProps) {
                   <td className="py-2 px-3 text-center">
                     {isOverridden && (
                       <button
+                        type="button"
                         onClick={() => handleReset(row.occupancy.id!)}
                         className="text-xs text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200"
                         title="Auf automatischen Wert zurücksetzen"

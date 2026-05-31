@@ -1,7 +1,7 @@
-import { useEffect } from 'react';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../../db';
-import { Card } from '../../components/shared/Card';
+import { useLiveQuery } from "dexie-react-hooks";
+import { useEffect } from "react";
+import { Card } from "../../components/shared/Card";
+import { db } from "../../db";
 
 interface MeterReading {
   meterId: number;
@@ -26,14 +26,14 @@ interface MeterSnapshotProps {
 
 export function MeterSnapshot({ unitId, readings, onChange }: MeterSnapshotProps) {
   const snapshots = useLiveQuery(async () => {
-    const meters = await db.meters.where('unitId').equals(unitId).toArray();
+    const meters = await db.meters.where("unitId").equals(unitId).toArray();
     const results: MeterSnapshot[] = [];
 
     for (const meter of meters) {
       const meterType = await db.meterTypes.get(meter.meterTypeId);
       const allReadings = await db.meterReadings
-        .where('[meterId+date]')
-        .between([meter.id!, ''], [meter.id!, '\uffff'])
+        .where("[meterId+date]")
+        .between([meter.id!, ""], [meter.id!, "\uffff"])
         .toArray();
 
       const sorted = allReadings.sort((a, b) => b.date.localeCompare(a.date));
@@ -42,8 +42,8 @@ export function MeterSnapshot({ unitId, readings, onChange }: MeterSnapshotProps
       results.push({
         meterId: meter.id!,
         meterTypeId: meter.meterTypeId,
-        typeName: meterType?.name ?? 'Unbekannt',
-        typeUnit: meterType?.unit ?? '',
+        typeName: meterType?.name ?? "Unbekannt",
+        typeUnit: meterType?.unit ?? "",
         serialNumber: meter.serialNumber,
         lastReading,
         value: 0,
@@ -66,9 +66,7 @@ export function MeterSnapshot({ unitId, readings, onChange }: MeterSnapshotProps
   }, [snapshots, readings.length, onChange]);
 
   const updateReading = (meterId: number, value: number) => {
-    const updated = readings.map((r) =>
-      r.meterId === meterId ? { ...r, value } : r,
-    );
+    const updated = readings.map((r) => (r.meterId === meterId ? { ...r, value } : r));
     // If meter not yet in readings, add it
     if (!readings.find((r) => r.meterId === meterId)) {
       updated.push({ meterId, value });
@@ -92,8 +90,8 @@ export function MeterSnapshot({ unitId, readings, onChange }: MeterSnapshotProps
     return (
       <Card>
         <p className="text-sm text-zinc-500 dark:text-zinc-400">
-          Keine Zähler für diese Wohnung vorhanden. Sie können diesen Schritt
-          überspringen oder zuerst Zähler in der Zählerverwaltung anlegen.
+          Keine Zähler für diese Wohnung vorhanden. Sie können diesen Schritt überspringen oder
+          zuerst Zähler in der Zählerverwaltung anlegen.
         </p>
       </Card>
     );
@@ -118,34 +116,32 @@ export function MeterSnapshot({ unitId, readings, onChange }: MeterSnapshotProps
               </p>
               {snapshot.lastReading !== null && (
                 <p className="text-xs text-zinc-400 dark:text-zinc-500">
-                  Letzter Stand: {snapshot.lastReading.toLocaleString('de-DE')}{' '}
-                  {snapshot.typeUnit}
+                  Letzter Stand: {snapshot.lastReading.toLocaleString("de-DE")} {snapshot.typeUnit}
                 </p>
               )}
             </div>
 
             <div className="sm:w-48">
-              <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-                Aktueller Stand
-              </label>
-              <div className="flex items-center gap-1">
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={getReadingValue(snapshot.meterId) || ''}
-                  onChange={(e) =>
-                    updateReading(
-                      snapshot.meterId,
-                      parseFloat(e.target.value) || 0,
-                    )
-                  }
-                  className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
-                />
-                <span className="text-xs text-zinc-500 dark:text-zinc-400 whitespace-nowrap">
-                  {snapshot.typeUnit}
+              <label className="block">
+                <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
+                  Aktueller Stand
                 </span>
-              </div>
+                <div className="flex items-center gap-1">
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={getReadingValue(snapshot.meterId) || ""}
+                    onChange={(e) =>
+                      updateReading(snapshot.meterId, parseFloat(e.target.value) || 0)
+                    }
+                    className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+                  />
+                  <span className="text-xs text-zinc-500 dark:text-zinc-400 whitespace-nowrap">
+                    {snapshot.typeUnit}
+                  </span>
+                </div>
+              </label>
             </div>
           </div>
         </Card>
