@@ -43,14 +43,22 @@ Query-Schicht), `useLiveQuery.ts` (reaktiver Hook). Cloudflare Worker (`worker/`
 `/api/*` an die Sync-Handler und liefert sonst die statischen Assets. Sync ist clientseitig
 verschlüsselt; Konflikte werden via R2-ETag (`If-Match`) aufgelöst.
 
-> Die Migration auf web-base erfolgt phasenweise (Stand: Tooling/Biome ✓, Struktur ✓,
-> Storage→idb ✓; offen: Router-/PWA-/Worker-/Layout-Templates, reusable CI). Siehe
-> Branch `claude/web-base-github-integration`.
+> Migrationsstand auf web-base: **Tooling/Biome ✓, Struktur (`src/lib`+`src/features`) ✓,
+> Storage→idb ✓, PWA injectManifest ✓, reusable CI ✓.**
 >
-> Hinweis Storage: `idb` ist die web-base-Base; die App behält darüber eine schlanke
-> Query-Schicht (`where/equals/between/orderBy/…`), weil ihre 20 Stores inkl.
-> Tombstones/Cascade/E2E-Sync über das minimale web-base-Template hinausgehen. `db.transaction`
-> ist ein Shim (sequentiell, kein Crash-Rollback) — bewusster Trade-off (siehe `cascade.ts`).
+> Bewusste Abweichungen (App übertrifft die minimalen web-base-Scaffolds — analog zu
+> web-bases Prinzip „jede App besitzt ihre Infrastruktur nach init"):
+> - **Storage**: `idb` ist die Base; die App behält darüber eine schlanke Query-Schicht
+>   (`where/equals/between/orderBy/…`), weil ihre 20 Stores inkl. Tombstones/Cascade/E2E-Sync
+>   über das Template hinausgehen. `db.transaction` ist ein sequentieller Shim (kein
+>   Crash-Rollback) — bewusster Trade-off (siehe `cascade.ts`).
+> - **Router**: react-router-dom 7 ist die Base; die App nutzt **HashRouter** (statt des
+>   `createBrowserRouter`-Scaffolds) wegen hash-basiertem URL-Daten-Sharing
+>   (`#/import/:payload`) und null Server-Config.
+> - **Worker/Sync**: eigene, fortgeschrittene Implementierung (OTP-Pairing, R2-Snapshots mit
+>   If-Match, KV, Rate-Limit) statt des minimalen Worker-Scaffolds.
+> - **Layout/Theme**: eigenes, ausgereiftes Design-System (AppShell, Modul-Accents, Tailwind-4
+>   `@theme`) statt des minimalen `--accent-h`-Layout-Templates.
 
 ## Offene Konventions-Lücken
 
