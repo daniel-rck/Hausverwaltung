@@ -36,14 +36,21 @@ bun run build       # SPA + Worker-Dry-Run via CI
 
 ## Architektur (aktuell)
 
-SPA unter `src/` — Module in `src/modules/`, Dexie-Schema in `src/db/`, Sync-Client
-in `src/sync/`. Cloudflare Worker (`worker/`) routet `/api/*` an die Sync-Handler und
-liefert sonst die statischen Assets. Sync ist clientseitig verschlüsselt; Konflikte
-werden via R2-ETag (`If-Match`) aufgelöst.
+SPA unter `src/` in web-base-Layout: geteilte Infrastruktur in `src/lib/{ui,db,sync,hooks,utils}`,
+app-spezifische Domänen in `src/features/<modul>/`. Storage ist **`idb`** (kein Dexie) —
+`src/lib/db/`: `idb.ts` (Engine/Schema/Indizes), `table.ts` (schlanke Dexie-kompatible
+Query-Schicht), `useLiveQuery.ts` (reaktiver Hook). Cloudflare Worker (`worker/`) routet
+`/api/*` an die Sync-Handler und liefert sonst die statischen Assets. Sync ist clientseitig
+verschlüsselt; Konflikte werden via R2-ETag (`If-Match`) aufgelöst.
 
-> Die Migration auf die web-base-Struktur (`src/lib/{ui,db,router,sync}` +
-> `src/features/`, `idb` statt Dexie, injectManifest-PWA, reusable CI) erfolgt
-> phasenweise. Stand siehe offene PRs / Branch `claude/web-base-github-integration`.
+> Die Migration auf web-base erfolgt phasenweise (Stand: Tooling/Biome ✓, Struktur ✓,
+> Storage→idb ✓; offen: Router-/PWA-/Worker-/Layout-Templates, reusable CI). Siehe
+> Branch `claude/web-base-github-integration`.
+>
+> Hinweis Storage: `idb` ist die web-base-Base; die App behält darüber eine schlanke
+> Query-Schicht (`where/equals/between/orderBy/…`), weil ihre 20 Stores inkl.
+> Tombstones/Cascade/E2E-Sync über das minimale web-base-Template hinausgehen. `db.transaction`
+> ist ein Shim (sequentiell, kein Crash-Rollback) — bewusster Trade-off (siehe `cascade.ts`).
 
 ## Offene Konventions-Lücken
 

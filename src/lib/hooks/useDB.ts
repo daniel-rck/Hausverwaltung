@@ -1,6 +1,5 @@
-import { useLiveQuery } from "dexie-react-hooks";
 import { useCallback } from "react";
-import { db, deleteWithTombstone, SYNCABLE_TABLES } from "../db";
+import { db, deleteWithTombstone, SYNCABLE_TABLES, useLiveQuery } from "../db";
 
 type TableName = keyof typeof db & string;
 type SyncableTable = (typeof SYNCABLE_TABLES)[number];

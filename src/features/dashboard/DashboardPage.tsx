@@ -1,7 +1,6 @@
-import { useLiveQuery } from "dexie-react-hooks";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { db } from "../../lib/db";
+import { db, useLiveQuery } from "../../lib/db";
 import { seedDatabase } from "../../lib/db/seed";
 import { useProperty } from "../../lib/hooks/useProperty";
 import { PageHeader } from "../../lib/ui/layout/PageHeader";

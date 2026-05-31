@@ -1,5 +1,4 @@
-import { useLiveQuery } from "dexie-react-hooks";
-import { db, deleteWithTombstone } from "../../lib/db";
+import { db, deleteWithTombstone, useLiveQuery } from "../../lib/db";
 import type { Occupancy, Prepayment, Tenant, Unit } from "../../lib/db/schema";
 import { Card } from "../../lib/ui/shared/Card";
 import { EmptyState } from "../../lib/ui/shared/EmptyState";

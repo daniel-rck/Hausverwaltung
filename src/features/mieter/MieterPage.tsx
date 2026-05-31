@@ -1,6 +1,5 @@
-import { useLiveQuery } from "dexie-react-hooks";
 import { useState } from "react";
-import { db } from "../../lib/db";
+import { db, useLiveQuery } from "../../lib/db";
 import type { Unit } from "../../lib/db/schema";
 import { useProperty } from "../../lib/hooks/useProperty";
 import { PageHeader } from "../../lib/ui/layout/PageHeader";

@@ -1,6 +1,5 @@
-import { useLiveQuery } from "dexie-react-hooks";
 import { useMemo, useState } from "react";
-import { db } from "../../lib/db";
+import { db, useLiveQuery } from "../../lib/db";
 import type { DepositEvent, DepositEventType, Occupancy } from "../../lib/db/schema";
 import { Card } from "../../lib/ui/shared/Card";
 import { type Column, DataTable } from "../../lib/ui/shared/DataTable";

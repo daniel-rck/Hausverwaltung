@@ -1,6 +1,5 @@
-import { useLiveQuery } from "dexie-react-hooks";
 import { useRef, useState } from "react";
-import { db, deleteWithTombstone } from "../../lib/db";
+import { db, deleteWithTombstone, useLiveQuery } from "../../lib/db";
 import type { AppDocument } from "../../lib/db/schema";
 import { Card } from "../../lib/ui/shared/Card";
 import { ConfirmDialog } from "../../lib/ui/shared/ConfirmDialog";

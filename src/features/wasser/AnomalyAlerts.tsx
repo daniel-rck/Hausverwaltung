@@ -1,6 +1,5 @@
-import { useLiveQuery } from "dexie-react-hooks";
 import { useMemo } from "react";
-import { db } from "../../lib/db";
+import { db, useLiveQuery } from "../../lib/db";
 import type {
   Meter,
   MeterReading,

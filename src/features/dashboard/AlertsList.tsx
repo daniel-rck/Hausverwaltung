@@ -1,5 +1,4 @@
-import { useLiveQuery } from "dexie-react-hooks";
-import { db } from "../../lib/db";
+import { db, useLiveQuery } from "../../lib/db";
 import { useProperty } from "../../lib/hooks/useProperty";
 import { Card } from "../../lib/ui/shared/Card";
 import type { LucideIcon } from "../../lib/ui/ui/icons";

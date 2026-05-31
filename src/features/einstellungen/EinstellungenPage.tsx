@@ -1,6 +1,5 @@
-import { useLiveQuery } from "dexie-react-hooks";
 import { useState } from "react";
-import { db } from "../../lib/db";
+import { db, useLiveQuery } from "../../lib/db";
 import type { LandlordInfo } from "../../lib/db/schema";
 import { PageHeader } from "../../lib/ui/layout/PageHeader";
 import { Card } from "../../lib/ui/shared/Card";

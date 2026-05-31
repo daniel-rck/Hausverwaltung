@@ -1,6 +1,5 @@
-import { useLiveQuery } from "dexie-react-hooks";
 import { useMemo, useState } from "react";
-import { db } from "../../lib/db";
+import { db, useLiveQuery } from "../../lib/db";
 import type { LandlordInfo, Occupancy, Payment, Tenant, Unit } from "../../lib/db/schema";
 import { usePrint } from "../../lib/hooks/usePrint";
 import { useProperty } from "../../lib/hooks/useProperty";

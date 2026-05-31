@@ -1,5 +1,4 @@
-import { useLiveQuery } from "dexie-react-hooks";
-import { db } from "../../lib/db";
+import { db, useLiveQuery } from "../../lib/db";
 import { Card } from "../../lib/ui/shared/Card";
 import { cashflow, equityYield, grossYield, netYield } from "../../lib/utils/calc";
 import { formatEuro, formatPercent } from "../../lib/utils/format";

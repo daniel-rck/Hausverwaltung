@@ -2,8 +2,8 @@
  * Sync-Metadaten, die jeder synchronisierbare Record trägt.
  * `syncId` ist die geräteübergreifende Identität, `updatedAt` entscheidet Merge-Konflikte.
  *
- * Die Felder sind statisch optional, weil sie von Dexie-Hooks beim
- * Insert/Update automatisch gesetzt werden — Aufrufer von `table.add(...)`
+ * Die Felder sind statisch optional, weil der DB-Layer (src/lib/db/table.ts)
+ * sie beim Insert/Update automatisch stempelt — Aufrufer von `table.add(...)`
  * müssen sie nicht manuell liefern. Beim Lesen sind sie für persistente Records
  * immer gesetzt.
  */

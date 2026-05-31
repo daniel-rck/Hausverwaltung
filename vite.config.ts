@@ -69,7 +69,7 @@ export default defineConfig({
           if (id.includes("/react-dom/") || id.includes("/react/") || id.includes("/scheduler/")) {
             return "vendor-react";
           }
-          if (id.includes("/dexie")) return "vendor-db";
+          if (id.includes("/idb")) return "vendor-db";
         },
       },
     },

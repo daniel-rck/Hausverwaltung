@@ -1,8 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 
-import { useLiveQuery } from "dexie-react-hooks";
 import { createContext, type ReactNode, useCallback, useContext, useMemo, useState } from "react";
-import { db } from "../db";
+import { db, useLiveQuery } from "../db";
 import { cascadeDeleteProperty } from "../db/cascade";
 import type { Property } from "../db/schema";
 

@@ -1,6 +1,5 @@
-import { useLiveQuery } from "dexie-react-hooks";
 import { useMemo } from "react";
-import { db } from "../../lib/db";
+import { db, useLiveQuery } from "../../lib/db";
 import { useProperty } from "../../lib/hooks/useProperty";
 import { BarChart } from "../../lib/ui/charts/BarChart";
 import { Card } from "../../lib/ui/shared/Card";

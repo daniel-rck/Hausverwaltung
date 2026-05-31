@@ -191,7 +191,7 @@ export async function exportDatabase(): Promise<string> {
   const data: Record<string, unknown[]> = {};
 
   for (const store of STORE_NAMES) {
-    data[store] = await (db[store] as ReturnType<typeof db.table>).toArray();
+    data[store] = await db.table(store).toArray();
   }
 
   const exportData: ExportData = {
@@ -226,7 +226,7 @@ export async function importDatabase(jsonString: string): Promise<void> {
 
   await db.transaction("rw", db.tables, async () => {
     for (const store of STORE_NAMES) {
-      const table = db[store] as ReturnType<typeof db.table>;
+      const table = db.table(store);
       await table.clear();
 
       const records = parsed.data[store];

@@ -1,5 +1,4 @@
-import { useLiveQuery } from "dexie-react-hooks";
-import { db } from "../../lib/db";
+import { db, useLiveQuery } from "../../lib/db";
 import type { Cost, CostShare, CostType, Occupancy, Tenant, Unit } from "../../lib/db/schema";
 import { Card } from "../../lib/ui/shared/Card";
 import { EmptyState } from "../../lib/ui/shared/EmptyState";

@@ -1,6 +1,5 @@
-import { useLiveQuery } from "dexie-react-hooks";
 import { useCallback, useState } from "react";
-import { db, deleteWithTombstone } from "../../lib/db";
+import { db, deleteWithTombstone, useLiveQuery } from "../../lib/db";
 import type { SupplierBill } from "../../lib/db/schema";
 import { useProperty } from "../../lib/hooks/useProperty";
 import { Card } from "../../lib/ui/shared/Card";

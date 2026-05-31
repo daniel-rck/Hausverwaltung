@@ -1,5 +1,4 @@
-import { useLiveQuery } from "dexie-react-hooks";
-import { db } from "../../lib/db";
+import { db, useLiveQuery } from "../../lib/db";
 import { DonutChart } from "../../lib/ui/charts/DonutChart";
 import { Card } from "../../lib/ui/shared/Card";
 import type { FinancingData } from "./FinancingInput";

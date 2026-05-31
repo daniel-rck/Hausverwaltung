@@ -1,6 +1,5 @@
-import { useLiveQuery } from "dexie-react-hooks";
 import { useMemo, useState } from "react";
-import { db, deleteWithTombstone } from "../../lib/db";
+import { db, deleteWithTombstone, useLiveQuery } from "../../lib/db";
 import type { MaintenanceItem, Unit } from "../../lib/db/schema";
 import { useProperty } from "../../lib/hooks/useProperty";
 import { Card } from "../../lib/ui/shared/Card";

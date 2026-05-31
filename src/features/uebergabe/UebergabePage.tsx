@@ -1,6 +1,5 @@
-import { useLiveQuery } from "dexie-react-hooks";
 import { useState } from "react";
-import { db, deleteWithTombstone } from "../../lib/db";
+import { db, deleteWithTombstone, useLiveQuery } from "../../lib/db";
 import type {
   HandoverProtocol,
   LandlordInfo,

@@ -1,6 +1,5 @@
-import { useLiveQuery } from "dexie-react-hooks";
 import { useState } from "react";
-import { db } from "../../lib/db";
+import { db, useLiveQuery } from "../../lib/db";
 import { cascadeDeleteMeter } from "../../lib/db/cascade";
 import type { Meter, MeterReading, MeterType, Unit } from "../../lib/db/schema";
 import { useProperty } from "../../lib/hooks/useProperty";
