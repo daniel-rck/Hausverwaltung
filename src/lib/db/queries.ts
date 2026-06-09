@@ -67,7 +67,8 @@ export async function getPersonMonths(unitId: number, year: number): Promise<num
   for (const occ of occupancies) {
     const start = occ.from < yearStart ? yearStart : occ.from;
     const end = occ.to === null || occ.to > yearEnd ? yearEnd : occ.to;
-    const months = monthDiff(start, end) + 1;
+    // Math.max: korrupte Belegungen (from > to) nicht negativ einrechnen
+    const months = Math.max(0, monthDiff(start, end) + 1);
     total += months * occ.persons;
   }
 
