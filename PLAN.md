@@ -28,12 +28,12 @@ Full verification command for the session:
 
 ## Tasks (execution order)
 
-- [ ] T1: Write PLAN.md (this plan) into repo root
+- [x] T1: Write PLAN.md (this plan) into repo root
       Files: PLAN.md (new)
       Change: Copy this plan as the session record; tasks get checked off there as the single source of progress.
       Verify: file exists; committed.
 
-- [ ] T2: Sync-Bug: eingebettete meterIds in handoverProtocols übersetzen + Snapshot-Validierung
+- [x] T2: Sync-Bug: eingebettete meterIds in handoverProtocols übersetzen + Snapshot-Validierung
       Files: src/lib/sync/snapshot.ts, src/lib/sync/service.ts, src/lib/sync/snapshot.test.ts (new)
       Change (bug): `HandoverProtocol.meterReadings: {meterId, value}[]` embeds **local numeric meter IDs**; `translateRowToWire`/`translateRowFromWire` only translate top-level FK fields (FK_MAP) → after sync, device B's protocols point at wrong/nonexistent meters (ProtocolPreview at UebergabePage.tsx:391-402 silently drops them or shows a wrong meter).
         - In `translateRowToWire`: special-case `tableName === "handoverProtocols"` — map each reading to `{ meterId__sync, value }` via `idToSyncId.meters`; drop readings whose meter has no syncId mapping (matches existing "skip dangling" render behavior).
@@ -42,22 +42,22 @@ Full verification command for the session:
       Test: new `snapshot.test.ts` (pattern of idb.test.ts: `fake-indexeddb/auto`, wipe via `db.tables`): seed meter + handover protocol → `buildLocalSnapshot()` → assert wire has `meterId__sync` and no raw `meterId`/`id` → wipe tables → `applySnapshot()` → assert reading's `meterId` equals the *new* local meter id (auto-increment keeps counting after clear, so IDs differ — meaningful assertion). Plus a parseSnapshot rejection test.
       Verify: `bun run test:run && bun run typecheck`
 
-- [ ] T3: Worker: Rate-Limit-Test für /pair/claim + Kommentar zur KV-Race
+- [x] T3: Worker: Rate-Limit-Test für /pair/claim + Kommentar zur KV-Race
       Files: worker/handlers/pair-claim.test.ts, worker/handlers/pair-claim.ts
       Change: add a test mirroring pair-create's rate-limit test: 10 claims pass (404/200 allowed), 11th returns 429 (limit 10 per 900 s, keyed per IP). Add a short comment in pair-claim.ts documenting that get→delete is not atomic on KV (concurrent claims can both succeed) and why that's acceptable (payload is OTP-encrypted; claimer must know the OTP anyway).
       Verify: `bun run test:run`
 
-- [ ] T4: Micro-Fix: negative Monatsdifferenz in getPersonMonths abfangen
+- [x] T4: Micro-Fix: negative Monatsdifferenz in getPersonMonths abfangen
       Files: src/lib/db/queries.ts:70 (getPersonMonths)
       Change: `const months = Math.max(0, monthDiff(start, end) + 1);` — guards corrupt occupancies (`from > to`) from producing negative person-months in the Nebenkosten allocation.
       Verify: `bun run test:run`
 
-- [ ] T5: Build-Artefakt aus Git entfernen
+- [x] T5: Build-Artefakt aus Git entfernen
       Files: tsconfig.sw.tsbuildinfo (tracked!), .gitignore
       Change: `git rm --cached tsconfig.sw.tsbuildinfo`; add `*.tsbuildinfo` to .gitignore (under a build/cache section).
       Verify: `git ls-files | grep tsbuildinfo` → empty; `bun run build` still green.
 
-- [ ] T6: Docs-Drift: CONTRIBUTING.md Architektur-Spickzettel aktualisieren
+- [x] T6: Docs-Drift: CONTRIBUTING.md Architektur-Spickzettel aktualisieren
       Files: CONTRIBUTING.md:78-89
       Change: the tree still shows the pre-migration layout (`src/modules/`, `src/components/`, `src/db/` "Dexie-Schema", `src/hooks/`...). Update to reality: `src/lib/{db,sync,ui,hooks,utils}` + `src/features/<modul>` (11 Module), idb statt Dexie. Keep it the same compact style.
       Verify: proofread; `bun run lint` (formatting).
