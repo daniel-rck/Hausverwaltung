@@ -39,17 +39,18 @@ Voraussetzung: [Bun 1.3+](https://bun.sh).
 ## Code-Style
 
 - **TypeScript strict** — keine `any` ohne Begründung.
-- **ESLint** entscheidet — `bun run lint` muss grün sein.
-- Lokale Komponenten landen unter `src/modules/<modul>/`, geteilte UI unter
-  `src/components/ui/`.
-- Bei neuen DB-Tabellen / Schema-Änderungen: Migration in `src/db/` ergänzen
-  und Versions-Bump im Dexie-Schema dokumentieren.
+- **Biome** entscheidet (Lint + Format) — `bun run lint` muss grün sein.
+- Feature-Komponenten landen unter `src/features/<modul>/`, geteilte UI unter
+  `src/lib/ui/`.
+- Bei neuen DB-Tabellen / Schema-Änderungen: Store/Indizes in `src/lib/db/idb.ts`
+  ergänzen und `DB_VERSION` bumpen (Upgrade-Pfad dort dokumentieren).
 
 ## Tests
 
 Wenn du ein Modul anfasst, schreib mindestens einen Smoke-Test (`*.test.ts(x)`
-im selben Ordner). Vitest läuft unter jsdom — die Sync-Layer-Tests laufen im
-Cloudflare-Worker-Pool (siehe `vitest.config.ts`).
+im selben Ordner). Vitest läuft für `src/` unter Node (IndexedDB via
+fake-indexeddb) — die Worker-Tests laufen im Cloudflare-Worker-Pool
+(siehe `vitest.config.ts`).
 
 ## Commit-Konvention
 
@@ -79,12 +80,13 @@ aber nicht erzwungen:
 
 ```
 src/
-  modules/       11 Feature-Module (mieter, nebenkosten, zaehler, ...)
-  components/    geteilte UI (layout, ui, charts, sync)
-  db/            Dexie-Schema, Cascade-Deletes, Import/Export
-  sync/          verschlüsselter Sync-Client (HKDF → AES-GCM)
-  hooks/         React-Hooks (useTheme, useProperty, ...)
-  utils/         reine Hilfsfunktionen
+  features/      11 Feature-Module (mieter, nebenkosten, zaehler, ...)
+  lib/
+    ui/          geteilte UI (layout, shared, ui, charts, sync, Theme)
+    db/          idb-Engine, Query-Schicht, Cascade-Deletes, Import/Export
+    sync/        verschlüsselter Sync-Client (HKDF → AES-GCM)
+    hooks/       React-Hooks (useProperty, useKeyboardShortcuts, ...)
+    utils/       reine Hilfsfunktionen
 worker/          Cloudflare Worker (/api/* Routing, R2/KV-Handler)
 ```
 
