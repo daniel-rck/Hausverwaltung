@@ -26,6 +26,32 @@ export interface SyncSnapshot {
 type AnyRecord = Record<string, unknown>;
 
 /**
+ * Parst und validiert einen Remote-Snapshot. Wirft bei fremdem/korruptem
+ * Inhalt eine verständliche Fehlermeldung statt z.B. "x is not iterable"
+ * tief im Merge.
+ */
+export function parseSnapshot(content: string): SyncSnapshot {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(content);
+  } catch {
+    throw new Error("Remote-Snapshot ist kein gültiges JSON.");
+  }
+  const snap = parsed as Partial<SyncSnapshot> | null;
+  if (
+    snap === null ||
+    typeof snap !== "object" ||
+    snap.version !== 1 ||
+    typeof snap.tables !== "object" ||
+    snap.tables === null ||
+    !Array.isArray(snap.tombstones)
+  ) {
+    throw new Error("Remote-Snapshot hat ein unbekanntes Format.");
+  }
+  return snap as SyncSnapshot;
+}
+
+/**
  * Export: lokaler DB-Zustand → Snapshot mit syncId-basierten FKs.
  */
 export async function buildLocalSnapshot(): Promise<SyncSnapshot> {
@@ -221,6 +247,21 @@ function translateRowToWire(
     delete out.entityId;
   }
 
+  // Eingebettete FKs: handoverProtocols.meterReadings trägt lokale Meter-IDs
+  // innerhalb eines Arrays — FK_MAP deckt nur Top-Level-Felder ab. Readings,
+  // deren Zähler keine syncId (mehr) hat, werden verworfen — das entspricht
+  // dem Render-Verhalten bei nicht auflösbaren meterIds (Vorschau skippt sie).
+  if (tableName === "handoverProtocols" && Array.isArray(row.meterReadings)) {
+    const wireReadings: AnyRecord[] = [];
+    for (const mr of row.meterReadings as { meterId: number; value: number }[]) {
+      const syncId = idToSyncId.meters?.get(mr.meterId);
+      if (syncId) {
+        wireReadings.push({ meterId__sync: syncId, value: mr.value });
+      }
+    }
+    out.meterReadings = wireReadings;
+  }
+
   return out;
 }
 
@@ -248,6 +289,24 @@ function translateRowFromWire(
       }
       delete out[syncKey];
     }
+  }
+
+  // Eingebettete FKs zurückübersetzen (siehe translateRowToWire). Einträge im
+  // Legacy-Wire-Format (rohe numerische meterId, vor diesem Fix exportiert)
+  // werden unverändert durchgereicht.
+  if (tableName === "handoverProtocols" && Array.isArray(out.meterReadings)) {
+    const localReadings: AnyRecord[] = [];
+    for (const mr of out.meterReadings as AnyRecord[]) {
+      if (typeof mr.meterId__sync === "string") {
+        const localId = syncIdToLocalId.get(mr.meterId__sync);
+        if (localId !== undefined) {
+          localReadings.push({ meterId: localId, value: mr.value });
+        }
+      } else {
+        localReadings.push(mr);
+      }
+    }
+    out.meterReadings = localReadings;
   }
 
   // Dynamische FKs zurückübersetzen

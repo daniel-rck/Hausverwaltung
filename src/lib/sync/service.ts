@@ -12,7 +12,7 @@ import {
   uploadSyncFile,
 } from "./cf-client";
 import { mergeSnapshots, snapshotSignature } from "./merge";
-import { applySnapshot, buildLocalSnapshot, type SyncSnapshot } from "./snapshot";
+import { applySnapshot, buildLocalSnapshot, parseSnapshot, type SyncSnapshot } from "./snapshot";
 
 export type SyncStatus = "disconnected" | "connecting" | "syncing" | "idle" | "error" | "offline";
 
@@ -270,7 +270,7 @@ class SyncService {
       // Remote unverändert — nur lokalen Dirty-Zustand pushen, wenn nötig
     } else {
       remoteEtag = remote.etag;
-      const remoteSnap = JSON.parse(remote.content) as SyncSnapshot;
+      const remoteSnap = parseSnapshot(remote.content);
       merged = mergeSnapshots(localSnapshot, remoteSnap);
       mergedFromRemote = true;
     }
