@@ -8,8 +8,8 @@ export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 export const inputBaseClasses =
-  "h-9 w-full rounded-md border bg-white dark:bg-zinc-800 text-sm text-zinc-800 dark:text-zinc-100 " +
-  "placeholder:text-zinc-400 dark:placeholder:text-zinc-500 " +
+  "h-9 w-full rounded-md border bg-surface text-sm text-fg " +
+  "placeholder:text-fg-subtle " +
   "focus:outline-none focus-visible:ring-2 focus-visible:ring-[--color-accent]/40 focus-visible:border-[--color-accent] " +
   "disabled:opacity-60 disabled:cursor-not-allowed transition-colors";
 
@@ -61,7 +61,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       <span className={wrapperCls}>
         {leftAddon && (
           <span
-            className="absolute left-3 text-zinc-400 dark:text-zinc-500 text-sm pointer-events-none"
+            className="absolute left-3 text-fg-subtle text-sm pointer-events-none"
             aria-hidden="true"
           >
             {leftAddon}
@@ -76,7 +76,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         />
         {rightAddon && (
           <span
-            className="absolute right-3 text-zinc-400 dark:text-zinc-500 text-sm pointer-events-none"
+            className="absolute right-3 text-fg-subtle text-sm pointer-events-none"
             aria-hidden="true"
           >
             {rightAddon}

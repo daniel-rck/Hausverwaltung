@@ -15,16 +15,14 @@ export function UpdatePrompt() {
   return (
     <div
       role="status"
-      className="fixed bottom-20 md:bottom-4 right-4 z-50 max-w-sm bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg shadow-lg p-4 no-print"
+      className="fixed bottom-20 md:bottom-4 right-4 z-50 max-w-sm bg-surface border border-border rounded-lg shadow-lg p-4 no-print"
     >
-      <p className="text-sm text-zinc-700 dark:text-zinc-200 mb-3">
-        Eine neue Version ist verfügbar.
-      </p>
+      <p className="text-sm text-fg mb-3">Eine neue Version ist verfügbar.</p>
       <div className="flex justify-end gap-2">
         <button
           type="button"
           onClick={() => setNeedRefresh(false)}
-          className="px-3 py-1.5 text-xs rounded-lg bg-zinc-100 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-600 transition-colors"
+          className="px-3 py-1.5 text-xs rounded-lg bg-surface-sunken text-fg-muted hover:bg-zinc-200 dark:hover:bg-zinc-600 transition-colors"
         >
           Später
         </button>

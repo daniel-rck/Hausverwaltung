@@ -37,7 +37,7 @@ const SHORTCUTS: { group: string; items: Shortcut[] }[] = [
 
 function Kbd({ children }: { children: string }) {
   return (
-    <kbd className="inline-flex items-center justify-center min-w-[1.5rem] h-6 px-1.5 rounded border border-zinc-300 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-[11px] font-mono font-medium text-zinc-700 dark:text-zinc-200">
+    <kbd className="inline-flex items-center justify-center min-w-[1.5rem] h-6 px-1.5 rounded border border-zinc-300 dark:border-zinc-700 bg-surface-muted text-[11px] font-mono font-medium text-fg">
       {children}
     </kbd>
   );
@@ -55,13 +55,13 @@ export function ShortcutsModal({ open, onClose }: ShortcutsModalProps) {
       <div className="space-y-5">
         {SHORTCUTS.map((group) => (
           <div key={group.group}>
-            <h3 className="text-[11px] uppercase tracking-wider font-semibold text-zinc-500 dark:text-zinc-400 mb-2">
+            <h3 className="text-[11px] uppercase tracking-wider font-semibold text-fg-muted mb-2">
               {group.group}
             </h3>
             <dl className="space-y-1.5">
               {group.items.map((s) => (
                 <div key={s.keys.join("-")} className="flex items-center justify-between gap-3">
-                  <dt className="text-sm text-zinc-700 dark:text-zinc-200">{s.description}</dt>
+                  <dt className="text-sm text-fg">{s.description}</dt>
                   <dd className="flex items-center gap-1 shrink-0">
                     {s.keys.map((k) => (
                       <Kbd key={k}>{k}</Kbd>

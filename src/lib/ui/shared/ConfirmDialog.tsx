@@ -91,14 +91,11 @@ export function ConfirmDialog({
         className="absolute inset-0 cursor-default"
         onClick={onCancel}
       />
-      <div className="relative bg-white dark:bg-zinc-800 rounded-lg shadow-lg max-w-sm w-full p-5">
-        <h3
-          id="confirm-title"
-          className="text-base font-semibold text-zinc-800 dark:text-zinc-100 mb-2"
-        >
+      <div className="relative bg-surface rounded-lg shadow-lg max-w-sm w-full p-5">
+        <h3 id="confirm-title" className="text-base font-semibold text-fg mb-2">
           {title}
         </h3>
-        <p id="confirm-message" className="text-sm text-zinc-600 dark:text-zinc-400 mb-4">
+        <p id="confirm-message" className="text-sm text-fg-muted mb-4">
           {message}
         </p>
         <div className="flex justify-end gap-2">
@@ -107,7 +104,7 @@ export function ConfirmDialog({
             type="button"
             onClick={onCancel}
             disabled={busy}
-            className="px-4 py-2 text-sm rounded-lg border border-zinc-300 dark:border-zinc-600 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors disabled:opacity-50"
+            className="px-4 py-2 text-sm rounded-lg border border-border text-fg-muted hover:bg-surface-muted transition-colors disabled:opacity-50"
           >
             {cancelLabel}
           </button>

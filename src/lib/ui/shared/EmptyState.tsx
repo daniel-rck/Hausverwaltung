@@ -26,17 +26,13 @@ export function EmptyState({ icon, title, description, action }: EmptyStateProps
       {icon && (
         <span
           aria-hidden="true"
-          className="mb-3 inline-flex items-center justify-center w-12 h-12 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400"
+          className="mb-3 inline-flex items-center justify-center w-12 h-12 rounded-lg bg-surface-sunken text-fg-muted"
         >
           {icon}
         </span>
       )}
-      <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-50 tracking-tight mb-1">
-        {title}
-      </h3>
-      {description && (
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 max-w-xs mb-4">{description}</p>
-      )}
+      <h3 className="text-base font-semibold text-fg tracking-tight mb-1">{title}</h3>
+      {description && <p className="text-sm text-fg-muted max-w-xs mb-4">{description}</p>}
       {action &&
         (isActionObject(action) ? (
           <Button variant="primary" onClick={action.onClick}>

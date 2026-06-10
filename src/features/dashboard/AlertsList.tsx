@@ -84,9 +84,7 @@ export function AlertsList() {
   if (!alerts || alerts.length === 0) {
     return (
       <Card title="Heute zu tun">
-        <p className="text-sm text-zinc-500 dark:text-zinc-400">
-          Alles erledigt — keine offenen Hinweise.
-        </p>
+        <p className="text-sm text-fg-muted">Alles erledigt — keine offenen Hinweise.</p>
       </Card>
     );
   }
@@ -104,10 +102,7 @@ export function AlertsList() {
               ? "text-amber-600 dark:text-amber-400"
               : "text-[--color-accent] dark:text-[--color-accent-dark]";
           return (
-            <li
-              key={alert.message}
-              className="flex items-start gap-3 text-sm text-zinc-700 dark:text-zinc-200"
-            >
+            <li key={alert.message} className="flex items-start gap-3 text-sm text-fg">
               <Icon
                 size={16}
                 strokeWidth={1.75}

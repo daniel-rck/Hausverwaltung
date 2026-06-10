@@ -36,11 +36,11 @@ function variantClasses(variant: Variant): string {
     case "primary":
       return "bg-[--color-accent] text-white hover:bg-[--color-accent-hover]";
     case "secondary":
-      return "bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-700/60";
+      return "bg-surface text-fg border border-zinc-300 dark:border-zinc-700 hover:bg-surface-muted/60";
     case "outline":
-      return "bg-transparent text-zinc-700 dark:text-zinc-200 border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800";
+      return "bg-transparent text-fg border border-zinc-300 dark:border-zinc-700 hover:bg-surface-muted";
     case "ghost":
-      return "bg-transparent text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800";
+      return "bg-transparent text-fg-muted hover:bg-surface-sunken";
     case "danger":
       return "bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-400/40";
     case "link":

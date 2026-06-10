@@ -142,9 +142,7 @@ export function UpcomingDue() {
       key: "unit",
       header: "Wohnung",
       render: (r) => (
-        <span className={r.item.unitId === null ? "text-zinc-500 dark:text-zinc-400 italic" : ""}>
-          {r.unitName}
-        </span>
+        <span className={r.item.unitId === null ? "text-fg-muted italic" : ""}>{r.unitName}</span>
       ),
       sortValue: (r) => r.unitName,
     },
@@ -173,7 +171,7 @@ export function UpcomingDue() {
         />
       ) : (
         <>
-          <div className="mb-3 flex gap-3 text-sm text-zinc-600 dark:text-zinc-300">
+          <div className="mb-3 flex gap-3 text-sm text-fg-muted">
             <span>{rows.filter((r) => r.status === "red").length} überfällig</span>
             <span className="text-zinc-300">|</span>
             <span>{rows.filter((r) => r.status === "yellow").length} in den nächsten 30 Tagen</span>

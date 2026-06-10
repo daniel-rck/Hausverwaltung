@@ -129,13 +129,10 @@ function ToastViewport({
 }
 
 const variantClasses: Record<ToastVariant, string> = {
-  success:
-    "border-green-200/60 dark:border-green-900/60 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100",
-  error:
-    "border-red-200/60 dark:border-red-900/60 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100",
-  info: "border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100",
-  warning:
-    "border-amber-200/60 dark:border-amber-900/60 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100",
+  success: "border-green-200/60 dark:border-green-900/60 bg-surface text-fg",
+  error: "border-red-200/60 dark:border-red-900/60 bg-surface text-fg",
+  info: "border-border bg-surface text-fg",
+  warning: "border-amber-200/60 dark:border-amber-900/60 bg-surface text-fg",
 };
 
 const variantIconColor: Record<ToastVariant, string> = {
@@ -178,7 +175,7 @@ function ToastView({ item, onDismiss }: { item: ToastItem; onDismiss: (id: numbe
         type="button"
         onClick={() => onDismiss(item.id)}
         aria-label="Schließen"
-        className="text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 -mr-1 -mt-0.5 p-1 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--color-accent]/40"
+        className="text-zinc-400 hover:text-fg -mr-1 -mt-0.5 p-1 rounded-md hover:bg-surface-sunken focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--color-accent]/40"
       >
         <X size={14} aria-hidden="true" />
       </button>

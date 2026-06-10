@@ -37,7 +37,7 @@ export function ContractTemplate({ occupancy, unit, tenant }: ContractTemplatePr
       </div>
 
       {/* A4 contract content – always light background for print */}
-      <div className="bg-white text-zinc-900 max-w-[210mm] mx-auto p-10 print:p-0 text-sm leading-relaxed border border-zinc-200 dark:border-zinc-700 print:border-none shadow-sm print:shadow-none">
+      <div className="bg-white text-zinc-900 max-w-[210mm] mx-auto p-10 print:p-0 text-sm leading-relaxed border border-border print:border-none shadow-sm print:shadow-none">
         {/* Header */}
         <h1 className="text-2xl font-bold text-center mb-8 tracking-wide">MIETVERTRAG</h1>
 

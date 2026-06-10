@@ -125,7 +125,7 @@ export function SignatureCanvas({ label, value, onChange }: SignatureCanvasProps
   return (
     <div>
       <div className="flex items-center justify-between mb-2">
-        <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-200">{label}</span>
+        <span className="text-sm font-semibold text-fg">{label}</span>
         <button
           type="button"
           onClick={handleClear}
@@ -136,7 +136,7 @@ export function SignatureCanvas({ label, value, onChange }: SignatureCanvasProps
       </div>
       <canvas
         ref={canvasRef}
-        className="w-full h-32 border border-zinc-300 dark:border-zinc-600 rounded-lg bg-white cursor-crosshair touch-none"
+        className="w-full h-32 border border-border rounded-lg bg-white cursor-crosshair touch-none"
         onMouseDown={startDraw}
         onMouseMove={draw}
         onMouseUp={endDraw}
@@ -145,9 +145,7 @@ export function SignatureCanvas({ label, value, onChange }: SignatureCanvasProps
         onTouchMove={draw}
         onTouchEnd={endDraw}
       />
-      {!value && (
-        <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-1">Bitte hier unterschreiben</p>
-      )}
+      {!value && <p className="text-xs text-fg-subtle mt-1">Bitte hier unterschreiben</p>}
     </div>
   );
 }

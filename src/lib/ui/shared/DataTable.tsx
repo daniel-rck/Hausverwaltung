@@ -142,7 +142,7 @@ export function DataTable<T>({
                     setPage(0);
                   }}
                   placeholder={searchPlaceholder}
-                  className="h-8 w-full rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-sm pl-8 pr-3 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--color-accent]/40 focus-visible:border-[--color-accent]"
+                  className="h-8 w-full rounded-md border border-zinc-300 dark:border-zinc-700 bg-surface text-sm pl-8 pr-3 placeholder:text-fg-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--color-accent]/40 focus-visible:border-[--color-accent]"
                 />
               </div>
             ) : (
@@ -151,7 +151,7 @@ export function DataTable<T>({
             <div className="flex items-center gap-2 shrink-0">
               {toolbar}
               {searchable && data.length > 0 && (
-                <span className="text-xs text-zinc-500 dark:text-zinc-400 tabular-nums">
+                <span className="text-xs text-fg-muted tabular-nums">
                   {sorted.length} / {data.length}
                 </span>
               )}
@@ -161,22 +161,20 @@ export function DataTable<T>({
       )}
 
       {sorted.length === 0 ? (
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 py-4 text-center">{emptyMessage}</p>
+        <p className="text-sm text-fg-muted py-4 text-center">{emptyMessage}</p>
       ) : (
         <>
           {/* Desktop: echte Tabelle */}
           <div className="hidden sm:block overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-zinc-200 dark:border-zinc-800">
+                <tr className="border-b border-border">
                   {columns.map((col) => (
                     <th
                       key={col.key}
                       onClick={() => toggleSort(col.key)}
-                      className={`${padY} px-3 text-[11px] uppercase tracking-wide font-medium text-zinc-500 dark:text-zinc-400 ${alignClass(col.align)} ${
-                        col.sortValue
-                          ? "cursor-pointer select-none hover:text-zinc-900 dark:hover:text-zinc-100"
-                          : ""
+                      className={`${padY} px-3 text-[11px] uppercase tracking-wide font-medium text-fg-muted ${alignClass(col.align)} ${
+                        col.sortValue ? "cursor-pointer select-none hover:text-fg" : ""
                       }`}
                       aria-sort={
                         col.sortValue
@@ -207,17 +205,12 @@ export function DataTable<T>({
                   <tr
                     key={keyFn(row)}
                     onClick={() => onRowClick?.(row)}
-                    className={`border-b border-zinc-100 dark:border-zinc-800/60 ${
+                    className={`border-b border-border/60 ${
                       zebra && idx % 2 === 1 ? "bg-zinc-50/50 dark:bg-zinc-900/30" : ""
-                    } ${
-                      onRowClick ? "cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800/40" : ""
-                    }`}
+                    } ${onRowClick ? "cursor-pointer hover:bg-surface-muted/40" : ""}`}
                   >
                     {columns.map((col) => (
-                      <td
-                        key={col.key}
-                        className={`${padY} px-3 ${alignClass(col.align)} text-zinc-700 dark:text-zinc-200`}
-                      >
+                      <td key={col.key} className={`${padY} px-3 ${alignClass(col.align)} text-fg`}>
                         {col.render(row)}
                       </td>
                     ))}
@@ -247,24 +240,20 @@ export function DataTable<T>({
                     role: "button",
                     tabIndex: 0,
                   })}
-                  className={`rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-2.5 ${
+                  className={`rounded-lg border border-border bg-surface p-2.5 ${
                     onRowClick ? "cursor-pointer active:bg-zinc-50 dark:active:bg-zinc-800/60" : ""
                   }`}
                 >
                   {primaryCol && (
-                    <div className="font-medium text-zinc-900 dark:text-zinc-50 mb-1 tracking-tight">
+                    <div className="font-medium text-fg mb-1 tracking-tight">
                       {primaryCol.render(row)}
                     </div>
                   )}
                   <dl className="space-y-1 text-xs">
                     {detailCols.map((col) => (
                       <div key={col.key} className="flex justify-between gap-2">
-                        <dt className="text-zinc-500 dark:text-zinc-400">
-                          {col.mobileLabel ?? col.header}
-                        </dt>
-                        <dd className="text-zinc-700 dark:text-zinc-200 text-right">
-                          {col.render(row)}
-                        </dd>
+                        <dt className="text-fg-muted">{col.mobileLabel ?? col.header}</dt>
+                        <dd className="text-fg text-right">{col.render(row)}</dd>
                       </div>
                     ))}
                   </dl>
@@ -272,7 +261,7 @@ export function DataTable<T>({
                     <div
                       role="toolbar"
                       aria-label="Aktionen"
-                      className="flex flex-wrap items-center gap-1 mt-2 pt-2 border-t border-zinc-100 dark:border-zinc-800/60"
+                      className="flex flex-wrap items-center gap-1 mt-2 pt-2 border-t border-border/60"
                       onClick={(e) => e.stopPropagation()}
                       onKeyDown={(e) => e.stopPropagation()}
                     >
@@ -289,7 +278,7 @@ export function DataTable<T>({
           {usePagination && (
             <nav
               aria-label="Seitennavigation"
-              className="flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-400 pt-1"
+              className="flex items-center justify-between text-xs text-fg-muted pt-1"
             >
               <span>
                 Seite {safePage + 1} von {totalPages}
@@ -299,7 +288,7 @@ export function DataTable<T>({
                   type="button"
                   onClick={() => setPage(Math.max(0, safePage - 1))}
                   disabled={safePage === 0}
-                  className="h-7 px-2 inline-flex items-center gap-1 rounded-md border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800 disabled:opacity-50"
+                  className="h-7 px-2 inline-flex items-center gap-1 rounded-md border border-zinc-300 dark:border-zinc-700 hover:bg-surface-muted disabled:opacity-50"
                 >
                   <ChevronLeft size={12} strokeWidth={2} aria-hidden="true" />
                   Zurück
@@ -308,7 +297,7 @@ export function DataTable<T>({
                   type="button"
                   onClick={() => setPage(Math.min(totalPages - 1, safePage + 1))}
                   disabled={safePage >= totalPages - 1}
-                  className="h-7 px-2 inline-flex items-center gap-1 rounded-md border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800 disabled:opacity-50"
+                  className="h-7 px-2 inline-flex items-center gap-1 rounded-md border border-zinc-300 dark:border-zinc-700 hover:bg-surface-muted disabled:opacity-50"
                 >
                   Weiter
                   <ChevronRight size={12} strokeWidth={2} aria-hidden="true" />

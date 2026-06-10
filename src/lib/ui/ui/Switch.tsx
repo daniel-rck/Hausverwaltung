@@ -30,11 +30,9 @@ export const Switch = forwardRef<HTMLInputElement, SwitchProps>(
         </span>
         {(label || description) && (
           <span className="text-sm">
-            {label && <span className="text-zinc-700 dark:text-zinc-200">{label}</span>}
+            {label && <span className="text-fg">{label}</span>}
             {description && (
-              <span className="block text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
-                {description}
-              </span>
+              <span className="block text-xs text-fg-muted mt-0.5">{description}</span>
             )}
           </span>
         )}

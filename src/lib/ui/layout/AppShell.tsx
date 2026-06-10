@@ -25,7 +25,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       </a>
 
       {/* Header */}
-      <header className="sticky top-0 z-30 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800 px-3 sm:px-4 no-print">
+      <header className="sticky top-0 z-30 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border-b border-border px-3 sm:px-4 no-print">
         <div className="h-14 flex items-center justify-between gap-2">
           <Link
             to="/"
@@ -37,7 +37,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             >
               <Building2 size={14} strokeWidth={2} />
             </span>
-            <span className="text-sm sm:text-[15px] font-semibold tracking-tight text-zinc-900 dark:text-zinc-50 truncate">
+            <span className="text-sm sm:text-[15px] font-semibold tracking-tight text-fg truncate">
               Hausverwaltung
             </span>
           </Link>
@@ -76,7 +76,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       <BottomNav />
 
-      <footer className="hidden md:flex flex-wrap justify-center items-center gap-x-3 gap-y-1 py-2 px-4 text-[11px] text-zinc-400 dark:text-zinc-500 no-print">
+      <footer className="hidden md:flex flex-wrap justify-center items-center gap-x-3 gap-y-1 py-2 px-4 text-[11px] text-fg-subtle no-print">
         <span className="tabular-nums">
           v{__APP_VERSION__} · {buildDate}
         </span>

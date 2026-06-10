@@ -177,9 +177,7 @@ export function MaintenanceList() {
       key: "unit",
       header: "Wohnung",
       render: (r) => (
-        <span className={r.item.unitId === null ? "text-zinc-500 dark:text-zinc-400 italic" : ""}>
-          {r.unitName}
-        </span>
+        <span className={r.item.unitId === null ? "text-fg-muted italic" : ""}>{r.unitName}</span>
       ),
       sortValue: (r) => r.unitName,
     },
@@ -211,8 +209,7 @@ export function MaintenanceList() {
     {
       key: "contractor",
       header: "Handwerker",
-      render: (r) =>
-        r.item.contractor ?? <span className="text-zinc-400 dark:text-zinc-500">–</span>,
+      render: (r) => r.item.contractor ?? <span className="text-fg-subtle">–</span>,
       sortValue: (r) => r.item.contractor ?? "",
     },
     {
@@ -226,7 +223,7 @@ export function MaintenanceList() {
               e.stopPropagation();
               openEdit(r);
             }}
-            className="text-xs text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200"
+            className="text-xs text-fg-subtle hover:text-fg"
           >
             Bearbeiten
           </button>
@@ -246,7 +243,7 @@ export function MaintenanceList() {
   ];
 
   const inputCls =
-    "w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500";
+    "w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500";
 
   return (
     <>
@@ -257,7 +254,7 @@ export function MaintenanceList() {
             <select
               value={filterCategory}
               onChange={(e) => setFilterCategory(e.target.value as Category | "")}
-              className="text-sm border border-zinc-300 dark:border-zinc-600 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+              className="text-sm border border-border rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
             >
               <option value="">Alle Kategorien</option>
               {(Object.entries(CATEGORY_LABELS) as [Category, string][]).map(([k, v]) => (
@@ -277,16 +274,14 @@ export function MaintenanceList() {
         }
       >
         {showForm && (
-          <div className="mb-4 p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-lg border border-zinc-200 dark:border-zinc-700">
-            <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-200 mb-3">
+          <div className="mb-4 p-4 bg-surface-muted rounded-lg border border-border">
+            <h3 className="text-sm font-semibold text-fg mb-3">
               {editItem ? "Maßnahme bearbeiten" : "Neue Maßnahme"}
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               <div>
                 <label className="block">
-                  <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-                    Titel *
-                  </span>
+                  <span className="block text-xs font-medium text-fg-muted mb-1">Titel *</span>
                   <input
                     type="text"
                     value={form.title}
@@ -298,9 +293,7 @@ export function MaintenanceList() {
               </div>
               <div>
                 <label className="block">
-                  <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-                    Datum *
-                  </span>
+                  <span className="block text-xs font-medium text-fg-muted mb-1">Datum *</span>
                   <input
                     type="date"
                     value={form.date}
@@ -311,9 +304,7 @@ export function MaintenanceList() {
               </div>
               <div>
                 <label className="block">
-                  <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-                    Kategorie
-                  </span>
+                  <span className="block text-xs font-medium text-fg-muted mb-1">Kategorie</span>
                   <select
                     value={form.category}
                     onChange={(e) => setForm({ ...form, category: e.target.value as Category })}
@@ -329,9 +320,7 @@ export function MaintenanceList() {
               </div>
               <div>
                 <label className="block">
-                  <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-                    Wohnung
-                  </span>
+                  <span className="block text-xs font-medium text-fg-muted mb-1">Wohnung</span>
                   <select
                     value={form.unitId}
                     onChange={(e) => setForm({ ...form, unitId: e.target.value })}
@@ -354,9 +343,7 @@ export function MaintenanceList() {
               />
               <div>
                 <label className="block">
-                  <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-                    Handwerker
-                  </span>
+                  <span className="block text-xs font-medium text-fg-muted mb-1">Handwerker</span>
                   <input
                     type="text"
                     value={form.contractor}
@@ -368,9 +355,7 @@ export function MaintenanceList() {
               </div>
               <div className="sm:col-span-2 lg:col-span-3">
                 <label className="block">
-                  <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-                    Beschreibung
-                  </span>
+                  <span className="block text-xs font-medium text-fg-muted mb-1">Beschreibung</span>
                   <textarea
                     value={form.description}
                     onChange={(e) => setForm({ ...form, description: e.target.value })}
@@ -380,12 +365,12 @@ export function MaintenanceList() {
                 </label>
               </div>
               <div className="flex items-end">
-                <label className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-300 pb-1.5">
+                <label className="flex items-center gap-2 text-sm text-fg-muted pb-1.5">
                   <input
                     type="checkbox"
                     checked={form.recurring}
                     onChange={(e) => setForm({ ...form, recurring: e.target.checked })}
-                    className="rounded border-zinc-300 dark:border-zinc-600"
+                    className="rounded border-border"
                   />
                   Wiederkehrend
                 </label>
@@ -394,7 +379,7 @@ export function MaintenanceList() {
                 <>
                   <div>
                     <label className="block">
-                      <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
+                      <span className="block text-xs font-medium text-fg-muted mb-1">
                         Intervall (Monate)
                       </span>
                       <input
@@ -409,7 +394,7 @@ export function MaintenanceList() {
                   </div>
                   <div>
                     <label className="block">
-                      <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
+                      <span className="block text-xs font-medium text-fg-muted mb-1">
                         Nächste Fälligkeit
                       </span>
                       <input
@@ -424,9 +409,7 @@ export function MaintenanceList() {
               )}
               <div className="sm:col-span-2 lg:col-span-3">
                 <label className="block">
-                  <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-                    Notizen
-                  </span>
+                  <span className="block text-xs font-medium text-fg-muted mb-1">Notizen</span>
                   <textarea
                     value={form.notes}
                     onChange={(e) => setForm({ ...form, notes: e.target.value })}
@@ -450,7 +433,7 @@ export function MaintenanceList() {
                   setShowForm(false);
                   setEditItem(null);
                 }}
-                className="px-4 py-1.5 text-sm border border-zinc-300 dark:border-zinc-600 text-zinc-600 dark:text-zinc-300 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors"
+                className="px-4 py-1.5 text-sm border border-border text-fg-muted rounded-lg hover:bg-surface-muted transition-colors"
               >
                 Abbrechen
               </button>

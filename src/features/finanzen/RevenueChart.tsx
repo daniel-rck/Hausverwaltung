@@ -79,12 +79,9 @@ export function RevenueChart({ year }: RevenueChartProps) {
       title="Jahresübersicht"
       action={
         hasData ? (
-          <div className="flex gap-4 text-xs text-zinc-500 dark:text-zinc-400">
+          <div className="flex gap-4 text-xs text-fg-muted">
             <span>
-              Soll:{" "}
-              <strong className="text-zinc-700 dark:text-zinc-200">
-                {formatEuro(chartData.totalExpected)}
-              </strong>
+              Soll: <strong className="text-fg">{formatEuro(chartData.totalExpected)}</strong>
             </span>
             <span>
               Ist:{" "}

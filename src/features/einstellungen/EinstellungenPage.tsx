@@ -90,7 +90,7 @@ function AllgemeinTab() {
       }
     >
       {!editing ? (
-        <dl className="text-sm text-zinc-600 dark:text-zinc-300 space-y-1.5">
+        <dl className="text-sm text-fg-muted space-y-1.5">
           <Row label="Vermieter" value={landlord?.name} />
           <Row label="Adresse" value={landlord?.address} />
           <Row label="IBAN" value={landlord?.iban} />
@@ -138,7 +138,7 @@ function AllgemeinTab() {
 function Row({ label, value }: { label: string; value: string | undefined }) {
   return (
     <div className="flex gap-2">
-      <dt className="font-medium min-w-[140px] text-zinc-500 dark:text-zinc-400">{label}:</dt>
+      <dt className="font-medium min-w-[140px] text-fg-muted">{label}:</dt>
       <dd>{value || "–"}</dd>
     </div>
   );

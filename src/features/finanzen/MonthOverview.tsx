@@ -237,19 +237,19 @@ export function MonthOverview({ year }: MonthOverviewProps) {
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
             <thead>
-              <tr className="border-b border-zinc-200 dark:border-zinc-700">
-                <th className="py-2 px-2 text-left font-medium text-zinc-500 dark:text-zinc-400 sticky left-0 bg-white dark:bg-zinc-800 min-w-[120px]">
+              <tr className="border-b border-border">
+                <th className="py-2 px-2 text-left font-medium text-fg-muted sticky left-0 bg-surface min-w-[120px]">
                   Einheit / Mieter
                 </th>
                 {shortMonths.map((m) => (
                   <th
                     key={m}
-                    className="py-2 px-1 text-center font-medium text-zinc-500 dark:text-zinc-400 min-w-[56px]"
+                    className="py-2 px-1 text-center font-medium text-fg-muted min-w-[56px]"
                   >
                     {m}
                   </th>
                 ))}
-                <th className="py-2 px-2 text-right font-medium text-zinc-500 dark:text-zinc-400 min-w-[80px]">
+                <th className="py-2 px-2 text-right font-medium text-fg-muted min-w-[80px]">
                   Summe
                 </th>
               </tr>
@@ -262,13 +262,11 @@ export function MonthOverview({ year }: MonthOverviewProps) {
                 return (
                   <tr
                     key={`${first.unit.id}-${first.tenant.id}`}
-                    className="border-b border-zinc-100 dark:border-zinc-700"
+                    className="border-b border-border"
                   >
-                    <td className="py-1.5 px-2 sticky left-0 bg-white dark:bg-zinc-800">
-                      <div className="font-medium text-zinc-700 dark:text-zinc-200">
-                        {first.unit.name}
-                      </div>
-                      <div className="text-zinc-500 dark:text-zinc-400 truncate max-w-[110px]">
+                    <td className="py-1.5 px-2 sticky left-0 bg-surface">
+                      <div className="font-medium text-fg">{first.unit.name}</div>
+                      <div className="text-fg-muted truncate max-w-[110px]">
                         {first.tenant.name}
                       </div>
                     </td>
@@ -285,7 +283,7 @@ export function MonthOverview({ year }: MonthOverviewProps) {
                                 ? "bg-amber-100 text-amber-700 hover:bg-amber-200"
                                 : cell.status === "red"
                                   ? "bg-red-100 text-red-700 hover:bg-red-200"
-                                  : "bg-zinc-50 dark:bg-zinc-800/50 text-zinc-300 cursor-default"
+                                  : "bg-surface-muted text-zinc-300 cursor-default"
                           }`}
                           title={
                             cell.status === "gray"
@@ -301,7 +299,7 @@ export function MonthOverview({ year }: MonthOverviewProps) {
                         </button>
                       </td>
                     ))}
-                    <td className="py-1.5 px-2 text-right font-mono font-medium text-zinc-700 dark:text-zinc-200">
+                    <td className="py-1.5 px-2 text-right font-mono font-medium text-fg">
                       {formatEuro(yearTotal)}
                     </td>
                   </tr>
@@ -312,7 +310,7 @@ export function MonthOverview({ year }: MonthOverviewProps) {
         </div>
 
         {/* Legende */}
-        <div className="flex flex-wrap gap-4 mt-4 text-xs text-zinc-500 dark:text-zinc-400">
+        <div className="flex flex-wrap gap-4 mt-4 text-xs text-fg-muted">
           <span className="flex items-center gap-1">
             <span className="w-3 h-3 rounded bg-green-100 border border-green-300" />
             Vollständig bezahlt
@@ -326,7 +324,7 @@ export function MonthOverview({ year }: MonthOverviewProps) {
             Offen
           </span>
           <span className="flex items-center gap-1">
-            <span className="w-3 h-3 rounded bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700" />
+            <span className="w-3 h-3 rounded bg-surface-muted border border-border" />
             Kein Mietverhältnis
           </span>
         </div>
@@ -335,23 +333,19 @@ export function MonthOverview({ year }: MonthOverviewProps) {
       {/* Payment Editor Dialog */}
       {editingCell && editingCellData && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-zinc-800 rounded-lg shadow-lg max-w-md w-full p-5">
-            <h3 className="text-base font-semibold text-zinc-800 dark:text-zinc-100 mb-1">
-              Zahlung erfassen
-            </h3>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-4">
+          <div className="bg-surface rounded-lg shadow-lg max-w-md w-full p-5">
+            <h3 className="text-base font-semibold text-fg mb-1">Zahlung erfassen</h3>
+            <p className="text-sm text-fg-muted mb-4">
               {editingCellData.unit.name} &middot; {editingCellData.tenant.name} &middot;{" "}
               {MONTH_NAMES[parseInt(editingCell.month.slice(5), 10) - 1]}{" "}
               {editingCell.month.slice(0, 4)}
             </p>
 
             <div className="space-y-3">
-              <div className="p-2 bg-zinc-50 dark:bg-zinc-800/50 rounded-lg text-xs text-zinc-500 dark:text-zinc-400">
+              <div className="p-2 bg-surface-muted rounded-lg text-xs text-fg-muted">
                 Soll-Miete: {formatEuro(editingCellData.occupancy.rentCold)} Kaltmiete +{" "}
                 {formatEuro(editingCellData.occupancy.rentUtilities)} Nebenkosten ={" "}
-                <strong className="text-zinc-700 dark:text-zinc-200">
-                  {formatEuro(editingCellData.expected)}
-                </strong>
+                <strong className="text-fg">{formatEuro(editingCellData.expected)}</strong>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -373,23 +367,21 @@ export function MonthOverview({ year }: MonthOverviewProps) {
 
               <div>
                 <label className="block">
-                  <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
+                  <span className="block text-xs font-medium text-fg-muted mb-1">
                     Eingangsdatum
                   </span>
                   <input
                     type="date"
                     value={form.receivedDate}
                     onChange={(e) => setForm((f) => ({ ...f, receivedDate: e.target.value }))}
-                    className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+                    className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
                   />
                 </label>
               </div>
 
               <div>
                 <label className="block">
-                  <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-                    Zahlungsart
-                  </span>
+                  <span className="block text-xs font-medium text-fg-muted mb-1">Zahlungsart</span>
                   <select
                     value={form.method}
                     onChange={(e) =>
@@ -398,7 +390,7 @@ export function MonthOverview({ year }: MonthOverviewProps) {
                         method: e.target.value as Payment["method"],
                       }))
                     }
-                    className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+                    className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
                   >
                     {(Object.entries(METHOD_LABELS) as [Payment["method"], string][]).map(
                       ([value, label]) => (
@@ -413,15 +405,13 @@ export function MonthOverview({ year }: MonthOverviewProps) {
 
               <div>
                 <label className="block">
-                  <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-                    Bemerkung
-                  </span>
+                  <span className="block text-xs font-medium text-fg-muted mb-1">Bemerkung</span>
                   <input
                     type="text"
                     value={form.notes}
                     onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
                     placeholder="Optional"
-                    className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+                    className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
                   />
                 </label>
               </div>
@@ -445,7 +435,7 @@ export function MonthOverview({ year }: MonthOverviewProps) {
                   type="button"
                   onClick={() => setEditingCell(null)}
                   disabled={saving}
-                  className="px-4 py-2 text-sm rounded-lg border border-zinc-300 dark:border-zinc-600 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors disabled:opacity-50"
+                  className="px-4 py-2 text-sm rounded-lg border border-border text-fg-muted hover:bg-surface-muted transition-colors disabled:opacity-50"
                 >
                   Abbrechen
                 </button>

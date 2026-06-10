@@ -83,9 +83,7 @@ export function RecurringTasks() {
       key: "unit",
       header: "Wohnung",
       render: (r) => (
-        <span className={r.item.unitId === null ? "text-zinc-500 dark:text-zinc-400 italic" : ""}>
-          {r.unitName}
-        </span>
+        <span className={r.item.unitId === null ? "text-fg-muted italic" : ""}>{r.unitName}</span>
       ),
       sortValue: (r) => r.unitName,
     },
@@ -102,7 +100,7 @@ export function RecurringTasks() {
         r.item.recurringInterval ? (
           `${r.item.recurringInterval} Monat${r.item.recurringInterval > 1 ? "e" : ""}`
         ) : (
-          <span className="text-zinc-400 dark:text-zinc-500">–</span>
+          <span className="text-fg-subtle">–</span>
         ),
       sortValue: (r) => r.item.recurringInterval ?? 0,
       align: "center",
@@ -117,7 +115,7 @@ export function RecurringTasks() {
       key: "nextDue",
       header: "Nächste Fälligkeit",
       render: (r) => {
-        if (!r.item.nextDue) return <span className="text-zinc-400 dark:text-zinc-500">–</span>;
+        if (!r.item.nextDue) return <span className="text-fg-subtle">–</span>;
         return (
           <span className={r.isOverdue ? "text-red-600 font-semibold" : ""}>
             {formatDate(r.item.nextDue)}

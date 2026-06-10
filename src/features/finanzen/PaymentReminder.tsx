@@ -226,12 +226,12 @@ export function PaymentReminder({ year }: PaymentReminderProps) {
     const totalFormatted = formatEuro(item.totalDifference);
 
     const letterContent = (
-      <div className="print-container bg-white dark:bg-zinc-800 max-w-3xl mx-auto p-8 print:p-0">
+      <div className="print-container bg-surface max-w-3xl mx-auto p-8 print:p-0">
         {/* A4 letter layout */}
-        <div className="min-h-[297mm] print:min-h-0 text-zinc-800 dark:text-zinc-100 print:text-black text-sm leading-relaxed">
+        <div className="min-h-[297mm] print:min-h-0 text-fg print:text-black text-sm leading-relaxed">
           {/* Sender (small, above address window) */}
           {landlord.name && (
-            <p className="text-xs text-zinc-400 dark:text-zinc-500 print:text-gray-500 mb-1 underline">
+            <p className="text-xs text-fg-subtle print:text-gray-500 mb-1 underline">
               {landlord.name} - {landlord.address.replace(/\n/g, ", ")}
             </p>
           )}
@@ -324,7 +324,7 @@ export function PaymentReminder({ year }: PaymentReminderProps) {
           {/* Signature line */}
           <div className="mt-10">
             <div className="w-64 border-b border-zinc-400 print:border-black mb-1" />
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 print:text-gray-600">
+            <p className="text-xs text-fg-muted print:text-gray-600">
               {landlord.name || "Vermieter/in"}
             </p>
           </div>
@@ -343,7 +343,7 @@ export function PaymentReminder({ year }: PaymentReminderProps) {
           <button
             type="button"
             onClick={closeLetter}
-            className="px-4 py-2 text-sm border border-zinc-300 dark:border-zinc-600 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors text-zinc-700 dark:text-zinc-200"
+            className="px-4 py-2 text-sm border border-border rounded-lg hover:bg-surface-muted transition-colors text-fg"
           >
             Zurück zur Übersicht
           </button>
@@ -356,7 +356,7 @@ export function PaymentReminder({ year }: PaymentReminderProps) {
                   mahnstufe: Number(e.target.value) as Mahnstufe,
                 })
               }
-              className="border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+              className="border border-border rounded-lg px-3 py-2 text-sm bg-surface text-fg focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
             >
               {MAHNSTUFE_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -390,7 +390,7 @@ export function PaymentReminder({ year }: PaymentReminderProps) {
             <select
               value={selectedStufe}
               onChange={(e) => setSelectedStufe(Number(e.target.value) as Mahnstufe)}
-              className="border border-zinc-300 dark:border-zinc-600 rounded-lg px-2 py-1 text-xs bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+              className="border border-border rounded-lg px-2 py-1 text-xs bg-surface text-fg focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
             >
               {MAHNSTUFE_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -413,25 +413,23 @@ export function PaymentReminder({ year }: PaymentReminderProps) {
           {items.map((item) => (
             <div
               key={item.id}
-              className="flex items-center justify-between p-4 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900/40"
+              className="flex items-center justify-between p-4 rounded-lg border border-border bg-surface-muted/40"
             >
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="font-medium text-zinc-800 dark:text-zinc-100 truncate">
-                    {item.tenant.name}
-                  </span>
+                  <span className="font-medium text-fg truncate">{item.tenant.name}</span>
                   <StatusBadge
                     status={item.overdueMonths.length >= 3 ? "red" : "yellow"}
                     label={`${item.overdueMonths.length} ${item.overdueMonths.length === 1 ? "Monat" : "Monate"} offen`}
                   />
                 </div>
-                <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                <p className="text-sm text-fg-muted">
                   {item.unit.name} &middot; Offen:{" "}
                   <span className="font-mono font-medium text-red-600 dark:text-red-400">
                     {formatEuro(item.totalDifference)}
                   </span>
                 </p>
-                <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5">
+                <p className="text-xs text-fg-subtle mt-0.5">
                   {item.overdueMonths.map((om) => formatMonth(om.month)).join(", ")}
                 </p>
               </div>
@@ -445,8 +443,8 @@ export function PaymentReminder({ year }: PaymentReminderProps) {
             </div>
           ))}
 
-          <div className="pt-3 border-t border-zinc-200 dark:border-zinc-700 flex justify-between text-sm">
-            <span className="text-zinc-600 dark:text-zinc-300">
+          <div className="pt-3 border-t border-border flex justify-between text-sm">
+            <span className="text-fg-muted">
               {items.length} {items.length === 1 ? "Mieter" : "Mieter"} mit offenen Posten
             </span>
             <span className="font-mono font-semibold text-red-600 dark:text-red-400">

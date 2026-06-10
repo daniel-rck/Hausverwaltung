@@ -148,12 +148,12 @@ export function MessdienstInput({ propertyId, year }: MessdienstInputProps) {
         return (
           <Card key={costType.id} title={`${costType.name} – ${messdienstName}-Anteil`}>
             {!cost ? (
-              <p className="text-sm text-zinc-500 dark:text-zinc-400">
+              <p className="text-sm text-fg-muted">
                 Bitte erfassen Sie zuerst den Gesamtbetrag unter &quot;Kosten erfassen&quot;.
               </p>
             ) : (
               <div className="space-y-3">
-                <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                <p className="text-xs text-fg-muted">
                   Gesamtbetrag: {formatEuro(cost.totalAmount)} | Verteilt: {formatEuro(sharesTotal)}{" "}
                   {Math.abs(cost.totalAmount - sharesTotal) > 0.01 && (
                     <span className="text-amber-600 font-medium">
@@ -164,32 +164,19 @@ export function MessdienstInput({ propertyId, year }: MessdienstInputProps) {
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b border-zinc-200 dark:border-zinc-700">
-                        <th className="py-2 px-3 text-left font-medium text-zinc-500 dark:text-zinc-400">
-                          Wohnung
-                        </th>
-                        <th className="py-2 px-3 text-left font-medium text-zinc-500 dark:text-zinc-400">
-                          Mieter
-                        </th>
-                        <th className="py-2 px-3 text-right font-medium text-zinc-500 dark:text-zinc-400">
-                          Betrag
-                        </th>
+                      <tr className="border-b border-border">
+                        <th className="py-2 px-3 text-left font-medium text-fg-muted">Wohnung</th>
+                        <th className="py-2 px-3 text-left font-medium text-fg-muted">Mieter</th>
+                        <th className="py-2 px-3 text-right font-medium text-fg-muted">Betrag</th>
                       </tr>
                     </thead>
                     <tbody>
                       {occupancies.map(({ occupancy, tenant, unit }) => {
                         const share = shares.find((s) => s.occupancyId === occupancy.id!);
                         return (
-                          <tr
-                            key={occupancy.id}
-                            className="border-b border-zinc-100 dark:border-zinc-700"
-                          >
-                            <td className="py-2 px-3 text-zinc-700 dark:text-zinc-200">
-                              {unit?.name ?? "–"}
-                            </td>
-                            <td className="py-2 px-3 text-zinc-700 dark:text-zinc-200">
-                              {tenant?.name ?? "–"}
-                            </td>
+                          <tr key={occupancy.id} className="border-b border-border">
+                            <td className="py-2 px-3 text-fg">{unit?.name ?? "–"}</td>
+                            <td className="py-2 px-3 text-fg">{tenant?.name ?? "–"}</td>
                             <td className="py-2 px-3">
                               <NumInput
                                 value={share?.amount ?? 0}
@@ -204,14 +191,11 @@ export function MessdienstInput({ propertyId, year }: MessdienstInputProps) {
                       })}
                     </tbody>
                     <tfoot>
-                      <tr className="border-t border-zinc-200 dark:border-zinc-700">
-                        <td
-                          colSpan={2}
-                          className="py-2 px-3 text-sm font-semibold text-zinc-600 dark:text-zinc-300"
-                        >
+                      <tr className="border-t border-border">
+                        <td colSpan={2} className="py-2 px-3 text-sm font-semibold text-fg-muted">
                           Summe Anteile
                         </td>
-                        <td className="py-2 px-3 text-right font-mono font-tabular font-semibold text-zinc-800 dark:text-zinc-100">
+                        <td className="py-2 px-3 text-right font-mono font-tabular font-semibold text-fg">
                           {formatEuro(sharesTotal)}
                         </td>
                       </tr>

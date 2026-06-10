@@ -184,18 +184,14 @@ export function DocumentStore({ entityType, entityId, title = "Dokumente" }: Doc
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-zinc-200 dark:border-zinc-700">
-                    <th className="text-left py-2 px-2 text-xs font-medium text-zinc-500 dark:text-zinc-400 w-8" />
-                    <th className="text-left py-2 px-2 text-xs font-medium text-zinc-500 dark:text-zinc-400">
-                      Name
-                    </th>
-                    <th className="text-right py-2 px-2 text-xs font-medium text-zinc-500 dark:text-zinc-400">
+                  <tr className="border-b border-border">
+                    <th className="text-left py-2 px-2 text-xs font-medium text-fg-muted w-8" />
+                    <th className="text-left py-2 px-2 text-xs font-medium text-fg-muted">Name</th>
+                    <th className="text-right py-2 px-2 text-xs font-medium text-fg-muted">
                       Größe
                     </th>
-                    <th className="text-left py-2 px-2 text-xs font-medium text-zinc-500 dark:text-zinc-400">
-                      Datum
-                    </th>
-                    <th className="text-right py-2 px-2 text-xs font-medium text-zinc-500 dark:text-zinc-400">
+                    <th className="text-left py-2 px-2 text-xs font-medium text-fg-muted">Datum</th>
+                    <th className="text-right py-2 px-2 text-xs font-medium text-fg-muted">
                       Aktionen
                     </th>
                   </tr>
@@ -204,7 +200,7 @@ export function DocumentStore({ entityType, entityId, title = "Dokumente" }: Doc
                   {documents.map((doc) => (
                     <tr
                       key={doc.id}
-                      className="border-b border-zinc-100 dark:border-zinc-700/50 hover:bg-zinc-50 dark:hover:bg-zinc-700/30"
+                      className="border-b border-border/50 hover:bg-surface-muted/30"
                     >
                       <td className="py-2 px-2 text-center">
                         {isPdf(doc.mimeType) ? (
@@ -245,16 +241,16 @@ export function DocumentStore({ entityType, entityId, title = "Dokumente" }: Doc
                         <button
                           type="button"
                           onClick={() => handlePreview(doc)}
-                          className="text-zinc-800 dark:text-zinc-200 hover:text-blue-600 dark:hover:text-blue-400 hover:underline text-left truncate max-w-[200px] block"
+                          className="text-fg hover:text-blue-600 dark:hover:text-blue-400 hover:underline text-left truncate max-w-[200px] block"
                           title={doc.name}
                         >
                           {doc.name}
                         </button>
                       </td>
-                      <td className="py-2 px-2 text-right text-zinc-500 dark:text-zinc-400 font-mono text-xs">
+                      <td className="py-2 px-2 text-right text-fg-muted font-mono text-xs">
                         {formatSize(doc.size)}
                       </td>
-                      <td className="py-2 px-2 text-zinc-500 dark:text-zinc-400 text-xs">
+                      <td className="py-2 px-2 text-fg-muted text-xs">
                         {new Date(doc.uploadedAt).toLocaleDateString("de-DE")}
                       </td>
                       <td className="py-2 px-2 text-right">
@@ -272,7 +268,7 @@ export function DocumentStore({ entityType, entityId, title = "Dokumente" }: Doc
               </table>
             </div>
 
-            <div className="mt-3 pt-3 border-t border-zinc-100 dark:border-zinc-700 text-xs text-zinc-500 dark:text-zinc-400">
+            <div className="mt-3 pt-3 border-t border-border text-xs text-fg-muted">
               Speicher: {formatSize(totalSize)} ({docCount}{" "}
               {docCount === 1 ? "Dokument" : "Dokumente"})
             </div>
@@ -300,11 +296,9 @@ export function DocumentStore({ entityType, entityId, title = "Dokumente" }: Doc
             className="absolute inset-0 cursor-default"
             onClick={() => setPreviewDoc(null)}
           />
-          <div className="relative bg-white dark:bg-zinc-800 rounded-lg shadow-lg max-w-3xl w-full max-h-[90vh] flex flex-col">
-            <div className="flex items-center justify-between px-5 py-3 border-b border-zinc-100 dark:border-zinc-700">
-              <h3 className="text-sm font-semibold text-zinc-800 dark:text-zinc-100 truncate">
-                {previewDoc.name}
-              </h3>
+          <div className="relative bg-surface rounded-lg shadow-lg max-w-3xl w-full max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between px-5 py-3 border-b border-border">
+              <h3 className="text-sm font-semibold text-fg truncate">{previewDoc.name}</h3>
               <button
                 type="button"
                 onClick={() => setPreviewDoc(null)}

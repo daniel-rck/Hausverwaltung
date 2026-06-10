@@ -39,11 +39,7 @@ export function AbrechnungPrint({ propertyId, year, onBack }: AbrechnungPrintPro
   }, [propertyId, year]);
 
   if (!occupancies) {
-    return (
-      <div className="text-center py-8 text-sm text-zinc-500 dark:text-zinc-400">
-        Lade Abrechnungen...
-      </div>
-    );
+    return <div className="text-center py-8 text-sm text-fg-muted">Lade Abrechnungen...</div>;
   }
 
   if (occupancies.length === 0) {
@@ -63,7 +59,7 @@ export function AbrechnungPrint({ propertyId, year, onBack }: AbrechnungPrintPro
         <button
           type="button"
           onClick={onBack}
-          className="text-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 flex items-center gap-1"
+          className="text-sm text-fg-muted hover:text-fg flex items-center gap-1"
         >
           ← Zurück
         </button>
@@ -81,7 +77,7 @@ export function AbrechnungPrint({ propertyId, year, onBack }: AbrechnungPrintPro
         {occupancies.map((info, idx) => (
           <div key={info.occupancy.id} className={idx > 0 ? "page-break" : ""}>
             <div className="no-print mb-2 px-2">
-              <p className="text-xs text-zinc-400 dark:text-zinc-500">
+              <p className="text-xs text-fg-subtle">
                 Abrechnung {idx + 1} von {occupancies.length}: {info.tenant?.name ?? "–"} (
                 {info.unit.name})
               </p>

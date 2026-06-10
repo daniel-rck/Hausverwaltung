@@ -39,7 +39,7 @@ export function SyncStatusBadge() {
 
   return (
     <div
-      className="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400 px-2 py-1"
+      className="flex items-center gap-1.5 text-xs text-fg-muted px-2 py-1"
       title={state.lastError ?? label}
     >
       <span className={`inline-block w-2 h-2 rounded-full ${dotClass}`} />

@@ -75,7 +75,7 @@ export function SidebarNav() {
     >
       {groups.map((group) => (
         <div key={group.name} className="space-y-0.5">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 px-2.5 mb-1">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-fg-subtle px-2.5 mb-1">
             {group.name}
           </p>
           {group.items.map((item) => {
@@ -88,8 +88,8 @@ export function SidebarNav() {
                 className={({ isActive }) =>
                   `relative flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-[13px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--color-accent]/40 ${
                     isActive
-                      ? "bg-zinc-100 dark:bg-zinc-800/80 text-zinc-900 dark:text-zinc-50 font-medium"
-                      : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100/60 dark:hover:bg-zinc-800/40 hover:text-zinc-900 dark:hover:text-zinc-100"
+                      ? "bg-surface-sunken/80 text-fg font-medium"
+                      : "text-fg-muted hover:bg-zinc-100/60 dark:hover:bg-zinc-800/40 hover:text-fg"
                   }`
                 }
               >
@@ -104,11 +104,7 @@ export function SidebarNav() {
                     <Icon
                       size={16}
                       strokeWidth={1.75}
-                      className={
-                        isActive
-                          ? "text-zinc-900 dark:text-zinc-50"
-                          : "text-zinc-500 dark:text-zinc-400"
-                      }
+                      className={isActive ? "text-fg" : "text-fg-muted"}
                       aria-hidden="true"
                     />
                     <span>{item.label}</span>
@@ -135,7 +131,7 @@ export function BottomNav() {
     <>
       <nav
         aria-label="Hauptnavigation Mobile"
-        className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border-t border-zinc-200 dark:border-zinc-800 z-40 no-print"
+        className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border-t border-border z-40 no-print"
         style={{ paddingBottom: "env(safe-area-inset-bottom, 0)" }}
       >
         <div className="flex justify-around py-1">
@@ -150,7 +146,7 @@ export function BottomNav() {
                   `relative flex flex-col items-center gap-0.5 min-w-[60px] py-2 px-2 text-[10px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--color-accent]/40 rounded-md ${
                     isActive
                       ? "text-[--color-accent] dark:text-[--color-accent-dark] font-semibold"
-                      : "text-zinc-500 dark:text-zinc-400"
+                      : "text-fg-muted"
                   }`
                 }
               >
@@ -177,7 +173,7 @@ export function BottomNav() {
             className={`flex flex-col items-center gap-0.5 min-w-[60px] py-2 px-2 text-[10px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--color-accent]/40 rounded-md ${
               moreActive
                 ? "text-[--color-accent] dark:text-[--color-accent-dark] font-semibold"
-                : "text-zinc-500 dark:text-zinc-400"
+                : "text-fg-muted"
             }`}
           >
             <MoreHorizontal size={20} strokeWidth={1.75} aria-hidden="true" />
@@ -198,8 +194,8 @@ export function BottomNav() {
                   className={({ isActive }) =>
                     `relative flex items-center gap-3 px-3 py-3 rounded-md text-sm transition-colors ${
                       isActive
-                        ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50 font-medium"
-                        : "text-zinc-700 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-800/60"
+                        ? "bg-surface-sunken text-fg font-medium"
+                        : "text-fg hover:bg-surface-muted/60"
                     }`
                   }
                 >
@@ -214,7 +210,7 @@ export function BottomNav() {
                       <Icon
                         size={18}
                         strokeWidth={1.75}
-                        className="text-zinc-500 dark:text-zinc-400"
+                        className="text-fg-muted"
                         aria-hidden="true"
                       />
                       <span>{item.label}</span>

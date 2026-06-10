@@ -148,7 +148,7 @@ export function CostBreakdown() {
       header: "Wohnung",
       render: (r) => (
         <span
-          className={`font-medium ${r.unitName === "Gemeinschaft" ? "text-zinc-500 dark:text-zinc-400 italic" : ""}`}
+          className={`font-medium ${r.unitName === "Gemeinschaft" ? "text-fg-muted italic" : ""}`}
         >
           {r.unitName}
         </span>
@@ -213,7 +213,7 @@ export function CostBreakdown() {
           <select
             value={effectiveYear ?? ""}
             onChange={(e) => setSelectedYear(parseInt(e.target.value, 10))}
-            className="text-sm border border-zinc-300 dark:border-zinc-600 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+            className="text-sm border border-border rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
           >
             {availableYears.map((y) => (
               <option key={y} value={y}>
@@ -223,7 +223,7 @@ export function CostBreakdown() {
           </select>
         }
       >
-        <p className="text-sm text-zinc-600 dark:text-zinc-300">
+        <p className="text-sm text-fg-muted">
           Gesamtkosten {effectiveYear}:{" "}
           <span className="font-semibold font-mono">{formatEuro(totalSelectedYear)}</span>
         </p>
@@ -241,7 +241,7 @@ export function CostBreakdown() {
               />
             </div>
           ) : (
-            <p className="text-sm text-zinc-500 dark:text-zinc-400 text-center py-8">Keine Daten</p>
+            <p className="text-sm text-fg-muted text-center py-8">Keine Daten</p>
           )}
         </Card>
 
@@ -256,9 +256,7 @@ export function CostBreakdown() {
               />
             </div>
           ) : (
-            <p className="text-sm text-zinc-500 dark:text-zinc-400 text-center py-8">
-              Keine Daten für dieses Jahr
-            </p>
+            <p className="text-sm text-fg-muted text-center py-8">Keine Daten für dieses Jahr</p>
           )}
         </Card>
       </div>
@@ -268,7 +266,7 @@ export function CostBreakdown() {
         {unitCostRows.length > 0 ? (
           <DataTable columns={unitColumns} data={unitCostRows} keyFn={(r) => r.unitName} />
         ) : (
-          <p className="text-sm text-zinc-500 dark:text-zinc-400 text-center py-4">
+          <p className="text-sm text-fg-muted text-center py-4">
             Keine Kosten für dieses Jahr vorhanden.
           </p>
         )}

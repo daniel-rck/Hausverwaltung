@@ -79,13 +79,11 @@ export function Drawer({ open, onClose, title, children, side = "right" }: Drawe
         role="dialog"
         aria-modal="true"
         aria-label={typeof title === "string" ? title : "Drawer"}
-        className={`absolute ${sideCls} border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-modal flex flex-col`}
+        className={`absolute ${sideCls} border-border bg-surface shadow-modal flex flex-col`}
       >
         {title && (
-          <header className="px-5 py-3.5 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 tracking-tight">
-              {title}
-            </h2>
+          <header className="px-5 py-3.5 border-b border-border flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-fg tracking-tight">{title}</h2>
             <button
               type="button"
               onClick={onClose}

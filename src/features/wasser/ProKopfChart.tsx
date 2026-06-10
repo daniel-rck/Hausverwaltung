@@ -152,7 +152,7 @@ export function ProKopfChart({ year }: ProKopfChartProps) {
 
   return (
     <Card title="Pro-Kopf-Verbrauch">
-      <p className="text-sm text-zinc-600 dark:text-zinc-300 mb-4">
+      <p className="text-sm text-fg-muted mb-4">
         Liter pro Person pro Tag nach Wohneinheit. Bundesdurchschnitt:{" "}
         <span className="font-semibold">{WATER_AVG_LITERS_PER_PERSON_DAY} l/Person/Tag</span>
       </p>
@@ -179,22 +179,12 @@ export function ProKopfChart({ year }: ProKopfChartProps) {
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-zinc-200 dark:border-zinc-700">
-              <th className="py-2 px-3 text-left font-medium text-zinc-500 dark:text-zinc-400">
-                Einheit
-              </th>
-              <th className="py-2 px-3 text-right font-medium text-zinc-500 dark:text-zinc-400">
-                Personen
-              </th>
-              <th className="py-2 px-3 text-right font-medium text-zinc-500 dark:text-zinc-400">
-                Verbrauch (m³)
-              </th>
-              <th className="py-2 px-3 text-right font-medium text-zinc-500 dark:text-zinc-400">
-                l/Person/Tag
-              </th>
-              <th className="py-2 px-3 text-right font-medium text-zinc-500 dark:text-zinc-400">
-                Abweichung
-              </th>
+            <tr className="border-b border-border">
+              <th className="py-2 px-3 text-left font-medium text-fg-muted">Einheit</th>
+              <th className="py-2 px-3 text-right font-medium text-fg-muted">Personen</th>
+              <th className="py-2 px-3 text-right font-medium text-fg-muted">Verbrauch (m³)</th>
+              <th className="py-2 px-3 text-right font-medium text-fg-muted">l/Person/Tag</th>
+              <th className="py-2 px-3 text-right font-medium text-fg-muted">Abweichung</th>
             </tr>
           </thead>
           <tbody>
@@ -205,7 +195,7 @@ export function ProKopfChart({ year }: ProKopfChartProps) {
                 100;
               const isHigh = deviation > 44;
               return (
-                <tr key={uc.unitName} className="border-b border-zinc-100 dark:border-zinc-700">
+                <tr key={uc.unitName} className="border-b border-border">
                   <td className="py-2.5 px-3">{uc.unitName}</td>
                   <td className="py-2.5 px-3 text-right font-mono">{formatNumber(uc.persons)}</td>
                   <td className="py-2.5 px-3 text-right font-mono">

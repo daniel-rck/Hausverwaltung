@@ -166,7 +166,7 @@ export function WarmKaltRatio({ year }: WarmKaltRatioProps) {
 
   return (
     <Card title="Warm/Kalt-Verhältnis">
-      <p className="text-sm text-zinc-600 dark:text-zinc-300 mb-4">
+      <p className="text-sm text-fg-muted mb-4">
         Anteil Warmwasser am Gesamtverbrauch pro Einheit. Normalbereich:{" "}
         <span className="font-semibold">
           {WARM_WATER_RATIO_MIN}–{WARM_WATER_RATIO_MAX} %
@@ -196,30 +196,18 @@ export function WarmKaltRatio({ year }: WarmKaltRatioProps) {
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-zinc-200 dark:border-zinc-700">
-              <th className="py-2 px-3 text-left font-medium text-zinc-500 dark:text-zinc-400">
-                Einheit
-              </th>
-              <th className="py-2 px-3 text-right font-medium text-zinc-500 dark:text-zinc-400">
-                Warmwasser (m³)
-              </th>
-              <th className="py-2 px-3 text-right font-medium text-zinc-500 dark:text-zinc-400">
-                Kaltwasser (m³)
-              </th>
-              <th className="py-2 px-3 text-right font-medium text-zinc-500 dark:text-zinc-400">
-                Gesamt (m³)
-              </th>
-              <th className="py-2 px-3 text-right font-medium text-zinc-500 dark:text-zinc-400">
-                Warmanteil
-              </th>
-              <th className="py-2 px-3 text-center font-medium text-zinc-500 dark:text-zinc-400">
-                Bewertung
-              </th>
+            <tr className="border-b border-border">
+              <th className="py-2 px-3 text-left font-medium text-fg-muted">Einheit</th>
+              <th className="py-2 px-3 text-right font-medium text-fg-muted">Warmwasser (m³)</th>
+              <th className="py-2 px-3 text-right font-medium text-fg-muted">Kaltwasser (m³)</th>
+              <th className="py-2 px-3 text-right font-medium text-fg-muted">Gesamt (m³)</th>
+              <th className="py-2 px-3 text-right font-medium text-fg-muted">Warmanteil</th>
+              <th className="py-2 px-3 text-center font-medium text-fg-muted">Bewertung</th>
             </tr>
           </thead>
           <tbody>
             {unitRatios.map((ur) => (
-              <tr key={ur.unitName} className="border-b border-zinc-100 dark:border-zinc-700">
+              <tr key={ur.unitName} className="border-b border-border">
                 <td className="py-2.5 px-3">{ur.unitName}</td>
                 <td className="py-2.5 px-3 text-right font-mono">{formatNumber(ur.warmM3)}</td>
                 <td className="py-2.5 px-3 text-right font-mono">{formatNumber(ur.coldM3)}</td>

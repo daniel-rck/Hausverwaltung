@@ -113,9 +113,7 @@ export function OpenItems({ year }: OpenItemsProps) {
     {
       key: "unit",
       header: "Einheit",
-      render: (row) => (
-        <span className="font-medium text-zinc-700 dark:text-zinc-200">{row.unit.name}</span>
-      ),
+      render: (row) => <span className="font-medium text-fg">{row.unit.name}</span>,
       sortValue: (row) => row.unit.name,
     },
     {

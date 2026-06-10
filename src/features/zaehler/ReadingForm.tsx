@@ -127,16 +127,14 @@ export function ReadingForm({ selectedMeterId, onMeterChange }: ReadingFormProps
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label className="block">
-              <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-                Zähler *
-              </span>
+              <span className="block text-xs font-medium text-fg-muted mb-1">Zähler *</span>
               <select
                 value={selectedMeterId ?? ""}
                 onChange={(e) => {
                   const val = e.target.value;
                   onMeterChange(val ? Number(val) : null);
                 }}
-                className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+                className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
               >
                 <option value="">– Zähler wählen –</option>
                 {(meterOptions ?? []).map((opt) => (
@@ -149,14 +147,12 @@ export function ReadingForm({ selectedMeterId, onMeterChange }: ReadingFormProps
           </div>
           <div>
             <label className="block">
-              <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-                Datum *
-              </span>
+              <span className="block text-xs font-medium text-fg-muted mb-1">Datum *</span>
               <input
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+                className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
               />
             </label>
           </div>
@@ -172,13 +168,11 @@ export function ReadingForm({ selectedMeterId, onMeterChange }: ReadingFormProps
           />
           <div>
             <label className="block">
-              <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-                Quelle *
-              </span>
+              <span className="block text-xs font-medium text-fg-muted mb-1">Quelle *</span>
               <select
                 value={source}
                 onChange={(e) => setSource(e.target.value as MeterReading["source"])}
-                className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+                className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
               >
                 <option value="self">Eigene Ablesung</option>
                 <option value="messdienst">Messdienstleister</option>
@@ -200,10 +194,8 @@ export function ReadingForm({ selectedMeterId, onMeterChange }: ReadingFormProps
         </div>
 
         {selectedMeterId && (
-          <div className="mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
-            <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-200 mb-2">
-              Letzte Ablesungen
-            </h3>
+          <div className="mt-4 pt-4 border-t border-border">
+            <h3 className="text-sm font-semibold text-fg mb-2">Letzte Ablesungen</h3>
             <DataTable
               columns={readingColumns}
               data={recentReadings ?? []}

@@ -134,7 +134,7 @@ export function SyncSettings() {
 
   return (
     <Card title="Multi-Device-Sync">
-      <p className="text-sm text-zinc-600 dark:text-zinc-300 mb-4">
+      <p className="text-sm text-fg-muted mb-4">
         Daten zwischen mehreren Geräten synchronisieren — verschlüsselt über deinen privaten
         Sync-Speicher. Kein Konto, keine E-Mail.
       </p>
@@ -152,7 +152,7 @@ export function SyncSettings() {
           >
             Mit anderem Gerät verknüpfen
           </Button>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-2">
+          <p className="text-xs text-fg-muted mt-2">
             Beim Aktivieren wird dieses Gerät zum Sync-Owner. Weitere Geräte verknüpfst du
             anschließend über einen 6-stelligen Code.
           </p>
@@ -161,9 +161,7 @@ export function SyncSettings() {
 
       {!enabled && mode === "entering-otp" && (
         <div className="space-y-3">
-          <div className="text-sm text-zinc-700 dark:text-zinc-200">
-            Code vom anderen Gerät eingeben:
-          </div>
+          <div className="text-sm text-fg">Code vom anderen Gerät eingeben:</div>
           <input
             type="text"
             inputMode="numeric"
@@ -174,7 +172,7 @@ export function SyncSettings() {
             value={otpInput}
             onChange={(e) => setOtpInput(e.target.value.replace(/\D/g, "").slice(0, 6))}
             placeholder="123456"
-            className="w-full px-4 py-3 text-center text-2xl font-mono tracking-widest border border-zinc-300 dark:border-zinc-700 rounded-md bg-white dark:bg-zinc-800 text-zinc-800 dark:text-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--color-accent]/40 focus-visible:border-[--color-accent]"
+            className="w-full px-4 py-3 text-center text-2xl font-mono tracking-widest border border-zinc-300 dark:border-zinc-700 rounded-md bg-surface text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--color-accent]/40 focus-visible:border-[--color-accent]"
           />
           <div className="flex gap-2">
             <Button
@@ -203,16 +201,16 @@ export function SyncSettings() {
 
       {enabled && mode === "showing-otp" && pairing && (
         <div className="space-y-3">
-          <div className="text-sm text-zinc-700 dark:text-zinc-200">
+          <div className="text-sm text-fg">
             Code am anderen Gerät eingeben (gültig {formatCountdown(pairing.expiresAt - now)}):
           </div>
-          <div className="text-4xl sm:text-5xl text-center font-mono font-semibold tracking-[0.2em] py-6 bg-zinc-50 dark:bg-zinc-800/60 rounded-lg text-zinc-900 dark:text-zinc-100 border border-zinc-200 dark:border-zinc-800">
+          <div className="text-4xl sm:text-5xl text-center font-mono font-semibold tracking-[0.2em] py-6 bg-surface-muted/60 rounded-lg text-fg border border-border">
             {pairing.otp.slice(0, 3)} {pairing.otp.slice(3)}
           </div>
           <Button variant="secondary" fullWidth onClick={handleCancelPairing}>
             Abbrechen
           </Button>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">
+          <p className="text-xs text-fg-muted">
             Der Code kann nur einmal verwendet werden und läuft nach 5 Minuten ab.
           </p>
         </div>
@@ -222,7 +220,7 @@ export function SyncSettings() {
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs text-zinc-500 dark:text-zinc-400">
+              <div className="text-xs text-fg-muted">
                 Status: {state.status === "idle" && "synchronisiert"}
                 {state.status === "syncing" && "synchronisiere…"}
                 {state.status === "connecting" && "verbinde…"}
@@ -230,12 +228,12 @@ export function SyncSettings() {
                 {state.status === "error" && `Fehler: ${state.lastError ?? "unbekannt"}`}
               </div>
               {state.lastSyncedAt && (
-                <div className="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5">
+                <div className="text-xs text-fg-subtle mt-0.5">
                   Letzter Sync: {formatAbsolute(state.lastSyncedAt)}
                 </div>
               )}
               {state.syncId && (
-                <div className="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5 font-mono">
+                <div className="text-xs text-fg-subtle mt-0.5 font-mono">
                   ID: {state.syncId.slice(0, 8)}…
                 </div>
               )}
@@ -264,7 +262,7 @@ export function SyncSettings() {
             </Button>
           </div>
 
-          <label className="flex items-center gap-2 text-xs text-zinc-600 dark:text-zinc-300">
+          <label className="flex items-center gap-2 text-xs text-fg-muted">
             <input
               type="checkbox"
               checked={state.autoSync}

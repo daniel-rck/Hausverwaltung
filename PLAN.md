@@ -86,7 +86,7 @@ Cross-Origin-Deployments und stabile Keys für RoomInspection/KeyHandover.
       ETag-Konflikt → Retry; korrupter Remote-Inhalt → klarer Fehler).
       Verify: `bun run test:run`
 
-- [ ] T9: zinc-* → semantische Tokens in Feature-Komponenten
+- [x] T9: zinc-* → semantische Tokens in Feature-Komponenten
       Files: src/features/** (~40 Komponenten), Mapping gemäß src/lib/ui/theme.css
       und bereits migrierten lib/ui-Komponenten.
       Change: mechanische Migration der verbleibenden zinc-Utilityklassen auf die

@@ -18,9 +18,8 @@ const sizeClasses: Record<Size, string> = {
 
 const variantClasses: Record<Variant, string> = {
   ghost:
-    "bg-transparent text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-800 dark:hover:text-zinc-100",
-  subtle:
-    "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700",
+    "bg-transparent text-fg-muted hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-800 dark:hover:text-zinc-100",
+  subtle: "bg-surface-sunken text-fg-muted hover:bg-zinc-200 dark:hover:bg-zinc-700",
   solid: "bg-[--color-accent] text-white hover:bg-[--color-accent-hover]",
 };
 

@@ -102,11 +102,7 @@ export function CalibrationAlerts() {
       key: "location",
       header: "Zuordnung",
       render: (r) =>
-        r.unit ? (
-          r.unit.name
-        ) : (
-          <span className="text-zinc-500 dark:text-zinc-400 italic">Hauptzähler</span>
-        ),
+        r.unit ? r.unit.name : <span className="text-fg-muted italic">Hauptzähler</span>,
     },
     {
       key: "due",

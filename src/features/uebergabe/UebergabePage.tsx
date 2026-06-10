@@ -342,17 +342,17 @@ export function UebergabePage() {
             {protocols.map((p) => (
               <li
                 key={p.id}
-                className="flex items-center justify-between p-3 rounded-lg border border-zinc-100 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-700/50"
+                className="flex items-center justify-between p-3 rounded-lg border border-border hover:bg-surface-muted"
               >
                 <button
                   type="button"
                   onClick={() => setPreviewId(p.id!)}
                   className="flex-1 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 rounded-lg"
                 >
-                  <p className="text-sm font-medium text-zinc-800 dark:text-zinc-200">
+                  <p className="text-sm font-medium text-fg">
                     {p.type === "move-in" ? "Einzug" : "Auszug"} – {p.unitName}
                   </p>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                  <p className="text-xs text-fg-muted">
                     {p.tenantName} | {formatDate(p.date)}
                   </p>
                 </button>
@@ -412,7 +412,7 @@ function ProtocolPreview({ protocolId, onBack }: { protocolId: number; onBack: (
   }, [protocolId]);
 
   if (!data) {
-    return <p className="text-sm text-zinc-500 dark:text-zinc-400">Lade Protokoll...</p>;
+    return <p className="text-sm text-fg-muted">Lade Protokoll...</p>;
   }
 
   return (

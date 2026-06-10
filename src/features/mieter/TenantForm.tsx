@@ -197,7 +197,7 @@ export function TenantForm({ unit, onBack }: TenantFormProps) {
         <button
           type="button"
           onClick={() => setContractOcc(null)}
-          className="text-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
+          className="text-sm text-fg-muted hover:text-fg"
         >
           ← Zurück zur Wohnung
         </button>
@@ -215,16 +215,14 @@ export function TenantForm({ unit, onBack }: TenantFormProps) {
       <button
         type="button"
         onClick={onBack}
-        className="text-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 flex items-center gap-1"
+        className="text-sm text-fg-muted hover:text-fg flex items-center gap-1"
       >
         ← Zurück zur Übersicht
       </button>
 
-      <h2 className="text-lg font-bold text-zinc-800 dark:text-zinc-100">
+      <h2 className="text-lg font-bold text-fg">
         Wohnung: {unit.name}
-        {unit.floor && (
-          <span className="text-zinc-500 dark:text-zinc-400 font-normal"> ({unit.floor})</span>
-        )}
+        {unit.floor && <span className="text-fg-muted font-normal"> ({unit.floor})</span>}
       </h2>
 
       {/* Mieter-Verwaltung */}
@@ -241,60 +239,50 @@ export function TenantForm({ unit, onBack }: TenantFormProps) {
         }
       >
         {showTenantForm && (
-          <div className="mb-4 p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-lg border border-zinc-200 dark:border-zinc-700">
-            <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-200 mb-3">
-              Neuer Mieter
-            </h3>
+          <div className="mb-4 p-4 bg-surface-muted rounded-lg border border-border">
+            <h3 className="text-sm font-semibold text-fg mb-3">Neuer Mieter</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block">
-                  <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-                    Name *
-                  </span>
+                  <span className="block text-xs font-medium text-fg-muted mb-1">Name *</span>
                   <input
                     type="text"
                     value={tenantForm.name}
                     onChange={(e) => setTenantForm({ ...tenantForm, name: e.target.value })}
-                    className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+                    className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
                   />
                 </label>
               </div>
               <div>
                 <label className="block">
-                  <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-                    E-Mail
-                  </span>
+                  <span className="block text-xs font-medium text-fg-muted mb-1">E-Mail</span>
                   <input
                     type="email"
                     value={tenantForm.email}
                     onChange={(e) => setTenantForm({ ...tenantForm, email: e.target.value })}
-                    className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+                    className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
                   />
                 </label>
               </div>
               <div>
                 <label className="block">
-                  <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-                    Telefon
-                  </span>
+                  <span className="block text-xs font-medium text-fg-muted mb-1">Telefon</span>
                   <input
                     type="tel"
                     value={tenantForm.phone}
                     onChange={(e) => setTenantForm({ ...tenantForm, phone: e.target.value })}
-                    className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+                    className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
                   />
                 </label>
               </div>
               <div>
                 <label className="block">
-                  <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-                    Notizen
-                  </span>
+                  <span className="block text-xs font-medium text-fg-muted mb-1">Notizen</span>
                   <input
                     type="text"
                     value={tenantForm.notes}
                     onChange={(e) => setTenantForm({ ...tenantForm, notes: e.target.value })}
-                    className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+                    className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
                   />
                 </label>
               </div>
@@ -310,7 +298,7 @@ export function TenantForm({ unit, onBack }: TenantFormProps) {
               <button
                 type="button"
                 onClick={() => setShowTenantForm(false)}
-                className="px-4 py-1.5 text-sm border border-zinc-300 dark:border-zinc-600 text-zinc-600 dark:text-zinc-300 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors"
+                className="px-4 py-1.5 text-sm border border-border text-fg-muted rounded-lg hover:bg-surface-muted transition-colors"
               >
                 Abbrechen
               </button>
@@ -323,8 +311,8 @@ export function TenantForm({ unit, onBack }: TenantFormProps) {
             {tenants.map((t) => (
               <li key={t.id} className="py-2 flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-zinc-800 dark:text-zinc-100">{t.name}</p>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                  <p className="text-sm font-medium text-fg">{t.name}</p>
+                  <p className="text-xs text-fg-muted">
                     {[t.email, t.phone].filter(Boolean).join(" | ") || "Keine Kontaktdaten"}
                   </p>
                 </div>
@@ -334,7 +322,7 @@ export function TenantForm({ unit, onBack }: TenantFormProps) {
                     setOccForm((f) => ({ ...f, tenantId: String(t.id!) }));
                     setShowOccForm(true);
                   }}
-                  className="text-xs px-2 py-1 bg-zinc-100 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 rounded hover:bg-zinc-200 dark:hover:bg-zinc-600 transition-colors"
+                  className="text-xs px-2 py-1 bg-surface-sunken text-fg-muted rounded hover:bg-zinc-200 dark:hover:bg-zinc-600 transition-colors"
                 >
                   Belegung anlegen
                 </button>
@@ -342,7 +330,7 @@ export function TenantForm({ unit, onBack }: TenantFormProps) {
             ))}
           </ul>
         ) : (
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">Noch keine Mieter angelegt.</p>
+          <p className="text-sm text-fg-muted">Noch keine Mieter angelegt.</p>
         )}
       </Card>
 
@@ -352,13 +340,11 @@ export function TenantForm({ unit, onBack }: TenantFormProps) {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block">
-                <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-                  Mieter *
-                </span>
+                <span className="block text-xs font-medium text-fg-muted mb-1">Mieter *</span>
                 <select
                   value={occForm.tenantId}
                   onChange={(e) => setOccForm({ ...occForm, tenantId: e.target.value })}
-                  className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
                 >
                   <option value="">Bitte wählen</option>
                   {tenants?.map((t) => (
@@ -371,62 +357,58 @@ export function TenantForm({ unit, onBack }: TenantFormProps) {
             </div>
             <div>
               <label className="block">
-                <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-                  Personen
-                </span>
+                <span className="block text-xs font-medium text-fg-muted mb-1">Personen</span>
                 <input
                   type="number"
                   min="1"
                   value={occForm.persons}
                   onChange={(e) => setOccForm({ ...occForm, persons: e.target.value })}
-                  className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
                 />
               </label>
             </div>
             <div>
               <label className="block">
-                <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
+                <span className="block text-xs font-medium text-fg-muted mb-1">
                   Einzug (Monat) *
                 </span>
                 <input
                   type="month"
                   value={occForm.from}
                   onChange={(e) => setOccForm({ ...occForm, from: e.target.value })}
-                  className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
                 />
               </label>
             </div>
             <div>
               <label className="block">
-                <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
+                <span className="block text-xs font-medium text-fg-muted mb-1">
                   Auszug (leer = aktuell)
                 </span>
                 <input
                   type="month"
                   value={occForm.to}
                   onChange={(e) => setOccForm({ ...occForm, to: e.target.value })}
-                  className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
                 />
               </label>
             </div>
             <div>
               <label className="block">
-                <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-                  Kaltmiete
-                </span>
+                <span className="block text-xs font-medium text-fg-muted mb-1">Kaltmiete</span>
                 <input
                   type="text"
                   inputMode="decimal"
                   value={occForm.rentCold}
                   onChange={(e) => setOccForm({ ...occForm, rentCold: e.target.value })}
                   placeholder="z.B. 450,00"
-                  className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
                 />
               </label>
             </div>
             <div>
               <label className="block">
-                <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
+                <span className="block text-xs font-medium text-fg-muted mb-1">
                   NK-Vorauszahlung
                 </span>
                 <input
@@ -435,32 +417,30 @@ export function TenantForm({ unit, onBack }: TenantFormProps) {
                   value={occForm.rentUtilities}
                   onChange={(e) => setOccForm({ ...occForm, rentUtilities: e.target.value })}
                   placeholder="z.B. 150,00"
-                  className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
                 />
               </label>
             </div>
             <div>
               <label className="block">
-                <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-                  Kaution
-                </span>
+                <span className="block text-xs font-medium text-fg-muted mb-1">Kaution</span>
                 <input
                   type="text"
                   inputMode="decimal"
                   value={occForm.deposit}
                   onChange={(e) => setOccForm({ ...occForm, deposit: e.target.value })}
                   placeholder="z.B. 1350,00"
-                  className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
                 />
               </label>
             </div>
             <div className="flex items-end">
-              <label className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-300 pb-1.5">
+              <label className="flex items-center gap-2 text-sm text-fg-muted pb-1.5">
                 <input
                   type="checkbox"
                   checked={occForm.depositPaid}
                   onChange={(e) => setOccForm({ ...occForm, depositPaid: e.target.checked })}
-                  className="rounded border-zinc-300 dark:border-zinc-600"
+                  className="rounded border-border"
                 />
                 Kaution bezahlt
               </label>
@@ -479,7 +459,7 @@ export function TenantForm({ unit, onBack }: TenantFormProps) {
               onClick={() => {
                 setShowOccForm(false);
               }}
-              className="px-4 py-1.5 text-sm border border-zinc-300 dark:border-zinc-600 text-zinc-600 dark:text-zinc-300 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors"
+              className="px-4 py-1.5 text-sm border border-border text-fg-muted rounded-lg hover:bg-surface-muted transition-colors"
             >
               Abbrechen
             </button>
@@ -492,9 +472,7 @@ export function TenantForm({ unit, onBack }: TenantFormProps) {
         {rows && rows.length > 0 ? (
           <DataTable columns={columns} data={rows} keyFn={(r) => r.occupancy.id!} />
         ) : (
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">
-            Noch keine Belegungen vorhanden.
-          </p>
+          <p className="text-sm text-fg-muted">Noch keine Belegungen vorhanden.</p>
         )}
       </Card>
 

@@ -73,7 +73,7 @@ export function ConsumptionChart({ meterId }: ConsumptionChartProps) {
   return (
     <Card title="Verbrauchsverlauf">
       <div className="mb-3">
-        <p className="text-xs text-zinc-500 dark:text-zinc-400">
+        <p className="text-xs text-fg-muted">
           Verbrauch zwischen aufeinanderfolgenden Ablesungen
           {unitLabel ? ` (${unitLabel})` : ""}
         </p>
@@ -91,19 +91,15 @@ export function ConsumptionChart({ meterId }: ConsumptionChartProps) {
       <div className="mt-3 overflow-x-auto">
         <table className="w-full text-xs">
           <thead>
-            <tr className="border-b border-zinc-200 dark:border-zinc-700">
-              <th className="py-1.5 px-2 text-left font-medium text-zinc-500 dark:text-zinc-400">
-                Zeitraum
-              </th>
-              <th className="py-1.5 px-2 text-right font-medium text-zinc-500 dark:text-zinc-400">
-                Verbrauch
-              </th>
+            <tr className="border-b border-border">
+              <th className="py-1.5 px-2 text-left font-medium text-fg-muted">Zeitraum</th>
+              <th className="py-1.5 px-2 text-right font-medium text-fg-muted">Verbrauch</th>
             </tr>
           </thead>
           <tbody>
             {chartData.labels.map((label, i) => (
-              <tr key={label} className="border-b border-zinc-100 dark:border-zinc-700">
-                <td className="py-1.5 px-2 text-zinc-600 dark:text-zinc-300">{label}</td>
+              <tr key={label} className="border-b border-border">
+                <td className="py-1.5 px-2 text-fg-muted">{label}</td>
                 <td className="py-1.5 px-2 text-right font-mono">
                   {formatNumber(chartData.data[i] ?? 0)} {unitLabel}
                 </td>

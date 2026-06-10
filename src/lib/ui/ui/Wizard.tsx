@@ -24,15 +24,11 @@ export function Wizard({ steps, current, ariaLabel = "Fortschritt" }: WizardProp
     <nav aria-label={ariaLabel}>
       {/* Mobile: kompakt */}
       <div className="md:hidden">
-        <div className="flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-400 mb-2">
+        <div className="flex items-center justify-between text-xs text-fg-muted mb-2">
           <span>
-            Schritt{" "}
-            <span className="font-semibold text-zinc-900 dark:text-zinc-50">{current + 1}</span> von{" "}
-            {steps.length}
+            Schritt <span className="font-semibold text-fg">{current + 1}</span> von {steps.length}
           </span>
-          <span className="text-zinc-900 dark:text-zinc-50 font-medium">
-            {steps[current]?.label}
-          </span>
+          <span className="text-fg font-medium">{steps[current]?.label}</span>
         </div>
         <div className="h-1 rounded-full bg-zinc-200 dark:bg-zinc-800 overflow-hidden">
           <div
@@ -55,16 +51,14 @@ export function Wizard({ steps, current, ariaLabel = "Fortschritt" }: WizardProp
                   active
                     ? "bg-[--color-accent] text-white"
                     : done
-                      ? "bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-200"
-                      : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400"
+                      ? "bg-zinc-200 dark:bg-zinc-700 text-fg"
+                      : "bg-surface-sunken text-fg-muted"
                 }`}
                 aria-current={active ? "step" : undefined}
               >
                 {done ? <Check size={12} strokeWidth={2.5} aria-hidden="true" /> : idx + 1}
               </span>
-              <span
-                className={`text-xs ${active ? "text-zinc-900 dark:text-zinc-50 font-medium" : "text-zinc-500 dark:text-zinc-400"}`}
-              >
+              <span className={`text-xs ${active ? "text-fg font-medium" : "text-fg-muted"}`}>
                 {step.label}
                 {step.optional && <span className="ml-1 text-zinc-400">(optional)</span>}
               </span>
@@ -103,13 +97,9 @@ export function WizardFooter({
   canNext = true,
 }: WizardFooterProps): ReactNode {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-2 pt-4 border-t border-zinc-200 dark:border-zinc-800">
+    <div className="flex flex-wrap items-center justify-between gap-2 pt-4 border-t border-border">
       {cancelLabel && onCancel ? (
-        <button
-          type="button"
-          onClick={onCancel}
-          className="text-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100"
-        >
+        <button type="button" onClick={onCancel} className="text-sm text-fg-muted hover:text-fg">
           {cancelLabel}
         </button>
       ) : (
@@ -121,7 +111,7 @@ export function WizardFooter({
             type="button"
             onClick={onBack}
             disabled={!canBack || busy}
-            className="h-9 px-3.5 text-sm rounded-md border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-800 disabled:opacity-50 transition-colors"
+            className="h-9 px-3.5 text-sm rounded-md border border-zinc-300 dark:border-zinc-700 text-fg hover:bg-surface-muted disabled:opacity-50 transition-colors"
           >
             {backLabel}
           </button>

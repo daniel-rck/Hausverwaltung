@@ -92,7 +92,7 @@ export function UnitList({ onSelectUnit }: UnitListProps) {
     {
       key: "tenant",
       header: "Mieter",
-      render: (r) => r.tenant?.name ?? <span className="text-zinc-400 dark:text-zinc-500">–</span>,
+      render: (r) => r.tenant?.name ?? <span className="text-fg-subtle">–</span>,
     },
     {
       key: "status",
@@ -120,7 +120,7 @@ export function UnitList({ onSelectUnit }: UnitListProps) {
             });
             setShowForm(true);
           }}
-          className="text-xs text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200"
+          className="text-xs text-fg-subtle hover:text-fg"
         >
           Bearbeiten
         </button>
@@ -148,51 +148,45 @@ export function UnitList({ onSelectUnit }: UnitListProps) {
       }
     >
       {showForm && (
-        <div className="mb-4 p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-lg border border-zinc-200 dark:border-zinc-700">
-          <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-200 mb-3">
+        <div className="mb-4 p-4 bg-surface-muted rounded-lg border border-border">
+          <h3 className="text-sm font-semibold text-fg mb-3">
             {editUnit ? "Wohnung bearbeiten" : "Neue Wohnung"}
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <label className="block">
-                <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-                  Bezeichnung *
-                </span>
+                <span className="block text-xs font-medium text-fg-muted mb-1">Bezeichnung *</span>
                 <input
                   type="text"
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                   placeholder="z.B. EG, OG, KG"
-                  className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
                 />
               </label>
             </div>
             <div>
               <label className="block">
-                <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-                  Fläche (m²)
-                </span>
+                <span className="block text-xs font-medium text-fg-muted mb-1">Fläche (m²)</span>
                 <input
                   type="text"
                   inputMode="decimal"
                   value={form.area}
                   onChange={(e) => setForm({ ...form, area: e.target.value })}
                   placeholder="z.B. 65,5"
-                  className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
                 />
               </label>
             </div>
             <div>
               <label className="block">
-                <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-                  Stockwerk
-                </span>
+                <span className="block text-xs font-medium text-fg-muted mb-1">Stockwerk</span>
                 <input
                   type="text"
                   value={form.floor}
                   onChange={(e) => setForm({ ...form, floor: e.target.value })}
                   placeholder="z.B. Erdgeschoss"
-                  className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
                 />
               </label>
             </div>
@@ -211,7 +205,7 @@ export function UnitList({ onSelectUnit }: UnitListProps) {
                 setShowForm(false);
                 setEditUnit(null);
               }}
-              className="px-4 py-1.5 text-sm border border-zinc-300 dark:border-zinc-600 text-zinc-600 dark:text-zinc-300 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors"
+              className="px-4 py-1.5 text-sm border border-border text-fg-muted rounded-lg hover:bg-surface-muted transition-colors"
             >
               Abbrechen
             </button>

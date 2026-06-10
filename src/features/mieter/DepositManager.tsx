@@ -127,7 +127,7 @@ export function DepositManager({ occupancy }: DepositManagerProps) {
       key: "description",
       header: "Beschreibung",
       render: (r) => (
-        <span className="text-zinc-500 dark:text-zinc-400 truncate max-w-[200px] inline-block">
+        <span className="text-fg-muted truncate max-w-[200px] inline-block">
           {r.description ?? "–"}
         </span>
       ),
@@ -152,21 +152,17 @@ export function DepositManager({ occupancy }: DepositManagerProps) {
       {/* Header info */}
       <div className="mb-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div className="p-3 bg-zinc-50 dark:bg-zinc-700/30 rounded-lg">
-          <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-0.5">Soll-Kaution</p>
-          <p className="font-semibold font-mono text-zinc-800 dark:text-zinc-100">
-            {formatEuro(occupancy.deposit)}
-          </p>
+          <p className="text-xs text-fg-muted mb-0.5">Soll-Kaution</p>
+          <p className="font-semibold font-mono text-fg">{formatEuro(occupancy.deposit)}</p>
         </div>
         <div className="p-3 bg-zinc-50 dark:bg-zinc-700/30 rounded-lg">
-          <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-0.5">Eingezahlt</p>
-          <p className="font-semibold font-mono text-zinc-800 dark:text-zinc-100">
-            {formatEuro(balance)}
-          </p>
+          <p className="text-xs text-fg-muted mb-0.5">Eingezahlt</p>
+          <p className="font-semibold font-mono text-fg">{formatEuro(balance)}</p>
         </div>
         <div className="p-3 bg-zinc-50 dark:bg-zinc-700/30 rounded-lg flex items-center justify-between">
           <div>
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-0.5">Status</p>
-            <p className="font-semibold font-mono text-zinc-800 dark:text-zinc-100">
+            <p className="text-xs text-fg-muted mb-0.5">Status</p>
+            <p className="font-semibold font-mono text-fg">
               {isPaid ? formatEuro(0) : formatEuro(remaining)}
             </p>
           </div>
@@ -191,33 +187,27 @@ export function DepositManager({ occupancy }: DepositManagerProps) {
 
       {/* Inline form */}
       {showForm && (
-        <div className="mb-4 p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-lg border border-zinc-200 dark:border-zinc-700">
-          <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-200 mb-3">
-            Vorgang erfassen
-          </h3>
+        <div className="mb-4 p-4 bg-surface-muted rounded-lg border border-border">
+          <h3 className="text-sm font-semibold text-fg mb-3">Vorgang erfassen</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block">
-                <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-                  Datum *
-                </span>
+                <span className="block text-xs font-medium text-fg-muted mb-1">Datum *</span>
                 <input
                   type="date"
                   value={form.date}
                   onChange={(e) => setForm({ ...form, date: e.target.value })}
-                  className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm bg-white dark:bg-zinc-800 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm bg-surface dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
                 />
               </label>
             </div>
             <div>
               <label className="block">
-                <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-                  Art *
-                </span>
+                <span className="block text-xs font-medium text-fg-muted mb-1">Art *</span>
                 <select
                   value={form.type}
                   onChange={(e) => setForm({ ...form, type: e.target.value as DepositEventType })}
-                  className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm bg-white dark:bg-zinc-800 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm bg-surface dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
                 >
                   <option value="payment">Einzahlung</option>
                   <option value="interest">Verzinsung</option>
@@ -235,14 +225,12 @@ export function DepositManager({ occupancy }: DepositManagerProps) {
             />
             <div>
               <label className="block">
-                <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-                  Beschreibung
-                </span>
+                <span className="block text-xs font-medium text-fg-muted mb-1">Beschreibung</span>
                 <input
                   type="text"
                   value={form.description}
                   onChange={(e) => setForm({ ...form, description: e.target.value })}
-                  className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm bg-white dark:bg-zinc-800 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm bg-surface dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
                 />
               </label>
             </div>
@@ -258,7 +246,7 @@ export function DepositManager({ occupancy }: DepositManagerProps) {
             <button
               type="button"
               onClick={() => setShowForm(false)}
-              className="px-4 py-1.5 text-sm border border-zinc-300 dark:border-zinc-600 text-zinc-600 dark:text-zinc-300 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors"
+              className="px-4 py-1.5 text-sm border border-border text-fg-muted rounded-lg hover:bg-surface-muted transition-colors"
             >
               Abbrechen
             </button>
