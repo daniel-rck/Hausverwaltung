@@ -78,7 +78,7 @@ Cross-Origin-Deployments und stabile Keys für RoomInspection/KeyHandover.
       „Offene Konventions-Lücken" aktualisiert.
       Verify: `bun run typecheck && bun run test:run && bun run lint`
 
-- [ ] T8: Tests für sync/service.ts (State-Machine) und db/cascade.ts
+- [x] T8: Tests für sync/service.ts (State-Machine) und db/cascade.ts
       Files: src/lib/sync/service.test.ts (neu), src/lib/db/cascade.test.ts (neu)
       Change: cascade: Tombstone-Erzeugung + vollständige Kaskaden (Unit→Occupancy→
       Payments/Shares/…, Property→alles inkl. Settings-Keys). service: syncOnce-
