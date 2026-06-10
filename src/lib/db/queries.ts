@@ -1,6 +1,22 @@
 import { monthDiff } from "../utils/calc";
 import { db } from "./index";
-import type { Occupancy, Unit } from "./schema";
+import type { MaintenanceItem, Occupancy, Unit } from "./schema";
+
+/**
+ * Gehört eine Maßnahme zur gegebenen Property? Wohnungsgebundene Einträge
+ * über ihre Unit; Gemeinschafts-Einträge (unitId === null) über propertyId.
+ * Legacy-Einträge ohne propertyId bleiben objektübergreifend sichtbar.
+ */
+export function isMaintenanceForProperty(
+  item: MaintenanceItem,
+  propertyId: number,
+  unitIds: readonly number[],
+): boolean {
+  if (item.unitId === null) {
+    return item.propertyId === undefined || item.propertyId === propertyId;
+  }
+  return unitIds.includes(item.unitId);
+}
 
 /** Aktuelle Belegung einer Wohneinheit zu einem Stichtag */
 export async function getActiveOccupancy(

@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { db, useLiveQuery } from "../../lib/db";
+import { isMaintenanceForProperty } from "../../lib/db/queries";
 import type { FinancingData } from "../../lib/db/schema";
 import { usePrint } from "../../lib/hooks/usePrint";
 import { useProperty } from "../../lib/hooks/useProperty";
@@ -91,7 +92,7 @@ export function TaxExport({ year }: TaxExportProps) {
         (m) =>
           m.date.startsWith(`${year}`) &&
           m.category === "repair" &&
-          (m.unitId === null || unitIds.includes(m.unitId!)),
+          isMaintenanceForProperty(m, propertyId, unitIds),
       )
       .reduce((s, m) => s + m.cost, 0);
 

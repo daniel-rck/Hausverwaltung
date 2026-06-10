@@ -1,5 +1,6 @@
 import { useId, useMemo, useState } from "react";
 import { db, useLiveQuery } from "../../lib/db";
+import { isMaintenanceForProperty } from "../../lib/db/queries";
 import type { FinancingData } from "../../lib/db/schema";
 import { Card } from "../../lib/ui/shared/Card";
 import { EmptyState } from "../../lib/ui/shared/EmptyState";
@@ -55,7 +56,7 @@ export function AnnualReport({ propertyId }: AnnualReportProps) {
     // Maintenance costs
     const allMaintenance = await db.maintenanceItems.toArray();
     const yearMaintenance = allMaintenance.filter(
-      (m) => m.date.startsWith(`${year}`) && (m.unitId === null || unitIds.includes(m.unitId)),
+      (m) => m.date.startsWith(`${year}`) && isMaintenanceForProperty(m, propertyId, unitIds),
     );
     const totalInstandhaltung = yearMaintenance.reduce((s, m) => s + m.cost, 0);
 

@@ -101,6 +101,7 @@ const ALLOWED_FIELDS: Record<StoreName, readonly string[]> = {
   maintenanceItems: [
     "id",
     "unitId",
+    "propertyId",
     "date",
     "category",
     "title",

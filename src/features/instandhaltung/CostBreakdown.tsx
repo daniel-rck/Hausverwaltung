@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { db, useLiveQuery } from "../../lib/db";
+import { isMaintenanceForProperty } from "../../lib/db/queries";
 import type { MaintenanceItem, Unit } from "../../lib/db/schema";
 import { useProperty } from "../../lib/hooks/useProperty";
 import { BarChart } from "../../lib/ui/charts/BarChart";
@@ -52,8 +53,9 @@ export function CostBreakdown() {
 
   const items = useLiveQuery(async () => {
     if (!activeProperty?.id) return [];
+    const propertyId = activeProperty.id;
     const all = await db.maintenanceItems.toArray();
-    return all.filter((item) => item.unitId === null || unitIds.includes(item.unitId));
+    return all.filter((item) => isMaintenanceForProperty(item, propertyId, unitIds));
   }, [activeProperty?.id, unitIds]);
 
   const availableYears = useMemo(() => {

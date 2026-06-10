@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { db, deleteWithTombstone, useLiveQuery } from "../../lib/db";
+import { isMaintenanceForProperty } from "../../lib/db/queries";
 import type { MaintenanceItem, Unit } from "../../lib/db/schema";
 import { useProperty } from "../../lib/hooks/useProperty";
 import { Card } from "../../lib/ui/shared/Card";
@@ -86,8 +87,9 @@ export function MaintenanceList() {
 
   const items = useLiveQuery(async () => {
     if (!activeProperty?.id) return [];
+    const propertyId = activeProperty.id;
     const all = await db.maintenanceItems.toArray();
-    return all.filter((item) => item.unitId === null || unitIds.includes(item.unitId));
+    return all.filter((item) => isMaintenanceForProperty(item, propertyId, unitIds));
   }, [activeProperty?.id, unitIds]);
 
   const rows: MaintenanceRow[] = useMemo(() => {
@@ -135,6 +137,9 @@ export function MaintenanceList() {
 
     const data: Omit<MaintenanceItem, "id"> = {
       unitId: form.unitId === "" ? null : parseInt(form.unitId, 10),
+      // Gemeinschafts-Maßnahmen aufs aktive Objekt scopen; Legacy-Einträge
+      // werden so beim nächsten Bearbeiten nachgestempelt.
+      propertyId: form.unitId === "" ? activeProperty?.id : undefined,
       date: form.date,
       category: form.category,
       title: form.title.trim(),

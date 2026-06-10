@@ -93,15 +93,19 @@ Cross-Origin-Deployments und stabile Keys für RoomInspection/KeyHandover.
       web-base-Tokens; pro Modul ein überschaubarer Schritt, keine Layout-Änderungen.
       Verify: `bun run lint && bun run build`, Stichproben-Screenshot.
 
-- [ ] T10: Gemeinschafts-Maßnahmen pro Objekt scopen (propertyId)
+- [x] T10: Gemeinschafts-Maßnahmen pro Objekt scopen (propertyId)
       Files: src/lib/db/schema.ts (MaintenanceItem.propertyId?: number), idb.ts
       (Index/DB-Version), fk-map.ts, MaintenanceList.tsx, InstandhaltungPage-
       Abfragen (CostBreakdown/RecurringTasks/UpcomingDue), ggf. Migration.
       Change: minimale additive Variante — neues optionales Feld `propertyId`;
       neue „Gemeinschaft"-Einträge erhalten activeProperty.id, Bestandseinträge
-      ohne propertyId verhalten sich wie bisher (überall sichtbar). Backfill nur,
-      wenn genau ein Objekt existiert.
-      Verify: `bun run test:run && bun run typecheck`, manueller Smoke.
+      ohne propertyId verhalten sich wie bisher (überall sichtbar) und werden
+      beim nächsten Bearbeiten nachgestempelt (statt expliziter Migration —
+      bei genau einem Objekt ist das Verhalten ohnehin identisch). Gemeinsamer
+      Filter-Helper `isMaintenanceForProperty` in queries.ts, angewandt in
+      MaintenanceList, CostBreakdown, RecurringTasks, UpcomingDue, AnnualReport,
+      TaxExport; FK-Map + Export-Whitelist um propertyId ergänzt.
+      Verify: `bun run test:run && bun run typecheck && bun run build`
 
 ## Finish
 - Run full verification: `bun run lint && bun run typecheck && bun run test:run && bun run build`

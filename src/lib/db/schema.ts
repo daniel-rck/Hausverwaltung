@@ -126,6 +126,12 @@ export interface SupplierBill extends SyncFields {
 export interface MaintenanceItem extends SyncFields {
   id?: number;
   unitId: number | null;
+  /**
+   * Scopt Gemeinschafts-Maßnahmen (unitId === null) auf ein Objekt.
+   * Fehlt bei Legacy-Einträgen — die bleiben objektübergreifend sichtbar
+   * (bisheriges Verhalten) und werden beim nächsten Bearbeiten gestempelt.
+   */
+  propertyId?: number;
   date: string;
   category: "repair" | "maintenance" | "inspection" | "modernization";
   title: string;

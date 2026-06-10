@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { db, useLiveQuery } from "../../lib/db";
+import { isMaintenanceForProperty } from "../../lib/db/queries";
 import type { MaintenanceItem, Unit } from "../../lib/db/schema";
 import { useProperty } from "../../lib/hooks/useProperty";
 import { Card } from "../../lib/ui/shared/Card";
@@ -66,12 +67,13 @@ export function UpcomingDue() {
 
   const items = useLiveQuery(async () => {
     if (!activeProperty?.id) return [];
+    const propertyId = activeProperty.id;
     const all = await db.maintenanceItems.toArray();
     return all.filter(
       (item) =>
         item.nextDue !== undefined &&
         item.nextDue !== "" &&
-        (item.unitId === null || unitIds.includes(item.unitId)),
+        isMaintenanceForProperty(item, propertyId, unitIds),
     );
   }, [activeProperty?.id, unitIds]);
 
