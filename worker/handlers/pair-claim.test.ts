@@ -86,11 +86,11 @@ describe("POST /api/pair/claim", () => {
   it("rate-limits after 10 requests in the same window", async () => {
     // Unknown OTPs (404) count against the limit too — the rate limit runs
     // before any KV lookup, so brute-forcing codes is what gets throttled.
-    let lastStatus = 0;
-    for (let i = 0; i < 11; i++) {
+    for (let i = 0; i < 10; i++) {
       const res = await postClaim(String(100000 + i));
-      lastStatus = res.status;
+      expect(res.status, `request ${i + 1} must not be limited`).toBe(404);
     }
-    expect(lastStatus).toBe(429);
+    const eleventh = await postClaim("100010");
+    expect(eleventh.status).toBe(429);
   });
 });

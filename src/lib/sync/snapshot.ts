@@ -44,6 +44,8 @@ export function parseSnapshot(content: string): SyncSnapshot {
     snap.version !== 1 ||
     typeof snap.tables !== "object" ||
     snap.tables === null ||
+    Array.isArray(snap.tables) ||
+    !Object.values(snap.tables).every((rows) => Array.isArray(rows)) ||
     !Array.isArray(snap.tombstones)
   ) {
     throw new Error("Remote-Snapshot hat ein unbekanntes Format.");
@@ -293,7 +295,9 @@ function translateRowFromWire(
 
   // Eingebettete FKs zurückübersetzen (siehe translateRowToWire). Einträge im
   // Legacy-Wire-Format (rohe numerische meterId, vor diesem Fix exportiert)
-  // werden unverändert durchgereicht.
+  // werden verworfen: die Auto-ID des Export-Geräts zeigt lokal typischerweise
+  // auf einen falschen Zähler und würde beim nächsten Export als falsche
+  // meterId__sync weiterpropagieren.
   if (tableName === "handoverProtocols" && Array.isArray(out.meterReadings)) {
     const localReadings: AnyRecord[] = [];
     for (const mr of out.meterReadings as AnyRecord[]) {
@@ -302,8 +306,6 @@ function translateRowFromWire(
         if (localId !== undefined) {
           localReadings.push({ meterId: localId, value: mr.value });
         }
-      } else {
-        localReadings.push(mr);
       }
     }
     out.meterReadings = localReadings;

@@ -106,6 +106,35 @@ describe("buildLocalSnapshot / applySnapshot", () => {
     };
     expect(wireProtocol.meterReadings).toEqual([]);
   });
+
+  it("verwirft Legacy-Readings mit roher meterId beim Import", async () => {
+    // Wire-Format von vor dem __sync-Fix: rohe Auto-ID des Export-Geräts —
+    // lokal nicht auflösbar, darf nicht als scheinbar gültige ID landen.
+    await applySnapshot({
+      version: 1,
+      app: "hausverwaltung",
+      exportedAt: Date.now(),
+      tombstones: [],
+      tables: {
+        handoverProtocols: [
+          {
+            syncId: "hp-legacy",
+            updatedAt: Date.now(),
+            type: "move-in",
+            date: "2025-01-01",
+            rooms: [],
+            keys: [],
+            signatures: {},
+            meterReadings: [{ meterId: 7, value: 3 }],
+          },
+        ],
+      },
+    });
+
+    const protocols = await db.handoverProtocols.toArray();
+    expect(protocols).toHaveLength(1);
+    expect(protocols[0]?.meterReadings).toEqual([]);
+  });
 });
 
 describe("parseSnapshot", () => {
@@ -124,6 +153,15 @@ describe("parseSnapshot", () => {
       /unbekanntes Format/,
     );
     expect(() => parseSnapshot(JSON.stringify({ version: 1, tables: {}, tombstones: {} }))).toThrow(
+      /unbekanntes Format/,
+    );
+    // tables muss ein Record mit Array-Werten sein
+    expect(() =>
+      parseSnapshot(
+        JSON.stringify({ version: 1, tables: { handoverProtocols: {} }, tombstones: [] }),
+      ),
+    ).toThrow(/unbekanntes Format/);
+    expect(() => parseSnapshot(JSON.stringify({ version: 1, tables: [], tombstones: [] }))).toThrow(
       /unbekanntes Format/,
     );
     expect(() => parseSnapshot("null")).toThrow(/unbekanntes Format/);
