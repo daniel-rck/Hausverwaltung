@@ -25,7 +25,7 @@ describe("mergeSnapshots — LWW per syncId", () => {
     });
     const merged = mergeSnapshots(local, remote);
     expect(merged.tables.properties).toHaveLength(1);
-    expect(merged.tables.properties[0]).toMatchObject({
+    expect(merged.tables.properties?.[0]).toMatchObject({
       syncId: "p1",
       name: "New Name",
       updatedAt: 2000,
@@ -40,7 +40,7 @@ describe("mergeSnapshots — LWW per syncId", () => {
       units: [{ syncId: "u1", area: 50, updatedAt: 4000 }],
     });
     const merged = mergeSnapshots(local, remote);
-    expect(merged.tables.units[0]).toMatchObject({ area: 80 });
+    expect(merged.tables.units?.[0]).toMatchObject({ area: 80 });
   });
 
   it("keeps records that exist only on one side", () => {
@@ -86,7 +86,7 @@ describe("mergeSnapshots — tombstones", () => {
     const remote = snap({}, [{ syncId: "p1", tableName: "properties", deletedAt: 2000 }]);
     const merged = mergeSnapshots(local, remote);
     expect(merged.tables.properties).toHaveLength(1);
-    expect(merged.tables.properties[0]).toMatchObject({ name: "Resurrected" });
+    expect(merged.tables.properties?.[0]).toMatchObject({ name: "Resurrected" });
   });
 
   it("drops a record on tie (deletedAt === updatedAt) — tombstone wins", () => {
@@ -103,7 +103,7 @@ describe("mergeSnapshots — tombstones", () => {
     const remote = snap({}, [{ syncId: "x", tableName: "units", deletedAt: 5000 }]);
     const merged = mergeSnapshots(local, remote);
     expect(merged.tombstones).toHaveLength(1);
-    expect(merged.tombstones[0].deletedAt).toBe(5000);
+    expect(merged.tombstones[0]?.deletedAt).toBe(5000);
   });
 
   it("is idempotent — merging the same snapshots twice yields the same content", () => {

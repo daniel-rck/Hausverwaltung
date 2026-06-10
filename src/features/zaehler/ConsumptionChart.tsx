@@ -34,9 +34,11 @@ export function ConsumptionChart({ meterId }: ConsumptionChartProps) {
     const data: number[] = [];
 
     for (let i = 1; i < readings.length; i++) {
-      const consumption = readings[i].value - readings[i - 1].value;
-      labels.push(formatDate(readings[i].date));
-      data.push(Math.max(0, consumption));
+      const curr = readings[i];
+      const prev = readings[i - 1];
+      if (!curr || !prev) continue;
+      labels.push(formatDate(curr.date));
+      data.push(Math.max(0, curr.value - prev.value));
     }
 
     return { labels, data };
@@ -103,7 +105,7 @@ export function ConsumptionChart({ meterId }: ConsumptionChartProps) {
               <tr key={label} className="border-b border-zinc-100 dark:border-zinc-700">
                 <td className="py-1.5 px-2 text-zinc-600 dark:text-zinc-300">{label}</td>
                 <td className="py-1.5 px-2 text-right font-mono">
-                  {formatNumber(chartData.data[i])} {unitLabel}
+                  {formatNumber(chartData.data[i] ?? 0)} {unitLabel}
                 </td>
               </tr>
             ))}

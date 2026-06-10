@@ -54,7 +54,7 @@ export function NumInput({
     } else {
       const parts = normalized.split(".");
       if (parts.length > 1) {
-        const last = parts[parts.length - 1];
+        const last = parts[parts.length - 1] ?? "";
         if (
           last.length === 3 &&
           parts.slice(0, -1).every((p) => p.length === 3 || /^\d{1,3}$/.test(p))

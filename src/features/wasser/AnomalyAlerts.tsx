@@ -12,7 +12,7 @@ import { useProperty } from "../../lib/hooks/useProperty";
 // Meter, MeterType, MeterReading, Occupancy used in allData query result type
 import { Card } from "../../lib/ui/shared/Card";
 import { StatusBadge } from "../../lib/ui/shared/StatusBadge";
-import { waterPerCapitaPerDay } from "../../lib/utils/calc";
+import { monthDiff, waterPerCapitaPerDay } from "../../lib/utils/calc";
 import {
   WARM_WATER_RATIO_MAX,
   WARM_WATER_RATIO_MIN,
@@ -127,9 +127,9 @@ export function AnomalyAlerts({ year }: AnomalyAlertsProps) {
             .filter((r) => r.meterId === meter.id!)
             .sort((a, b) => a.date.localeCompare(b.date));
 
-          if (meterReadings.length >= 2) {
-            const first = meterReadings[0];
-            const last = meterReadings[meterReadings.length - 1];
+          const first = meterReadings[0];
+          const last = meterReadings.at(-1);
+          if (meterReadings.length >= 2 && first && last) {
             messdienstTotal += last.value - first.value;
           }
         }
@@ -161,9 +161,9 @@ export function AnomalyAlerts({ year }: AnomalyAlertsProps) {
             .filter((r) => r.meterId === meter.id!)
             .sort((a, b) => a.date.localeCompare(b.date));
 
-          if (meterReadings.length >= 2) {
-            const first = meterReadings[0];
-            const last = meterReadings[meterReadings.length - 1];
+          const first = meterReadings[0];
+          const last = meterReadings.at(-1);
+          if (meterReadings.length >= 2 && first && last) {
             const consumption = last.value - first.value;
             totalConsumption += consumption;
 
@@ -185,9 +185,7 @@ export function AnomalyAlerts({ year }: AnomalyAlertsProps) {
           for (const occ of occupancies) {
             const start = occ.from < yearStartMonth ? yearStartMonth : occ.from;
             const end = occ.to === null || occ.to > yearEndMonth ? yearEndMonth : occ.to;
-            const [y1, m1] = start.split("-").map(Number);
-            const [y2, m2] = end.split("-").map(Number);
-            const months = Math.max(1, (y2 - y1) * 12 + (m2 - m1) + 1);
+            const months = Math.max(1, monthDiff(start, end) + 1);
             totalPersonMonths += months * occ.persons;
           }
 

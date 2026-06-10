@@ -35,9 +35,9 @@ export function Drawer({ open, onClose, title, children, side = "right" }: Drawe
         );
         if (!focusables || focusables.length === 0) return;
         const list = Array.from(focusables).filter((el) => !el.hasAttribute("disabled"));
-        if (list.length === 0) return;
         const first = list[0];
         const last = list[list.length - 1];
+        if (!first || !last) return;
         const active = document.activeElement;
         if (e.shiftKey && active === first) {
           e.preventDefault();

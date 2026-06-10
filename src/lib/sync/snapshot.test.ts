@@ -55,7 +55,7 @@ describe("buildLocalSnapshot / applySnapshot", () => {
     const snapshot = await buildLocalSnapshot();
 
     // Wire-Format: syncId statt lokaler ID, keine rohen meterIds
-    const wireProtocol = snapshot.tables.handoverProtocols[0] as {
+    const wireProtocol = snapshot.tables.handoverProtocols?.[0] as {
       meterReadings: { meterId__sync?: string; meterId?: number; value: number }[];
     };
     expect(wireProtocol.meterReadings).toEqual([{ meterId__sync: meterSyncId, value: 123.4 }]);
@@ -67,12 +67,12 @@ describe("buildLocalSnapshot / applySnapshot", () => {
 
     const meters = await db.meters.toArray();
     expect(meters).toHaveLength(1);
-    const newMeterId = meters[0].id;
+    const newMeterId = meters[0]?.id;
     expect(newMeterId).not.toBe(meterId);
 
     const protocols = await db.handoverProtocols.toArray();
     expect(protocols).toHaveLength(1);
-    expect(protocols[0].meterReadings).toEqual([{ meterId: newMeterId, value: 123.4 }]);
+    expect(protocols[0]?.meterReadings).toEqual([{ meterId: newMeterId, value: 123.4 }]);
   });
 
   it("verwirft Readings, deren Zähler nicht (mehr) auflösbar ist", async () => {
@@ -101,7 +101,7 @@ describe("buildLocalSnapshot / applySnapshot", () => {
     } as HandoverProtocol);
 
     const snapshot = await buildLocalSnapshot();
-    const wireProtocol = snapshot.tables.handoverProtocols[0] as {
+    const wireProtocol = snapshot.tables.handoverProtocols?.[0] as {
       meterReadings: unknown[];
     };
     expect(wireProtocol.meterReadings).toEqual([]);

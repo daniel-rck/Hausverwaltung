@@ -95,8 +95,8 @@ export function CostBreakdown() {
     const filtered = categories
       .map((cat, idx) => ({
         label: CATEGORY_LABELS[cat],
-        value: sums[idx],
-        color: CATEGORY_COLORS[idx],
+        value: sums[idx] ?? 0,
+        color: CATEGORY_COLORS[idx] ?? "#a1a1aa",
       }))
       .filter((c) => c.value > 0);
 

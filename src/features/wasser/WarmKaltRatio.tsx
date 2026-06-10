@@ -116,9 +116,9 @@ export function WarmKaltRatio({ year }: WarmKaltRatioProps) {
           .filter((r) => r.meterId === meter.id!)
           .sort((a, b) => a.date.localeCompare(b.date));
 
-        if (meterReadings.length >= 2) {
-          const first = meterReadings[0];
-          const last = meterReadings[meterReadings.length - 1];
+        const first = meterReadings[0];
+        const last = meterReadings.at(-1);
+        if (meterReadings.length >= 2 && first && last) {
           const consumption = last.value - first.value;
 
           const typeName = meter.meterType.name.toLowerCase();

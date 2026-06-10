@@ -65,7 +65,7 @@ export function DepositManager({ occupancy }: DepositManagerProps) {
   const moveoutWarning = useMemo(() => {
     if (!occupancy.to || balance <= 0) return null;
 
-    const [y, m] = occupancy.to.split("-").map(Number);
+    const [y = 0, m = 1] = occupancy.to.split("-").map(Number);
     const deadline = new Date(Date.UTC(y, m - 1 + 6, 1));
 
     const now = new Date();

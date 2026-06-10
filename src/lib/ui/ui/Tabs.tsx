@@ -42,7 +42,7 @@ export function Tabs<T extends string>({
 
   const handleKeyDown = (e: KeyboardEvent<HTMLButtonElement>, currentIdx: number) => {
     if (enabledIndices.length === 0) return;
-    let target: number | null = null;
+    let target: number | undefined;
     const pos = enabledIndices.indexOf(currentIdx);
 
     switch (e.key) {
@@ -62,6 +62,7 @@ export function Tabs<T extends string>({
         return;
     }
     e.preventDefault();
+    if (target === undefined) return;
     const item = items[target];
     if (!item) return;
     onChange(item.id);

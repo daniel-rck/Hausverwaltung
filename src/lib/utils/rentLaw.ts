@@ -1,4 +1,5 @@
 import type { RentChange } from "../db/schema";
+import { monthDiff } from "./calc";
 
 /**
  * §558 BGB — Validierung einer Vergleichsmieten-Erhöhung.
@@ -33,14 +34,8 @@ export interface RentLawCheckInput {
 
 /** "YYYY-MM" → Datum 1. des Monats (lokale Zeit, ausreichend für Monatsdiff) */
 function ymToDate(ym: string): Date {
-  const [y, m] = ym.split("-").map(Number);
-  return new Date(y, (m ?? 1) - 1, 1);
-}
-
-function monthsBetween(fromYM: string, toYM: string): number {
-  const [y1, m1] = fromYM.split("-").map(Number);
-  const [y2, m2] = toYM.split("-").map(Number);
-  return (y2 - y1) * 12 + (m2 - m1);
+  const [y = 0, m = 1] = ym.split("-").map(Number);
+  return new Date(y, m - 1, 1);
 }
 
 export function checkRentIncrease(input: RentLawCheckInput): RentLawIssue[] {
@@ -57,7 +52,7 @@ export function checkRentIncrease(input: RentLawCheckInput): RentLawIssue[] {
   const lastChange = sortedPast[sortedPast.length - 1];
   const lastIncreaseDate = lastChange?.effectiveDate ?? input.occupancyFrom;
 
-  const monthsSinceLast = monthsBetween(lastIncreaseDate, input.effectiveDate);
+  const monthsSinceLast = monthDiff(lastIncreaseDate, input.effectiveDate);
   if (monthsSinceLast < 12) {
     issues.push({
       level: "error",
@@ -67,7 +62,7 @@ export function checkRentIncrease(input: RentLawCheckInput): RentLawIssue[] {
 
   // 15-Monats-Wartezeit nach Mietbeginn vor erster Erhöhung
   if (sortedPast.length === 0) {
-    const sinceMoveIn = monthsBetween(input.occupancyFrom, input.effectiveDate);
+    const sinceMoveIn = monthDiff(input.occupancyFrom, input.effectiveDate);
     if (sinceMoveIn < 15) {
       issues.push({
         level: "error",
@@ -85,15 +80,9 @@ export function checkRentIncrease(input: RentLawCheckInput): RentLawIssue[] {
   // History enthält "neueRente ab effectiveDate". Wenn nichts früher als refYM existiert,
   // gilt occupancy.rentCold zum Mietbeginn (= input.oldRentCold beim ersten Eintrag schwierig
   // zu rekonstruieren; deshalb: rentBeforeRef = älteste oldRentCold oder input.oldRentCold).
-  let rentBeforeRef: number;
-  const beforeRef = sortedPast.filter((r) => r.effectiveDate <= refYM);
-  if (beforeRef.length > 0) {
-    rentBeforeRef = beforeRef[beforeRef.length - 1].newRentCold;
-  } else if (sortedPast.length > 0) {
-    rentBeforeRef = sortedPast[0].oldRentCold;
-  } else {
-    rentBeforeRef = input.oldRentCold;
-  }
+  const lastBeforeRef = sortedPast.filter((r) => r.effectiveDate <= refYM).at(-1);
+  const rentBeforeRef =
+    lastBeforeRef?.newRentCold ?? sortedPast[0]?.oldRentCold ?? input.oldRentCold;
 
   if (rentBeforeRef > 0) {
     const totalIncreasePct = ((input.newRentCold - rentBeforeRef) / rentBeforeRef) * 100;

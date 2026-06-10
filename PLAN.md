@@ -62,14 +62,51 @@ Full verification command for the session:
       Change: the tree still shows the pre-migration layout (`src/modules/`, `src/components/`, `src/db/` "Dexie-Schema", `src/hooks/`...). Update to reality: `src/lib/{db,sync,ui,hooks,utils}` + `src/features/<modul>` (11 Module), idb statt Dexie. Keep it the same compact style.
       Verify: proofread; `bun run lint` (formatting).
 
+## Phase 2 — „mach alles in diesem PR" (2026-06-10)
+
+Auf Anweisung des Maintainers werden die ursprünglich geparkten Punkte ebenfalls
+in PR #16 umgesetzt. Ausgenommen bleiben (mit Begründung, siehe unten): CORS für
+Cross-Origin-Deployments und stabile Keys für RoomInspection/KeyHandover.
+
+- [x] T7: `noUncheckedIndexedAccess` projektweit aktivieren
+      Files: tsconfig.app.json, worker/tsconfig.json, ~26 Quelldateien
+      Change: Flag in App- und Worker-tsconfig (SW hatte es schon); alle 94+5
+      Fundstellen mit echten Guards statt `!` fixen. Nebenbei: 5 duplizierte
+      monthDiff/monthsBetween-Implementierungen zu einem exportierten
+      `monthDiff` in src/lib/utils/calc.ts konsolidiert (queries.ts, rentLaw.ts,
+      AnomalyAlerts, ProKopfChart, calc-intern). CLAUDE.md-Abschnitt
+      „Offene Konventions-Lücken" aktualisiert.
+      Verify: `bun run typecheck && bun run test:run && bun run lint`
+
+- [ ] T8: Tests für sync/service.ts (State-Machine) und db/cascade.ts
+      Files: src/lib/sync/service.test.ts (neu), src/lib/db/cascade.test.ts (neu)
+      Change: cascade: Tombstone-Erzeugung + vollständige Kaskaden (Unit→Occupancy→
+      Payments/Shares/…, Property→alles inkl. Settings-Keys). service: syncOnce-
+      Pfade per Mock von cf-client (kein Remote → Push; Remote neuer → Merge+Apply;
+      ETag-Konflikt → Retry; korrupter Remote-Inhalt → klarer Fehler).
+      Verify: `bun run test:run`
+
+- [ ] T9: zinc-* → semantische Tokens in Feature-Komponenten
+      Files: src/features/** (~40 Komponenten), Mapping gemäß src/lib/ui/theme.css
+      und bereits migrierten lib/ui-Komponenten.
+      Change: mechanische Migration der verbleibenden zinc-Utilityklassen auf die
+      web-base-Tokens; pro Modul ein überschaubarer Schritt, keine Layout-Änderungen.
+      Verify: `bun run lint && bun run build`, Stichproben-Screenshot.
+
+- [ ] T10: Gemeinschafts-Maßnahmen pro Objekt scopen (propertyId)
+      Files: src/lib/db/schema.ts (MaintenanceItem.propertyId?: number), idb.ts
+      (Index/DB-Version), fk-map.ts, MaintenanceList.tsx, InstandhaltungPage-
+      Abfragen (CostBreakdown/RecurringTasks/UpcomingDue), ggf. Migration.
+      Change: minimale additive Variante — neues optionales Feld `propertyId`;
+      neue „Gemeinschaft"-Einträge erhalten activeProperty.id, Bestandseinträge
+      ohne propertyId verhalten sich wie bisher (überall sichtbar). Backfill nur,
+      wenn genau ein Objekt existiert.
+      Verify: `bun run test:run && bun run typecheck`, manueller Smoke.
+
 ## Finish
 - Run full verification: `bun run lint && bun run typecheck && bun run test:run && bun run build`
 - Check all tasks off in PLAN.md, commit each task atomically (`T<nr>: <title>`), push to `claude/deep-fixup-liebdj`, open draft PR.
 
-## Not this session
-- `noUncheckedIndexedAccess` + the 194 lint warnings (documented Phase-4 type/storage work).
-- zinc-* → semantic-token migration in feature components (documented gradual).
-- "Gemeinschaft" maintenance items (`unitId === null`) have no `propertyId` and appear under **all** properties (MaintenanceList.tsx:90); needs a schema migration — Phase-4 candidate.
-- Stable IDs for RoomInspection/KeyHandover rows (`key={index}`, documented).
-- CORS headers if cross-origin `VITE_SYNC_API_URL` ever becomes a supported deployment; document the variable then.
-- Tests for service.ts state machine and cascade.ts.
+## Bewusst nicht umgesetzt (auch in Phase 2)
+- CORS headers if cross-origin `VITE_SYNC_API_URL` ever becomes a supported deployment; document the variable then. (Unsupported Deployment-Variante; Gold-Plating.)
+- Stable IDs for RoomInspection/KeyHandover rows (`key={index}`): Räume/Schlüssel haben keine natürliche Identität; persistente UI-IDs im Protokoll-JSON wären Schema-Rauschen. Bleibt beim dokumentierten biome-ignore, bis das Schema ohnehin angefasst wird.

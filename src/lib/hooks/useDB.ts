@@ -16,8 +16,9 @@ export function useDB<T extends { id?: number }>(
 ) {
   const items = useLiveQuery(async () => {
     const tbl = db.table(table);
-    if (filter) {
-      const [key, value] = Object.entries(filter)[0];
+    const entry = filter ? Object.entries(filter)[0] : undefined;
+    if (entry) {
+      const [key, value] = entry;
       return tbl
         .where(key)
         .equals(value as string | number)

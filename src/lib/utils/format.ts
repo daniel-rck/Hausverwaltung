@@ -45,7 +45,7 @@ export function formatArea(value: number): string {
 
 /** "2024-01" → "Januar 2024" */
 export function formatMonth(ym: string): string {
-  const [year, month] = ym.split("-").map(Number);
+  const [year = 0, month = 1] = ym.split("-").map(Number);
   const date = new Date(year, month - 1);
   return date.toLocaleDateString("de-DE", { month: "long", year: "numeric" });
 }

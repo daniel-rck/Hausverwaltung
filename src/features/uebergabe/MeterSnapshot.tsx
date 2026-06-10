@@ -36,7 +36,7 @@ export function MeterSnapshot({ unitId, readings, onChange }: MeterSnapshotProps
         .toArray();
 
       const sorted = allReadings.sort((a, b) => b.date.localeCompare(a.date));
-      const lastReading = sorted.length > 0 ? sorted[0].value : null;
+      const lastReading = sorted[0]?.value ?? null;
 
       results.push({
         meterId: meter.id!,

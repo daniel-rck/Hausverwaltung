@@ -257,6 +257,7 @@ export function MonthOverview({ year }: MonthOverviewProps) {
             <tbody>
               {grid.map((row) => {
                 const first = row[0];
+                if (!first) return null;
                 const yearTotal = row.reduce((s, c) => s + c.received, 0);
                 return (
                   <tr

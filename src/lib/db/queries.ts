@@ -1,3 +1,4 @@
+import { monthDiff } from "../utils/calc";
 import { db } from "./index";
 import type { Occupancy, Unit } from "./schema";
 
@@ -37,20 +38,21 @@ export async function getVacancyPeriods(
   const sorted = occupancies.sort((a, b) => a.from.localeCompare(b.from));
   const gaps: { from: string; to: string }[] = [];
 
-  if (sorted[0].from > yearStart) {
-    gaps.push({ from: yearStart, to: sorted[0].from });
+  const first = sorted[0];
+  if (first && first.from > yearStart) {
+    gaps.push({ from: yearStart, to: first.from });
   }
 
   for (let i = 0; i < sorted.length - 1; i++) {
-    const currentEnd = sorted[i].to;
-    const nextStart = sorted[i + 1].from;
-    if (currentEnd && currentEnd < nextStart) {
+    const currentEnd = sorted[i]?.to;
+    const nextStart = sorted[i + 1]?.from;
+    if (currentEnd && nextStart && currentEnd < nextStart) {
       gaps.push({ from: currentEnd, to: nextStart });
     }
   }
 
   const last = sorted[sorted.length - 1];
-  if (last.to && last.to < yearEnd) {
+  if (last?.to && last.to < yearEnd) {
     gaps.push({ from: last.to, to: yearEnd });
   }
 
@@ -86,10 +88,9 @@ export async function getConsumption(
     .between([meterId, from], [meterId, to], true, true)
     .sortBy("date");
 
-  if (readings.length < 2) return null;
-
   const first = readings[0];
   const last = readings[readings.length - 1];
+  if (readings.length < 2 || !first || !last) return null;
   return last.value - first.value;
 }
 
@@ -121,10 +122,4 @@ export async function getOpenPayments(
   }
 
   return open;
-}
-
-function monthDiff(from: string, to: string): number {
-  const [y1, m1] = from.split("-").map(Number);
-  const [y2, m2] = to.split("-").map(Number);
-  return (y2 - y1) * 12 + (m2 - m1);
 }

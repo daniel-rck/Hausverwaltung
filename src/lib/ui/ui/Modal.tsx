@@ -60,6 +60,7 @@ export function Modal({
         const list = Array.from(focusables).filter((el) => !el.hasAttribute("disabled"));
         const first = list[0];
         const last = list[list.length - 1];
+        if (!first || !last) return;
         const active = document.activeElement;
         if (e.shiftKey && active === first) {
           e.preventDefault();

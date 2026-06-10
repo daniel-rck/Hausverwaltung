@@ -6,7 +6,7 @@ import { BarChart } from "../../lib/ui/charts/BarChart";
 import { Card } from "../../lib/ui/shared/Card";
 import { EmptyState } from "../../lib/ui/shared/EmptyState";
 import { ShowerHead } from "../../lib/ui/ui/icons";
-import { waterPerCapitaPerDay } from "../../lib/utils/calc";
+import { monthDiff, waterPerCapitaPerDay } from "../../lib/utils/calc";
 import { WATER_AVG_LITERS_PER_PERSON_DAY } from "../../lib/utils/constants";
 import { formatNumber } from "../../lib/utils/format";
 
@@ -97,9 +97,9 @@ export function ProKopfChart({ year }: ProKopfChartProps) {
           .filter((r) => r.meterId === meter.id!)
           .sort((a, b) => a.date.localeCompare(b.date));
 
-        if (meterReadings.length >= 2) {
-          const first = meterReadings[0];
-          const last = meterReadings[meterReadings.length - 1];
+        const first = meterReadings[0];
+        const last = meterReadings.at(-1);
+        if (meterReadings.length >= 2 && first && last) {
           totalConsumption += last.value - first.value;
         }
       }
@@ -114,9 +114,7 @@ export function ProKopfChart({ year }: ProKopfChartProps) {
       for (const occ of occupancies) {
         const start = occ.from < yearStartMonth ? yearStartMonth : occ.from;
         const end = occ.to === null || occ.to > yearEndMonth ? yearEndMonth : occ.to;
-        const [y1, m1] = start.split("-").map(Number);
-        const [y2, m2] = end.split("-").map(Number);
-        const months = Math.max(1, (y2 - y1) * 12 + (m2 - m1) + 1);
+        const months = Math.max(1, monthDiff(start, end) + 1);
         totalPersonMonths += months * occ.persons;
       }
 

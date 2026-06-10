@@ -201,7 +201,7 @@ function crockfordBase32(bytes: Uint8Array): string {
   let value = 0;
   let out = "";
   for (let i = 0; i < bytes.length; i++) {
-    value = (value << 8) | bytes[i];
+    value = (value << 8) | (bytes[i] ?? 0);
     bits += 8;
     while (bits >= 5) {
       out += CROCKFORD[(value >>> (bits - 5)) & 0x1f];
@@ -226,8 +226,9 @@ function randomOtp(): string {
   const buf = new Uint32Array(1);
   while (true) {
     crypto.getRandomValues(buf);
-    if (buf[0] < limit) {
-      return (buf[0] % max).toString().padStart(6, "0");
+    const value = buf[0] ?? 0;
+    if (value < limit) {
+      return (value % max).toString().padStart(6, "0");
     }
   }
 }

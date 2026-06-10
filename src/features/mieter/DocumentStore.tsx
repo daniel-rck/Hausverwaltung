@@ -40,9 +40,9 @@ const ALLOWED_MIME_TYPES = new Set([
 function dataUrlToBlob(dataUrl: string): Blob {
   const match = /^data:([^;,]+)(;base64)?,(.*)$/.exec(dataUrl);
   if (!match) throw new Error("Ungültige Data-URL");
-  const mime = match[1];
+  const mime = match[1] ?? "application/octet-stream";
   const isBase64 = match[2] === ";base64";
-  const payload = match[3];
+  const payload = match[3] ?? "";
   if (isBase64) {
     const binary = atob(payload);
     const bytes = new Uint8Array(binary.length);

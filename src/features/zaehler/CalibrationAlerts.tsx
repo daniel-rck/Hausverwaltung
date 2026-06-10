@@ -76,7 +76,9 @@ export function CalibrationAlerts() {
 
     // Sort: red first, then yellow, then green
     const order: Record<string, number> = { red: 0, yellow: 1, green: 2 };
-    rows.sort((a, b) => order[a.status] - order[b.status] || a.daysUntilDue - b.daysUntilDue);
+    rows.sort(
+      (a, b) => (order[a.status] ?? 3) - (order[b.status] ?? 3) || a.daysUntilDue - b.daysUntilDue,
+    );
 
     return rows;
   }, [activeProperty?.id]);

@@ -6,6 +6,17 @@ interface OccupancyWithUnit {
 }
 
 /**
+ * Differenz in Monaten zwischen zwei `YYYY-MM`-Strings (`to` − `from`).
+ * Zentrale Implementierung — ersetzt die früheren Duplikate in
+ * queries.ts, rentLaw.ts und den Wasser-Charts.
+ */
+export function monthDiff(from: string, to: string): number {
+  const [y1 = 0, m1 = 0] = from.split("-").map(Number);
+  const [y2 = 0, m2 = 0] = to.split("-").map(Number);
+  return (y2 - y1) * 12 + (m2 - m1);
+}
+
+/**
  * Verteilungsschlüssel: Anteil einer Belegung an den Gesamtkosten.
  * Gibt den Bruchteil (0–1) zurück.
  * Mit year-Parameter: zeitanteilige Gewichtung nach Belegungsmonaten.
@@ -22,9 +33,7 @@ export function getDistributionShare(
     const yearEnd = `${year}-12`;
     const start = o.occupancy.from < yearStart ? yearStart : o.occupancy.from;
     const end = o.occupancy.to === null || o.occupancy.to > yearEnd ? yearEnd : o.occupancy.to;
-    const [y1, m1] = start.split("-").map(Number);
-    const [y2, m2] = end.split("-").map(Number);
-    return Math.max(0, (y2 - y1) * 12 + (m2 - m1) + 1);
+    return Math.max(0, monthDiff(start, end) + 1);
   };
 
   switch (key) {
@@ -108,7 +117,7 @@ export function getOccupiedMonthsFractional(
   const isLeap = (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
   const daysInYear = isLeap ? 366 : 365;
 
-  const [fy, fm, fd = 1] = occupancy.from.split("-").map(Number);
+  const [fy = year, fm = 1, fd = 1] = occupancy.from.split("-").map(Number);
   const start = new Date(Date.UTC(fy, fm - 1, fd));
   const effectiveStart = start < yearStart ? yearStart : start;
 
@@ -117,7 +126,7 @@ export function getOccupiedMonthsFractional(
     effectiveEnd = yearEnd;
   } else {
     const parts = occupancy.to.split("-").map(Number);
-    const [ty, tm, td] = parts;
+    const [ty = year, tm = 12, td] = parts;
     let endDate: Date;
     if (td !== undefined) {
       endDate = new Date(Date.UTC(ty, tm - 1, td));
