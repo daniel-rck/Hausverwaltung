@@ -50,30 +50,26 @@ export function Card({
 
   return (
     <Tag
-      className={`relative bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 ${interactiveCls} ${className}`}
+      className={`relative bg-surface rounded-lg border border-border ${interactiveCls} ${className}`}
     >
       {accentBar}
       {(title || action) && (
-        <header className="flex items-start justify-between gap-3 px-5 py-3 border-b border-zinc-100 dark:border-zinc-800">
+        <header className="flex items-start justify-between gap-3 px-5 py-3 border-b border-border">
           <div className="min-w-0">
             {title &&
               (typeof title === "string" ? (
-                <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 tracking-tight truncate">
-                  {title}
-                </h2>
+                <h2 className="text-sm font-semibold text-fg tracking-tight truncate">{title}</h2>
               ) : (
                 title
               ))}
-            {description && (
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">{description}</p>
-            )}
+            {description && <p className="text-xs text-fg-muted mt-0.5">{description}</p>}
           </div>
           {action && <div className="shrink-0">{action}</div>}
         </header>
       )}
       <div className={padMap[padding]}>{children}</div>
       {footer && (
-        <footer className="px-5 py-3 border-t border-zinc-100 dark:border-zinc-800 bg-zinc-50/60 dark:bg-zinc-900/40 rounded-b-lg">
+        <footer className="px-5 py-3 border-t border-border bg-zinc-50/60 dark:bg-zinc-900/40 rounded-b-lg">
           {footer}
         </footer>
       )}

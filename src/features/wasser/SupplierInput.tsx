@@ -152,15 +152,13 @@ export function SupplierInput({ year, type }: SupplierInputProps) {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
         <div>
           <label className="block">
-            <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-              {config.label}
-            </span>
+            <span className="block text-xs font-medium text-fg-muted mb-1">{config.label}</span>
             <input
               type="text"
               value={form.supplier}
               onChange={(e) => setForm((f) => ({ ...f, supplier: e.target.value }))}
               placeholder="z.B. Stadtwerke"
-              className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+              className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
             />
           </label>
         </div>
@@ -183,7 +181,7 @@ export function SupplierInput({ year, type }: SupplierInputProps) {
             <select
               value={form.unit}
               onChange={(e) => setForm((f) => ({ ...f, unit: e.target.value }))}
-              className="mt-1 border border-zinc-300 dark:border-zinc-600 rounded-lg px-2 py-1 text-xs bg-white dark:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+              className="mt-1 border border-border rounded-lg px-2 py-1 text-xs bg-surface focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
             >
               {config.units.map((u) => (
                 <option key={u} value={u}>
@@ -195,41 +193,39 @@ export function SupplierInput({ year, type }: SupplierInputProps) {
         </div>
         <div>
           <label className="block">
-            <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
+            <span className="block text-xs font-medium text-fg-muted mb-1">
               Abrechnungszeitraum von
             </span>
             <input
               type="date"
               value={form.billingFrom}
               onChange={(e) => setForm((f) => ({ ...f, billingFrom: e.target.value }))}
-              className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+              className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
             />
           </label>
         </div>
         <div>
           <label className="block">
-            <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
+            <span className="block text-xs font-medium text-fg-muted mb-1">
               Abrechnungszeitraum bis
             </span>
             <input
               type="date"
               value={form.billingTo}
               onChange={(e) => setForm((f) => ({ ...f, billingTo: e.target.value }))}
-              className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+              className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
             />
           </label>
         </div>
         <div>
           <label className="block">
-            <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-              Hinweise
-            </span>
+            <span className="block text-xs font-medium text-fg-muted mb-1">Hinweise</span>
             <input
               type="text"
               value={form.notes}
               onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
               placeholder="optional"
-              className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+              className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
             />
           </label>
         </div>
@@ -245,9 +241,7 @@ export function SupplierInput({ year, type }: SupplierInputProps) {
         </button>
       </div>
 
-      <h3 className="text-sm font-medium text-zinc-600 dark:text-zinc-300 mb-2">
-        Erfasste Rechnungen ({year})
-      </h3>
+      <h3 className="text-sm font-medium text-fg-muted mb-2">Erfasste Rechnungen ({year})</h3>
       <DataTable
         columns={columns}
         data={bills ?? []}

@@ -40,18 +40,16 @@ export function PageHeader({
           {icon && (
             <span
               aria-hidden="true"
-              className="shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200"
+              className="shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-md bg-surface-sunken text-fg"
             >
               {icon}
             </span>
           )}
           <div className="min-w-0">
-            <h1 className="text-lg md:text-xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50 truncate">
+            <h1 className="text-lg md:text-xl font-semibold tracking-tight text-fg truncate">
               {title}
             </h1>
-            {description && (
-              <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">{description}</p>
-            )}
+            {description && <p className="text-sm text-fg-muted mt-0.5">{description}</p>}
           </div>
         </div>
         {actions && <div className="shrink-0 flex items-center gap-2">{actions}</div>}
@@ -63,22 +61,19 @@ export function PageHeader({
 
 export function Breadcrumbs({ items }: { items: BreadcrumbItem[] }) {
   return (
-    <nav aria-label="Brotkrumen" className="text-[11px] text-zinc-500 dark:text-zinc-400">
+    <nav aria-label="Brotkrumen" className="text-[11px] text-fg-muted">
       <ol className="flex items-center gap-1 flex-wrap">
         {items.map((item, idx) => {
           const last = idx === items.length - 1;
           return (
             <li key={item.to ?? item.label} className="flex items-center gap-1">
               {item.to && !last ? (
-                <Link
-                  to={item.to}
-                  className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
-                >
+                <Link to={item.to} className="hover:text-fg transition-colors">
                   {item.label}
                 </Link>
               ) : (
                 <span
-                  className={last ? "text-zinc-700 dark:text-zinc-200 font-medium" : ""}
+                  className={last ? "text-fg font-medium" : ""}
                   aria-current={last ? "page" : undefined}
                 >
                   {item.label}

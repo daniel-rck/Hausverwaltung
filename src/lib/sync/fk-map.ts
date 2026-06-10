@@ -16,7 +16,7 @@ export const FK_MAP: Record<string, Record<string, string>> = {
   meters: { unitId: "units", meterTypeId: "meterTypes" },
   meterReadings: { meterId: "meters" },
   supplierBills: { propertyId: "properties" },
-  maintenanceItems: { unitId: "units" },
+  maintenanceItems: { unitId: "units", propertyId: "properties" },
   payments: { occupancyId: "occupancies" },
   handoverProtocols: { occupancyId: "occupancies" },
   rentChanges: { occupancyId: "occupancies" },

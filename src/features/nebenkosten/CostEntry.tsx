@@ -112,10 +112,8 @@ export function CostEntry({ propertyId, year }: CostEntryProps) {
               {rows.map((row) => (
                 <div key={row.costType.id} className="flex items-center gap-4">
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-zinc-800 dark:text-zinc-100 truncate">
-                      {row.costType.name}
-                    </p>
-                    <p className="text-xs text-zinc-400 dark:text-zinc-500">
+                    <p className="text-sm font-medium text-fg truncate">{row.costType.name}</p>
+                    <p className="text-xs text-fg-subtle">
                       {DISTRIBUTION_LABELS[row.costType.distribution]}
                     </p>
                   </div>
@@ -128,11 +126,9 @@ export function CostEntry({ propertyId, year }: CostEntryProps) {
                   />
                 </div>
               ))}
-              <div className="flex items-center justify-between pt-2 border-t border-zinc-100 dark:border-zinc-700">
-                <span className="text-sm font-semibold text-zinc-600 dark:text-zinc-300">
-                  Zwischensumme
-                </span>
-                <span className="text-sm font-semibold font-mono font-tabular text-zinc-800 dark:text-zinc-100">
+              <div className="flex items-center justify-between pt-2 border-t border-border">
+                <span className="text-sm font-semibold text-fg-muted">Zwischensumme</span>
+                <span className="text-sm font-semibold font-mono font-tabular text-fg">
                   {formatEuro(subtotal)}
                 </span>
               </div>
@@ -143,10 +139,8 @@ export function CostEntry({ propertyId, year }: CostEntryProps) {
 
       <Card>
         <div className="flex items-center justify-between">
-          <span className="text-base font-bold text-zinc-800 dark:text-zinc-100">
-            Gesamtkosten {year}
-          </span>
-          <span className="text-base font-bold font-mono font-tabular text-zinc-800 dark:text-zinc-100">
+          <span className="text-base font-bold text-fg">Gesamtkosten {year}</span>
+          <span className="text-base font-bold font-mono font-tabular text-fg">
             {formatEuro(totalAll)}
           </span>
         </div>

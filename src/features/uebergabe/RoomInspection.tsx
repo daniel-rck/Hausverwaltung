@@ -76,7 +76,7 @@ export function RoomInspection({ rooms, onChange }: RoomInspectionProps) {
         // biome-ignore lint/suspicious/noArrayIndexKey: editierbare Positionsliste ohne stabile ID (stabile IDs folgen mit dem Schema-Umbau in Phase 4)
         <Card key={index}>
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold text-zinc-800 dark:text-zinc-100">{room.name}</h3>
+            <h3 className="text-sm font-semibold text-fg">{room.name}</h3>
             <button
               type="button"
               onClick={() => removeRoom(index)}
@@ -90,7 +90,7 @@ export function RoomInspection({ rooms, onChange }: RoomInspectionProps) {
             {ASPECTS.map((aspect) => (
               <div key={aspect.key}>
                 <label className="block">
-                  <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
+                  <span className="block text-xs font-medium text-fg-muted mb-1">
                     {aspect.label}
                   </span>
                   <select
@@ -115,15 +115,13 @@ export function RoomInspection({ rooms, onChange }: RoomInspectionProps) {
 
           <div>
             <label className="block">
-              <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-                Bemerkungen
-              </span>
+              <span className="block text-xs font-medium text-fg-muted mb-1">Bemerkungen</span>
               <input
                 type="text"
                 value={room.notes ?? ""}
                 onChange={(e) => updateRoom(index, { notes: e.target.value })}
                 placeholder="z.B. Kratzer an der Tür"
-                className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+                className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
               />
             </label>
           </div>
@@ -142,7 +140,7 @@ export function RoomInspection({ rooms, onChange }: RoomInspectionProps) {
             }
           }}
           placeholder="Weiteren Raum hinzufügen..."
-          className="flex-1 border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+          className="flex-1 border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
         />
         <button
           type="button"

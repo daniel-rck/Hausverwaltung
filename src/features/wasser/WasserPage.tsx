@@ -53,9 +53,7 @@ function ConsumptionSummary({ year, type }: { year: number; type: SupplierType }
   if (!bills || bills.length === 0) {
     return (
       <Card title="Verbrauchsübersicht">
-        <p className="text-sm text-zinc-500 dark:text-zinc-400">
-          Keine Rechnungen für dieses Jahr erfasst.
-        </p>
+        <p className="text-sm text-fg-muted">Keine Rechnungen für dieses Jahr erfasst.</p>
       </Card>
     );
   }

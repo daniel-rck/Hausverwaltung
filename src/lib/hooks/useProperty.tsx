@@ -27,7 +27,7 @@ export function PropertyProvider({ children }: { children: ReactNode }) {
     if (activeId !== null && properties.some((p) => p.id === activeId)) {
       return activeId;
     }
-    return properties.length > 0 ? properties[0].id! : null;
+    return properties[0]?.id ?? null;
   }, [activeId, properties]);
 
   const activeProperty = properties.find((p) => p.id === resolvedActiveId) ?? null;

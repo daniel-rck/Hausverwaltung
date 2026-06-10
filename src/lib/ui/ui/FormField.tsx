@@ -45,7 +45,7 @@ export function FormField({
   return (
     <div className="flex flex-col gap-1">
       {label && (
-        <label htmlFor={fieldId} className="text-xs font-medium text-zinc-600 dark:text-zinc-300">
+        <label htmlFor={fieldId} className="text-xs font-medium text-fg-muted">
           {label}
           {required && (
             <span className="text-red-600 dark:text-red-400 ml-0.5" aria-hidden="true">
@@ -55,7 +55,7 @@ export function FormField({
         </label>
       )}
       {description && (
-        <p id={descId} className="text-xs text-zinc-500 dark:text-zinc-400">
+        <p id={descId} className="text-xs text-fg-muted">
           {description}
         </p>
       )}
@@ -68,9 +68,7 @@ export function FormField({
         ) : (
           <span aria-hidden="true" />
         )}
-        {hint && !error && (
-          <p className="text-xs text-zinc-400 dark:text-zinc-500 ml-auto">{hint}</p>
-        )}
+        {hint && !error && <p className="text-xs text-fg-subtle ml-auto">{hint}</p>}
       </div>
     </div>
   );

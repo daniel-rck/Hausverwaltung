@@ -130,9 +130,7 @@ export function RentHistory({ occupancy, unit }: RentHistoryProps) {
       key: "notes",
       header: "Notiz",
       render: (r) => (
-        <span className="text-zinc-500 dark:text-zinc-400 truncate max-w-[200px] inline-block">
-          {r.notes ?? "–"}
-        </span>
+        <span className="text-fg-muted truncate max-w-[200px] inline-block">{r.notes ?? "–"}</span>
       ),
     },
   ];
@@ -154,31 +152,25 @@ export function RentHistory({ occupancy, unit }: RentHistoryProps) {
     >
       {/* Current rent display */}
       <div className="mb-4 p-3 bg-zinc-50 dark:bg-zinc-700/30 rounded-lg">
-        <p className="text-sm text-zinc-600 dark:text-zinc-300">
+        <p className="text-sm text-fg-muted">
           Aktuelle Kaltmiete:{" "}
-          <span className="font-semibold font-mono text-zinc-800 dark:text-zinc-100">
-            {formatEuro(occupancy.rentCold)}
-          </span>
+          <span className="font-semibold font-mono text-fg">{formatEuro(occupancy.rentCold)}</span>
         </p>
       </div>
 
       {/* Inline form */}
       {showForm && (
-        <div className="mb-4 p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-lg border border-zinc-200 dark:border-zinc-700">
-          <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-200 mb-3">
-            Mieterhöhung erfassen
-          </h3>
+        <div className="mb-4 p-4 bg-surface-muted rounded-lg border border-border">
+          <h3 className="text-sm font-semibold text-fg mb-3">Mieterhöhung erfassen</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block">
-                <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-                  Wirksam ab *
-                </span>
+                <span className="block text-xs font-medium text-fg-muted mb-1">Wirksam ab *</span>
                 <input
                   type="month"
                   value={form.effectiveDate}
                   onChange={(e) => setForm({ ...form, effectiveDate: e.target.value })}
-                  className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm bg-white dark:bg-zinc-800 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm bg-surface dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
                 />
               </label>
             </div>
@@ -191,13 +183,11 @@ export function RentHistory({ occupancy, unit }: RentHistoryProps) {
             />
             <div>
               <label className="block">
-                <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-                  Grund *
-                </span>
+                <span className="block text-xs font-medium text-fg-muted mb-1">Grund *</span>
                 <select
                   value={form.reason}
                   onChange={(e) => setForm({ ...form, reason: e.target.value as RentChangeReason })}
-                  className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm bg-white dark:bg-zinc-800 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm bg-surface dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
                 >
                   <option value="mietspiegel">Mietspiegel</option>
                   <option value="index">Indexanpassung</option>
@@ -208,14 +198,12 @@ export function RentHistory({ occupancy, unit }: RentHistoryProps) {
             </div>
             <div>
               <label className="block">
-                <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-                  Notiz
-                </span>
+                <span className="block text-xs font-medium text-fg-muted mb-1">Notiz</span>
                 <input
                   type="text"
                   value={form.notes}
                   onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                  className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm bg-white dark:bg-zinc-800 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm bg-surface dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
                 />
               </label>
             </div>
@@ -235,7 +223,7 @@ export function RentHistory({ occupancy, unit }: RentHistoryProps) {
                 </div>
               ))}
               {hasErrors && (
-                <label className="flex items-center gap-2 text-xs text-zinc-600 dark:text-zinc-300 mt-1">
+                <label className="flex items-center gap-2 text-xs text-fg-muted mt-1">
                   <input
                     type="checkbox"
                     checked={overrideErrors}
@@ -261,7 +249,7 @@ export function RentHistory({ occupancy, unit }: RentHistoryProps) {
                 setShowForm(false);
                 setOverrideErrors(false);
               }}
-              className="px-4 py-1.5 text-sm border border-zinc-300 dark:border-zinc-600 text-zinc-600 dark:text-zinc-300 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors"
+              className="px-4 py-1.5 text-sm border border-border text-fg-muted rounded-lg hover:bg-surface-muted transition-colors"
             >
               Abbrechen
             </button>

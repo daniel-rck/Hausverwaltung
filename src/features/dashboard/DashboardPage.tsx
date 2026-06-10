@@ -131,7 +131,7 @@ export function DashboardPage() {
 
       {/* Module-Kacheln */}
       <div>
-        <h2 className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-3">
+        <h2 className="text-[11px] font-semibold uppercase tracking-wider text-fg-muted mb-3">
           Module
         </h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -141,18 +141,16 @@ export function DashboardPage() {
               <Link
                 key={m.path}
                 to={m.path}
-                className="group block bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-4 transition-colors hover:border-zinc-300 dark:hover:border-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[--color-accent]/40 dark:focus-visible:ring-offset-zinc-950"
+                className="group block bg-surface rounded-lg border border-border p-4 transition-colors hover:border-zinc-300 dark:hover:border-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[--color-accent]/40 dark:focus-visible:ring-offset-zinc-950"
               >
                 <span
                   aria-hidden="true"
-                  className="inline-flex items-center justify-center w-9 h-9 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200"
+                  className="inline-flex items-center justify-center w-9 h-9 rounded-md bg-surface-sunken text-fg"
                 >
                   <Icon size={18} strokeWidth={1.75} />
                 </span>
-                <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 tracking-tight mt-3">
-                  {m.label}
-                </p>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">{m.desc}</p>
+                <p className="text-sm font-semibold text-fg tracking-tight mt-3">{m.label}</p>
+                <p className="text-xs text-fg-muted mt-0.5">{m.desc}</p>
               </Link>
             );
           })}

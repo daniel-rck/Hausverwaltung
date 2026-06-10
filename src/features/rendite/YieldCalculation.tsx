@@ -15,16 +15,11 @@ interface MetricCardProps {
 }
 
 function MetricCard({ label, value, positive }: MetricCardProps) {
-  const colorClass =
-    positive === null
-      ? "text-zinc-800 dark:text-zinc-100"
-      : positive
-        ? "text-green-600"
-        : "text-red-600";
+  const colorClass = positive === null ? "text-fg" : positive ? "text-green-600" : "text-red-600";
 
   return (
-    <div className="bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700 shadow-sm px-4 py-3 text-center">
-      <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">{label}</p>
+    <div className="bg-surface rounded-lg border border-border shadow-sm px-4 py-3 text-center">
+      <p className="text-xs font-medium text-fg-muted mb-1">{label}</p>
       <p className={`text-lg font-bold font-mono font-tabular ${colorClass}`}>{value}</p>
     </div>
   );

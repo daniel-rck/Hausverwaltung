@@ -109,10 +109,8 @@ export function FinancingInput({ propertyId }: FinancingInputProps) {
           step={0.1}
         />
         <div>
-          <div className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-            Jährliche Kreditrate
-          </div>
-          <div className="w-full border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/50 rounded-lg px-3 py-1.5 text-sm text-right font-mono text-zinc-600 dark:text-zinc-300">
+          <div className="block text-xs font-medium text-fg-muted mb-1">Jährliche Kreditrate</div>
+          <div className="w-full border border-border bg-surface-muted rounded-lg px-3 py-1.5 text-sm text-right font-mono text-fg-muted">
             {formatEuro(data.jaehrlicheKreditrate)}
           </div>
         </div>

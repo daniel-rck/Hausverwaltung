@@ -24,7 +24,10 @@ export async function handlePairClaim(request: Request, env: Env): Promise<Respo
     return jsonError(404, "expired_or_unknown");
   }
 
-  // One-shot delete before returning.
+  // One-shot delete before returning. get→delete ist auf KV nicht atomar:
+  // zwei zeitgleiche Claims können beide das Payload erhalten. Akzeptabel,
+  // weil das Secret OTP-verschlüsselt ist — wer claimt, muss den OTP ohnehin
+  // kennen; das Löschen verhindert nur spätere Replays.
   await env.PAIR_KV.delete(kvKey);
 
   const parsed = JSON.parse(value) as PairClaimResponse;

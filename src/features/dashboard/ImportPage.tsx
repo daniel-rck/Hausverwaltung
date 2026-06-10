@@ -95,7 +95,7 @@ export function ImportPage() {
       <Card title="Daten importieren">
         {status === "confirm" && (
           <div className="space-y-4">
-            <p className="text-sm text-zinc-600 dark:text-zinc-300">
+            <p className="text-sm text-fg-muted">
               Es wurden Daten in der URL gefunden. Alle vorhandenen Daten werden durch den Import{" "}
               <strong>überschrieben</strong>.
               {syncActive && (
@@ -118,7 +118,7 @@ export function ImportPage() {
               <button
                 type="button"
                 onClick={() => navigate("/")}
-                className="px-4 py-2 text-sm border border-zinc-300 dark:border-zinc-600 text-zinc-600 dark:text-zinc-300 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors"
+                className="px-4 py-2 text-sm border border-border text-fg-muted rounded-lg hover:bg-surface-muted transition-colors"
               >
                 Abbrechen
               </button>
@@ -126,9 +126,7 @@ export function ImportPage() {
           </div>
         )}
 
-        {status === "importing" && (
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">Import läuft...</p>
-        )}
+        {status === "importing" && <p className="text-sm text-fg-muted">Import läuft...</p>}
 
         {status === "success" && (
           <p className="text-sm text-green-600">
@@ -142,7 +140,7 @@ export function ImportPage() {
             <button
               type="button"
               onClick={() => navigate("/")}
-              className="px-4 py-2 text-sm border border-zinc-300 dark:border-zinc-600 text-zinc-600 dark:text-zinc-300 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors"
+              className="px-4 py-2 text-sm border border-border text-fg-muted rounded-lg hover:bg-surface-muted transition-colors"
             >
               Zum Dashboard
             </button>

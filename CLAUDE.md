@@ -66,5 +66,5 @@ verschlüsselt; Konflikte werden via R2-ETag (`If-Match`) aufgelöst.
 
 ## Offene Konventions-Lücken
 
-- `noUncheckedIndexedAccess` ist noch **nicht** aktiv (≈90 Fundstellen); wird mit dem
-  Typ-/Storage-Umbau (Phase 4) nachgezogen.
+- Keine — `noUncheckedIndexedAccess` ist seit dem Deep-Fixup in allen tsconfigs
+  (App, Worker, SW) aktiv.

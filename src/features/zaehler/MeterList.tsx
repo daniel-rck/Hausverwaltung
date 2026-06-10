@@ -174,11 +174,7 @@ export function MeterList() {
       key: "location",
       header: "Zuordnung",
       render: (r) =>
-        r.unit ? (
-          r.unit.name
-        ) : (
-          <span className="text-zinc-500 dark:text-zinc-400 italic">Hauptzähler</span>
-        ),
+        r.unit ? r.unit.name : <span className="text-fg-muted italic">Hauptzähler</span>,
       sortValue: (r) => r.unit?.name ?? "",
     },
     {
@@ -188,12 +184,10 @@ export function MeterList() {
         r.lastReading ? (
           <span className="font-mono text-xs">
             {formatNumber(r.lastReading.value)} {r.meterType.unit}
-            <span className="text-zinc-400 dark:text-zinc-500 ml-1">
-              ({formatDate(r.lastReading.date)})
-            </span>
+            <span className="text-fg-subtle ml-1">({formatDate(r.lastReading.date)})</span>
           </span>
         ) : (
-          <span className="text-zinc-400 dark:text-zinc-500">–</span>
+          <span className="text-fg-subtle">–</span>
         ),
       sortValue: (r) => r.lastReading?.value ?? 0,
       align: "right",
@@ -206,9 +200,7 @@ export function MeterList() {
         return (
           <div className="flex items-center gap-2">
             {r.meter.calibrationDue && (
-              <span className="text-xs text-zinc-500 dark:text-zinc-400">
-                {formatDate(r.meter.calibrationDue)}
-              </span>
+              <span className="text-xs text-fg-muted">{formatDate(r.meter.calibrationDue)}</span>
             )}
             <StatusBadge status={status} label={label} />
           </div>
@@ -227,7 +219,7 @@ export function MeterList() {
               e.stopPropagation();
               handleOpenEdit(r.meter);
             }}
-            className="text-xs text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200"
+            className="text-xs text-fg-subtle hover:text-fg"
           >
             Bearbeiten
           </button>
@@ -247,20 +239,18 @@ export function MeterList() {
   ];
 
   const formContent = (
-    <div className="mb-4 p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-lg border border-zinc-200 dark:border-zinc-700">
-      <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-200 mb-3">
+    <div className="mb-4 p-4 bg-surface-muted rounded-lg border border-border">
+      <h3 className="text-sm font-semibold text-fg mb-3">
         {editMeter ? "Zähler bearbeiten" : "Neuer Zähler"}
       </h3>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         <div>
           <label className="block">
-            <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-              Zählertyp *
-            </span>
+            <span className="block text-xs font-medium text-fg-muted mb-1">Zählertyp *</span>
             <select
               value={form.meterTypeId}
               onChange={(e) => setForm({ ...form, meterTypeId: e.target.value })}
-              className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+              className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
             >
               <option value="">– Typ wählen –</option>
               {meterTypes.map((mt) => (
@@ -273,27 +263,23 @@ export function MeterList() {
         </div>
         <div>
           <label className="block">
-            <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-              Seriennummer *
-            </span>
+            <span className="block text-xs font-medium text-fg-muted mb-1">Seriennummer *</span>
             <input
               type="text"
               value={form.serialNumber}
               onChange={(e) => setForm({ ...form, serialNumber: e.target.value })}
               placeholder="z.B. WZ-2024-001"
-              className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+              className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
             />
           </label>
         </div>
         <div>
           <label className="block">
-            <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-              Zuordnung
-            </span>
+            <span className="block text-xs font-medium text-fg-muted mb-1">Zuordnung</span>
             <select
               value={form.unitId}
               onChange={(e) => setForm({ ...form, unitId: e.target.value })}
-              className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+              className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
             >
               <option value="">Hauptzähler (kein Wohnungsbezug)</option>
               {units.map((u) => (
@@ -306,41 +292,35 @@ export function MeterList() {
         </div>
         <div>
           <label className="block">
-            <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-              Einbaudatum
-            </span>
+            <span className="block text-xs font-medium text-fg-muted mb-1">Einbaudatum</span>
             <input
               type="date"
               value={form.installDate}
               onChange={(e) => setForm({ ...form, installDate: e.target.value })}
-              className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+              className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
             />
           </label>
         </div>
         <div>
           <label className="block">
-            <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-              Eichfrist bis
-            </span>
+            <span className="block text-xs font-medium text-fg-muted mb-1">Eichfrist bis</span>
             <input
               type="date"
               value={form.calibrationDue}
               onChange={(e) => setForm({ ...form, calibrationDue: e.target.value })}
-              className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+              className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
             />
           </label>
         </div>
         <div>
           <label className="block">
-            <span className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-              Notizen
-            </span>
+            <span className="block text-xs font-medium text-fg-muted mb-1">Notizen</span>
             <input
               type="text"
               value={form.notes}
               onChange={(e) => setForm({ ...form, notes: e.target.value })}
               placeholder="Optionale Bemerkungen"
-              className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+              className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
             />
           </label>
         </div>
@@ -360,7 +340,7 @@ export function MeterList() {
             setShowForm(false);
             setEditMeter(null);
           }}
-          className="px-4 py-1.5 text-sm border border-zinc-300 dark:border-zinc-600 text-zinc-600 dark:text-zinc-300 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors"
+          className="px-4 py-1.5 text-sm border border-border text-fg-muted rounded-lg hover:bg-surface-muted transition-colors"
         >
           Abbrechen
         </button>
@@ -386,7 +366,7 @@ export function MeterList() {
 
         {hauptzaehler.length > 0 && (
           <div className="mb-4">
-            <h3 className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide mb-2">
+            <h3 className="text-xs font-semibold text-fg-muted uppercase tracking-wide mb-2">
               Hauptzähler
             </h3>
             <DataTable columns={makeColumns()} data={hauptzaehler} keyFn={(r) => r.meter.id!} />
@@ -395,7 +375,7 @@ export function MeterList() {
 
         {wohnungszaehler.length > 0 && (
           <div>
-            <h3 className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide mb-2">
+            <h3 className="text-xs font-semibold text-fg-muted uppercase tracking-wide mb-2">
               Wohnungszähler
             </h3>
             <DataTable columns={makeColumns()} data={wohnungszaehler} keyFn={(r) => r.meter.id!} />

@@ -30,7 +30,7 @@ export function PropertySelector() {
             }
             setActivePropertyId(Number(v));
           }}
-          className="h-9 text-sm border border-zinc-300 dark:border-zinc-600 rounded-lg pl-3 pr-3 bg-white dark:bg-zinc-700 text-zinc-700 dark:text-zinc-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 max-w-[180px]"
+          className="h-9 text-sm border border-border rounded-lg pl-3 pr-3 bg-white dark:bg-zinc-700 text-zinc-700 dark:text-zinc-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 max-w-[180px]"
         >
           {properties.map((p) => (
             <option key={p.id} value={p.id}>

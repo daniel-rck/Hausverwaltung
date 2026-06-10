@@ -41,11 +41,10 @@ export default {
         return await handlePairClaim(request, env);
       }
 
-      const objMatch = pathname.match(OBJECTS_PATH);
-      if (objMatch) {
-        const id = objMatch[1];
-        if (method === "GET") return await handleObjectGet(request, env, id);
-        if (method === "PUT") return await handleObjectPut(request, env, id);
+      const objectId = pathname.match(OBJECTS_PATH)?.[1];
+      if (objectId) {
+        if (method === "GET") return await handleObjectGet(request, env, objectId);
+        if (method === "PUT") return await handleObjectPut(request, env, objectId);
         return jsonError(405, "method_not_allowed");
       }
 

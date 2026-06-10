@@ -48,7 +48,7 @@ export function RevenueChart({ year }: RevenueChartProps) {
         const month = `${year}-${String(m).padStart(2, "0")}`;
         if (month < occ.from) continue;
         if (occ.to !== null && month > occ.to) continue;
-        expected[m - 1] += monthlyRent;
+        expected[m - 1] = (expected[m - 1] ?? 0) + monthlyRent;
       }
     }
 
@@ -60,7 +60,7 @@ export function RevenueChart({ year }: RevenueChartProps) {
 
       const monthIndex = parseInt(p.month.slice(5), 10) - 1;
       if (monthIndex >= 0 && monthIndex < 12) {
-        received[monthIndex] += p.amountCold + p.amountUtilities;
+        received[monthIndex] = (received[monthIndex] ?? 0) + p.amountCold + p.amountUtilities;
       }
     }
 
@@ -79,12 +79,9 @@ export function RevenueChart({ year }: RevenueChartProps) {
       title="Jahresübersicht"
       action={
         hasData ? (
-          <div className="flex gap-4 text-xs text-zinc-500 dark:text-zinc-400">
+          <div className="flex gap-4 text-xs text-fg-muted">
             <span>
-              Soll:{" "}
-              <strong className="text-zinc-700 dark:text-zinc-200">
-                {formatEuro(chartData.totalExpected)}
-              </strong>
+              Soll: <strong className="text-fg">{formatEuro(chartData.totalExpected)}</strong>
             </span>
             <span>
               Ist:{" "}

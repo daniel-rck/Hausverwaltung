@@ -1,5 +1,22 @@
+import { monthDiff } from "../utils/calc";
 import { db } from "./index";
-import type { Occupancy, Unit } from "./schema";
+import type { MaintenanceItem, Occupancy, Unit } from "./schema";
+
+/**
+ * Gehört eine Maßnahme zur gegebenen Property? Wohnungsgebundene Einträge
+ * über ihre Unit; Gemeinschafts-Einträge (unitId === null) über propertyId.
+ * Legacy-Einträge ohne propertyId bleiben objektübergreifend sichtbar.
+ */
+export function isMaintenanceForProperty(
+  item: MaintenanceItem,
+  propertyId: number,
+  unitIds: readonly number[],
+): boolean {
+  if (item.unitId === null) {
+    return item.propertyId === undefined || item.propertyId === propertyId;
+  }
+  return unitIds.includes(item.unitId);
+}
 
 /** Aktuelle Belegung einer Wohneinheit zu einem Stichtag */
 export async function getActiveOccupancy(
@@ -37,20 +54,21 @@ export async function getVacancyPeriods(
   const sorted = occupancies.sort((a, b) => a.from.localeCompare(b.from));
   const gaps: { from: string; to: string }[] = [];
 
-  if (sorted[0].from > yearStart) {
-    gaps.push({ from: yearStart, to: sorted[0].from });
+  const first = sorted[0];
+  if (first && first.from > yearStart) {
+    gaps.push({ from: yearStart, to: first.from });
   }
 
   for (let i = 0; i < sorted.length - 1; i++) {
-    const currentEnd = sorted[i].to;
-    const nextStart = sorted[i + 1].from;
-    if (currentEnd && currentEnd < nextStart) {
+    const currentEnd = sorted[i]?.to;
+    const nextStart = sorted[i + 1]?.from;
+    if (currentEnd && nextStart && currentEnd < nextStart) {
       gaps.push({ from: currentEnd, to: nextStart });
     }
   }
 
   const last = sorted[sorted.length - 1];
-  if (last.to && last.to < yearEnd) {
+  if (last?.to && last.to < yearEnd) {
     gaps.push({ from: last.to, to: yearEnd });
   }
 
@@ -67,7 +85,8 @@ export async function getPersonMonths(unitId: number, year: number): Promise<num
   for (const occ of occupancies) {
     const start = occ.from < yearStart ? yearStart : occ.from;
     const end = occ.to === null || occ.to > yearEnd ? yearEnd : occ.to;
-    const months = monthDiff(start, end) + 1;
+    // Math.max: korrupte Belegungen (from > to) nicht negativ einrechnen
+    const months = Math.max(0, monthDiff(start, end) + 1);
     total += months * occ.persons;
   }
 
@@ -85,10 +104,9 @@ export async function getConsumption(
     .between([meterId, from], [meterId, to], true, true)
     .sortBy("date");
 
-  if (readings.length < 2) return null;
-
   const first = readings[0];
   const last = readings[readings.length - 1];
+  if (readings.length < 2 || !first || !last) return null;
   return last.value - first.value;
 }
 
@@ -120,10 +138,4 @@ export async function getOpenPayments(
   }
 
   return open;
-}
-
-function monthDiff(from: string, to: string): number {
-  const [y1, m1] = from.split("-").map(Number);
-  const [y2, m2] = to.split("-").map(Number);
-  return (y2 - y1) * 12 + (m2 - m1);
 }

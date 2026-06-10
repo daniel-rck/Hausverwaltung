@@ -60,6 +60,7 @@ export function Modal({
         const list = Array.from(focusables).filter((el) => !el.hasAttribute("disabled"));
         const first = list[0];
         const last = list[list.length - 1];
+        if (!first || !last) return;
         const active = document.activeElement;
         if (e.shiftKey && active === first) {
           e.preventDefault();
@@ -100,18 +101,15 @@ export function Modal({
         aria-modal="true"
         aria-labelledby={title ? titleId : undefined}
         aria-describedby={description ? descId : undefined}
-        className={`relative bg-white dark:bg-zinc-900 rounded-lg shadow-modal border border-zinc-200 dark:border-zinc-800 w-full ${sizeMap[size]} max-h-[90vh] flex flex-col`}
+        className={`relative bg-surface rounded-lg shadow-modal border border-border w-full ${sizeMap[size]} max-h-[90vh] flex flex-col`}
       >
         {title && (
-          <header className="px-5 py-3.5 border-b border-zinc-200 dark:border-zinc-800">
-            <h2
-              id={titleId}
-              className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 tracking-tight"
-            >
+          <header className="px-5 py-3.5 border-b border-border">
+            <h2 id={titleId} className="text-sm font-semibold text-fg tracking-tight">
               {title}
             </h2>
             {description && (
-              <p id={descId} className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+              <p id={descId} className="text-xs text-fg-muted mt-1">
                 {description}
               </p>
             )}
@@ -119,7 +117,7 @@ export function Modal({
         )}
         <div className="px-5 py-4 overflow-y-auto flex-1">{children}</div>
         {footer && (
-          <footer className="px-5 py-3 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50/60 dark:bg-zinc-900/40 rounded-b-lg flex justify-end gap-2">
+          <footer className="px-5 py-3 border-t border-border bg-zinc-50/60 dark:bg-zinc-900/40 rounded-b-lg flex justify-end gap-2">
             {footer}
           </footer>
         )}

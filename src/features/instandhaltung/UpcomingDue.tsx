@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { db, useLiveQuery } from "../../lib/db";
+import { isMaintenanceForProperty } from "../../lib/db/queries";
 import type { MaintenanceItem, Unit } from "../../lib/db/schema";
 import { useProperty } from "../../lib/hooks/useProperty";
 import { Card } from "../../lib/ui/shared/Card";
@@ -66,12 +67,13 @@ export function UpcomingDue() {
 
   const items = useLiveQuery(async () => {
     if (!activeProperty?.id) return [];
+    const propertyId = activeProperty.id;
     const all = await db.maintenanceItems.toArray();
     return all.filter(
       (item) =>
         item.nextDue !== undefined &&
         item.nextDue !== "" &&
-        (item.unitId === null || unitIds.includes(item.unitId)),
+        isMaintenanceForProperty(item, propertyId, unitIds),
     );
   }, [activeProperty?.id, unitIds]);
 
@@ -142,9 +144,7 @@ export function UpcomingDue() {
       key: "unit",
       header: "Wohnung",
       render: (r) => (
-        <span className={r.item.unitId === null ? "text-zinc-500 dark:text-zinc-400 italic" : ""}>
-          {r.unitName}
-        </span>
+        <span className={r.item.unitId === null ? "text-fg-muted italic" : ""}>{r.unitName}</span>
       ),
       sortValue: (r) => r.unitName,
     },
@@ -173,7 +173,7 @@ export function UpcomingDue() {
         />
       ) : (
         <>
-          <div className="mb-3 flex gap-3 text-sm text-zinc-600 dark:text-zinc-300">
+          <div className="mb-3 flex gap-3 text-sm text-fg-muted">
             <span>{rows.filter((r) => r.status === "red").length} überfällig</span>
             <span className="text-zinc-300">|</span>
             <span>{rows.filter((r) => r.status === "yellow").length} in den nächsten 30 Tagen</span>
