@@ -73,6 +73,14 @@ describe("plausibility", () => {
     expect(liters?.message).toContain("Bestandsführung");
   });
 
+  it("zeigt Abweichungen vorzeichenlos als Betrag", () => {
+    const s = statement2022();
+    s.consumption.liters = 3700; // rechnerisch 3630 → Delta −70
+    const [liters] = plausibility(s, null);
+    expect(liters?.message).toContain("um 70 l");
+    expect(liters?.message).not.toContain("-70");
+  });
+
   it("warnt, wenn die Einzelpositionen nicht zur Summe passen", () => {
     const s = statement2022();
     s.totalDistributed = 6000;

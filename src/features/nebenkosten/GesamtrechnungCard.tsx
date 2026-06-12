@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { db, useLiveQuery } from "../../lib/db";
-import type { FuelPurchase, HeatingStatement, StatementPosition } from "../../lib/db/schema";
+import type { HeatingStatement, StatementPosition } from "../../lib/db/schema";
 import { Card } from "../../lib/ui/shared/Card";
 import { NumInput } from "../../lib/ui/shared/NumInput";
 import { Button, Input } from "../../lib/ui/ui";
@@ -79,7 +79,13 @@ export function GesamtrechnungCard({ propertyId, year }: GesamtrechnungCardProps
         .where("propertyId")
         .equals(propertyId)
         .toArray()
-        .then((all) => all.find((s) => s.year === year) ?? null),
+        .then((all) => {
+          // Der Index [propertyId+year] ist bewusst nicht unique (Sync kann
+          // Duplikate erzeugen) — deterministisch den zuletzt geänderten nehmen.
+          const matches = all.filter((s) => s.year === year);
+          matches.sort((a, b) => (b.updatedAt ?? 0) - (a.updatedAt ?? 0));
+          return matches[0] ?? null;
+        }),
     [propertyId, year],
   );
 
@@ -111,10 +117,10 @@ export function GesamtrechnungCard({ propertyId, year }: GesamtrechnungCardProps
     }
   };
 
-  const updatePositions = (
-    field: "purchases" | "otherHeatingCosts" | "separateCosts",
-    next: FuelPurchase[] | StatementPosition[],
-  ) => update({ [field]: next });
+  const updatePositions = <K extends "purchases" | "otherHeatingCosts" | "separateCosts">(
+    field: K,
+    next: HeatingStatement[K],
+  ) => update({ [field]: next } as Pick<HeatingStatement, K>);
 
   const checks = statement ? plausibility(statement, messdienstCostsTotal ?? null) : [];
 

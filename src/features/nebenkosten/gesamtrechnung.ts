@@ -47,7 +47,7 @@ export function plausibility(
       ? { level: "ok", message: "Brennstoff-Verbrauch (Liter) passt zur Bestandsführung." }
       : {
           level: "warn",
-          message: `Brennstoff-Verbrauch weicht um ${formatLiters(litersDelta)} von der Bestandsführung ab (Anfangsbestand + Bezüge − Endbestand = ${formatLiters(computedConsumptionLiters(s))}).`,
+          message: `Brennstoff-Verbrauch weicht um ${formatLiters(Math.abs(litersDelta))} von der Bestandsführung ab (Anfangsbestand + Bezüge − Endbestand = ${formatLiters(computedConsumptionLiters(s))}).`,
         },
   );
 
@@ -57,7 +57,7 @@ export function plausibility(
       ? { level: "ok", message: "Summe der zu verteilenden Kosten passt zu den Einzelpositionen." }
       : {
           level: "warn",
-          message: `Summe der zu verteilenden Kosten weicht um ${formatEuro(totalDelta)} von den Einzelpositionen ab (rechnerisch ${formatEuro(computedTotal(s))}).`,
+          message: `Summe der zu verteilenden Kosten weicht um ${formatEuro(Math.abs(totalDelta))} von den Einzelpositionen ab (rechnerisch ${formatEuro(computedTotal(s))}).`,
         },
   );
 
@@ -71,7 +71,7 @@ export function plausibility(
           }
         : {
             level: "warn",
-            message: `Erfasste Messdienst-Kosten (${formatEuro(messdienstCostsTotal)}) weichen um ${formatEuro(costsDelta)} von der Gesamtrechnung (${formatEuro(s.totalDistributed)}) ab.`,
+            message: `Erfasste Messdienst-Kosten (${formatEuro(messdienstCostsTotal)}) weichen um ${formatEuro(Math.abs(costsDelta))} von der Gesamtrechnung (${formatEuro(s.totalDistributed)}) ab.`,
           },
     );
   }
