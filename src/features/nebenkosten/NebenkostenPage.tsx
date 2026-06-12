@@ -7,11 +7,13 @@ import { Card } from "../../lib/ui/shared/Card";
 import { EmptyState } from "../../lib/ui/shared/EmptyState";
 import { Button, FormField, Select, type TabItem, Tabs } from "../../lib/ui/ui";
 import { Building2, Receipt, Users } from "../../lib/ui/ui/icons";
+import { buildYearOptions } from "../../lib/utils/years";
 import { AbrechnungPrint } from "./AbrechnungPrint";
 import { AbrechnungView } from "./AbrechnungView";
 import { CostEntry } from "./CostEntry";
 import { MessdienstInput } from "./MessdienstInput";
 import { PrepaymentInput } from "./PrepaymentInput";
+import { MessdienstScan } from "./scan/MessdienstScan";
 
 type Tab = "kosten" | "messdienst" | "vorauszahlung" | "abrechnung";
 
@@ -36,13 +38,7 @@ export function NebenkostenPage() {
   const [selectedOccupancyId, setSelectedOccupancyId] = useState<number | null>(null);
   const [showPrintAll, setShowPrintAll] = useState(false);
 
-  const yearOptions = useMemo(() => {
-    const years: number[] = [];
-    for (let y = currentYear; y >= currentYear - 5; y--) {
-      years.push(y);
-    }
-    return years;
-  }, [currentYear]);
+  const yearOptions = useMemo(() => buildYearOptions({ currentYear }), [currentYear]);
 
   const occupancies = useLiveQuery(async () => {
     if (!activeProperty?.id) return [];
@@ -140,7 +136,10 @@ export function NebenkostenPage() {
       {activeTab === "kosten" && <CostEntry propertyId={activeProperty.id!} year={year} />}
 
       {activeTab === "messdienst" && (
-        <MessdienstInput propertyId={activeProperty.id!} year={year} />
+        <div className="space-y-4">
+          <MessdienstScan propertyId={activeProperty.id!} year={year} />
+          <MessdienstInput propertyId={activeProperty.id!} year={year} />
+        </div>
       )}
 
       {activeTab === "vorauszahlung" && (

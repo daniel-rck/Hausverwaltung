@@ -1,6 +1,14 @@
 import { useState } from "react";
 import { db, useLiveQuery } from "../../lib/db";
 import type { LandlordInfo } from "../../lib/db/schema";
+import {
+  DEFAULT_MODEL,
+  getApiKey,
+  getModel,
+  setApiKey,
+  setModel,
+  testApiKey,
+} from "../../lib/gemini";
 import { PageHeader } from "../../lib/ui/layout/PageHeader";
 import { Card } from "../../lib/ui/shared/Card";
 import { SyncSettings } from "../../lib/ui/sync/SyncSettings";
@@ -29,7 +37,12 @@ export function EinstellungenPage() {
         <Tabs items={tabItems} value={tab} onChange={setTab} ariaLabel="Einstellungen-Bereiche" />
       </PageHeader>
 
-      {tab === "allgemein" && <AllgemeinTab />}
+      {tab === "allgemein" && (
+        <div className="space-y-4">
+          <AllgemeinTab />
+          <GeminiCard />
+        </div>
+      )}
       {tab === "sync" && <SyncSettings />}
       {tab === "daten" && <ExportImport />}
     </div>
@@ -131,6 +144,86 @@ function AllgemeinTab() {
           </div>
         </div>
       )}
+    </Card>
+  );
+}
+
+type KeyTestState = "idle" | "testing" | "ok" | "fail";
+
+function GeminiCard() {
+  const [apiKey, setApiKeyState] = useState(getApiKey);
+  const [model, setModelState] = useState(getModel);
+  const [keyTest, setKeyTest] = useState<KeyTestState>("idle");
+
+  const saveApiKey = (value: string) => {
+    setApiKeyState(value);
+    setApiKey(value);
+    setKeyTest("idle");
+  };
+
+  const saveModel = (value: string) => {
+    setModelState(value);
+    setModel(value);
+    setKeyTest("idle");
+  };
+
+  const handleKeyTest = async () => {
+    setKeyTest("testing");
+    const ok = await testApiKey({ apiKey: getApiKey(), model: getModel() });
+    setKeyTest(ok ? "ok" : "fail");
+  };
+
+  return (
+    <Card
+      title="KI-Scan (Gemini)"
+      description="Fotografierte Messdienst-Abrechnungen automatisch auslesen — mit eigenem, kostenlosem Gemini-API-Key."
+    >
+      <div className="space-y-3">
+        <p className="text-sm text-fg-muted">
+          Erstelle den Key unter{" "}
+          <a
+            href="https://aistudio.google.com/apikey"
+            target="_blank"
+            rel="noreferrer"
+            className="underline text-fg"
+          >
+            aistudio.google.com/apikey
+          </a>
+          . Er wird nur lokal auf diesem Gerät gespeichert (kein Sync, kein Export). Fotos verlassen
+          das Gerät nur für die Auswertung an Googles Gemini-API; sie können Mieternamen enthalten —
+          im kostenlosen Tarif kann Google die Daten zum Training verwenden.
+        </p>
+        <FormField label="API-Key">
+          <Input
+            type="password"
+            autoComplete="off"
+            value={apiKey}
+            onChange={(e) => saveApiKey(e.target.value)}
+          />
+        </FormField>
+        <FormField label="Modell">
+          <Input
+            type="text"
+            className="font-mono"
+            placeholder={DEFAULT_MODEL}
+            value={model}
+            onChange={(e) => saveModel(e.target.value)}
+          />
+        </FormField>
+        <div className="flex items-center gap-3">
+          <Button
+            variant="secondary"
+            disabled={apiKey.trim() === "" || keyTest === "testing"}
+            onClick={() => void handleKeyTest()}
+          >
+            {keyTest === "testing" ? "Key wird getestet…" : "Key testen"}
+          </Button>
+          {keyTest === "ok" && <span className="text-sm text-emerald-600">Key funktioniert.</span>}
+          {keyTest === "fail" && (
+            <span className="text-sm text-red-500">Key oder Modell ungültig.</span>
+          )}
+        </div>
+      </div>
     </Card>
   );
 }

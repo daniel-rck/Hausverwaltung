@@ -1,24 +1,12 @@
 import { useState } from "react";
 import { db, useLiveQuery } from "../../lib/db";
-import type { Meter, MeterReading, MeterType, Unit } from "../../lib/db/schema";
+import type { MeterReading, MeterType } from "../../lib/db/schema";
 import { useProperty } from "../../lib/hooks/useProperty";
 import { Card } from "../../lib/ui/shared/Card";
 import { type Column, DataTable } from "../../lib/ui/shared/DataTable";
 import { NumInput } from "../../lib/ui/shared/NumInput";
 import { formatDate, formatNumber } from "../../lib/utils/format";
-
-interface MeterOption {
-  meter: Meter;
-  meterType: MeterType;
-  unit: Unit | null;
-  label: string;
-}
-
-const SOURCE_LABELS: Record<MeterReading["source"], string> = {
-  self: "Eigene Ablesung",
-  messdienst: "Messdienstleister",
-  versorger: "Versorger",
-};
+import { SOURCE_LABELS, useMeterOptions } from "./useMeterOptions";
 
 interface ReadingFormProps {
   selectedMeterId: number | null;
@@ -34,31 +22,7 @@ export function ReadingForm({ selectedMeterId, onMeterChange }: ReadingFormProps
   const [source, setSource] = useState<MeterReading["source"]>("self");
   const [saving, setSaving] = useState(false);
 
-  const meterOptions = useLiveQuery(async (): Promise<MeterOption[]> => {
-    if (!activeProperty?.id) return [];
-
-    const units = await db.units.where("propertyId").equals(activeProperty.id).toArray();
-    const unitIds = units.map((u) => u.id!);
-    const unitMap = new Map(units.map((u) => [u.id!, u]));
-
-    const allMeters = await db.meters.toArray();
-    const propertyMeters = allMeters.filter((m) => m.unitId === null || unitIds.includes(m.unitId));
-
-    const meterTypes = await db.meterTypes.toArray();
-    const typeMap = new Map(meterTypes.map((t) => [t.id!, t]));
-
-    return propertyMeters.map((meter) => {
-      const mt = typeMap.get(meter.meterTypeId);
-      const unit = meter.unitId ? (unitMap.get(meter.unitId) ?? null) : null;
-      const locationLabel = unit ? unit.name : "Hauptzähler";
-      return {
-        meter,
-        meterType: mt ?? { id: 0, name: "Unbekannt", unit: "", category: "water" as const },
-        unit,
-        label: `${mt?.name ?? "Unbekannt"} – ${meter.serialNumber} (${locationLabel})`,
-      };
-    });
-  }, [activeProperty?.id]);
+  const meterOptions = useMeterOptions(activeProperty?.id);
 
   const recentReadings = useLiveQuery(async () => {
     if (!selectedMeterId) return [];
