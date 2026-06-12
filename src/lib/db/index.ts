@@ -25,6 +25,7 @@ class Database {
   readonly meters = new Table<S.Meter>("meters", "id");
   readonly meterReadings = new Table<S.MeterReading>("meterReadings", "id");
   readonly supplierBills = new Table<S.SupplierBill>("supplierBills", "id");
+  readonly heatingStatements = new Table<S.HeatingStatement>("heatingStatements", "id");
   readonly maintenanceItems = new Table<S.MaintenanceItem>("maintenanceItems", "id");
   readonly payments = new Table<S.Payment>("payments", "id");
   readonly handoverProtocols = new Table<S.HandoverProtocol>("handoverProtocols", "id");
@@ -82,6 +83,7 @@ export const SYNCABLE_TABLES = [
   "meters",
   "meterReadings",
   "supplierBills",
+  "heatingStatements",
   "maintenanceItems",
   "payments",
   "handoverProtocols",

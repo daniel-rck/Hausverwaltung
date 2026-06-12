@@ -117,6 +117,48 @@ export function matchOccupancy(
   return null;
 }
 
+const POSITION_KEYWORDS = ["warmwasser", "kaltwasser", "heizung"] as const;
+type PositionKeyword = (typeof POSITION_KEYWORDS)[number];
+
+function keywordForLabel(label: string): PositionKeyword | null {
+  const l = label.toLowerCase();
+  if (l.includes("warmwasser")) return "warmwasser";
+  // "Kalt- und Abwasser", "Gerätemiete Kaltwasser", "Abrechnung Kaltwasser"
+  if (l.includes("kaltwasser") || l.includes("abwasser")) return "kaltwasser";
+  if (l.includes("heizung")) return "heizung";
+  return null;
+}
+
+/**
+ * Prefill the position→costType mapping by keyword match on the cost type
+ * name. Among matches, a name mentioning ONLY the position's keyword wins over
+ * a combined one (e.g. "Warmwasser (Messdienst)" beats "Heizung/Warmwasser"
+ * for a Warmwasser position). Unmatched labels stay unmapped for manual review.
+ */
+export function prefillPositionMapping(
+  labels: string[],
+  costTypes: { id?: number; name: string }[],
+): Map<string, number> {
+  const mapping = new Map<string, number>();
+
+  for (const label of labels) {
+    const keyword = keywordForLabel(label);
+    if (keyword === null) continue;
+
+    const matches = costTypes.filter(
+      (ct) => ct.id != null && ct.name.toLowerCase().includes(keyword),
+    );
+    const specific = matches.filter((ct) => {
+      const name = ct.name.toLowerCase();
+      return POSITION_KEYWORDS.every((other) => other === keyword || !name.includes(other));
+    });
+    const match = specific[0] ?? matches[0];
+    if (match?.id != null) mapping.set(label, match.id);
+  }
+
+  return mapping;
+}
+
 export type CostDraft = {
   costTypeId: number;
   /** Total from the document's "Summe aller Nutzer", fallback: sum of shares. */

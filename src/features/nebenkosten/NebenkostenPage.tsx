@@ -11,6 +11,7 @@ import { buildYearOptions } from "../../lib/utils/years";
 import { AbrechnungPrint } from "./AbrechnungPrint";
 import { AbrechnungView } from "./AbrechnungView";
 import { CostEntry } from "./CostEntry";
+import { GesamtrechnungCard } from "./GesamtrechnungCard";
 import { MessdienstInput } from "./MessdienstInput";
 import { PrepaymentInput } from "./PrepaymentInput";
 import { MessdienstScan } from "./scan/MessdienstScan";
@@ -139,6 +140,7 @@ export function NebenkostenPage() {
         <div className="space-y-4">
           <MessdienstScan propertyId={activeProperty.id!} year={year} />
           <MessdienstInput propertyId={activeProperty.id!} year={year} />
+          <GesamtrechnungCard propertyId={activeProperty.id!} year={year} />
         </div>
       )}
 

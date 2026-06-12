@@ -6,6 +6,7 @@ import { EmptyState } from "../../lib/ui/shared/EmptyState";
 import { NumInput } from "../../lib/ui/shared/NumInput";
 import { Loader2 } from "../../lib/ui/ui/icons";
 import { formatEuro } from "../../lib/utils/format";
+import { findDoubleBookingCostTypeIds } from "./doubleBooking";
 
 interface CostEntryProps {
   propertyId: number;
@@ -69,6 +70,11 @@ export function CostEntry({ propertyId, year }: CostEntryProps) {
     return groups;
   }, [costTypes, costs]);
 
+  const doubleBookingIds = useMemo(
+    () => findDoubleBookingCostTypeIds(costTypes ?? [], costs ?? []),
+    [costTypes, costs],
+  );
+
   const handleAmountChange = async (costTypeId: number, amount: number) => {
     const existing = costs?.find((c) => c.costTypeId === costTypeId);
 
@@ -116,6 +122,12 @@ export function CostEntry({ propertyId, year }: CostEntryProps) {
                     <p className="text-xs text-fg-subtle">
                       {DISTRIBUTION_LABELS[row.costType.distribution]}
                     </p>
+                    {doubleBookingIds.has(row.costType.id!) && (
+                      <p className="text-xs text-amber-600 font-medium">
+                        Hinweis: Diese Position ist in der Messdienst-Abrechnung möglicherweise
+                        bereits enthalten — bitte Doppelbuchung prüfen.
+                      </p>
+                    )}
                   </div>
                   <NumInput
                     value={row.cost?.totalAmount ?? 0}

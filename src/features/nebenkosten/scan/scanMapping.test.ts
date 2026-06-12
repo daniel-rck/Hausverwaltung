@@ -3,6 +3,7 @@ import {
   buildCostDrafts,
   matchOccupancy,
   parseScanResponse,
+  prefillPositionMapping,
   type ScannedAbrechnung,
 } from "./scanMapping";
 
@@ -73,6 +74,58 @@ describe("matchOccupancy", () => {
 
   it("returns null without a match", () => {
     expect(matchOccupancy({ unitLabel: "0009 DG", tenantName: "Meier" }, candidates)).toBeNull();
+  });
+});
+
+describe("prefillPositionMapping", () => {
+  const brunataLabels = [
+    "Heizung Grundkosten",
+    "Heizung Verbrauchskosten",
+    "Warmwasser Grundkosten",
+    "Warmwasser Verbrauchskosten",
+    "Kalt- und Abwasser",
+    "Gerätemiete Kaltwasser",
+    "Abrechnung Kaltwasser",
+    "Kosten bei Nutzerwechsel",
+  ];
+
+  it("mappt Brunata-Positionen auf die getrennten Messdienst-Kostenarten", () => {
+    const mapping = prefillPositionMapping(brunataLabels, [
+      { id: 1, name: "Heizung (Messdienst)" },
+      { id: 2, name: "Warmwasser (Messdienst)" },
+      { id: 3, name: "Kaltwasser (Messdienst)" },
+    ]);
+
+    expect(mapping.get("Heizung Grundkosten")).toBe(1);
+    expect(mapping.get("Heizung Verbrauchskosten")).toBe(1);
+    expect(mapping.get("Warmwasser Grundkosten")).toBe(2);
+    expect(mapping.get("Warmwasser Verbrauchskosten")).toBe(2);
+    expect(mapping.get("Kalt- und Abwasser")).toBe(3);
+    expect(mapping.get("Gerätemiete Kaltwasser")).toBe(3);
+    expect(mapping.get("Abrechnung Kaltwasser")).toBe(3);
+    // kein Keyword → bleibt für die manuelle Zuordnung offen
+    expect(mapping.has("Kosten bei Nutzerwechsel")).toBe(false);
+  });
+
+  it("bevorzugt die spezifische Kostenart vor dem Sammelposten", () => {
+    const mapping = prefillPositionMapping(
+      ["Warmwasser Grundkosten", "Heizung Grundkosten"],
+      [
+        { id: 4, name: "Heizung/Warmwasser" },
+        { id: 2, name: "Warmwasser (Messdienst)" },
+        { id: 1, name: "Heizung (Messdienst)" },
+      ],
+    );
+    expect(mapping.get("Warmwasser Grundkosten")).toBe(2);
+    expect(mapping.get("Heizung Grundkosten")).toBe(1);
+  });
+
+  it("fällt auf den Sammelposten zurück, wenn nichts Spezifischeres existiert", () => {
+    const mapping = prefillPositionMapping(
+      ["Warmwasser Grundkosten"],
+      [{ id: 4, name: "Heizung/Warmwasser" }],
+    );
+    expect(mapping.get("Warmwasser Grundkosten")).toBe(4);
   });
 });
 

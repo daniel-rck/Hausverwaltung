@@ -11,7 +11,7 @@ import { type IDBPDatabase, type IDBPTransaction, openDB } from "idb";
  */
 
 const DB_NAME = "hausverwaltung";
-const DB_VERSION = 50;
+const DB_VERSION = 51;
 
 type IndexSpec = { name: string; keyPath: string | string[]; unique?: boolean };
 type StoreSpec = {
@@ -102,6 +102,18 @@ export const STORES: StoreSpec[] = [
     autoIncrement: true,
     indexes: [
       { name: "[year+type]", keyPath: ["year", "type"] },
+      { name: "propertyId", keyPath: "propertyId" },
+      ...SYNC_IDX,
+    ],
+  },
+  {
+    name: "heatingStatements",
+    keyPath: "id",
+    autoIncrement: true,
+    indexes: [
+      // Bewusst nicht unique: legen zwei Geräte dasselbe Jahr an, muss der
+      // Sync-Apply beide Records einfügen können (vgl. occupancies-Dedupe).
+      { name: "[propertyId+year]", keyPath: ["propertyId", "year"] },
       { name: "propertyId", keyPath: "propertyId" },
       ...SYNC_IDX,
     ],
