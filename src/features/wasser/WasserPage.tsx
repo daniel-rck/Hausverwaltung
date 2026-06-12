@@ -9,13 +9,21 @@ import { EmptyState } from "../../lib/ui/shared/EmptyState";
 import { FormField, KpiTile, Select, type TabItem, Tabs } from "../../lib/ui/ui";
 import { Droplet, Thermometer } from "../../lib/ui/ui/icons";
 import { formatEuro } from "../../lib/utils/format";
+import { buildYearOptions } from "../../lib/utils/years";
 import { AnomalyAlerts } from "./AnomalyAlerts";
 import { DifferenzAnalyse } from "./DifferenzAnalyse";
 import { ProKopfChart } from "./ProKopfChart";
+import { SupplierBatchInput } from "./SupplierBatchInput";
 import { SupplierInput } from "./SupplierInput";
+import type { SupplierType } from "./supplierConfig";
 import { WarmKaltRatio } from "./WarmKaltRatio";
 
-type SupplierType = "water" | "gas" | "electricity" | "heating";
+type EntryMode = "single" | "batch";
+
+const ENTRY_MODE_ITEMS: TabItem<EntryMode>[] = [
+  { id: "single", label: "Einzelerfassung" },
+  { id: "batch", label: "Batch-Erfassung" },
+];
 
 const TAB_ITEMS: TabItem<SupplierType>[] = [
   { id: "water", label: "Wasser", icon: <Droplet size={14} strokeWidth={1.75} /> },
@@ -25,14 +33,6 @@ const TAB_ITEMS: TabItem<SupplierType>[] = [
 ];
 
 const currentYear = new Date().getFullYear();
-
-function buildYearOptions(): number[] {
-  const years: number[] = [];
-  for (let y = currentYear; y >= currentYear - 5; y--) {
-    years.push(y);
-  }
-  return years;
-}
 
 function ConsumptionSummary({ year, type }: { year: number; type: SupplierType }) {
   const { activeProperty } = useProperty();
@@ -81,6 +81,7 @@ export function WasserPage() {
   const { activeProperty } = useProperty();
   const [year, setYear] = useState(currentYear);
   const [supplierType, setSupplierType] = useState<SupplierType>("water");
+  const [entryMode, setEntryMode] = useState<EntryMode>("single");
 
   if (!activeProperty) {
     return (
@@ -131,7 +132,18 @@ export function WasserPage() {
       <Tabs items={TAB_ITEMS} value={supplierType} onChange={setSupplierType} accent="wasser" />
 
       <div className="space-y-6">
-        <SupplierInput year={year} type={supplierType} />
+        <Tabs
+          items={ENTRY_MODE_ITEMS}
+          value={entryMode}
+          onChange={setEntryMode}
+          accent="wasser"
+          ariaLabel="Erfassungsmodus"
+        />
+        {entryMode === "single" ? (
+          <SupplierInput year={year} type={supplierType} />
+        ) : (
+          <SupplierBatchInput type={supplierType} />
+        )}
         {supplierType === "water" ? (
           <>
             <DifferenzAnalyse year={year} />

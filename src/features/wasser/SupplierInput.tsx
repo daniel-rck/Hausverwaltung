@@ -6,8 +6,7 @@ import { Card } from "../../lib/ui/shared/Card";
 import { type Column, DataTable } from "../../lib/ui/shared/DataTable";
 import { NumInput } from "../../lib/ui/shared/NumInput";
 import { formatDate, formatEuro, formatNumber } from "../../lib/utils/format";
-
-type SupplierType = "water" | "gas" | "electricity" | "heating";
+import { type SupplierType, typeConfig } from "./supplierConfig";
 
 interface SupplierInputProps {
   year: number;
@@ -23,13 +22,6 @@ interface BillForm {
   billingTo: string;
   notes: string;
 }
-
-const typeConfig: Record<SupplierType, { label: string; defaultUnit: string; units: string[] }> = {
-  water: { label: "Wasserversorger", defaultUnit: "m³", units: ["m³"] },
-  gas: { label: "Gasversorger", defaultUnit: "m³", units: ["m³", "kWh"] },
-  electricity: { label: "Stromversorger", defaultUnit: "kWh", units: ["kWh"] },
-  heating: { label: "Fernwärme/Heizung", defaultUnit: "kWh", units: ["kWh", "MWh"] },
-};
 
 function makeEmptyForm(type: SupplierType): BillForm {
   return {

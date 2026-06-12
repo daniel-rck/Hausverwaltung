@@ -4,6 +4,7 @@ import { PageHeader } from "../../lib/ui/layout/PageHeader";
 import { EmptyState } from "../../lib/ui/shared/EmptyState";
 import { IconButton, Select } from "../../lib/ui/ui";
 import { ChevronLeft, ChevronRight, Wallet } from "../../lib/ui/ui/icons";
+import { buildYearOptions } from "../../lib/utils/years";
 import { MonthOverview } from "./MonthOverview";
 import { OpenItems } from "./OpenItems";
 import { PaymentReminder } from "./PaymentReminder";
@@ -26,10 +27,7 @@ export function FinanzenPage() {
     );
   }
 
-  const yearOptions: number[] = [];
-  for (let y = currentYear + 1; y >= currentYear - 10; y--) {
-    yearOptions.push(y);
-  }
+  const yearOptions = buildYearOptions({ currentYear, yearsForward: 1 });
 
   return (
     <div className="space-y-6">

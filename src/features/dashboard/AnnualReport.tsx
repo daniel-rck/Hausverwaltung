@@ -6,6 +6,7 @@ import { Card } from "../../lib/ui/shared/Card";
 import { EmptyState } from "../../lib/ui/shared/EmptyState";
 import { BarChart3 } from "../../lib/ui/ui/icons";
 import { formatEuro, formatPercent } from "../../lib/utils/format";
+import { buildYearOptions } from "../../lib/utils/years";
 
 interface AnnualReportProps {
   propertyId: number;
@@ -144,13 +145,7 @@ export function AnnualReport({ propertyId }: AnnualReportProps) {
     };
   }, [propertyId, year]);
 
-  const yearOptions = useMemo(() => {
-    const years: number[] = [];
-    for (let y = currentYear; y >= currentYear - 10; y--) {
-      years.push(y);
-    }
-    return years;
-  }, [currentYear]);
+  const yearOptions = useMemo(() => buildYearOptions({ currentYear }), [currentYear]);
 
   if (data === undefined) return null;
 

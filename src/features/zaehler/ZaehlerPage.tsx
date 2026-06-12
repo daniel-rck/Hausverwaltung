@@ -7,9 +7,11 @@ import { Building2, Gauge } from "../../lib/ui/ui/icons";
 import { CalibrationAlerts } from "./CalibrationAlerts";
 import { ConsumptionChart } from "./ConsumptionChart";
 import { MeterList } from "./MeterList";
+import { ReadingBatchForm } from "./ReadingBatchForm";
 import { ReadingForm } from "./ReadingForm";
 
 type Tab = "meters" | "readings" | "calibration";
+type EntryMode = "single" | "batch";
 
 const TAB_ITEMS: TabItem<Tab>[] = [
   { id: "meters", label: "Zähler-Übersicht" },
@@ -17,9 +19,15 @@ const TAB_ITEMS: TabItem<Tab>[] = [
   { id: "calibration", label: "Eichfristen" },
 ];
 
+const ENTRY_MODE_ITEMS: TabItem<EntryMode>[] = [
+  { id: "single", label: "Einzelerfassung" },
+  { id: "batch", label: "Batch-Erfassung" },
+];
+
 export function ZaehlerPage() {
   const { activeProperty, addProperty } = useProperty();
   const [activeTab, setActiveTab] = useState<Tab>("meters");
+  const [entryMode, setEntryMode] = useState<EntryMode>("single");
   const [selectedMeterId, setSelectedMeterId] = useState<number | null>(null);
 
   if (!activeProperty) {
@@ -51,7 +59,21 @@ export function ZaehlerPage() {
 
       {activeTab === "readings" && (
         <div className="space-y-4">
-          <ReadingForm selectedMeterId={selectedMeterId} onMeterChange={setSelectedMeterId} />
+          <Tabs
+            items={ENTRY_MODE_ITEMS}
+            value={entryMode}
+            onChange={setEntryMode}
+            accent="zaehler"
+            ariaLabel="Erfassungsmodus"
+          />
+          {entryMode === "single" ? (
+            <ReadingForm selectedMeterId={selectedMeterId} onMeterChange={setSelectedMeterId} />
+          ) : (
+            <ReadingBatchForm
+              selectedMeterId={selectedMeterId}
+              onMeterChange={setSelectedMeterId}
+            />
+          )}
           <ConsumptionChart meterId={selectedMeterId} />
         </div>
       )}
