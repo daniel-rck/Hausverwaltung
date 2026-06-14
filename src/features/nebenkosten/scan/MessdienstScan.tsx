@@ -18,6 +18,7 @@ import {
   matchOccupancy,
   type OccupancyCandidate,
   parseScanResponse,
+  prefillPositionMapping,
   type ScannedAbrechnung,
 } from "./scanMapping";
 
@@ -106,7 +107,12 @@ export function MessdienstScan({ propertyId, year }: MessdienstScanProps) {
         if (match) prefill.set(index, match.occupancyId);
       });
       setUnitMapping(prefill);
-      setPositionMapping(new Map());
+      const labels = [
+        ...new Set(
+          [...parsed.units.flatMap((u) => u.positions), ...parsed.totals].map((p) => p.label),
+        ),
+      ];
+      setPositionMapping(prefillPositionMapping(labels, costTypes ?? []));
     } catch (err) {
       toast.error(err instanceof ExtractionError ? err.message : "Scan fehlgeschlagen.");
     } finally {

@@ -123,6 +123,44 @@ export interface SupplierBill extends SyncFields {
   notes?: string;
 }
 
+export interface FuelPurchase {
+  date: string;
+  liters: number;
+  amount: number;
+}
+
+export interface StatementPosition {
+  label: string;
+  amount: number;
+}
+
+/**
+ * Gesamtrechnung des Messdienstleisters (Gebäudeebene, ein Record pro
+ * Objekt+Jahr): Brennstoff-Bestandsführung, weitere Heizungsbetriebskosten
+ * und gesondert verteilte Kosten. Reine Dokumentation + Plausibilität —
+ * die Verteilung auf Mieter rechnet der Messdienst (CostShares), nie die App.
+ * Gedruckte Summen (`consumption`, `totalDistributed`) werden gespeichert und
+ * nur geprüft: Brunata bewertet Heizöl per FIFO, der €-Verbrauch ist aus
+ * Beständen/Bezügen nicht ableitbar.
+ */
+export interface HeatingStatement extends SyncFields {
+  id?: number;
+  propertyId: number;
+  year: number;
+  provider: string;
+  fuelType: string;
+  openingStock: { liters: number; amount: number };
+  purchases: FuelPurchase[];
+  closingStock: { liters: number; amount: number };
+  consumption: { liters: number; amount: number };
+  /** "abz. Vermieteranteil CO2-Kosten" — positiv gespeichert, in Summen subtrahiert. */
+  co2LandlordShare: number;
+  otherHeatingCosts: StatementPosition[];
+  separateCosts: StatementPosition[];
+  totalDistributed: number;
+  notes?: string;
+}
+
 export interface MaintenanceItem extends SyncFields {
   id?: number;
   unitId: number | null;

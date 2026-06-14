@@ -75,6 +75,45 @@ describe("buildLocalSnapshot / applySnapshot", () => {
     expect(protocols[0]?.meterReadings).toEqual([{ meterId: newMeterId, value: 123.4 }]);
   });
 
+  it("übersetzt heatingStatements-propertyId hin und zurück", async () => {
+    const propertyId = (await db.properties.add({
+      name: "Haus",
+      address: "Weg 1",
+      units: 3,
+    })) as number;
+    await db.heatingStatements.add({
+      propertyId,
+      year: 2024,
+      provider: "BRUNATA-METRONA",
+      fuelType: "Heizöl",
+      openingStock: { liters: 2420, amount: 1697.99 },
+      purchases: [{ date: "2024-03-15", liters: 1000, amount: 950 }],
+      closingStock: { liters: 500, amount: 475 },
+      consumption: { liters: 2920, amount: 2172.99 },
+      co2LandlordShare: 117.3,
+      otherHeatingCosts: [{ label: "Brennerwartung", amount: 363.79 }],
+      separateCosts: [],
+      totalDistributed: 2419.48,
+    });
+    const propertySyncId = (await db.properties.get(propertyId))?.syncId;
+
+    const snapshot = await buildLocalSnapshot();
+    const wire = snapshot.tables.heatingStatements?.[0] as Record<string, unknown>;
+    expect(wire.propertyId__sync).toBe(propertySyncId);
+    expect(wire.propertyId).toBeUndefined();
+
+    await wipe();
+    await applySnapshot(snapshot);
+
+    const statements = await db.heatingStatements.toArray();
+    const newPropertyId = (await db.properties.toArray())[0]?.id;
+    expect(statements).toHaveLength(1);
+    expect(statements[0]?.propertyId).toBe(newPropertyId);
+    // eingebettete Arrays überleben die Übersetzung unverändert
+    expect(statements[0]?.purchases).toEqual([{ date: "2024-03-15", liters: 1000, amount: 950 }]);
+    expect(statements[0]?.co2LandlordShare).toBe(117.3);
+  });
+
   it("verwirft Readings, deren Zähler nicht (mehr) auflösbar ist", async () => {
     const unitId = (await db.units.add({ propertyId: 1, name: "EG", area: 50 })) as number;
     const tenantId = (await db.tenants.add({ unitId, name: "Müller" })) as number;

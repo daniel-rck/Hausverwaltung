@@ -342,6 +342,7 @@ function topologicalOrder(): readonly string[] {
     "costs",
     "maintenanceItems",
     "supplierBills",
+    "heatingStatements",
     "costShares",
     "prepayments",
     "meterReadings",

@@ -122,10 +122,11 @@ export async function cascadeDeleteMeter(meterId: number): Promise<void> {
 }
 
 export async function cascadeDeleteProperty(propertyId: number): Promise<void> {
-  const [units, costs, supplierBills] = await Promise.all([
+  const [units, costs, supplierBills, heatingStatements] = await Promise.all([
     db.units.where("propertyId").equals(propertyId).toArray(),
     db.costs.where("propertyId").equals(propertyId).toArray(),
     db.supplierBills.where("propertyId").equals(propertyId).toArray(),
+    db.heatingStatements.where("propertyId").equals(propertyId).toArray(),
   ]);
 
   const unitIds = units.map((u) => u.id!);
@@ -145,6 +146,10 @@ export async function cascadeDeleteProperty(propertyId: number): Promise<void> {
   await bulkDeleteWithTombstones(
     "supplierBills",
     supplierBills.map((b) => b.id!),
+  );
+  await bulkDeleteWithTombstones(
+    "heatingStatements",
+    heatingStatements.map((h) => h.id!),
   );
 
   const settings = await db.settings.toArray();

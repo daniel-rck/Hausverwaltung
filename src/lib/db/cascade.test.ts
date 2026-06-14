@@ -109,6 +109,20 @@ async function seed() {
     billingFrom: "2025-01-01",
     billingTo: "2025-12-31",
   });
+  await db.heatingStatements.add({
+    propertyId,
+    year: 2025,
+    provider: "BRUNATA-METRONA",
+    fuelType: "Heizöl",
+    openingStock: { liters: 100, amount: 100 },
+    purchases: [],
+    closingStock: { liters: 0, amount: 0 },
+    consumption: { liters: 100, amount: 100 },
+    co2LandlordShare: 0,
+    otherHeatingCosts: [],
+    separateCosts: [],
+    totalDistributed: 100,
+  });
   await db.settings.put({ key: `financing_${propertyId}`, value: {} });
   return { propertyId, unitId, tenantId, occId, meterId, costId };
 }
@@ -190,6 +204,7 @@ describe("cascadeDeleteProperty", () => {
       "costs",
       "costShares",
       "supplierBills",
+      "heatingStatements",
       "payments",
       "documents",
       "meters",
