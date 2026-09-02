@@ -31,7 +31,7 @@ export function Tabs<T extends string>({
   const a = moduleAccent(accent);
   // Linear-Stil: Active-Text immer neutral, Modul-Akzent nur als 2px-Underline-Bar.
   const activeText = "text-fg";
-  const activeBar = a?.bar ?? "bg-zinc-900 dark:bg-zinc-100";
+  const activeBar = a?.bar ?? "bg-fg";
 
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
 

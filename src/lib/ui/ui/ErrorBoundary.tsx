@@ -43,7 +43,7 @@ export class ErrorBoundary extends Component<Props, State> {
               <button
                 type="button"
                 onClick={this.reset}
-                className="h-9 px-4 text-sm font-medium rounded-lg bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
+                className="h-9 px-4 text-sm font-medium rounded-lg bg-fg text-surface hover:opacity-90"
               >
                 Erneut versuchen
               </button>

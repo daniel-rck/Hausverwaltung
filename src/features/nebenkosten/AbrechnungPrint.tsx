@@ -66,7 +66,7 @@ export function AbrechnungPrint({ propertyId, year, onBack }: AbrechnungPrintPro
         <button
           type="button"
           onClick={() => window.print()}
-          className="px-4 py-2 text-sm bg-zinc-800 text-white rounded-lg hover:bg-zinc-900 transition-colors"
+          className="px-4 py-2 text-sm bg-fg text-surface rounded-lg hover:opacity-90 transition-colors"
         >
           Alle drucken ({occupancies.length} Abrechnungen)
         </button>
@@ -82,7 +82,7 @@ export function AbrechnungPrint({ propertyId, year, onBack }: AbrechnungPrintPro
                 {info.unit.name})
               </p>
             </div>
-            <div className="border border-zinc-200 rounded-lg p-6 mb-6 print:border-0 print:p-0 print:mb-0 print:rounded-none">
+            <div className="border border-border rounded-lg p-6 mb-6 print:border-0 print:p-0 print:mb-0 print:rounded-none">
               <AbrechnungView
                 occupancy={info.occupancy}
                 year={year}

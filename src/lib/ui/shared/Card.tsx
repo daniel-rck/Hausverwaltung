@@ -44,9 +44,7 @@ export function Card({
     />
   ) : null;
 
-  const interactiveCls = interactive
-    ? "transition-colors hover:border-zinc-300 dark:hover:border-zinc-700 cursor-pointer"
-    : "";
+  const interactiveCls = interactive ? "transition-colors hover:border-border cursor-pointer" : "";
 
   return (
     <Tag
@@ -69,7 +67,7 @@ export function Card({
       )}
       <div className={padMap[padding]}>{children}</div>
       {footer && (
-        <footer className="px-5 py-3 border-t border-border bg-zinc-50/60 dark:bg-zinc-900/40 rounded-b-lg">
+        <footer className="px-5 py-3 border-t border-border bg-surface-muted/60 rounded-b-lg">
           {footer}
         </footer>
       )}

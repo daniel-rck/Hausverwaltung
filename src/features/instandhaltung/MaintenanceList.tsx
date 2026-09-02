@@ -248,7 +248,7 @@ export function MaintenanceList() {
   ];
 
   const inputCls =
-    "w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500";
+    "w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500";
 
   return (
     <>
@@ -259,7 +259,7 @@ export function MaintenanceList() {
             <select
               value={filterCategory}
               onChange={(e) => setFilterCategory(e.target.value as Category | "")}
-              className="text-sm border border-border rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+              className="text-sm border border-border rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-accent-500"
             >
               <option value="">Alle Kategorien</option>
               {(Object.entries(CATEGORY_LABELS) as [Category, string][]).map(([k, v]) => (
@@ -428,7 +428,7 @@ export function MaintenanceList() {
               <button
                 type="button"
                 onClick={handleSave}
-                className="px-4 py-1.5 text-sm bg-zinc-800 text-white rounded-lg hover:bg-zinc-900 transition-colors"
+                className="px-4 py-1.5 text-sm bg-fg text-surface rounded-lg hover:opacity-90 transition-colors"
               >
                 Speichern
               </button>

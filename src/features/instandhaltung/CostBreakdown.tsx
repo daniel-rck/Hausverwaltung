@@ -215,7 +215,7 @@ export function CostBreakdown() {
           <select
             value={effectiveYear ?? ""}
             onChange={(e) => setSelectedYear(parseInt(e.target.value, 10))}
-            className="text-sm border border-border rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+            className="text-sm border border-border rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-accent-500"
           >
             {availableYears.map((y) => (
               <option key={y} value={y}>

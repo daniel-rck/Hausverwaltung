@@ -151,7 +151,7 @@ export function RentHistory({ occupancy, unit }: RentHistoryProps) {
       }
     >
       {/* Current rent display */}
-      <div className="mb-4 p-3 bg-zinc-50 dark:bg-zinc-700/30 rounded-lg">
+      <div className="mb-4 p-3 bg-surface-sunken rounded-lg">
         <p className="text-sm text-fg-muted">
           Aktuelle Kaltmiete:{" "}
           <span className="font-semibold font-mono text-fg">{formatEuro(occupancy.rentCold)}</span>
@@ -170,7 +170,7 @@ export function RentHistory({ occupancy, unit }: RentHistoryProps) {
                   type="month"
                   value={form.effectiveDate}
                   onChange={(e) => setForm({ ...form, effectiveDate: e.target.value })}
-                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm bg-surface dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm bg-surface text-fg focus:outline-none focus:ring-2 focus:ring-accent-500"
                 />
               </label>
             </div>
@@ -187,7 +187,7 @@ export function RentHistory({ occupancy, unit }: RentHistoryProps) {
                 <select
                   value={form.reason}
                   onChange={(e) => setForm({ ...form, reason: e.target.value as RentChangeReason })}
-                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm bg-surface dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm bg-surface text-fg focus:outline-none focus:ring-2 focus:ring-accent-500"
                 >
                   <option value="mietspiegel">Mietspiegel</option>
                   <option value="index">Indexanpassung</option>
@@ -203,7 +203,7 @@ export function RentHistory({ occupancy, unit }: RentHistoryProps) {
                   type="text"
                   value={form.notes}
                   onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm bg-surface dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm bg-surface text-fg focus:outline-none focus:ring-2 focus:ring-accent-500"
                 />
               </label>
             </div>
@@ -239,7 +239,7 @@ export function RentHistory({ occupancy, unit }: RentHistoryProps) {
               type="button"
               onClick={handleSave}
               disabled={hasErrors && !overrideErrors}
-              className="px-4 py-1.5 text-sm bg-zinc-800 dark:bg-zinc-600 text-white rounded-lg hover:bg-zinc-900 dark:hover:bg-zinc-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-1.5 text-sm bg-fg text-surface rounded-lg hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Speichern
             </button>

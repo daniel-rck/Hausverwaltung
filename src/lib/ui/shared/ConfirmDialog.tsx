@@ -113,10 +113,10 @@ export function ConfirmDialog({
             type="button"
             onClick={handleConfirm}
             disabled={busy}
-            className={`px-4 py-2 text-sm rounded-lg text-white transition-colors disabled:opacity-60 disabled:cursor-not-allowed ${
+            className={`px-4 py-2 text-sm rounded-lg transition-colors disabled:opacity-60 disabled:cursor-not-allowed ${
               danger
-                ? "bg-red-600 hover:bg-red-700"
-                : "bg-zinc-800 hover:bg-zinc-900 dark:bg-zinc-600 dark:hover:bg-zinc-500"
+                ? "bg-danger text-fg-on-accent hover:opacity-90"
+                : "bg-fg text-surface hover:opacity-90"
             }`}
           >
             {busy ? "..." : confirmLabel}

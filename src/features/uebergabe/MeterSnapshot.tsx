@@ -130,7 +130,7 @@ export function MeterSnapshot({ unitId, readings, onChange }: MeterSnapshotProps
                     onChange={(e) =>
                       updateReading(snapshot.meterId, parseFloat(e.target.value) || 0)
                     }
-                    className="w-full border border-border rounded-lg px-3 py-1.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+                    className="w-full border border-border rounded-lg px-3 py-1.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-accent-500"
                   />
                   <span className="text-xs text-fg-muted whitespace-nowrap">
                     {snapshot.typeUnit}

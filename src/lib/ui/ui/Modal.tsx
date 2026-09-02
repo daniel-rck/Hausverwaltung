@@ -117,7 +117,7 @@ export function Modal({
         )}
         <div className="px-5 py-4 overflow-y-auto flex-1">{children}</div>
         {footer && (
-          <footer className="px-5 py-3 border-t border-border bg-zinc-50/60 dark:bg-zinc-900/40 rounded-b-lg flex justify-end gap-2">
+          <footer className="px-5 py-3 border-t border-border bg-surface-muted/60 rounded-b-lg flex justify-end gap-2">
             {footer}
           </footer>
         )}

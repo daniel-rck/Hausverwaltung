@@ -25,7 +25,7 @@ export const Switch = forwardRef<HTMLInputElement, SwitchProps>(
             className={`peer sr-only ${className}`}
             {...rest}
           />
-          <span className="absolute inset-0 rounded-full bg-zinc-300 dark:bg-zinc-600 peer-checked:bg-zinc-800 dark:peer-checked:bg-zinc-200 transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-zinc-400 peer-focus-visible:ring-offset-2 dark:peer-focus-visible:ring-offset-zinc-900" />
+          <span className="absolute inset-0 rounded-full bg-border peer-checked:bg-accent-600 transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-accent-500 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-surface" />
           <span className="absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
         </span>
         {(label || description) && (

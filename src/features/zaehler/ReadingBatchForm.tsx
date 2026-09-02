@@ -20,7 +20,7 @@ interface ReadingBatchFormProps {
 }
 
 const INPUT_CLASS =
-  "w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500";
+  "w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500";
 
 function makeInitialRows(): ReadingBatchRow[] {
   return [makeEmptyRow(), makeEmptyRow(), makeEmptyRow()];
@@ -193,7 +193,7 @@ export function ReadingBatchForm({ selectedMeterId, onMeterChange }: ReadingBatc
             type="button"
             onClick={handleSave}
             disabled={!selectedMeterId || !hasFilledRow || saving}
-            className="px-4 py-1.5 text-sm bg-zinc-800 text-white rounded-lg hover:bg-zinc-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-1.5 text-sm bg-fg text-surface rounded-lg hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {saving ? "Speichere..." : "Ablesungen speichern"}
           </button>

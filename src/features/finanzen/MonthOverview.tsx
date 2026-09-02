@@ -283,7 +283,7 @@ export function MonthOverview({ year }: MonthOverviewProps) {
                                 ? "bg-amber-100 text-amber-700 hover:bg-amber-200"
                                 : cell.status === "red"
                                   ? "bg-red-100 text-red-700 hover:bg-red-200"
-                                  : "bg-surface-muted text-zinc-300 cursor-default"
+                                  : "bg-surface-muted text-fg-subtle cursor-default"
                           }`}
                           title={
                             cell.status === "gray"
@@ -374,7 +374,7 @@ export function MonthOverview({ year }: MonthOverviewProps) {
                     type="date"
                     value={form.receivedDate}
                     onChange={(e) => setForm((f) => ({ ...f, receivedDate: e.target.value }))}
-                    className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+                    className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
                   />
                 </label>
               </div>
@@ -390,7 +390,7 @@ export function MonthOverview({ year }: MonthOverviewProps) {
                         method: e.target.value as Payment["method"],
                       }))
                     }
-                    className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+                    className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
                   >
                     {(Object.entries(METHOD_LABELS) as [Payment["method"], string][]).map(
                       ([value, label]) => (
@@ -411,7 +411,7 @@ export function MonthOverview({ year }: MonthOverviewProps) {
                     value={form.notes}
                     onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
                     placeholder="Optional"
-                    className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+                    className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
                   />
                 </label>
               </div>
@@ -443,7 +443,7 @@ export function MonthOverview({ year }: MonthOverviewProps) {
                   type="button"
                   onClick={handleSave}
                   disabled={saving}
-                  className="px-4 py-2 text-sm rounded-lg bg-zinc-800 text-white hover:bg-zinc-900 transition-colors disabled:opacity-50"
+                  className="px-4 py-2 text-sm rounded-lg bg-fg text-surface hover:opacity-90 transition-colors disabled:opacity-50"
                 >
                   {saving ? "Speichern..." : "Speichern"}
                 </button>

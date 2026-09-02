@@ -83,7 +83,7 @@ export function Breadcrumbs({ items }: { items: BreadcrumbItem[] }) {
                 <ChevronRight
                   size={12}
                   strokeWidth={1.75}
-                  className="text-zinc-400"
+                  className="text-fg-subtle"
                   aria-hidden="true"
                 />
               )}

@@ -94,7 +94,7 @@ export function NumInput({
           onBlur={handleBlur}
           step={step}
           disabled={disabled}
-          className="w-full border border-border rounded-lg px-3 py-1.5 text-sm text-right font-mono bg-surface dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500 disabled:bg-zinc-50 disabled:text-zinc-400 dark:disabled:bg-zinc-800/50 dark:disabled:text-zinc-500"
+          className="w-full border border-border rounded-lg px-3 py-1.5 text-sm text-right font-mono bg-surface text-fg focus:outline-none focus:ring-2 focus:ring-accent-500 disabled:bg-surface-sunken disabled:text-fg-subtle"
         />
         {suffix && (
           <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-fg-subtle pointer-events-none">

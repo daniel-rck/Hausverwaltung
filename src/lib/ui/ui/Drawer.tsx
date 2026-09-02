@@ -88,7 +88,7 @@ export function Drawer({ open, onClose, title, children, side = "right" }: Drawe
               type="button"
               onClick={onClose}
               aria-label="Schließen"
-              className="w-7 h-7 inline-flex items-center justify-center rounded-md text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-800 dark:hover:text-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--color-accent]/40"
+              className="w-7 h-7 inline-flex items-center justify-center rounded-md text-fg-muted hover:bg-surface-sunken hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--color-accent]/40"
             >
               <X size={16} aria-hidden="true" />
             </button>

@@ -175,7 +175,7 @@ function ToastView({ item, onDismiss }: { item: ToastItem; onDismiss: (id: numbe
         type="button"
         onClick={() => onDismiss(item.id)}
         aria-label="Schließen"
-        className="text-zinc-400 hover:text-fg -mr-1 -mt-0.5 p-1 rounded-md hover:bg-surface-sunken focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--color-accent]/40"
+        className="text-fg-subtle hover:text-fg -mr-1 -mt-0.5 p-1 rounded-md hover:bg-surface-sunken focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--color-accent]/40"
       >
         <X size={14} aria-hidden="true" />
       </button>

@@ -21,7 +21,7 @@ export function MonthPicker({ value, onChange, label, className = "" }: MonthPic
         type="month"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full border border-border rounded-lg px-3 py-1.5 text-sm bg-surface dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+        className="w-full border border-border rounded-lg px-3 py-1.5 text-sm bg-surface text-fg focus:outline-none focus:ring-2 focus:ring-accent-500"
       />
     </div>
   );

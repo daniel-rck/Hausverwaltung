@@ -30,7 +30,7 @@ export function Wizard({ steps, current, ariaLabel = "Fortschritt" }: WizardProp
           </span>
           <span className="text-fg font-medium">{steps[current]?.label}</span>
         </div>
-        <div className="h-1 rounded-full bg-zinc-200 dark:bg-zinc-800 overflow-hidden">
+        <div className="h-1 rounded-full bg-surface-sunken overflow-hidden">
           <div
             className="h-full bg-[--color-accent] transition-all"
             style={{ width: `${((current + 1) / steps.length) * 100}%` }}
@@ -49,9 +49,9 @@ export function Wizard({ steps, current, ariaLabel = "Fortschritt" }: WizardProp
               <span
                 className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-semibold ${
                   active
-                    ? "bg-[--color-accent] text-white"
+                    ? "bg-[--color-accent] text-fg-on-accent"
                     : done
-                      ? "bg-zinc-200 dark:bg-zinc-700 text-fg"
+                      ? "bg-surface-sunken text-fg"
                       : "bg-surface-sunken text-fg-muted"
                 }`}
                 aria-current={active ? "step" : undefined}
@@ -60,10 +60,10 @@ export function Wizard({ steps, current, ariaLabel = "Fortschritt" }: WizardProp
               </span>
               <span className={`text-xs ${active ? "text-fg font-medium" : "text-fg-muted"}`}>
                 {step.label}
-                {step.optional && <span className="ml-1 text-zinc-400">(optional)</span>}
+                {step.optional && <span className="ml-1 text-fg-subtle">(optional)</span>}
               </span>
               {idx < steps.length - 1 && (
-                <span aria-hidden="true" className="flex-1 h-px bg-zinc-200 dark:bg-zinc-800" />
+                <span aria-hidden="true" className="flex-1 h-px bg-surface-sunken" />
               )}
             </li>
           );
@@ -111,7 +111,7 @@ export function WizardFooter({
             type="button"
             onClick={onBack}
             disabled={!canBack || busy}
-            className="h-9 px-3.5 text-sm rounded-md border border-zinc-300 dark:border-zinc-700 text-fg hover:bg-surface-muted disabled:opacity-50 transition-colors"
+            className="h-9 px-3.5 text-sm rounded-md border border-border text-fg hover:bg-surface-muted disabled:opacity-50 transition-colors"
           >
             {backLabel}
           </button>
@@ -121,7 +121,7 @@ export function WizardFooter({
             type="button"
             onClick={onNext}
             disabled={!canNext || busy}
-            className="h-9 px-3.5 text-sm rounded-md bg-[--color-accent] text-white hover:bg-[--color-accent-hover] disabled:opacity-50 transition-colors"
+            className="h-9 px-3.5 text-sm rounded-md bg-[--color-accent] text-fg-on-accent hover:bg-[--color-accent-hover] disabled:opacity-50 transition-colors"
           >
             {busy ? "…" : nextLabel}
           </button>

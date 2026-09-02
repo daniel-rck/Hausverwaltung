@@ -151,15 +151,15 @@ export function DepositManager({ occupancy }: DepositManagerProps) {
     >
       {/* Header info */}
       <div className="mb-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div className="p-3 bg-zinc-50 dark:bg-zinc-700/30 rounded-lg">
+        <div className="p-3 bg-surface-sunken rounded-lg">
           <p className="text-xs text-fg-muted mb-0.5">Soll-Kaution</p>
           <p className="font-semibold font-mono text-fg">{formatEuro(occupancy.deposit)}</p>
         </div>
-        <div className="p-3 bg-zinc-50 dark:bg-zinc-700/30 rounded-lg">
+        <div className="p-3 bg-surface-sunken rounded-lg">
           <p className="text-xs text-fg-muted mb-0.5">Eingezahlt</p>
           <p className="font-semibold font-mono text-fg">{formatEuro(balance)}</p>
         </div>
-        <div className="p-3 bg-zinc-50 dark:bg-zinc-700/30 rounded-lg flex items-center justify-between">
+        <div className="p-3 bg-surface-sunken rounded-lg flex items-center justify-between">
           <div>
             <p className="text-xs text-fg-muted mb-0.5">Status</p>
             <p className="font-semibold font-mono text-fg">
@@ -197,7 +197,7 @@ export function DepositManager({ occupancy }: DepositManagerProps) {
                   type="date"
                   value={form.date}
                   onChange={(e) => setForm({ ...form, date: e.target.value })}
-                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm bg-surface dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm bg-surface text-fg focus:outline-none focus:ring-2 focus:ring-accent-500"
                 />
               </label>
             </div>
@@ -207,7 +207,7 @@ export function DepositManager({ occupancy }: DepositManagerProps) {
                 <select
                   value={form.type}
                   onChange={(e) => setForm({ ...form, type: e.target.value as DepositEventType })}
-                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm bg-surface dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm bg-surface text-fg focus:outline-none focus:ring-2 focus:ring-accent-500"
                 >
                   <option value="payment">Einzahlung</option>
                   <option value="interest">Verzinsung</option>
@@ -230,7 +230,7 @@ export function DepositManager({ occupancy }: DepositManagerProps) {
                   type="text"
                   value={form.description}
                   onChange={(e) => setForm({ ...form, description: e.target.value })}
-                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm bg-surface dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm bg-surface text-fg focus:outline-none focus:ring-2 focus:ring-accent-500"
                 />
               </label>
             </div>
@@ -239,7 +239,7 @@ export function DepositManager({ occupancy }: DepositManagerProps) {
             <button
               type="button"
               onClick={handleSave}
-              className="px-4 py-1.5 text-sm bg-zinc-800 dark:bg-zinc-600 text-white rounded-lg hover:bg-zinc-900 dark:hover:bg-zinc-500 transition-colors"
+              className="px-4 py-1.5 text-sm bg-fg text-surface rounded-lg hover:opacity-90 transition-colors"
             >
               Speichern
             </button>

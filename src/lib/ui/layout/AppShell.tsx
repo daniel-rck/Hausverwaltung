@@ -19,13 +19,13 @@ export function AppShell({ children }: { children: ReactNode }) {
   useKeyboardShortcuts(showHelp);
 
   return (
-    <div className="min-h-screen flex flex-col bg-zinc-50 dark:bg-zinc-950">
+    <div className="min-h-screen flex flex-col bg-surface-muted">
       <a href="#main" className="skip-link">
         Zum Inhalt springen
       </a>
 
       {/* Header */}
-      <header className="sticky top-0 z-30 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border-b border-border px-3 sm:px-4 no-print">
+      <header className="sticky top-0 z-30 bg-surface/95 backdrop-blur-md border-b border-border px-3 sm:px-4 no-print">
         <div className="h-14 flex items-center justify-between gap-2">
           <Link
             to="/"

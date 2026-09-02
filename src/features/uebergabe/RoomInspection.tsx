@@ -100,7 +100,7 @@ export function RoomInspection({ rooms, onChange }: RoomInspectionProps) {
                         [aspect.key]: e.target.value as Rating,
                       })
                     }
-                    className={`w-full border rounded-lg px-2 py-1.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500 ${ratingColor(room[aspect.key])}`}
+                    className={`w-full border rounded-lg px-2 py-1.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-accent-500 ${ratingColor(room[aspect.key])}`}
                   >
                     {RATING_OPTIONS.map((opt) => (
                       <option key={opt.value} value={opt.value}>
@@ -121,7 +121,7 @@ export function RoomInspection({ rooms, onChange }: RoomInspectionProps) {
                 value={room.notes ?? ""}
                 onChange={(e) => updateRoom(index, { notes: e.target.value })}
                 placeholder="z.B. Kratzer an der Tür"
-                className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+                className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
               />
             </label>
           </div>
@@ -140,13 +140,13 @@ export function RoomInspection({ rooms, onChange }: RoomInspectionProps) {
             }
           }}
           placeholder="Weiteren Raum hinzufügen..."
-          className="flex-1 border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+          className="flex-1 border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
         />
         <button
           type="button"
           onClick={addRoom}
           disabled={!newRoomName.trim()}
-          className="px-4 py-1.5 text-sm bg-zinc-800 text-white rounded-lg hover:bg-zinc-900 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          className="px-4 py-1.5 text-sm bg-fg text-surface rounded-lg hover:opacity-90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
           + Raum
         </button>

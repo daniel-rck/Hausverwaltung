@@ -211,7 +211,7 @@ export function RentBenchmark({ propertyId, units, occupancies }: RentBenchmarkP
                 value={settings.source}
                 onChange={(e) => saveSettings({ ...settings, source: e.target.value })}
                 placeholder="z.B. Mietspiegel 2025 Stadt XY"
-                className="w-full border border-border rounded-lg px-3 py-1.5 text-sm bg-surface dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+                className="w-full border border-border rounded-lg px-3 py-1.5 text-sm bg-surface text-fg focus:outline-none focus:ring-2 focus:ring-accent-500"
               />
             </label>
           </div>
@@ -222,7 +222,7 @@ export function RentBenchmark({ propertyId, units, occupancies }: RentBenchmarkP
                 type="month"
                 value={settings.validUntil}
                 onChange={(e) => saveSettings({ ...settings, validUntil: e.target.value })}
-                className="w-full border border-border rounded-lg px-3 py-1.5 text-sm bg-surface dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+                className="w-full border border-border rounded-lg px-3 py-1.5 text-sm bg-surface text-fg focus:outline-none focus:ring-2 focus:ring-accent-500"
               />
             </label>
           </div>
@@ -258,7 +258,7 @@ export function RentBenchmark({ propertyId, units, occupancies }: RentBenchmarkP
           )}
 
           {/* Legal note */}
-          <div className="mt-4 p-3 bg-zinc-50 dark:bg-zinc-700/30 rounded-lg">
+          <div className="mt-4 p-3 bg-surface-sunken rounded-lg">
             <p className="text-xs text-fg-muted">
               Beachten Sie die Kappungsgrenze von 20% innerhalb von 3 Jahren (§ 558 Abs. 3 BGB).
             </p>

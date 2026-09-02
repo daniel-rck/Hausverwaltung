@@ -138,7 +138,7 @@ export function FinancingInput({ propertyId }: FinancingInputProps) {
           type="button"
           onClick={handleSave}
           disabled={!dirty}
-          className="px-4 py-1.5 text-sm bg-zinc-800 text-white rounded-lg hover:bg-zinc-900 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          className="px-4 py-1.5 text-sm bg-fg text-surface rounded-lg hover:opacity-90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
           Speichern
         </button>

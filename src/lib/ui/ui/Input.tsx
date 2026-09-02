@@ -13,7 +13,7 @@ export const inputBaseClasses =
   "focus:outline-none focus-visible:ring-2 focus-visible:ring-[--color-accent]/40 focus-visible:border-[--color-accent] " +
   "disabled:opacity-60 disabled:cursor-not-allowed transition-colors";
 
-export const inputBorderClasses = "border-zinc-300 dark:border-zinc-700";
+export const inputBorderClasses = "border-border";
 export const inputInvalidClasses =
   "border-red-500 dark:border-red-500 focus-visible:ring-red-400/40 focus-visible:border-red-500";
 

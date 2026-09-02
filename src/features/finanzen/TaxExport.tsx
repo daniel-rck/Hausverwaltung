@@ -205,7 +205,7 @@ export function TaxExport({ year }: TaxExportProps) {
             <td className="py-3 px-3 text-right font-mono font-semibold text-fg">
               {formatEuro(grandTotalUtilities)}
             </td>
-            <td className="py-3 px-3 text-right font-mono font-bold text-zinc-900">
+            <td className="py-3 px-3 text-right font-mono font-bold text-fg">
               {formatEuro(grandTotal)}
             </td>
           </tr>
@@ -331,7 +331,7 @@ export function TaxExport({ year }: TaxExportProps) {
             <button
               type="button"
               onClick={print}
-              className="px-3 py-1.5 text-xs bg-zinc-800 text-white rounded-lg hover:bg-zinc-900 transition-colors"
+              className="px-3 py-1.5 text-xs bg-fg text-surface rounded-lg hover:opacity-90 transition-colors"
             >
               Drucken
             </button>

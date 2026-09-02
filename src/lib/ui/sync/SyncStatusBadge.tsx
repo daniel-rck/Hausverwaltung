@@ -21,7 +21,7 @@ export function SyncStatusBadge() {
       : state.status === "syncing" || state.status === "connecting"
         ? "bg-amber-400 animate-pulse"
         : state.status === "offline"
-          ? "bg-zinc-400"
+          ? "bg-fg-subtle"
           : "bg-red-500";
 
   const label =

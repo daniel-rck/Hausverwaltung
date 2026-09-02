@@ -250,7 +250,7 @@ export function MeterList() {
             <select
               value={form.meterTypeId}
               onChange={(e) => setForm({ ...form, meterTypeId: e.target.value })}
-              className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+              className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
             >
               <option value="">– Typ wählen –</option>
               {meterTypes.map((mt) => (
@@ -269,7 +269,7 @@ export function MeterList() {
               value={form.serialNumber}
               onChange={(e) => setForm({ ...form, serialNumber: e.target.value })}
               placeholder="z.B. WZ-2024-001"
-              className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+              className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
             />
           </label>
         </div>
@@ -279,7 +279,7 @@ export function MeterList() {
             <select
               value={form.unitId}
               onChange={(e) => setForm({ ...form, unitId: e.target.value })}
-              className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+              className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
             >
               <option value="">Hauptzähler (kein Wohnungsbezug)</option>
               {units.map((u) => (
@@ -297,7 +297,7 @@ export function MeterList() {
               type="date"
               value={form.installDate}
               onChange={(e) => setForm({ ...form, installDate: e.target.value })}
-              className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+              className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
             />
           </label>
         </div>
@@ -308,7 +308,7 @@ export function MeterList() {
               type="date"
               value={form.calibrationDue}
               onChange={(e) => setForm({ ...form, calibrationDue: e.target.value })}
-              className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+              className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
             />
           </label>
         </div>
@@ -320,7 +320,7 @@ export function MeterList() {
               value={form.notes}
               onChange={(e) => setForm({ ...form, notes: e.target.value })}
               placeholder="Optionale Bemerkungen"
-              className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+              className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
             />
           </label>
         </div>
@@ -330,7 +330,7 @@ export function MeterList() {
           type="button"
           onClick={handleSave}
           disabled={!form.meterTypeId || !form.serialNumber.trim()}
-          className="px-4 py-1.5 text-sm bg-zinc-800 text-white rounded-lg hover:bg-zinc-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-4 py-1.5 text-sm bg-fg text-surface rounded-lg hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Speichern
         </button>

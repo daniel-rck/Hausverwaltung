@@ -150,7 +150,7 @@ export function SupplierInput({ year, type }: SupplierInputProps) {
               value={form.supplier}
               onChange={(e) => setForm((f) => ({ ...f, supplier: e.target.value }))}
               placeholder="z.B. Stadtwerke"
-              className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+              className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
             />
           </label>
         </div>
@@ -173,7 +173,7 @@ export function SupplierInput({ year, type }: SupplierInputProps) {
             <select
               value={form.unit}
               onChange={(e) => setForm((f) => ({ ...f, unit: e.target.value }))}
-              className="mt-1 border border-border rounded-lg px-2 py-1 text-xs bg-surface focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+              className="mt-1 border border-border rounded-lg px-2 py-1 text-xs bg-surface focus:outline-none focus:ring-2 focus:ring-accent-500"
             >
               {config.units.map((u) => (
                 <option key={u} value={u}>
@@ -192,7 +192,7 @@ export function SupplierInput({ year, type }: SupplierInputProps) {
               type="date"
               value={form.billingFrom}
               onChange={(e) => setForm((f) => ({ ...f, billingFrom: e.target.value }))}
-              className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+              className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
             />
           </label>
         </div>
@@ -205,7 +205,7 @@ export function SupplierInput({ year, type }: SupplierInputProps) {
               type="date"
               value={form.billingTo}
               onChange={(e) => setForm((f) => ({ ...f, billingTo: e.target.value }))}
-              className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+              className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
             />
           </label>
         </div>
@@ -217,7 +217,7 @@ export function SupplierInput({ year, type }: SupplierInputProps) {
               value={form.notes}
               onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
               placeholder="optional"
-              className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+              className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
             />
           </label>
         </div>
@@ -227,7 +227,7 @@ export function SupplierInput({ year, type }: SupplierInputProps) {
           type="button"
           onClick={handleSave}
           disabled={!isValid || saving}
-          className="px-4 py-2 text-sm bg-zinc-800 text-white rounded-lg hover:bg-zinc-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-4 py-2 text-sm bg-fg text-surface rounded-lg hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {saving ? "Speichern..." : "Rechnung speichern"}
         </button>
