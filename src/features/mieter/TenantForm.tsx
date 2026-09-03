@@ -249,7 +249,7 @@ export function TenantForm({ unit, onBack }: TenantFormProps) {
                     type="text"
                     value={tenantForm.name}
                     onChange={(e) => setTenantForm({ ...tenantForm, name: e.target.value })}
-                    className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+                    className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
                   />
                 </label>
               </div>
@@ -260,7 +260,7 @@ export function TenantForm({ unit, onBack }: TenantFormProps) {
                     type="email"
                     value={tenantForm.email}
                     onChange={(e) => setTenantForm({ ...tenantForm, email: e.target.value })}
-                    className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+                    className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
                   />
                 </label>
               </div>
@@ -271,7 +271,7 @@ export function TenantForm({ unit, onBack }: TenantFormProps) {
                     type="tel"
                     value={tenantForm.phone}
                     onChange={(e) => setTenantForm({ ...tenantForm, phone: e.target.value })}
-                    className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+                    className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
                   />
                 </label>
               </div>
@@ -282,7 +282,7 @@ export function TenantForm({ unit, onBack }: TenantFormProps) {
                     type="text"
                     value={tenantForm.notes}
                     onChange={(e) => setTenantForm({ ...tenantForm, notes: e.target.value })}
-                    className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+                    className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
                   />
                 </label>
               </div>
@@ -291,7 +291,7 @@ export function TenantForm({ unit, onBack }: TenantFormProps) {
               <button
                 type="button"
                 onClick={handleSaveTenant}
-                className="px-4 py-1.5 text-sm bg-zinc-800 text-white rounded-lg hover:bg-zinc-900 transition-colors"
+                className="px-4 py-1.5 text-sm bg-fg text-surface rounded-lg hover:opacity-90 transition-colors"
               >
                 Speichern
               </button>
@@ -307,7 +307,7 @@ export function TenantForm({ unit, onBack }: TenantFormProps) {
         )}
 
         {tenants && tenants.length > 0 ? (
-          <ul className="divide-y divide-zinc-100">
+          <ul className="divide-y divide-border">
             {tenants.map((t) => (
               <li key={t.id} className="py-2 flex items-center justify-between">
                 <div>
@@ -322,7 +322,7 @@ export function TenantForm({ unit, onBack }: TenantFormProps) {
                     setOccForm((f) => ({ ...f, tenantId: String(t.id!) }));
                     setShowOccForm(true);
                   }}
-                  className="text-xs px-2 py-1 bg-surface-sunken text-fg-muted rounded hover:bg-zinc-200 dark:hover:bg-zinc-600 transition-colors"
+                  className="text-xs px-2 py-1 bg-surface-sunken text-fg-muted rounded hover:bg-border transition-colors"
                 >
                   Belegung anlegen
                 </button>
@@ -344,7 +344,7 @@ export function TenantForm({ unit, onBack }: TenantFormProps) {
                 <select
                   value={occForm.tenantId}
                   onChange={(e) => setOccForm({ ...occForm, tenantId: e.target.value })}
-                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
                 >
                   <option value="">Bitte wählen</option>
                   {tenants?.map((t) => (
@@ -363,7 +363,7 @@ export function TenantForm({ unit, onBack }: TenantFormProps) {
                   min="1"
                   value={occForm.persons}
                   onChange={(e) => setOccForm({ ...occForm, persons: e.target.value })}
-                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
                 />
               </label>
             </div>
@@ -376,7 +376,7 @@ export function TenantForm({ unit, onBack }: TenantFormProps) {
                   type="month"
                   value={occForm.from}
                   onChange={(e) => setOccForm({ ...occForm, from: e.target.value })}
-                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
                 />
               </label>
             </div>
@@ -389,7 +389,7 @@ export function TenantForm({ unit, onBack }: TenantFormProps) {
                   type="month"
                   value={occForm.to}
                   onChange={(e) => setOccForm({ ...occForm, to: e.target.value })}
-                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
                 />
               </label>
             </div>
@@ -402,7 +402,7 @@ export function TenantForm({ unit, onBack }: TenantFormProps) {
                   value={occForm.rentCold}
                   onChange={(e) => setOccForm({ ...occForm, rentCold: e.target.value })}
                   placeholder="z.B. 450,00"
-                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
                 />
               </label>
             </div>
@@ -417,7 +417,7 @@ export function TenantForm({ unit, onBack }: TenantFormProps) {
                   value={occForm.rentUtilities}
                   onChange={(e) => setOccForm({ ...occForm, rentUtilities: e.target.value })}
                   placeholder="z.B. 150,00"
-                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
                 />
               </label>
             </div>
@@ -430,7 +430,7 @@ export function TenantForm({ unit, onBack }: TenantFormProps) {
                   value={occForm.deposit}
                   onChange={(e) => setOccForm({ ...occForm, deposit: e.target.value })}
                   placeholder="z.B. 1350,00"
-                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
                 />
               </label>
             </div>
@@ -450,7 +450,7 @@ export function TenantForm({ unit, onBack }: TenantFormProps) {
             <button
               type="button"
               onClick={handleSaveOccupancy}
-              className="px-4 py-1.5 text-sm bg-zinc-800 text-white rounded-lg hover:bg-zinc-900 transition-colors"
+              className="px-4 py-1.5 text-sm bg-fg text-surface rounded-lg hover:opacity-90 transition-colors"
             >
               Belegung speichern
             </button>

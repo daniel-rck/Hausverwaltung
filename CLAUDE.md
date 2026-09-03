@@ -6,10 +6,12 @@ Cloudflare Worker (R2 + KV).
 
 ## Foundation: web-base
 
-Diese App wird auf die gemeinsame Foundation **[`daniel-rck/web-base`](https://github.com/daniel-rck/web-base)**
-migriert. Die dortigen `docs/specs/` sind die maßgebliche Quelle für Konventionen,
-Tooling und Layout-System. Bei ungeklärten Entscheidungen die minimale, zu den
-bestehenden Mustern passende Variante wählen.
+Diese App läuft auf der gemeinsamen Foundation **[`daniel-rck/web-base`](https://github.com/daniel-rck/web-base)**.
+Die dortigen `docs/specs/` sind die maßgebliche Quelle für Konventionen, Tooling
+und Layout-System. Bei ungeklärten Entscheidungen die minimale, zu den
+bestehenden Mustern passende Variante wählen. Scaffolding & Updates über die CLI
+(`bunx github:daniel-rck/web-base …`), nicht von Hand kopieren — `.github/workflows/ci.yml`
+fährt den Drift-Guard `web-base-check`, wer eine *owned* Datei anfasst, bricht die CI.
 
 ## Quality Gates
 
@@ -18,21 +20,28 @@ Vor jedem Commit grün halten:
 ```bash
 bun run lint        # Biome (check)
 bun run format      # Biome (format --write)
-bun run typecheck   # tsc (App + Worker)
-bun run test:run    # Vitest
+bun run typecheck   # tsc -b (App + Node + SW + Worker)
+bun run test        # Vitest (run, kein Watch)
 bun run build       # SPA + Worker-Dry-Run via CI
 ```
 
 ## Konventionen (gemäß web-base)
 
 - **Bun** als Runtime & Package-Manager (kein npm/yarn-Lockfile).
-- **Biome** für Lint + Format (ersetzt ESLint/Prettier) — eine Config, `biome.json`.
+- **Biome** für Lint + Format (ersetzt ESLint/Prettier). `biome.base.json` kommt
+  aus web-base und wird bei `update` überschrieben; app-eigene Regeln gehören in
+  `biome.json` (`extends`). CSS wird mitgelintet (Tailwind-Direktiven parsen).
 - **TypeScript strict**; `verbatimModuleSyntax` (→ `import type`), `any` vermeiden
   (lieber `unknown`), Non-Null-Assertions nur mit Begründung.
 - `type`-Deklarationen statt `interface`, außer Declaration-Merging nötig.
 - **Lokale Daten zuerst** via IndexedDB; `localStorage` nur für Settings.
 - **DSGVO by design**: clientseitige AES-GCM-Verschlüsselung für Sync.
 - **Deutsche UI, englischer Quellcode** (Bezeichner/Kommentare englisch).
+- **Design-Tokens statt Roh-Paletten**: `bg-surface`, `text-fg-muted`,
+  `border-border`, `text-danger` … aus `src/lib/ui/theme.css`. Neue
+  `zinc-*`-Klassen im Chrome sind ein Review-Fehler.
+- **Keine externen Asset-Hosts.** Schriften liegen als `@fontsource`-Pakete im
+  Bundle; eine PWA, deren Typografie am CDN hängt, ist offline kaputt.
 
 ## Architektur (aktuell)
 
@@ -66,5 +75,10 @@ verschlüsselt; Konflikte werden via R2-ETag (`If-Match`) aufgelöst.
 
 ## Offene Konventions-Lücken
 
-- Keine — `noUncheckedIndexedAccess` ist seit dem Deep-Fixup in allen tsconfigs
-  (App, Worker, SW) aktiv.
+- `noUncheckedIndexedAccess` ist in allen tsconfigs (App, Node, SW, Worker) aktiv.
+- Rund 190 `noNonNullAssertion`-Warnungen (Kanon: `warn`) — Altbestand, beim
+  Anfassen einer Datei jeweils mitaufräumen.
+- `compatibility_date` in `wrangler.toml` und `nodejs_compat` sind bewusst
+  **nicht** flottenweit angeglichen worden: beide ändern Workers-Runtime-Semantik
+  und die App deployt bei Merge auf `main` automatisch. Einzeln bumpen, mit
+  Smoke-Test.

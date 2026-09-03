@@ -161,7 +161,7 @@ export function UnitList({ onSelectUnit }: UnitListProps) {
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                   placeholder="z.B. EG, OG, KG"
-                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
                 />
               </label>
             </div>
@@ -174,7 +174,7 @@ export function UnitList({ onSelectUnit }: UnitListProps) {
                   value={form.area}
                   onChange={(e) => setForm({ ...form, area: e.target.value })}
                   placeholder="z.B. 65,5"
-                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
                 />
               </label>
             </div>
@@ -186,7 +186,7 @@ export function UnitList({ onSelectUnit }: UnitListProps) {
                   value={form.floor}
                   onChange={(e) => setForm({ ...form, floor: e.target.value })}
                   placeholder="z.B. Erdgeschoss"
-                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
                 />
               </label>
             </div>
@@ -195,7 +195,7 @@ export function UnitList({ onSelectUnit }: UnitListProps) {
             <button
               type="button"
               onClick={handleSave}
-              className="px-4 py-1.5 text-sm bg-zinc-800 text-white rounded-lg hover:bg-zinc-900 transition-colors"
+              className="px-4 py-1.5 text-sm bg-fg text-surface rounded-lg hover:opacity-90 transition-colors"
             >
               Speichern
             </button>

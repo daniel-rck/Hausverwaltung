@@ -1,3 +1,17 @@
+/* Selbst gehostete Schriften — eine PWA darf für ihre Typografie nicht am
+ * Google-Fonts-CDN hängen: offline lädt sie sonst gar nicht, und jeder
+ * Seitenaufruf meldet die IP des Nutzers an einen Dritten. Nur das
+ * latin-Subset — die UI ist deutsch, und alle Subsets zu precachen
+ * verdreifacht den Service-Worker-Cache. */
+@import "@fontsource/ibm-plex-sans/latin-300.css";
+@import "@fontsource/ibm-plex-sans/latin-400.css";
+@import "@fontsource/ibm-plex-sans/latin-500.css";
+@import "@fontsource/ibm-plex-sans/latin-600.css";
+@import "@fontsource/ibm-plex-sans/latin-700.css";
+@import "@fontsource/ibm-plex-mono/latin-400.css";
+@import "@fontsource/ibm-plex-mono/latin-500.css";
+@import "@fontsource/ibm-plex-mono/latin-600.css";
+
 /* web-base Design-Tokens (Surfaces, Akzent via --accent-h, data-theme-Variant). */
 @import "./lib/ui/theme.css";
 

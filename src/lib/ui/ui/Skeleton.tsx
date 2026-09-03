@@ -6,7 +6,7 @@ interface SkeletonProps {
 }
 
 export function Skeleton({ variant = "rect", width, height, className = "" }: SkeletonProps) {
-  const base = "bg-zinc-200 dark:bg-zinc-700 animate-pulse";
+  const base = "bg-surface-sunken animate-pulse";
   const shape =
     variant === "circle" ? "rounded-full" : variant === "text" ? "rounded h-4" : "rounded-lg";
   const style: React.CSSProperties = {};

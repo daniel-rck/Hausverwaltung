@@ -347,7 +347,7 @@ export function UebergabePage() {
                 <button
                   type="button"
                   onClick={() => setPreviewId(p.id!)}
-                  className="flex-1 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 rounded-lg"
+                  className="flex-1 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500 rounded-lg"
                 >
                   <p className="text-sm font-medium text-fg">
                     {p.type === "move-in" ? "Einzug" : "Auszug"} – {p.unitName}

@@ -59,7 +59,7 @@ const groupOrder = ["Übersicht", "Stammdaten", "Verbrauch", "Buchhaltung", "Vor
 
 function activeBar(accent: ModulKey | undefined): string {
   const a = moduleAccent(accent);
-  return a?.bar ?? "bg-zinc-900 dark:bg-zinc-100";
+  return a?.bar ?? "bg-fg";
 }
 
 export function SidebarNav() {
@@ -71,7 +71,7 @@ export function SidebarNav() {
   return (
     <nav
       aria-label="Hauptnavigation"
-      className="hidden md:flex flex-col gap-4 w-52 shrink-0 p-3 no-print border-r border-zinc-200/60 dark:border-zinc-800/60"
+      className="hidden md:flex flex-col gap-4 w-52 shrink-0 p-3 no-print border-r border-border/60"
     >
       {groups.map((group) => (
         <div key={group.name} className="space-y-0.5">
@@ -89,7 +89,7 @@ export function SidebarNav() {
                   `relative flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-[13px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--color-accent]/40 ${
                     isActive
                       ? "bg-surface-sunken/80 text-fg font-medium"
-                      : "text-fg-muted hover:bg-zinc-100/60 dark:hover:bg-zinc-800/40 hover:text-fg"
+                      : "text-fg-muted hover:bg-surface-sunken/60 hover:text-fg"
                   }`
                 }
               >
@@ -131,7 +131,7 @@ export function BottomNav() {
     <>
       <nav
         aria-label="Hauptnavigation Mobile"
-        className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border-t border-border z-40 no-print"
+        className="md:hidden fixed bottom-0 left-0 right-0 bg-surface/95 backdrop-blur-md border-t border-border z-40 no-print"
         style={{ paddingBottom: "env(safe-area-inset-bottom, 0)" }}
       >
         <div className="flex justify-around py-1">

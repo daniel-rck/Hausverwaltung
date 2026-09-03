@@ -302,7 +302,7 @@ export function DocumentStore({ entityType, entityId, title = "Dokumente" }: Doc
               <button
                 type="button"
                 onClick={() => setPreviewDoc(null)}
-                className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 text-lg leading-none"
+                className="text-fg-subtle hover:text-fg text-lg leading-none"
               >
                 &times;
               </button>

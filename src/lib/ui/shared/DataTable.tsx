@@ -114,7 +114,7 @@ export function DataTable<T>({
     a === "right" ? "text-right" : a === "center" ? "text-center" : "text-left";
 
   const toolbarCls = stickyToolbar
-    ? "sticky top-14 z-10 -mx-3 md:-mx-5 px-3 md:px-5 py-2 bg-zinc-50/95 dark:bg-zinc-900/95 backdrop-blur border-b border-zinc-200/60 dark:border-zinc-800/60"
+    ? "sticky top-14 z-10 -mx-3 md:-mx-5 px-3 md:px-5 py-2 bg-surface-muted/95 backdrop-blur border-b border-border/60"
     : "";
 
   return (
@@ -127,7 +127,7 @@ export function DataTable<T>({
                 <Search
                   size={14}
                   strokeWidth={1.75}
-                  className="absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none"
+                  className="absolute left-2.5 top-1/2 -translate-y-1/2 text-fg-subtle pointer-events-none"
                   aria-hidden="true"
                 />
                 <label className="sr-only" htmlFor={searchId}>
@@ -142,7 +142,7 @@ export function DataTable<T>({
                     setPage(0);
                   }}
                   placeholder={searchPlaceholder}
-                  className="h-8 w-full rounded-md border border-zinc-300 dark:border-zinc-700 bg-surface text-sm pl-8 pr-3 placeholder:text-fg-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--color-accent]/40 focus-visible:border-[--color-accent]"
+                  className="h-8 w-full rounded-md border border-border bg-surface text-sm pl-8 pr-3 placeholder:text-fg-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--color-accent]/40 focus-visible:border-[--color-accent]"
                 />
               </div>
             ) : (
@@ -206,7 +206,7 @@ export function DataTable<T>({
                     key={keyFn(row)}
                     onClick={() => onRowClick?.(row)}
                     className={`border-b border-border/60 ${
-                      zebra && idx % 2 === 1 ? "bg-zinc-50/50 dark:bg-zinc-900/30" : ""
+                      zebra && idx % 2 === 1 ? "bg-surface-muted/50" : ""
                     } ${onRowClick ? "cursor-pointer hover:bg-surface-muted/40" : ""}`}
                   >
                     {columns.map((col) => (
@@ -241,7 +241,7 @@ export function DataTable<T>({
                     tabIndex: 0,
                   })}
                   className={`rounded-lg border border-border bg-surface p-2.5 ${
-                    onRowClick ? "cursor-pointer active:bg-zinc-50 dark:active:bg-zinc-800/60" : ""
+                    onRowClick ? "cursor-pointer active:bg-surface-sunken" : ""
                   }`}
                 >
                   {primaryCol && (
@@ -288,7 +288,7 @@ export function DataTable<T>({
                   type="button"
                   onClick={() => setPage(Math.max(0, safePage - 1))}
                   disabled={safePage === 0}
-                  className="h-7 px-2 inline-flex items-center gap-1 rounded-md border border-zinc-300 dark:border-zinc-700 hover:bg-surface-muted disabled:opacity-50"
+                  className="h-7 px-2 inline-flex items-center gap-1 rounded-md border border-border hover:bg-surface-muted disabled:opacity-50"
                 >
                   <ChevronLeft size={12} strokeWidth={2} aria-hidden="true" />
                   Zurück
@@ -297,7 +297,7 @@ export function DataTable<T>({
                   type="button"
                   onClick={() => setPage(Math.min(totalPages - 1, safePage + 1))}
                   disabled={safePage >= totalPages - 1}
-                  className="h-7 px-2 inline-flex items-center gap-1 rounded-md border border-zinc-300 dark:border-zinc-700 hover:bg-surface-muted disabled:opacity-50"
+                  className="h-7 px-2 inline-flex items-center gap-1 rounded-md border border-border hover:bg-surface-muted disabled:opacity-50"
                 >
                   Weiter
                   <ChevronRight size={12} strokeWidth={2} aria-hidden="true" />

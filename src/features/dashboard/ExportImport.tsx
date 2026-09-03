@@ -95,7 +95,7 @@ export function ExportImport() {
           <button
             type="button"
             onClick={handleExport}
-            className="flex-1 px-4 py-2 text-sm bg-zinc-800 text-white rounded-lg hover:bg-zinc-900 transition-colors"
+            className="flex-1 px-4 py-2 text-sm bg-fg text-surface rounded-lg hover:opacity-90 transition-colors"
           >
             Export (JSON)
           </button>

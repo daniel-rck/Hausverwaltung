@@ -111,7 +111,7 @@ export function ImportPage() {
               <button
                 type="button"
                 onClick={handleImport}
-                className="px-4 py-2 text-sm bg-zinc-800 text-white rounded-lg hover:bg-zinc-900 transition-colors"
+                className="px-4 py-2 text-sm bg-fg text-surface rounded-lg hover:opacity-90 transition-colors"
               >
                 Jetzt importieren
               </button>

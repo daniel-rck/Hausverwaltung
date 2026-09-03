@@ -50,14 +50,14 @@ export function KeyHandover({ keys, onChange }: KeyHandoverProps) {
               value={key.type}
               onChange={(e) => updateKey(index, { type: e.target.value })}
               placeholder="Schlüsselart"
-              className="border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+              className="border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
             />
             <input
               type="number"
               min="0"
               value={key.count || ""}
               onChange={(e) => updateKey(index, { count: parseInt(e.target.value, 10) || 0 })}
-              className="border border-border rounded-lg px-3 py-1.5 text-sm text-center font-mono focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+              className="border border-border rounded-lg px-3 py-1.5 text-sm text-center font-mono focus:outline-none focus:ring-2 focus:ring-accent-500"
             />
             <button
               type="button"
@@ -74,7 +74,7 @@ export function KeyHandover({ keys, onChange }: KeyHandoverProps) {
         <button
           type="button"
           onClick={addKey}
-          className="text-sm text-fg-muted hover:text-zinc-800 dark:hover:text-zinc-100 px-3 py-1.5 border border-dashed border-border rounded-lg hover:bg-surface-muted transition-colors w-full"
+          className="text-sm text-fg-muted hover:text-fg px-3 py-1.5 border border-dashed border-border rounded-lg hover:bg-surface-muted transition-colors w-full"
         >
           + Weiteren Schlüssel hinzufügen
         </button>

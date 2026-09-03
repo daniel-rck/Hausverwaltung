@@ -31,7 +31,7 @@ export function KpiTile({ label, value, hint, accent, delta, loading = false }: 
       {a && <span aria-hidden="true" className={`absolute left-0 right-0 top-0 h-0.5 ${a.bar}`} />}
       <p className="text-[11px] uppercase tracking-wide text-fg-muted font-medium">{label}</p>
       {loading ? (
-        <div className="h-7 w-20 rounded bg-zinc-200 dark:bg-zinc-800 animate-pulse" />
+        <div className="h-7 w-20 rounded bg-surface-sunken animate-pulse" />
       ) : (
         <p className="text-2xl font-semibold font-tabular text-fg tracking-tight">{value}</p>
       )}

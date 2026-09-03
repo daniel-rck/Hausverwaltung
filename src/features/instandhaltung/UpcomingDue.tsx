@@ -175,7 +175,7 @@ export function UpcomingDue() {
         <>
           <div className="mb-3 flex gap-3 text-sm text-fg-muted">
             <span>{rows.filter((r) => r.status === "red").length} überfällig</span>
-            <span className="text-zinc-300">|</span>
+            <span className="text-fg-subtle">|</span>
             <span>{rows.filter((r) => r.status === "yellow").length} in den nächsten 30 Tagen</span>
           </div>
           <DataTable columns={columns} data={rows} keyFn={(r) => r.item.id!} />

@@ -17,10 +17,9 @@ const sizeClasses: Record<Size, string> = {
 };
 
 const variantClasses: Record<Variant, string> = {
-  ghost:
-    "bg-transparent text-fg-muted hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-800 dark:hover:text-zinc-100",
-  subtle: "bg-surface-sunken text-fg-muted hover:bg-zinc-200 dark:hover:bg-zinc-700",
-  solid: "bg-[--color-accent] text-white hover:bg-[--color-accent-hover]",
+  ghost: "bg-transparent text-fg-muted hover:bg-surface-sunken hover:text-fg",
+  subtle: "bg-surface-sunken text-fg-muted hover:bg-surface-sunken",
+  solid: "bg-[--color-accent] text-fg-on-accent hover:bg-[--color-accent-hover]",
 };
 
 export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(

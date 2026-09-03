@@ -17,7 +17,7 @@ interface BadgeProps {
 }
 
 const variantClasses: Record<BadgeVariant, string> = {
-  neutral: "bg-surface-sunken text-fg border border-zinc-200/60 dark:border-zinc-700/60",
+  neutral: "bg-surface-sunken text-fg border border-border/60",
   success:
     "bg-green-50 dark:bg-green-950/60 text-green-700 dark:text-green-300 border border-green-200/60 dark:border-green-900/60",
   warning:

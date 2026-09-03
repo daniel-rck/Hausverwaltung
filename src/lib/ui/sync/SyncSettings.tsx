@@ -172,7 +172,7 @@ export function SyncSettings() {
             value={otpInput}
             onChange={(e) => setOtpInput(e.target.value.replace(/\D/g, "").slice(0, 6))}
             placeholder="123456"
-            className="w-full px-4 py-3 text-center text-2xl font-mono tracking-widest border border-zinc-300 dark:border-zinc-700 rounded-md bg-surface text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--color-accent]/40 focus-visible:border-[--color-accent]"
+            className="w-full px-4 py-3 text-center text-2xl font-mono tracking-widest border border-border rounded-md bg-surface text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--color-accent]/40 focus-visible:border-[--color-accent]"
           />
           <div className="flex gap-2">
             <Button

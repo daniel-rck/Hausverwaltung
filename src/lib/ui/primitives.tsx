@@ -5,20 +5,96 @@ function cn(...parts: Array<string | false | null | undefined>): string {
 }
 
 // ── Card ──────────────────────────────────────────────────────────────
-export type CardProps = HTMLAttributes<HTMLDivElement>;
+export type CardProps = HTMLAttributes<HTMLDivElement> & {
+  /** Adds a subtle hover-lift for cards that act as a link or button target. */
+  interactive?: boolean;
+};
 
 export const Card = forwardRef<HTMLDivElement, CardProps>(function Card(
-  { className, children, ...rest },
+  { className, interactive, children, ...rest },
   ref,
 ) {
   return (
     <div
       ref={ref}
-      className={cn("rounded-lg border border-border bg-surface p-4 shadow-sm", className)}
+      className={cn(
+        "rounded-lg border border-border bg-surface p-4 shadow-sm",
+        interactive &&
+          "transition-[transform,box-shadow] duration-[var(--duration-base)] ease-[var(--ease-out-quart)] hover:-translate-y-0.5 hover:shadow-md",
+        className,
+      )}
       {...rest}
     >
       {children}
     </div>
+  );
+});
+
+// ── SectionCard ───────────────────────────────────────────────────────
+// A titled section, so a page of them reads as one cohesive set rather than a
+// flat stack. The heading is an <h2>: pages are expected to carry their own
+// <h1> via PageHeader.
+export type SectionCardProps = HTMLAttributes<HTMLElement> & {
+  title?: ReactNode;
+  /** Short right-aligned annotation next to the title (a unit, a count). */
+  hint?: ReactNode;
+  icon?: ReactNode;
+};
+
+export function SectionCard({ title, hint, icon, className, children, ...rest }: SectionCardProps) {
+  return (
+    <section
+      className={cn("rounded-lg border border-border bg-surface p-4 shadow-sm", className)}
+      {...rest}
+    >
+      {title ? (
+        <div className="mb-3 flex items-baseline justify-between gap-3">
+          <h2 className="flex items-center gap-2 text-sm font-semibold tracking-tight text-fg">
+            {icon ? (
+              <span className="text-accent-600" aria-hidden="true">
+                {icon}
+              </span>
+            ) : null}
+            {title}
+          </h2>
+          {hint ? <span className="text-xs text-fg-muted">{hint}</span> : null}
+        </div>
+      ) : null}
+      {children}
+    </section>
+  );
+}
+
+// ── Chip ──────────────────────────────────────────────────────────────
+// A selectable pill. `aria-pressed` rather than a role toggle, so a group of
+// chips reads as independent toggles to a screen reader. Labels wrap instead
+// of truncating — a clipped option is worse than a two-line one.
+export type ChipProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "type"> & {
+  active?: boolean;
+};
+
+export const Chip = forwardRef<HTMLButtonElement, ChipProps>(function Chip(
+  { className, active = false, children, ...rest },
+  ref,
+) {
+  return (
+    <button
+      ref={ref}
+      type="button"
+      aria-pressed={active}
+      className={cn(
+        "rounded-full px-4 py-2 text-sm font-medium whitespace-normal text-center",
+        "transition-[background-color,color,box-shadow,transform] duration-[var(--duration-fast)] ease-[var(--ease-out-quart)]",
+        "active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500 focus-visible:ring-offset-2 focus-visible:ring-offset-surface",
+        active
+          ? "bg-accent-600 text-fg-on-accent shadow-sm"
+          : "bg-surface-muted text-fg-muted hover:bg-surface-sunken hover:text-fg",
+        className,
+      )}
+      {...rest}
+    >
+      {children}
+    </button>
   );
 });
 

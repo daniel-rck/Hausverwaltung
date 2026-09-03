@@ -4,7 +4,6 @@ on:
   push:
     branches: [main]
   pull_request:
-    branches: [main]
 
 permissions:
   contents: read
@@ -21,3 +20,10 @@ jobs:
     uses: daniel-rck/web-base/.github/workflows/web-app-ci.yml@main
     with:
       bun-version: "1.3.11"
+
+  # Bricht den Build, wenn ein *owned* web-base-Baustein von der Basis
+  # abgewichen ist. Scaffold-Nähte (theme.css-Akzent, DB-Schema, Routen,
+  # Worker-Handler) bleiben unangetastet. Pin auf @main statt auf einen
+  # Version-Tag, bis v0.3.0 auf web-bases main getaggt ist; danach @v0.3.0.
+  web-base-check:
+    uses: daniel-rck/web-base/.github/workflows/web-base-check.yml@main

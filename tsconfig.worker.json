@@ -12,7 +12,10 @@
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,
     "isolatedModules": true,
-    "noEmit": true
+    "verbatimModuleSyntax": true,
+    "erasableSyntaxOnly": true,
+    "noEmit": true,
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.worker.tsbuildinfo"
   },
-  "include": ["**/*.ts", "**/*.d.ts"]
+  "include": ["worker/**/*.ts", "worker/**/*.d.ts"]
 }

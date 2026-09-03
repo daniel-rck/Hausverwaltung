@@ -34,15 +34,15 @@ const baseClasses =
 function variantClasses(variant: Variant): string {
   switch (variant) {
     case "primary":
-      return "bg-[--color-accent] text-white hover:bg-[--color-accent-hover]";
+      return "bg-[--color-accent] text-fg-on-accent hover:bg-[--color-accent-hover]";
     case "secondary":
-      return "bg-surface text-fg border border-zinc-300 dark:border-zinc-700 hover:bg-surface-muted/60";
+      return "bg-surface text-fg border border-border hover:bg-surface-muted/60";
     case "outline":
-      return "bg-transparent text-fg border border-zinc-300 dark:border-zinc-700 hover:bg-surface-muted";
+      return "bg-transparent text-fg border border-border hover:bg-surface-muted";
     case "ghost":
       return "bg-transparent text-fg-muted hover:bg-surface-sunken";
     case "danger":
-      return "bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-400/40";
+      return "bg-red-600 text-fg-on-accent hover:bg-red-700 focus-visible:ring-red-400/40";
     case "link":
       return "bg-transparent text-[--color-accent] dark:text-[--color-accent-dark] underline-offset-4 hover:underline px-0 h-auto";
   }

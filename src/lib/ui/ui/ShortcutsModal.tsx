@@ -37,7 +37,7 @@ const SHORTCUTS: { group: string; items: Shortcut[] }[] = [
 
 function Kbd({ children }: { children: string }) {
   return (
-    <kbd className="inline-flex items-center justify-center min-w-[1.5rem] h-6 px-1.5 rounded border border-zinc-300 dark:border-zinc-700 bg-surface-muted text-[11px] font-mono font-medium text-fg">
+    <kbd className="inline-flex items-center justify-center min-w-[1.5rem] h-6 px-1.5 rounded border border-border bg-surface-muted text-[11px] font-mono font-medium text-fg">
       {children}
     </kbd>
   );

@@ -2,10 +2,7 @@
 <html lang="de">
   <head>
     <meta charset="UTF-8" />
-    <script>
-      // Theme vor dem ersten Paint setzen (verhindert Flash). Spiegelt web-bases themeInitScript.
-      (() => {try{const t=localStorage.getItem("theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t);}catch{}})();
-    </script>
+    <script src="/theme-init.js"></script>
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
     <link rel="manifest" href="manifest.json" />
     <meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)" />
@@ -15,12 +12,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="description" content="Hausverwaltung — Mietobjekte einfach im Griff. Mieter, Nebenkosten, Zähler, Finanzen und mehr." />
     <meta name="color-scheme" content="light dark" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
     <title>Hausverwaltung</title>
   </head>
   <body>
