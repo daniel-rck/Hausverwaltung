@@ -3,6 +3,7 @@ import { db, useLiveQuery } from "../../lib/db";
 import type { FinancingData } from "../../lib/db/schema";
 import { Card } from "../../lib/ui/shared/Card";
 import { NumInput } from "../../lib/ui/shared/NumInput";
+import { Button, FormField, Input, Skeleton, useToast } from "../../lib/ui/ui";
 import { formatEuro } from "../../lib/utils/format";
 
 export type { FinancingData };
@@ -18,6 +19,8 @@ const defaultFinancing: FinancingData = {
   afaSatz: 2,
 };
 
+const FIELD_SKELETON_KEYS = ["kp", "ek", "kb", "zs", "tg", "rate", "nuk", "afa"] as const;
+
 interface FinancingInputProps {
   propertyId: number;
 }
@@ -25,7 +28,13 @@ interface FinancingInputProps {
 export function FinancingInput({ propertyId }: FinancingInputProps) {
   const settingKey = `financing_${propertyId}`;
 
-  const stored = useLiveQuery(() => db.settings.get(settingKey), [settingKey]);
+  // `null` = geladen, aber noch nicht gespeichert; `undefined` = lädt noch.
+  const stored = useLiveQuery(
+    async () => (await db.settings.get(settingKey)) ?? null,
+    [settingKey],
+  );
+  const toast = useToast();
+  const [saving, setSaving] = useState(false);
 
   const [data, setData] = useState<FinancingData>(defaultFinancing);
   const [dirty, setDirty] = useState(false);
@@ -62,85 +71,110 @@ export function FinancingInput({ propertyId }: FinancingInputProps) {
   }, []);
 
   const handleSave = useCallback(async () => {
-    await db.settings.put({ key: settingKey, value: data });
-    setDirty(false);
-  }, [settingKey, data]);
+    setSaving(true);
+    try {
+      await db.settings.put({ key: settingKey, value: data });
+      setDirty(false);
+      toast.success("Finanzierungsdaten gespeichert.");
+    } catch (err) {
+      toast.error("Speichern fehlgeschlagen.");
+      console.error(err);
+    } finally {
+      setSaving(false);
+    }
+  }, [settingKey, data, toast]);
+
+  if (stored === undefined) {
+    return (
+      <Card title="Objektdaten & Finanzierung">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {FIELD_SKELETON_KEYS.map((k) => (
+            <Skeleton key={k} height="3.5rem" />
+          ))}
+        </div>
+      </Card>
+    );
+  }
 
   return (
     <Card title="Objektdaten & Finanzierung">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <NumInput
-          label="Kaufpreis"
-          value={data.kaufpreis}
-          onChange={(v) => update("kaufpreis", v)}
-          suffix="EUR"
-          min={0}
-        />
-        <NumInput
-          label="Eigenkapital"
-          value={data.eigenkapital}
-          onChange={(v) => update("eigenkapital", v)}
-          suffix="EUR"
-          min={0}
-        />
-        <NumInput
-          label="Kreditbetrag"
-          value={data.kreditbetrag}
-          onChange={(v) => update("kreditbetrag", v)}
-          suffix="EUR"
-          min={0}
-        />
-        <NumInput
-          label="Zinssatz"
-          value={data.zinssatz}
-          onChange={(v) => update("zinssatz", v)}
-          suffix="%"
-          min={0}
-          max={100}
-        />
-        <NumInput
-          label="Tilgung"
-          value={data.tilgung}
-          onChange={(v) => update("tilgung", v)}
-          suffix="%"
-          min={0}
-          max={100}
-        />
-        <div>
-          <div className="block text-xs font-medium text-fg-muted mb-1">Jährliche Kreditrate</div>
-          <div className="w-full border border-border bg-surface-muted rounded-lg px-3 py-1.5 text-sm text-right font-mono text-fg-muted">
-            {formatEuro(data.jaehrlicheKreditrate)}
-          </div>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          void handleSave();
+        }}
+      >
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <NumInput
+            label="Kaufpreis"
+            value={data.kaufpreis}
+            onChange={(v) => update("kaufpreis", v)}
+            suffix="EUR"
+            min={0}
+          />
+          <NumInput
+            label="Eigenkapital"
+            value={data.eigenkapital}
+            onChange={(v) => update("eigenkapital", v)}
+            suffix="EUR"
+            min={0}
+          />
+          <NumInput
+            label="Kreditbetrag"
+            value={data.kreditbetrag}
+            onChange={(v) => update("kreditbetrag", v)}
+            suffix="EUR"
+            min={0}
+          />
+          <NumInput
+            label="Zinssatz"
+            value={data.zinssatz}
+            onChange={(v) => update("zinssatz", v)}
+            suffix="%"
+            min={0}
+            max={100}
+          />
+          <NumInput
+            label="Tilgung"
+            value={data.tilgung}
+            onChange={(v) => update("tilgung", v)}
+            suffix="%"
+            min={0}
+            max={100}
+          />
+          <FormField label="Jährliche Kreditrate" hint="Automatisch berechnet">
+            <Input
+              readOnly
+              tabIndex={-1}
+              value={formatEuro(data.jaehrlicheKreditrate)}
+              className="text-right font-mono bg-surface-muted text-fg-muted"
+            />
+          </FormField>
+          <NumInput
+            label="Nicht-umlagefähige Kosten / Jahr"
+            value={data.nichtUmlagefaehigeKosten}
+            onChange={(v) => update("nichtUmlagefaehigeKosten", v)}
+            suffix="EUR"
+            min={0}
+            className="sm:col-span-2 lg:col-span-1"
+          />
+          <NumInput
+            label="AfA-Satz (Anlage V, Zeile 33)"
+            value={data.afaSatz}
+            onChange={(v) => update("afaSatz", v)}
+            suffix="%"
+            min={0}
+            max={5}
+          />
         </div>
-        <NumInput
-          label="Nicht-umlagefähige Kosten / Jahr"
-          value={data.nichtUmlagefaehigeKosten}
-          onChange={(v) => update("nichtUmlagefaehigeKosten", v)}
-          suffix="EUR"
-          min={0}
-          className="sm:col-span-2 lg:col-span-1"
-        />
-        <NumInput
-          label="AfA-Satz (Anlage V, Zeile 33)"
-          value={data.afaSatz}
-          onChange={(v) => update("afaSatz", v)}
-          suffix="%"
-          min={0}
-          max={5}
-        />
-      </div>
 
-      <div className="mt-4 flex items-center gap-3">
-        <button
-          type="button"
-          onClick={handleSave}
-          disabled={!dirty}
-          className="px-4 py-1.5 text-sm bg-fg text-surface rounded-lg hover:opacity-90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          Speichern
-        </button>
-        {dirty && <span className="text-xs text-amber-600">Ungespeicherte Änderungen</span>}
-      </div>
+        <div className="mt-4 flex items-center gap-3">
+          <Button type="submit" variant="primary" disabled={!dirty} loading={saving}>
+            Speichern
+          </Button>
+          {dirty && <span className="text-xs text-warning-fg">Ungespeicherte Änderungen</span>}
+        </div>
+      </form>
     </Card>
   );
 }

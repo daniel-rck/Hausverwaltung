@@ -1,5 +1,6 @@
 import { db, useLiveQuery } from "../../lib/db";
 import { Card } from "../../lib/ui/shared/Card";
+import { Skeleton } from "../../lib/ui/ui";
 import { cashflow, equityYield, grossYield, netYield } from "../../lib/utils/calc";
 import { currentMonth } from "../../lib/utils/dates";
 import { formatEuro, formatPercent } from "../../lib/utils/format";
@@ -17,7 +18,8 @@ interface MetricCardProps {
 }
 
 function MetricCard({ label, value, positive }: MetricCardProps) {
-  const colorClass = positive === null ? "text-fg" : positive ? "text-green-600" : "text-red-600";
+  const colorClass =
+    positive === null ? "text-fg" : positive ? "text-success-fg" : "text-danger-fg";
 
   return (
     <div className="bg-surface rounded-lg border border-border shadow-sm px-4 py-3 text-center">
@@ -26,6 +28,8 @@ function MetricCard({ label, value, positive }: MetricCardProps) {
     </div>
   );
 }
+
+const METRIC_SKELETON_KEYS = ["rent", "gross", "net", "cfm", "cfy", "eq"] as const;
 
 export function YieldCalculation({ propertyId }: YieldCalculationProps) {
   const financing = useLiveQuery(async () => {
@@ -37,7 +41,7 @@ export function YieldCalculation({ propertyId }: YieldCalculationProps) {
     const now = currentMonth();
     const rentAt = buildRentLookup(await db.rentChanges.toArray());
     const units = await db.units.where("propertyId").equals(propertyId).toArray();
-    const unitIds = units.map((u) => u.id!);
+    const unitIds = units.flatMap((u) => (u.id != null ? [u.id] : []));
 
     if (unitIds.length === 0) return 0;
 
@@ -50,7 +54,15 @@ export function YieldCalculation({ propertyId }: YieldCalculationProps) {
   }, [propertyId]);
 
   if (financing === undefined || annualColdRent === undefined) {
-    return null;
+    return (
+      <Card title="Renditeberechnung">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+          {METRIC_SKELETON_KEYS.map((k) => (
+            <Skeleton key={k} height="4.25rem" />
+          ))}
+        </div>
+      </Card>
+    );
   }
 
   const kaufpreis = financing?.kaufpreis ?? 0;

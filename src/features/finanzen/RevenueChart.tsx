@@ -4,6 +4,7 @@ import { useProperty } from "../../lib/hooks/useProperty";
 import { BarChart } from "../../lib/ui/charts/BarChart";
 import { Card } from "../../lib/ui/shared/Card";
 import { EmptyState } from "../../lib/ui/shared/EmptyState";
+import { Skeleton } from "../../lib/ui/ui";
 import { BarChart3 } from "../../lib/ui/ui/icons";
 import { formatEuro, MONTH_NAMES } from "../../lib/utils/format";
 import { buildRentLookup } from "../../lib/utils/rent";
@@ -20,7 +21,7 @@ export function RevenueChart({ year }: RevenueChartProps) {
 
     const units = await db.units.where("propertyId").equals(activeProperty.id).toArray();
 
-    const unitIds = units.map((u) => u.id!);
+    const unitIds = units.flatMap((u) => (u.id != null ? [u.id] : []));
     const allOccupancies = await db.occupancies.toArray();
     const occupancies = allOccupancies.filter((o) => unitIds.includes(o.unitId));
 
@@ -54,7 +55,7 @@ export function RevenueChart({ year }: RevenueChartProps) {
     }
 
     // Calculate received per month from payments
-    const occupancyIds = new Set(occupancies.map((o) => o.id!));
+    const occupancyIds = new Set(occupancies.flatMap((o) => (o.id != null ? [o.id] : [])));
     for (const p of allPayments) {
       if (!occupancyIds.has(p.occupancyId)) continue;
       if (!p.month.startsWith(`${year}-`)) continue;
@@ -70,6 +71,14 @@ export function RevenueChart({ year }: RevenueChartProps) {
 
     return { expected, received, totalExpected, totalReceived };
   }, [data, year]);
+
+  if (data === undefined) {
+    return (
+      <Card title="Jahresübersicht">
+        <Skeleton height="300px" />
+      </Card>
+    );
+  }
 
   if (!data || !chartData) return null;
 
@@ -89,8 +98,8 @@ export function RevenueChart({ year }: RevenueChartProps) {
               <strong
                 className={
                   chartData.totalReceived >= chartData.totalExpected
-                    ? "text-green-600"
-                    : "text-amber-600"
+                    ? "text-success-fg"
+                    : "text-warning-fg"
                 }
               >
                 {formatEuro(chartData.totalReceived)}

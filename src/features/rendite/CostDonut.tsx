@@ -2,6 +2,7 @@ import { db, useLiveQuery } from "../../lib/db";
 import { isMaintenanceForProperty } from "../../lib/db/queries";
 import { DonutChart } from "../../lib/ui/charts/DonutChart";
 import { Card } from "../../lib/ui/shared/Card";
+import { Skeleton } from "../../lib/ui/ui";
 import { currentMonth } from "../../lib/utils/dates";
 import { buildRentLookup } from "../../lib/utils/rent";
 import type { FinancingData } from "./FinancingInput";
@@ -22,7 +23,7 @@ export function CostDonut({ propertyId }: CostDonutProps) {
     const now = currentMonth();
     const rentAt = buildRentLookup(await db.rentChanges.toArray());
     const units = await db.units.where("propertyId").equals(propertyId).toArray();
-    const unitIds = units.map((u) => u.id!);
+    const unitIds = units.flatMap((u) => (u.id != null ? [u.id] : []));
 
     let annualRent = 0;
     if (unitIds.length > 0) {
@@ -52,7 +53,11 @@ export function CostDonut({ propertyId }: CostDonutProps) {
   }, [propertyId]);
 
   if (!donutData) {
-    return null;
+    return (
+      <Card title="Kostenverteilung">
+        <Skeleton height="280px" />
+      </Card>
+    );
   }
 
   const hasData = donutData.data.some((v) => v > 0);

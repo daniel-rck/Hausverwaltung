@@ -1,6 +1,7 @@
 import { db, useLiveQuery } from "../../lib/db";
 import { LineChart } from "../../lib/ui/charts/LineChart";
 import { Card } from "../../lib/ui/shared/Card";
+import { Skeleton } from "../../lib/ui/ui";
 import type { FinancingData } from "./FinancingInput";
 
 interface CashflowChartProps {
@@ -16,7 +17,7 @@ export function CashflowChart({ propertyId }: CashflowChartProps) {
     const nichtUmlagefaehig = financing?.nichtUmlagefaehigeKosten ?? 0;
 
     const units = await db.units.where("propertyId").equals(propertyId).toArray();
-    const unitIds = units.map((u) => u.id!);
+    const unitIds = units.flatMap((u) => (u.id != null ? [u.id] : []));
 
     if (unitIds.length === 0) {
       return { labels: [], einnahmen: [], cashflow: [] };
@@ -25,7 +26,7 @@ export function CashflowChart({ propertyId }: CashflowChartProps) {
     // Get all occupancies for this property's units
     const allOccupancies = await db.occupancies.toArray();
     const propertyOccupancies = allOccupancies.filter((o) => unitIds.includes(o.unitId));
-    const occupancyIds = propertyOccupancies.map((o) => o.id!);
+    const occupancyIds = propertyOccupancies.flatMap((o) => (o.id != null ? [o.id] : []));
 
     // Get all payments for those occupancies
     const allPayments = await db.payments.toArray();
@@ -60,7 +61,15 @@ export function CashflowChart({ propertyId }: CashflowChartProps) {
     return { labels, einnahmen, cashflow: cashflowValues };
   }, [propertyId]);
 
-  if (!chartData || chartData.labels.length === 0) {
+  if (chartData === undefined) {
+    return (
+      <Card title="Cashflow-Entwicklung">
+        <Skeleton height="280px" />
+      </Card>
+    );
+  }
+
+  if (chartData.labels.length === 0) {
     return (
       <Card title="Cashflow-Entwicklung">
         <p className="text-sm text-fg-muted text-center py-8">

@@ -1,13 +1,14 @@
 import { useMemo } from "react";
 import { db, useLiveQuery } from "../../lib/db";
 import { isMaintenanceForProperty } from "../../lib/db/queries";
-import type { FinancingData } from "../../lib/db/schema";
+import type { FinancingData, Tenant, Unit } from "../../lib/db/schema";
 import { usePrint } from "../../lib/hooks/usePrint";
 import { useProperty } from "../../lib/hooks/useProperty";
 import { PrintLayout } from "../../lib/ui/layout/PrintLayout";
 import { Card } from "../../lib/ui/shared/Card";
 import { EmptyState } from "../../lib/ui/shared/EmptyState";
-import { FileText } from "../../lib/ui/ui/icons";
+import { Button, Callout, Skeleton } from "../../lib/ui/ui";
+import { FileText, Printer } from "../../lib/ui/ui/icons";
 import { formatArea, formatEuro } from "../../lib/utils/format";
 
 interface TaxRow {
@@ -34,15 +35,21 @@ export function TaxExport({ year }: TaxExportProps) {
 
     const units = await db.units.where("propertyId").equals(activeProperty.id).toArray();
 
-    const unitIds = units.map((u) => u.id!);
+    const unitIds = units.flatMap((u) => (u.id != null ? [u.id] : []));
     const allOccupancies = await db.occupancies.toArray();
     const occupancies = allOccupancies.filter((o) => unitIds.includes(o.unitId));
 
     const tenantIds = [...new Set(occupancies.map((o) => o.tenantId))];
     const tenants = await db.tenants.bulkGet(tenantIds);
-    const tenantMap = new Map(tenants.filter(Boolean).map((t) => [t!.id!, t!]));
+    const tenantMap = new Map<number, Tenant>();
+    for (const t of tenants) {
+      if (t?.id != null) tenantMap.set(t.id, t);
+    }
 
-    const unitMap = new Map(units.map((u) => [u.id!, u]));
+    const unitMap = new Map<number, Unit>();
+    for (const u of units) {
+      if (u.id != null) unitMap.set(u.id, u);
+    }
 
     const allPayments = await db.payments.toArray();
 
@@ -61,10 +68,10 @@ export function TaxExport({ year }: TaxExportProps) {
     const costs = await db.costs.where("propertyId").equals(propertyId).toArray();
     const yearCosts = costs.filter((c) => c.year === year);
 
-    const taxTypeIds = costTypes.filter((ct) => ct.category === "tax").map((ct) => ct.id!);
-    const insuranceTypeIds = costTypes
-      .filter((ct) => ct.category === "insurance")
-      .map((ct) => ct.id!);
+    const idsOf = (category: string) =>
+      costTypes.flatMap((ct) => (ct.category === category && ct.id != null ? [ct.id] : []));
+    const taxTypeIds = idsOf("tax");
+    const insuranceTypeIds = idsOf("insurance");
 
     const grundsteuer = yearCosts
       .filter((c) => taxTypeIds.includes(c.costTypeId))
@@ -85,7 +92,7 @@ export function TaxExport({ year }: TaxExportProps) {
     // angegeben werden; die UI weist explizit darauf hin.
     const schuldzinsen = financing ? (financing.kreditbetrag * financing.zinssatz) / 100 : 0;
 
-    const unitIds = units.map((u) => u.id!);
+    const unitIds = units.flatMap((u) => (u.id != null ? [u.id] : []));
     const allMaintenance = await db.maintenanceItems.toArray();
     const erhaltung = allMaintenance
       .filter(
@@ -128,7 +135,7 @@ export function TaxExport({ year }: TaxExportProps) {
       const tenant = tenantMap.get(occ.tenantId);
       if (!unit || !tenant) continue;
 
-      const payments = paymentsByOcc.get(occ.id!) ?? {
+      const payments = (occ.id != null ? paymentsByOcc.get(occ.id) : undefined) ?? {
         cold: 0,
         utilities: 0,
       };
@@ -150,6 +157,18 @@ export function TaxExport({ year }: TaxExportProps) {
 
     return result;
   }, [data, year]);
+
+  if (data === undefined) {
+    return (
+      <Card title="Steuer-Export">
+        <div className="space-y-2">
+          <Skeleton height="2rem" />
+          <Skeleton height="2rem" />
+          <Skeleton height="2rem" />
+        </div>
+      </Card>
+    );
+  }
 
   if (!data) return null;
 
@@ -267,37 +286,42 @@ export function TaxExport({ year }: TaxExportProps) {
 
   const anlageVContent = anlageV && (
     <Card title="Anlage V – Übertragungshilfe für Elster">
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="border-b-2 border-border">
-            <th className="py-2 px-2 text-left font-medium text-fg-muted w-16">Zeile</th>
-            <th className="py-2 px-3 text-left font-medium text-fg-muted">Bezeichnung</th>
-            <th className="py-2 px-3 text-right font-medium text-fg-muted">Wert</th>
-          </tr>
-        </thead>
-        <tbody>
-          {anlageVRows.map((row) => (
-            <tr
-              key={row.zeile}
-              className={`border-b border-border ${row.highlight ? "bg-emerald-50 dark:bg-emerald-900/20" : ""}`}
-            >
-              <td className="py-2 px-2 text-xs text-fg-subtle font-mono">{row.zeile}</td>
-              <td
-                className={`py-2 px-3 ${row.bold || row.highlight ? "font-semibold" : ""} text-fg`}
-              >
-                {row.label}
-              </td>
-              <td
-                className={`py-2 px-3 text-right font-mono ${row.highlight ? "font-bold text-emerald-700 dark:text-emerald-400" : row.bold ? "font-semibold text-fg" : "text-fg"}`}
-              >
-                {row.value}
-              </td>
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b-2 border-border">
+              <th className="py-2 px-2 text-left font-medium text-fg-muted w-16">Zeile</th>
+              <th className="py-2 px-3 text-left font-medium text-fg-muted">Bezeichnung</th>
+              <th className="py-2 px-3 text-right font-medium text-fg-muted">Wert</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-      <div className="mt-4 p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 text-xs text-amber-900 dark:text-amber-200 space-y-1">
-        <p className="font-semibold">Hinweis zur Anlage V — Näherungswerte</p>
+          </thead>
+          <tbody>
+            {anlageVRows.map((row) => (
+              <tr
+                key={row.zeile}
+                className={`border-b border-border ${row.highlight ? "bg-success/10" : ""}`}
+              >
+                <td className="py-2 px-2 text-xs text-fg-subtle font-mono">{row.zeile}</td>
+                <td
+                  className={`py-2 px-3 ${row.bold || row.highlight ? "font-semibold" : ""} text-fg`}
+                >
+                  {row.label}
+                </td>
+                <td
+                  className={`py-2 px-3 text-right font-mono ${row.highlight ? "font-bold text-success-fg" : row.bold ? "font-semibold text-fg" : "text-fg"}`}
+                >
+                  {row.value}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <Callout
+        variant="warning"
+        title="Hinweis zur Anlage V — Näherungswerte"
+        className="mt-4 text-xs"
+      >
         <p>
           AfA und Schuldzinsen werden hier näherungsweise berechnet (Kaufpreis × AfA-Satz bzw.
           Kreditbetrag × Zinssatz). Beide Werte ändern sich über die Laufzeit (Tilgung reduziert die
@@ -305,7 +329,7 @@ export function TaxExport({ year }: TaxExportProps) {
           <strong>tatsächlich gezahlten Zinsen</strong> aus der Bank-Jahresabrechnung übernehmen und
           die AfA gegen Steuerberater/Vorjahres-Bescheid prüfen.
         </p>
-      </div>
+      </Callout>
       <p className="text-xs text-fg-subtle mt-2">
         Die Angaben dienen als Ausfüllhilfe für die Anlage V der Einkommensteuererklärung. Bitte
         prüfen Sie alle Werte vor der Übertragung in ELSTER.
@@ -328,13 +352,9 @@ export function TaxExport({ year }: TaxExportProps) {
         title="Steuer-Export"
         action={
           rows.length > 0 ? (
-            <button
-              type="button"
-              onClick={print}
-              className="px-3 py-1.5 text-xs bg-fg text-surface rounded-lg hover:opacity-90 transition-colors"
-            >
+            <Button variant="secondary" size="sm" onClick={print} leftIcon={<Printer size={14} />}>
               Drucken
-            </button>
+            </Button>
           ) : undefined
         }
       >
