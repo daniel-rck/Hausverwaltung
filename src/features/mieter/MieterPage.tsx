@@ -22,7 +22,7 @@ function MieterOverview({
   );
   const occupancies = useLiveQuery(async () => {
     if (!units) return [];
-    const unitIds = units.map((u) => u.id!);
+    const unitIds = units.flatMap((u) => (u.id != null ? [u.id] : []));
     const all = await db.occupancies.toArray();
     return all.filter((o) => unitIds.includes(o.unitId));
   }, [units]);
@@ -75,9 +75,9 @@ export function MieterPage() {
 
       {selectedUnit ? (
         <TenantForm unit={selectedUnit} onBack={() => setSelectedUnit(null)} />
-      ) : (
-        <MieterOverview propertyId={activeProperty.id!} onSelectUnit={setSelectedUnit} />
-      )}
+      ) : activeProperty.id != null ? (
+        <MieterOverview propertyId={activeProperty.id} onSelectUnit={setSelectedUnit} />
+      ) : null}
     </div>
   );
 }

@@ -1,5 +1,7 @@
 import { db, useLiveQuery } from "../../lib/db";
 import type { LandlordInfo, Occupancy, Tenant, Unit } from "../../lib/db/schema";
+import { Button, Skeleton } from "../../lib/ui/ui";
+import { Printer } from "../../lib/ui/ui/icons";
 import { formatArea, formatEuro, formatMonth } from "../../lib/utils/format";
 
 interface ContractTemplateProps {
@@ -19,7 +21,9 @@ export function ContractTemplate({ occupancy, unit, tenant }: ContractTemplatePr
     return props.find((p) => p.id === unit.propertyId) ?? null;
   }, [unit.propertyId]);
 
-  if (landlord === undefined || property === undefined) return null;
+  if (landlord === undefined || property === undefined) {
+    return <Skeleton height="40rem" className="max-w-[210mm] mx-auto" />;
+  }
 
   const totalRent = occupancy.rentCold + occupancy.rentUtilities;
 
@@ -27,13 +31,9 @@ export function ContractTemplate({ occupancy, unit, tenant }: ContractTemplatePr
     <div>
       {/* Print button – hidden when printing */}
       <div className="no-print mb-4 flex justify-end">
-        <button
-          type="button"
-          onClick={() => window.print()}
-          className="px-4 py-2 text-sm bg-zinc-800 dark:bg-zinc-600 text-white rounded-lg hover:bg-zinc-900 dark:hover:bg-zinc-500 transition-colors"
-        >
+        <Button variant="primary" leftIcon={<Printer size={14} />} onClick={() => window.print()}>
           Vertrag drucken
-        </button>
+        </Button>
       </div>
 
       {/* A4 contract content – always light background for print */}

@@ -5,7 +5,20 @@ import { Card } from "../../lib/ui/shared/Card";
 import { type Column, DataTable } from "../../lib/ui/shared/DataTable";
 import { EmptyState } from "../../lib/ui/shared/EmptyState";
 import { NumInput } from "../../lib/ui/shared/NumInput";
-import { TrendingUp } from "../../lib/ui/ui/icons";
+import {
+  Button,
+  Callout,
+  Checkbox,
+  FormField,
+  Input,
+  required,
+  Select,
+  Skeleton,
+  useFormValidation,
+  useToast,
+  type ValidationSchema,
+} from "../../lib/ui/ui";
+import { Plus, TrendingUp } from "../../lib/ui/ui/icons";
 import { currentMonth } from "../../lib/utils/dates";
 import { formatEuro, formatMonth } from "../../lib/utils/format";
 import { checkRentIncrease } from "../../lib/utils/rentLaw";
@@ -22,24 +35,35 @@ const REASON_LABELS: Record<RentChangeReason, string> = {
   agreement: "Vereinbarung",
 };
 
+type RentFormValues = {
+  effectiveDate: string;
+  newRentCold: number;
+  reason: RentChangeReason;
+  notes: string;
+};
+
+const rentSchema: ValidationSchema<RentFormValues> = {
+  effectiveDate: required("Bitte Monat angeben"),
+  newRentCold: (value) =>
+    typeof value === "number" && value > 0 ? null : "Kaltmiete muss größer als 0 sein",
+};
+
 export function RentHistory({ occupancy, unit }: RentHistoryProps) {
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<RentFormValues>({
     effectiveDate: "",
     newRentCold: occupancy.rentCold,
-    reason: "mietspiegel" as RentChangeReason,
+    reason: "mietspiegel",
     notes: "",
   });
+  const toast = useToast();
+  const { errors, validate, clear } = useFormValidation<RentFormValues>(rentSchema);
 
-  const changes = useLiveQuery(
-    () =>
-      db.rentChanges
-        .where("occupancyId")
-        .equals(occupancy.id!)
-        .toArray()
-        .then((rows) => rows.sort((a, b) => b.effectiveDate.localeCompare(a.effectiveDate))),
-    [occupancy.id],
-  );
+  const changes = useLiveQuery(async () => {
+    if (occupancy.id == null) return [];
+    const rows = await db.rentChanges.where("occupancyId").equals(occupancy.id).toArray();
+    return rows.sort((a, b) => b.effectiveDate.localeCompare(a.effectiveDate));
+  }, [occupancy.id]);
 
   const issues = useMemo(() => {
     if (!form.effectiveDate || form.newRentCold <= 0) return [];
@@ -56,23 +80,41 @@ export function RentHistory({ occupancy, unit }: RentHistoryProps) {
   const hasErrors = issues.some((i) => i.level === "error");
   const [overrideErrors, setOverrideErrors] = useState(false);
 
+  const closeForm = () => {
+    setShowForm(false);
+    setOverrideErrors(false);
+    clear();
+  };
+
   const handleSave = async () => {
-    if (!form.effectiveDate || form.newRentCold <= 0) return;
-    if (hasErrors && !overrideErrors) return;
+    const occId = occupancy.id;
+    if (occId == null) return;
+    if (!validate(form)) return;
+    if (hasErrors && !overrideErrors) {
+      toast.error("Bitte rechtliche Hinweise prüfen oder bewusst übersteuern.");
+      return;
+    }
 
-    await db.rentChanges.add({
-      occupancyId: occupancy.id!,
-      effectiveDate: form.effectiveDate,
-      oldRentCold: occupancy.rentCold,
-      newRentCold: form.newRentCold,
-      reason: form.reason,
-      notes: form.notes || undefined,
-    });
+    try {
+      await db.rentChanges.add({
+        occupancyId: occId,
+        effectiveDate: form.effectiveDate,
+        oldRentCold: occupancy.rentCold,
+        newRentCold: form.newRentCold,
+        reason: form.reason,
+        notes: form.notes || undefined,
+      });
 
-    // Zukünftige Erhöhungen erst mit Wirksamkeit übernehmen — bis dahin gilt die
-    // bisherige Miete (Monats-Soll kommt ohnehin aus rentColdAt/rentChanges).
-    if (form.effectiveDate.slice(0, 7) <= currentMonth()) {
-      await db.occupancies.update(occupancy.id!, { rentCold: form.newRentCold });
+      // Zukünftige Erhöhungen erst mit Wirksamkeit übernehmen — bis dahin gilt die
+      // bisherige Miete (Monats-Soll kommt ohnehin aus rentColdAt/rentChanges).
+      if (form.effectiveDate.slice(0, 7) <= currentMonth()) {
+        await db.occupancies.update(occId, { rentCold: form.newRentCold });
+      }
+      toast.success("Mieterhöhung gespeichert.");
+    } catch (err) {
+      toast.error("Speichern fehlgeschlagen.");
+      console.error(err);
+      return;
     }
 
     setForm({
@@ -81,8 +123,7 @@ export function RentHistory({ occupancy, unit }: RentHistoryProps) {
       reason: "mietspiegel",
       notes: "",
     });
-    setOverrideErrors(false);
-    setShowForm(false);
+    closeForm();
   };
 
   const columns: Column<RentChange>[] = [
@@ -111,12 +152,7 @@ export function RentHistory({ occupancy, unit }: RentHistoryProps) {
       header: "Differenz",
       render: (r) => {
         const diff = r.newRentCold - r.oldRentCold;
-        const cls =
-          diff > 0
-            ? "text-red-600 dark:text-red-400"
-            : diff < 0
-              ? "text-green-600 dark:text-green-400"
-              : "";
+        const cls = diff > 0 ? "text-danger-fg" : diff < 0 ? "text-success-fg" : "";
         return (
           <span className={`font-mono ${cls}`}>
             {diff > 0 ? "+" : ""}
@@ -145,13 +181,14 @@ export function RentHistory({ occupancy, unit }: RentHistoryProps) {
       title={`Miethistorie – ${unit.name}`}
       action={
         !showForm ? (
-          <button
-            type="button"
+          <Button
+            variant="primary"
+            size="sm"
+            leftIcon={<Plus size={14} />}
             onClick={() => setShowForm(true)}
-            className="text-sm px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
           >
             Mieterhöhung erfassen
-          </button>
+          </Button>
         ) : undefined
       }
     >
@@ -165,106 +202,98 @@ export function RentHistory({ occupancy, unit }: RentHistoryProps) {
 
       {/* Inline form */}
       {showForm && (
-        <div className="mb-4 p-4 bg-surface-muted rounded-lg border border-border">
+        <form
+          className="mb-4 p-4 bg-surface-muted rounded-lg border border-border"
+          onSubmit={(e) => {
+            e.preventDefault();
+            void handleSave();
+          }}
+          noValidate
+        >
           <h3 className="text-sm font-semibold text-fg mb-3">Mieterhöhung erfassen</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="block">
-                <span className="block text-xs font-medium text-fg-muted mb-1">Wirksam ab *</span>
-                <input
-                  type="month"
-                  value={form.effectiveDate}
-                  onChange={(e) => setForm({ ...form, effectiveDate: e.target.value })}
-                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm bg-surface text-fg focus:outline-none focus:ring-2 focus:ring-accent-500"
-                />
-              </label>
-            </div>
-            <NumInput
-              label="Neue Kaltmiete *"
-              value={form.newRentCold}
-              onChange={(v) => setForm({ ...form, newRentCold: v })}
-              suffix="€"
-              min={0}
-            />
-            <div>
-              <label className="block">
-                <span className="block text-xs font-medium text-fg-muted mb-1">Grund *</span>
-                <select
-                  value={form.reason}
-                  onChange={(e) => setForm({ ...form, reason: e.target.value as RentChangeReason })}
-                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm bg-surface text-fg focus:outline-none focus:ring-2 focus:ring-accent-500"
-                >
-                  <option value="mietspiegel">Mietspiegel</option>
-                  <option value="index">Indexanpassung</option>
-                  <option value="modernization">Modernisierung</option>
-                  <option value="agreement">Vereinbarung</option>
-                </select>
-              </label>
-            </div>
-            <div>
-              <label className="block">
-                <span className="block text-xs font-medium text-fg-muted mb-1">Notiz</span>
-                <input
-                  type="text"
-                  value={form.notes}
-                  onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm bg-surface text-fg focus:outline-none focus:ring-2 focus:ring-accent-500"
-                />
-              </label>
-            </div>
+            <FormField label="Wirksam ab" required error={errors.effectiveDate}>
+              <Input
+                type="month"
+                value={form.effectiveDate}
+                onChange={(e) => setForm({ ...form, effectiveDate: e.target.value })}
+              />
+            </FormField>
+            <FormField label="Neue Kaltmiete" required error={errors.newRentCold}>
+              <NumInput
+                value={form.newRentCold}
+                onChange={(v) => setForm({ ...form, newRentCold: v })}
+                suffix="€"
+                min={0}
+              />
+            </FormField>
+            <FormField label="Grund" required>
+              <Select
+                value={form.reason}
+                onChange={(e) => setForm({ ...form, reason: e.target.value as RentChangeReason })}
+              >
+                <option value="mietspiegel">Mietspiegel</option>
+                <option value="index">Indexanpassung</option>
+                <option value="modernization">Modernisierung</option>
+                <option value="agreement">Vereinbarung</option>
+              </Select>
+            </FormField>
+            <FormField label="Notiz">
+              <Input
+                value={form.notes}
+                onChange={(e) => setForm({ ...form, notes: e.target.value })}
+              />
+            </FormField>
           </div>
           {issues.length > 0 && (
-            <div className="mt-3 space-y-1.5">
+            <div className="mt-1 space-y-1.5">
               {issues.map((issue) => (
-                <div
+                <Callout
                   key={issue.message}
-                  className={`text-xs px-3 py-2 rounded-lg border ${
-                    issue.level === "error"
-                      ? "bg-red-50 border-red-300 text-red-800 dark:bg-red-950/40 dark:border-red-800 dark:text-red-200"
-                      : "bg-amber-50 border-amber-300 text-amber-800 dark:bg-amber-950/40 dark:border-amber-800 dark:text-amber-200"
-                  }`}
+                  variant={issue.level === "error" ? "danger" : "warning"}
                 >
                   {issue.message}
-                </div>
+                </Callout>
               ))}
               {hasErrors && (
-                <label className="flex items-center gap-2 text-xs text-fg-muted mt-1">
-                  <input
-                    type="checkbox"
+                <div className="pt-1">
+                  <Checkbox
+                    label="Trotzdem speichern (juristische Verantwortung übernehme ich)"
                     checked={overrideErrors}
                     onChange={(e) => setOverrideErrors(e.target.checked)}
                   />
-                  Trotzdem speichern (juristische Verantwortung übernehme ich)
-                </label>
+                </div>
               )}
             </div>
           )}
           <div className="flex gap-2 mt-3">
-            <button
-              type="button"
-              onClick={handleSave}
+            <Button
+              type="submit"
+              variant="primary"
+              size="sm"
               disabled={hasErrors && !overrideErrors}
-              className="px-4 py-1.5 text-sm bg-fg text-surface rounded-lg hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Speichern
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setShowForm(false);
-                setOverrideErrors(false);
-              }}
-              className="px-4 py-1.5 text-sm border border-border text-fg-muted rounded-lg hover:bg-surface-muted transition-colors"
-            >
+            </Button>
+            <Button variant="outline" size="sm" onClick={closeForm}>
               Abbrechen
-            </button>
+            </Button>
           </div>
-        </div>
+        </form>
       )}
 
       {/* History table */}
-      {changes && changes.length > 0 ? (
-        <DataTable columns={columns} data={changes} keyFn={(r) => r.id!} />
+      {changes === undefined ? (
+        <div className="space-y-2">
+          <Skeleton height="2rem" />
+          <Skeleton height="2rem" />
+        </div>
+      ) : changes.length > 0 ? (
+        <DataTable
+          columns={columns}
+          data={changes}
+          keyFn={(r) => r.id ?? `${r.effectiveDate}-${r.newRentCold}`}
+        />
       ) : (
         <EmptyState
           icon={<TrendingUp size={24} strokeWidth={1.75} />}
