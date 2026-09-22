@@ -75,6 +75,7 @@ export function CostDonut({ propertyId }: CostDonutProps) {
   return (
     <Card title="Kostenverteilung">
       <DonutChart
+        valueFormat="euro"
         labels={donutData.labels}
         data={donutData.data}
         colors={["#78716c", "#d97706", "#e11d48", "#16a34a"]}

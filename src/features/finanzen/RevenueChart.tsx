@@ -118,6 +118,7 @@ export function RevenueChart({ year }: RevenueChartProps) {
       ) : (
         <div className="h-[300px]">
           <BarChart
+            valueFormat="euro"
             labels={MONTH_NAMES.map((n) => n.slice(0, 3))}
             datasets={[
               {

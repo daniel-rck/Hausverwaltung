@@ -82,6 +82,7 @@ export function CashflowChart({ propertyId }: CashflowChartProps) {
   return (
     <Card title="Cashflow-Entwicklung">
       <LineChart
+        valueFormat="euro"
         labels={chartData.labels}
         datasets={[
           {
