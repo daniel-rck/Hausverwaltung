@@ -85,7 +85,13 @@ export function NumInput({
           onFocus={handleFocus}
           onBlur={handleBlur}
           onKeyDown={(e) => {
-            if (e.key === "Enter") e.currentTarget.blur();
+            if (e.key !== "Enter") return;
+            // Erst den Wert übernehmen, dann (in einem Formular) absenden —
+            // sonst sähe der Submit-Handler noch den alten Wert.
+            e.preventDefault();
+            const form = e.currentTarget.form;
+            e.currentTarget.blur();
+            if (form) setTimeout(() => form.requestSubmit(), 0);
           }}
           disabled={disabled}
           aria-label={label ? undefined : ariaLabel}
