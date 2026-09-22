@@ -276,7 +276,7 @@ export function SyncSettings() {
       {message && (
         <p
           className={`mt-3 text-sm ${
-            message.type === "success" ? "text-green-600" : "text-red-600"
+            message.type === "success" ? "text-success-fg" : "text-danger-fg"
           }`}
         >
           {message.text}

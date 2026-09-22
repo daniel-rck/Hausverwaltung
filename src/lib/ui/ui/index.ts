@@ -1,5 +1,6 @@
 export { Badge } from "./Badge";
 export { Button } from "./Button";
+export { Callout } from "./Callout";
 export { Checkbox } from "./Checkbox";
 export { ConfirmProvider, useConfirm } from "./ConfirmProvider";
 export { Drawer } from "./Drawer";

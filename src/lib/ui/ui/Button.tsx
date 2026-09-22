@@ -1,7 +1,7 @@
 import { type ButtonHTMLAttributes, forwardRef, type ReactNode } from "react";
 import type { ModulKey } from "./moduleAccent";
 
-type Variant = "primary" | "secondary" | "ghost" | "outline" | "danger" | "link";
+type Variant = "primary" | "secondary" | "ghost" | "outline" | "danger" | "dangerGhost" | "link";
 type Size = "sm" | "md" | "lg";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -27,7 +27,7 @@ const sizeClasses: Record<Size, string> = {
 
 const baseClasses =
   "inline-flex items-center justify-center font-medium rounded-md transition-colors select-none " +
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-900 " +
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-surface " +
   "focus-visible:ring-accent/40 " +
   "disabled:opacity-50 disabled:cursor-not-allowed";
 
@@ -42,7 +42,9 @@ function variantClasses(variant: Variant): string {
     case "ghost":
       return "bg-transparent text-fg-muted hover:bg-surface-sunken";
     case "danger":
-      return "bg-red-600 text-fg-on-accent hover:bg-red-700 focus-visible:ring-red-400/40";
+      return "bg-danger text-fg-on-accent hover:bg-danger/90 focus-visible:ring-danger/40";
+    case "dangerGhost":
+      return "bg-transparent text-danger-fg hover:bg-danger/10 focus-visible:ring-danger/40";
     case "link":
       return "bg-transparent text-accent dark:text-accent-dark underline-offset-4 hover:underline px-0 h-auto";
   }

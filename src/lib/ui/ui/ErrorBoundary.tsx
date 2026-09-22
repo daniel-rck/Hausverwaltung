@@ -27,15 +27,15 @@ export class ErrorBoundary extends Component<Props, State> {
       if (this.props.fallback) return this.props.fallback(this.state.error, this.reset);
       return (
         <div className="p-6 max-w-xl mx-auto">
-          <div className="rounded-lg border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/40 p-5">
-            <h2 className="text-base font-semibold text-red-800 dark:text-red-200 mb-1">
+          <div className="rounded-lg border border-danger/30 bg-danger/10 p-5">
+            <h2 className="text-base font-semibold text-danger-fg mb-1">
               Da ist etwas schiefgelaufen
             </h2>
-            <p className="text-sm text-red-700 dark:text-red-300 mb-3">
+            <p className="text-sm text-danger-fg mb-3">
               Die Seite konnte nicht angezeigt werden. Du kannst es erneut versuchen oder die App
               neu laden.
             </p>
-            <details className="text-xs text-red-700 dark:text-red-300 mb-3">
+            <details className="text-xs text-danger-fg mb-3">
               <summary className="cursor-pointer">Technische Details</summary>
               <pre className="mt-2 whitespace-pre-wrap break-words">{this.state.error.message}</pre>
             </details>

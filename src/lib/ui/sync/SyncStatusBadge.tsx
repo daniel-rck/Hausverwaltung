@@ -17,12 +17,12 @@ export function SyncStatusBadge() {
 
   const dotClass =
     state.status === "idle"
-      ? "bg-green-500"
+      ? "bg-success"
       : state.status === "syncing" || state.status === "connecting"
-        ? "bg-amber-400 animate-pulse"
+        ? "bg-warning animate-pulse"
         : state.status === "offline"
           ? "bg-fg-subtle"
-          : "bg-red-500";
+          : "bg-danger";
 
   const label =
     state.status === "idle"

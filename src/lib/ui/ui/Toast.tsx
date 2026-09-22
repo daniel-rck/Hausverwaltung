@@ -129,17 +129,17 @@ function ToastViewport({
 }
 
 const variantClasses: Record<ToastVariant, string> = {
-  success: "border-green-200/60 dark:border-green-900/60 bg-surface text-fg",
-  error: "border-red-200/60 dark:border-red-900/60 bg-surface text-fg",
+  success: "border-success/40 bg-surface text-fg",
+  error: "border-danger/40 bg-surface text-fg",
   info: "border-border bg-surface text-fg",
-  warning: "border-amber-200/60 dark:border-amber-900/60 bg-surface text-fg",
+  warning: "border-warning/40 bg-surface text-fg",
 };
 
 const variantIconColor: Record<ToastVariant, string> = {
-  success: "text-green-600 dark:text-green-400",
-  error: "text-red-600 dark:text-red-400",
+  success: "text-success-fg",
+  error: "text-danger-fg",
   info: "text-accent dark:text-accent-dark",
-  warning: "text-amber-600 dark:text-amber-400",
+  warning: "text-warning-fg",
 };
 
 function ToastView({ item, onDismiss }: { item: ToastItem; onDismiss: (id: number) => void }) {

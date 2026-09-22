@@ -15,7 +15,7 @@ export const inputBaseClasses =
 
 export const inputBorderClasses = "border-border";
 export const inputInvalidClasses =
-  "border-red-500 dark:border-red-500 focus-visible:ring-red-400/40 focus-visible:border-red-500";
+  "border-danger focus-visible:ring-danger/40 focus-visible:border-danger";
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
   (
