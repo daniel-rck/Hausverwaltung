@@ -26,6 +26,13 @@ export function getDistributionShare(
   current: OccupancyWithUnit,
   all: OccupancyWithUnit[],
   year?: number,
+  /**
+   * Alle Einheiten des Objekts. Ist sie gesetzt, bilden Gesamtfläche bzw.
+   * Einheitenzahl × 12 Monate die Verteilbasis — der Leerstandsanteil bleibt
+   * dann beim Vermieter statt auf die anwesenden Mieter umgelegt zu werden.
+   * Beim Personenschlüssel gibt es keinen Leerstandsanteil (0 Personen).
+   */
+  allUnits?: readonly Pick<Unit, "area">[],
 ): number {
   const getMonths = (o: OccupancyWithUnit): number => {
     if (!year) return 12;
@@ -38,8 +45,9 @@ export function getDistributionShare(
 
   switch (key) {
     case "area": {
-      const weighted = all.map((o) => o.unit.area * (getMonths(o) / 12));
-      const total = weighted.reduce((sum, w) => sum + w, 0);
+      const total = allUnits
+        ? allUnits.reduce((sum, u) => sum + u.area, 0)
+        : all.reduce((sum, o) => sum + o.unit.area * (getMonths(o) / 12), 0);
       const currentWeight = current.unit.area * (getMonths(current) / 12);
       return total > 0 ? currentWeight / total : 0;
     }
@@ -50,8 +58,7 @@ export function getDistributionShare(
       return total > 0 ? currentWeight / total : 0;
     }
     case "units": {
-      const weighted = all.map((o) => getMonths(o) / 12);
-      const total = weighted.reduce((sum, w) => sum + w, 0);
+      const total = allUnits ? allUnits.length : all.reduce((sum, o) => sum + getMonths(o) / 12, 0);
       const currentWeight = getMonths(current) / 12;
       return total > 0 ? currentWeight / total : 0;
     }
@@ -104,7 +111,8 @@ export function waterPerCapitaPerDay(
  * Halbmonatige Mietverhältnisse werden korrekt anteilig verrechnet —
  * der angefangene Monat wird nicht voll gezählt.
  *
- * Berechnung: Anzahl belegter Tage / 365 (oder 366 im Schaltjahr) × 12.
+ * Berechnung: Anzahl belegter Tage / 365 (oder 366 im Schaltjahr) × 12;
+ * bei rein monatsgenauen Belegungen die Anzahl ganzer Monate.
  */
 export function getOccupiedMonthsFractional(
   occupancy: { from: string; to: string | null },
@@ -138,6 +146,18 @@ export function getOccupiedMonthsFractional(
   }
 
   if (effectiveEnd < effectiveStart) return 0;
+
+  // Monatsgenau erfasste Belegungen (ohne Tag) zählen in ganzen Monaten —
+  // passend zu Soll-Miete und Verteilerschlüssel. Tagegenau nur, wenn ein
+  // konkreter Tag gespeichert ist (sonst 181/365 × 12 = 5,95 statt 6 Monate).
+  const hasDay = (v: string | null) => v !== null && v.split("-").length >= 3;
+  if (!hasDay(occupancy.from) && !hasDay(occupancy.to)) {
+    return (
+      (effectiveEnd.getUTCFullYear() - effectiveStart.getUTCFullYear()) * 12 +
+      (effectiveEnd.getUTCMonth() - effectiveStart.getUTCMonth()) +
+      1
+    );
+  }
 
   const msPerDay = 24 * 60 * 60 * 1000;
   const days = Math.round((effectiveEnd.getTime() - effectiveStart.getTime()) / msPerDay) + 1;

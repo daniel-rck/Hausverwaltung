@@ -10,7 +10,7 @@ import type {
 } from "../../lib/db/schema";
 import { getDistributionShare, getOccupiedMonthsFractional } from "../../lib/utils/calc";
 import { todayIso } from "../../lib/utils/dates";
-import { formatArea, formatDate, formatEuro, formatNumber } from "../../lib/utils/format";
+import { formatArea, formatDate, formatEuro, formatPercent } from "../../lib/utils/format";
 
 interface AbrechnungViewProps {
   occupancy: Occupancy;
@@ -50,6 +50,10 @@ const DISTRIBUTION_LABELS: Record<string, string> = {
   messdienst: "Messdienst",
   direct: "Direkt",
 };
+
+function roundCents(value: number): number {
+  return Math.round(value * 100) / 100;
+}
 
 function getOccupiedMonths(occupancy: Occupancy, year: number): number {
   return getOccupiedMonthsFractional(occupancy, year);
@@ -133,9 +137,10 @@ export function AbrechnungView({
           currentOccWithUnit,
           allOccupancies,
           year,
+          allUnits,
         );
-        share = cost.totalAmount * fraction;
-        distributionLabel = `${DISTRIBUTION_LABELS[costType.distribution]} (${(fraction * 100).toFixed(1)}%)`;
+        share = roundCents(cost.totalAmount * fraction);
+        distributionLabel = `${DISTRIBUTION_LABELS[costType.distribution]} (${formatPercent(fraction)})`;
       }
 
       costLines.push({ costType, cost, share, distributionLabel });
@@ -148,10 +153,11 @@ export function AbrechnungView({
       .first();
 
     const months = getOccupiedMonths(occupancy, year);
-    const prepaymentAmount = prepayment?.amount ?? occupancy.rentUtilities * months;
+    const prepaymentAmount = roundCents(prepayment?.amount ?? occupancy.rentUtilities * months);
 
-    const totalCostShare = costLines.reduce((sum, l) => sum + l.share, 0);
-    const result = totalCostShare - prepaymentAmount;
+    // Summe aus den gedruckten (gerundeten) Zeilen — sonst weicht sie um Cents ab.
+    const totalCostShare = roundCents(costLines.reduce((sum, l) => sum + l.share, 0));
+    const result = roundCents(totalCostShare - prepaymentAmount);
 
     return {
       property,
@@ -221,7 +227,7 @@ export function AbrechnungView({
         </p>
         <p className="text-sm text-zinc-500">
           Wohnung: {unit.name} ({formatArea(unit.area)}) | Abrechnungszeitraum:{" "}
-          {formatNumber(months)} Monate
+          {months.toLocaleString("de-DE", { maximumFractionDigits: 2 })} Monate
         </p>
       </div>
 
@@ -289,7 +295,8 @@ export function AbrechnungView({
         </div>
         <div className="flex justify-between text-sm">
           <span className="text-zinc-600">
-            abzgl. Vorauszahlungen ({formatNumber(months)} Monate)
+            abzgl. Vorauszahlungen ({months.toLocaleString("de-DE", { maximumFractionDigits: 2 })}{" "}
+            Monate)
           </span>
           <span className="font-mono font-tabular text-zinc-600">
             - {formatEuro(prepaymentAmount)}
@@ -297,7 +304,7 @@ export function AbrechnungView({
         </div>
         <div className="flex justify-between text-base pt-2 border-t border-zinc-200">
           <span className="font-bold text-zinc-800">
-            {result >= 0 ? "Nachzahlung" : "Guthaben"}
+            {result > 0 ? "Nachzahlung" : result < 0 ? "Guthaben" : "Ausgeglichen"}
           </span>
           <span
             className={`font-mono font-tabular font-bold ${
