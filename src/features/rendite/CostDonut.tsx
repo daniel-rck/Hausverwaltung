@@ -3,6 +3,7 @@ import { isMaintenanceForProperty } from "../../lib/db/queries";
 import { DonutChart } from "../../lib/ui/charts/DonutChart";
 import { Card } from "../../lib/ui/shared/Card";
 import { currentMonth } from "../../lib/utils/dates";
+import { buildRentLookup } from "../../lib/utils/rent";
 import type { FinancingData } from "./FinancingInput";
 
 interface CostDonutProps {
@@ -19,6 +20,7 @@ export function CostDonut({ propertyId }: CostDonutProps) {
 
     // Annual rent from active occupancies
     const now = currentMonth();
+    const rentAt = buildRentLookup(await db.rentChanges.toArray());
     const units = await db.units.where("propertyId").equals(propertyId).toArray();
     const unitIds = units.map((u) => u.id!);
 
@@ -28,7 +30,7 @@ export function CostDonut({ propertyId }: CostDonutProps) {
       const active = allOccupancies.filter(
         (o) => unitIds.includes(o.unitId) && o.from <= now && (o.to === null || o.to >= now),
       );
-      annualRent = active.reduce((sum, o) => sum + o.rentCold * 12, 0);
+      annualRent = active.reduce((sum, o) => sum + rentAt(o, now) * 12, 0);
     }
 
     // Maintenance costs for current year

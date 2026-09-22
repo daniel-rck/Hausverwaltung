@@ -3,6 +3,7 @@ import { useProperty } from "../../lib/hooks/useProperty";
 import { KpiTile } from "../../lib/ui/ui";
 import { currentMonth } from "../../lib/utils/dates";
 import { formatEuro } from "../../lib/utils/format";
+import { buildRentLookup } from "../../lib/utils/rent";
 
 export function QuickStats() {
   const { activeProperty } = useProperty();
@@ -23,7 +24,11 @@ export function QuickStats() {
     const occupiedCount = new Set(activeOccupancies.map((o) => o.unitId)).size;
     const vacantCount = units.length - occupiedCount;
 
-    const monthlyRent = activeOccupancies.reduce((sum, o) => sum + o.rentCold + o.rentUtilities, 0);
+    const rentAt = buildRentLookup(await db.rentChanges.toArray());
+    const monthlyRent = activeOccupancies.reduce(
+      (sum, o) => sum + rentAt(o, now) + o.rentUtilities,
+      0,
+    );
 
     return {
       totalUnits: units.length,

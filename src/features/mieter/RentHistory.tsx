@@ -6,6 +6,7 @@ import { type Column, DataTable } from "../../lib/ui/shared/DataTable";
 import { EmptyState } from "../../lib/ui/shared/EmptyState";
 import { NumInput } from "../../lib/ui/shared/NumInput";
 import { TrendingUp } from "../../lib/ui/ui/icons";
+import { currentMonth } from "../../lib/utils/dates";
 import { formatEuro, formatMonth } from "../../lib/utils/format";
 import { checkRentIncrease } from "../../lib/utils/rentLaw";
 
@@ -68,7 +69,11 @@ export function RentHistory({ occupancy, unit }: RentHistoryProps) {
       notes: form.notes || undefined,
     });
 
-    await db.occupancies.update(occupancy.id!, { rentCold: form.newRentCold });
+    // Zukünftige Erhöhungen erst mit Wirksamkeit übernehmen — bis dahin gilt die
+    // bisherige Miete (Monats-Soll kommt ohnehin aus rentColdAt/rentChanges).
+    if (form.effectiveDate.slice(0, 7) <= currentMonth()) {
+      await db.occupancies.update(occupancy.id!, { rentCold: form.newRentCold });
+    }
 
     setForm({
       effectiveDate: "",

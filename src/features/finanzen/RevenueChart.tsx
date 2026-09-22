@@ -6,6 +6,7 @@ import { Card } from "../../lib/ui/shared/Card";
 import { EmptyState } from "../../lib/ui/shared/EmptyState";
 import { BarChart3 } from "../../lib/ui/ui/icons";
 import { formatEuro, MONTH_NAMES } from "../../lib/utils/format";
+import { buildRentLookup } from "../../lib/utils/rent";
 
 interface RevenueChartProps {
   year: number;
@@ -25,13 +26,15 @@ export function RevenueChart({ year }: RevenueChartProps) {
 
     const allPayments = await db.payments.toArray();
 
-    return { occupancies, allPayments };
+    const rentChanges = await db.rentChanges.toArray();
+    return { occupancies, allPayments, rentChanges };
   }, [activeProperty?.id]);
 
   const chartData = useMemo(() => {
     if (!data) return null;
 
-    const { occupancies, allPayments } = data;
+    const { occupancies, allPayments, rentChanges } = data;
+    const rentAt = buildRentLookup(rentChanges);
     const expected: number[] = new Array(12).fill(0) as number[];
     const received: number[] = new Array(12).fill(0) as number[];
 
@@ -42,13 +45,11 @@ export function RevenueChart({ year }: RevenueChartProps) {
     for (const occ of occupancies) {
       if (occ.from > yearEnd || (occ.to !== null && occ.to < yearStart)) continue;
 
-      const monthlyRent = occ.rentCold + occ.rentUtilities;
-
       for (let m = 1; m <= 12; m++) {
         const month = `${year}-${String(m).padStart(2, "0")}`;
         if (month < occ.from) continue;
         if (occ.to !== null && month > occ.to) continue;
-        expected[m - 1] = (expected[m - 1] ?? 0) + monthlyRent;
+        expected[m - 1] = (expected[m - 1] ?? 0) + rentAt(occ, month) + occ.rentUtilities;
       }
     }
 

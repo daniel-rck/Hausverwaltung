@@ -6,8 +6,11 @@ import { monthDiff } from "./calc";
  *
  * Geprüfte Regeln (Standard-Kappungsgrenze 20% in 3 Jahren — in vielen
  * Großstädten per Verordnung auf 15% gesenkt; konfigurierbar):
- *  - 12-Monats-Sperrfrist seit der letzten Erhöhung
- *  - 15-Monats-Wartezeit nach Mietbeginn vor der ersten Erhöhung
+ *  - 15-Monats-Frist (§558 Abs. 1 S. 1): Die Miete muss zum Wirksamwerden der
+ *    Erhöhung seit 15 Monaten unverändert sein — seit Mietbeginn bzw. seit
+ *    der letzten Erhöhung. Erhöhungen nach §559 (Modernisierung) und §560
+ *    (Betriebskosten) bleiben dabei außer Betracht; Index-Änderungen
+ *    (§557b) schließen §558 ohnehin aus und werden ebenfalls übersprungen.
  *  - Kappungsgrenze: max. 20% (bzw. 15%) in 3 Jahren ggü. der Miete vor 3 Jahren
  *
  * Modernisierungs- und Indexerhöhungen unterliegen anderen Regeln und
@@ -49,26 +52,21 @@ export function checkRentIncrease(input: RentLawCheckInput): RentLawIssue[] {
     .filter((r) => r.effectiveDate < input.effectiveDate)
     .sort((a, b) => a.effectiveDate.localeCompare(b.effectiveDate));
 
-  const lastChange = sortedPast[sortedPast.length - 1];
+  // §558 Abs. 1 S. 3: Modernisierungs-/Betriebskostenerhöhungen zählen nicht.
+  const relevantPast = sortedPast.filter(
+    (r) => r.reason !== "modernization" && r.reason !== "index",
+  );
+  const lastChange = relevantPast[relevantPast.length - 1];
   const lastIncreaseDate = lastChange?.effectiveDate ?? input.occupancyFrom;
 
   const monthsSinceLast = monthDiff(lastIncreaseDate, input.effectiveDate);
-  if (monthsSinceLast < 12) {
+  if (monthsSinceLast < 15) {
     issues.push({
       level: "error",
-      message: `12-Monats-Sperrfrist nicht eingehalten — seit der letzten Erhöhung (${lastIncreaseDate}) sind erst ${monthsSinceLast} Monate vergangen.`,
+      message: lastChange
+        ? `15-Monats-Frist nicht eingehalten — die Miete muss bei Wirksamwerden seit 15 Monaten unverändert sein; seit der letzten Erhöhung (${lastIncreaseDate}) sind erst ${monthsSinceLast} Monate vergangen.`
+        : `Erste Mieterhöhung frühestens 15 Monate nach Mietbeginn wirksam (aktuell ${monthsSinceLast} Monate).`,
     });
-  }
-
-  // 15-Monats-Wartezeit nach Mietbeginn vor erster Erhöhung
-  if (sortedPast.length === 0) {
-    const sinceMoveIn = monthDiff(input.occupancyFrom, input.effectiveDate);
-    if (sinceMoveIn < 15) {
-      issues.push({
-        level: "error",
-        message: `Erste Mieterhöhung frühestens 15 Monate nach Mietbeginn zulässig (aktuell ${sinceMoveIn} Monate).`,
-      });
-    }
   }
 
   // Kappungsgrenze: Vergleich mit Miete, die 36 Monate vor effectiveDate galt

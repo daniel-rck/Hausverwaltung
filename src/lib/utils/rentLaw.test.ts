@@ -39,27 +39,40 @@ describe("checkRentIncrease — gating", () => {
   });
 });
 
-describe("checkRentIncrease — 12-month lock since last increase", () => {
-  it("flags an increase less than 12 months after the previous one", () => {
+describe("checkRentIncrease — 15-Monats-Frist seit letzter Erhöhung", () => {
+  it("flags an increase less than 15 months after the previous one", () => {
     const issues = checkRentIncrease(
       input({
         effectiveDate: "2024-06",
-        history: [change({ effectiveDate: "2024-01", newRentCold: 1000 })],
+        newRentCold: 1050,
+        history: [change({ effectiveDate: "2023-06", newRentCold: 1000 })],
       }),
     );
-    expect(issues.some((i) => i.level === "error" && /Sperrfrist/.test(i.message))).toBe(true);
+    expect(issues.some((i) => i.level === "error" && /15-Monats-Frist/.test(i.message))).toBe(true);
   });
 
-  it("allows an increase 12+ months after the previous one", () => {
+  it("allows an increase 15+ months after the previous one", () => {
     const issues = checkRentIncrease(
       input({
-        effectiveDate: "2024-06",
+        effectiveDate: "2024-09",
         oldRentCold: 1000,
         newRentCold: 1050, // small, within capping
         history: [change({ effectiveDate: "2023-06", newRentCold: 1000 })],
       }),
     );
-    expect(issues.some((i) => /Sperrfrist/.test(i.message))).toBe(false);
+    expect(issues.some((i) => /15-Monats-Frist/.test(i.message))).toBe(false);
+  });
+
+  it("ignores modernization increases when looking for the last increase", () => {
+    const issues = checkRentIncrease(
+      input({
+        occupancyFrom: "2020-01",
+        effectiveDate: "2024-06",
+        newRentCold: 1050,
+        history: [change({ effectiveDate: "2024-01", newRentCold: 1000, reason: "modernization" })],
+      }),
+    );
+    expect(issues.some((i) => /15-Monats-Frist/.test(i.message))).toBe(false);
   });
 });
 
@@ -69,17 +82,6 @@ describe("checkRentIncrease — 15-month wait after move-in (first increase)", (
       input({ occupancyFrom: "2024-01", effectiveDate: "2024-10", history: [] }),
     );
     expect(issues.some((i) => i.level === "error" && /15 Monate/.test(i.message))).toBe(true);
-  });
-
-  it("does not apply the 15-month rule when there is prior increase history", () => {
-    const issues = checkRentIncrease(
-      input({
-        occupancyFrom: "2024-01",
-        effectiveDate: "2025-06",
-        history: [change({ effectiveDate: "2024-03", newRentCold: 1000 })],
-      }),
-    );
-    expect(issues.some((i) => /15 Monate/.test(i.message))).toBe(false);
   });
 });
 

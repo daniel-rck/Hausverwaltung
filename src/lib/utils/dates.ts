@@ -22,3 +22,13 @@ export function isoInDays(days: number, now: Date = new Date()): string {
   const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + days);
   return todayIso(d);
 }
+
+/**
+ * Letzter Monat, dessen Miete bereits fällig ist. Miete ist zum 3. Werktag
+ * fällig (§556b BGB) — vereinfachend gilt der laufende Monat ab dem 4. als
+ * fällig, davor erst der Vormonat.
+ */
+export function lastDueMonth(now: Date = new Date()): string {
+  if (now.getDate() >= 4) return currentMonth(now);
+  return currentMonth(new Date(now.getFullYear(), now.getMonth() - 1, 1));
+}

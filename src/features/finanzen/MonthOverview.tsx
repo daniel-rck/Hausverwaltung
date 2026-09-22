@@ -8,6 +8,7 @@ import { NumInput } from "../../lib/ui/shared/NumInput";
 import { Calendar } from "../../lib/ui/ui/icons";
 import { todayIso } from "../../lib/utils/dates";
 import { formatEuro, MONTH_NAMES } from "../../lib/utils/format";
+import { buildRentLookup } from "../../lib/utils/rent";
 
 interface PaymentForm {
   amountCold: number;
@@ -23,6 +24,7 @@ interface CellData {
   tenant: Tenant;
   month: string;
   expected: number;
+  expectedCold: number;
   payment: Payment | undefined;
   received: number;
   status: "green" | "yellow" | "red" | "gray";
@@ -74,13 +76,15 @@ export function MonthOverview({ year }: MonthOverviewProps) {
       paymentMap.set(`${p.occupancyId}-${p.month}`, p);
     }
 
-    return { occupancies, unitMap, tenantMap, paymentMap };
+    const rentChanges = await db.rentChanges.toArray();
+    return { occupancies, unitMap, tenantMap, paymentMap, rentChanges };
   }, [activeProperty?.id]);
 
   const grid = useMemo((): CellData[][] => {
     if (!data) return [];
 
-    const { occupancies, unitMap, tenantMap, paymentMap } = data;
+    const { occupancies, unitMap, tenantMap, paymentMap, rentChanges } = data;
+    const rentAt = buildRentLookup(rentChanges);
     const rows: CellData[][] = [];
 
     // Filter to occupancies active during this year
@@ -111,7 +115,8 @@ export function MonthOverview({ year }: MonthOverviewProps) {
         const month = `${year}-${String(m).padStart(2, "0")}`;
         const isActive = occ.from <= month && (occ.to === null || occ.to >= month);
 
-        const expected = isActive ? occ.rentCold + occ.rentUtilities : 0;
+        const expectedCold = isActive ? rentAt(occ, month) : 0;
+        const expected = isActive ? expectedCold + occ.rentUtilities : 0;
         const payment = paymentMap.get(`${occ.id}-${month}`);
         const received = payment ? payment.amountCold + payment.amountUtilities : 0;
 
@@ -126,7 +131,17 @@ export function MonthOverview({ year }: MonthOverviewProps) {
           status = "red";
         }
 
-        row.push({ occupancy: occ, unit, tenant, month, expected, payment, received, status });
+        row.push({
+          occupancy: occ,
+          unit,
+          tenant,
+          month,
+          expected,
+          expectedCold,
+          payment,
+          received,
+          status,
+        });
       }
       rows.push(row);
     }
@@ -150,7 +165,7 @@ export function MonthOverview({ year }: MonthOverviewProps) {
       });
     } else {
       setForm({
-        amountCold: cell.occupancy.rentCold,
+        amountCold: cell.expectedCold,
         amountUtilities: cell.occupancy.rentUtilities,
         receivedDate: todayIso(),
         method: "transfer",
@@ -344,7 +359,7 @@ export function MonthOverview({ year }: MonthOverviewProps) {
 
             <div className="space-y-3">
               <div className="p-2 bg-surface-muted rounded-lg text-xs text-fg-muted">
-                Soll-Miete: {formatEuro(editingCellData.occupancy.rentCold)} Kaltmiete +{" "}
+                Soll-Miete: {formatEuro(editingCellData.expectedCold)} Kaltmiete +{" "}
                 {formatEuro(editingCellData.occupancy.rentUtilities)} Nebenkosten ={" "}
                 <strong className="text-fg">{formatEuro(editingCellData.expected)}</strong>
               </div>

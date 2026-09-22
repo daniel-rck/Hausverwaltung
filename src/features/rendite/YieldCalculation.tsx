@@ -3,6 +3,7 @@ import { Card } from "../../lib/ui/shared/Card";
 import { cashflow, equityYield, grossYield, netYield } from "../../lib/utils/calc";
 import { currentMonth } from "../../lib/utils/dates";
 import { formatEuro, formatPercent } from "../../lib/utils/format";
+import { buildRentLookup } from "../../lib/utils/rent";
 import type { FinancingData } from "./FinancingInput";
 
 interface YieldCalculationProps {
@@ -34,6 +35,7 @@ export function YieldCalculation({ propertyId }: YieldCalculationProps) {
 
   const annualColdRent = useLiveQuery(async () => {
     const now = currentMonth();
+    const rentAt = buildRentLookup(await db.rentChanges.toArray());
     const units = await db.units.where("propertyId").equals(propertyId).toArray();
     const unitIds = units.map((u) => u.id!);
 
@@ -44,7 +46,7 @@ export function YieldCalculation({ propertyId }: YieldCalculationProps) {
       (o) => unitIds.includes(o.unitId) && o.from <= now && (o.to === null || o.to >= now),
     );
 
-    return active.reduce((sum, o) => sum + o.rentCold * 12, 0);
+    return active.reduce((sum, o) => sum + rentAt(o, now) * 12, 0);
   }, [propertyId]);
 
   if (financing === undefined || annualColdRent === undefined) {

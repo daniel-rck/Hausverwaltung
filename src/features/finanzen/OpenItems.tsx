@@ -7,7 +7,9 @@ import { type Column, DataTable } from "../../lib/ui/shared/DataTable";
 import { EmptyState } from "../../lib/ui/shared/EmptyState";
 import { StatusBadge } from "../../lib/ui/shared/StatusBadge";
 import { CheckCircle2 } from "../../lib/ui/ui/icons";
+import { lastDueMonth } from "../../lib/utils/dates";
 import { formatEuro, formatMonth } from "../../lib/utils/format";
+import { buildRentLookup } from "../../lib/utils/rent";
 
 interface OpenItem {
   id: string;
@@ -49,24 +51,24 @@ export function OpenItems({ year }: OpenItemsProps) {
       paymentMap.set(`${p.occupancyId}-${p.month}`, p);
     }
 
-    return { occupancies, unitMap, tenantMap, paymentMap };
+    const rentChanges = await db.rentChanges.toArray();
+    return { occupancies, unitMap, tenantMap, paymentMap, rentChanges };
   }, [activeProperty?.id]);
 
   const items = useMemo((): OpenItem[] => {
     if (!data) return [];
 
-    const { occupancies, unitMap, tenantMap, paymentMap } = data;
+    const { occupancies, unitMap, tenantMap, paymentMap, rentChanges } = data;
+    const rentAt = buildRentLookup(rentChanges);
     const result: OpenItem[] = [];
 
     const yearStart = `${year}-01`;
     const yearEnd = `${year}-12`;
 
     // Only consider months up to current month
-    const now = new Date();
-    const currentMonth =
-      now.getFullYear() === year
-        ? `${year}-${String(now.getMonth() + 1).padStart(2, "0")}`
-        : yearEnd;
+    // Nur bereits fällige Monate (laufender Monat erst ab dem 4.).
+    const dueUntil = lastDueMonth();
+    const currentMonth = dueUntil < yearEnd ? dueUntil : yearEnd;
 
     for (const occ of occupancies) {
       if (occ.from > yearEnd || (occ.to !== null && occ.to < yearStart)) continue;
@@ -81,7 +83,7 @@ export function OpenItems({ year }: OpenItemsProps) {
         if (month < occ.from) continue;
         if (occ.to !== null && month > occ.to) continue;
 
-        const expected = occ.rentCold + occ.rentUtilities;
+        const expected = rentAt(occ, month) + occ.rentUtilities;
         const payment = paymentMap.get(`${occ.id}-${month}`);
         const received = payment ? payment.amountCold + payment.amountUtilities : 0;
 

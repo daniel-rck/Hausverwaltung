@@ -5,7 +5,9 @@ import type { FinancingData } from "../../lib/db/schema";
 import { Card } from "../../lib/ui/shared/Card";
 import { EmptyState } from "../../lib/ui/shared/EmptyState";
 import { BarChart3 } from "../../lib/ui/ui/icons";
+import { lastDueMonth } from "../../lib/utils/dates";
 import { formatEuro, formatPercent } from "../../lib/utils/format";
+import { buildRentLookup } from "../../lib/utils/rent";
 import { buildYearOptions } from "../../lib/utils/years";
 
 interface AnnualReportProps {
@@ -100,11 +102,10 @@ export function AnnualReport({ propertyId }: AnnualReportProps) {
     let openCount = 0;
     let openSum = 0;
 
-    const now = new Date();
-    const currentMonth =
-      now.getFullYear() === year
-        ? `${year}-${String(now.getMonth() + 1).padStart(2, "0")}`
-        : yearEnd;
+    // Nur bereits fällige Monate (laufender Monat erst ab dem 4.).
+    const dueUntil = lastDueMonth();
+    const currentMonth = dueUntil < yearEnd ? dueUntil : yearEnd;
+    const rentAt = buildRentLookup(await db.rentChanges.toArray());
 
     for (const occ of relevantOccs) {
       for (let m = 1; m <= 12; m++) {
@@ -113,7 +114,7 @@ export function AnnualReport({ propertyId }: AnnualReportProps) {
         if (month < occ.from) continue;
         if (occ.to !== null && month > occ.to) continue;
 
-        const expected = occ.rentCold + occ.rentUtilities;
+        const expected = rentAt(occ, month) + occ.rentUtilities;
         const received = paymentMap.get(`${occ.id}-${month}`) ?? 0;
         if (received < expected) {
           openCount++;

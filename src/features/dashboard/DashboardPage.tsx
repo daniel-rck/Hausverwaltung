@@ -20,6 +20,7 @@ import { Building2, type ModulIconKey, ModulIcons } from "../../lib/ui/ui/icons"
 import { required, useFormValidation } from "../../lib/ui/ui/useFormValidation";
 import { currentMonth } from "../../lib/utils/dates";
 import { formatEuro } from "../../lib/utils/format";
+import { buildRentLookup } from "../../lib/utils/rent";
 import { AlertsList } from "./AlertsList";
 import { AnnualReport } from "./AnnualReport";
 import { QuickStats } from "./QuickStats";
@@ -357,6 +358,7 @@ function PortfolioOverview() {
     let totalUnits = 0;
     let totalOccupied = 0;
     let totalMonthlyRent = 0;
+    const rentAt = buildRentLookup(await db.rentChanges.toArray());
 
     for (const prop of properties) {
       const units = await db.units.where("propertyId").equals(prop.id!).toArray();
@@ -371,7 +373,7 @@ function PortfolioOverview() {
 
       const occupied = new Set(active.map((o) => o.unitId)).size;
       totalOccupied += occupied;
-      totalMonthlyRent += active.reduce((s, o) => s + o.rentCold + o.rentUtilities, 0);
+      totalMonthlyRent += active.reduce((s, o) => s + rentAt(o, now) + o.rentUtilities, 0);
     }
 
     return {
