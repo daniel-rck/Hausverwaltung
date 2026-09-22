@@ -4,11 +4,22 @@ import { cascadeDeleteMeter } from "../../lib/db/cascade";
 import type { Meter, MeterReading, MeterType, Unit } from "../../lib/db/schema";
 import { useProperty } from "../../lib/hooks/useProperty";
 import { Card } from "../../lib/ui/shared/Card";
-import { ConfirmDialog } from "../../lib/ui/shared/ConfirmDialog";
 import { type Column, DataTable } from "../../lib/ui/shared/DataTable";
 import { EmptyState } from "../../lib/ui/shared/EmptyState";
 import { StatusBadge } from "../../lib/ui/shared/StatusBadge";
-import { Gauge } from "../../lib/ui/ui/icons";
+import {
+  Button,
+  FormField,
+  Input,
+  required,
+  Select,
+  Skeleton,
+  useConfirm,
+  useFormValidation,
+  useToast,
+  type ValidationSchema,
+} from "../../lib/ui/ui";
+import { Gauge, Plus } from "../../lib/ui/ui/icons";
 import { formatDate, formatNumber } from "../../lib/utils/format";
 
 interface MeterRow {
@@ -18,14 +29,19 @@ interface MeterRow {
   lastReading: MeterReading | null;
 }
 
-interface MeterFormData {
+type MeterFormData = {
   meterTypeId: string;
   serialNumber: string;
   unitId: string; // '' = Hauptzähler
   installDate: string;
   calibrationDue: string;
   notes: string;
-}
+};
+
+const meterSchema: ValidationSchema<MeterFormData> = {
+  meterTypeId: required("Bitte Zählertyp wählen"),
+  serialNumber: required("Bitte Seriennummer angeben"),
+};
 
 const EMPTY_FORM: MeterFormData = {
   meterTypeId: "",
@@ -41,7 +57,10 @@ export function MeterList() {
   const [showForm, setShowForm] = useState(false);
   const [editMeter, setEditMeter] = useState<Meter | null>(null);
   const [form, setForm] = useState<MeterFormData>(EMPTY_FORM);
-  const [deleteTarget, setDeleteTarget] = useState<Meter | null>(null);
+  const [saving, setSaving] = useState(false);
+  const toast = useToast();
+  const confirm = useConfirm();
+  const { errors, validate, clear } = useFormValidation<MeterFormData>(meterSchema);
 
   const meterTypes = useLiveQuery(() => db.meterTypes.toArray()) ?? [];
 
@@ -61,9 +80,9 @@ export function MeterList() {
       db.meterReadings.toArray(),
     ]);
 
-    const unitIds = new Set(propertyUnits.map((u) => u.id!));
-    const unitMap = new Map(propertyUnits.map((u) => [u.id!, u]));
-    const typeMap = new Map(types.map((t) => [t.id!, t]));
+    const unitMap = new Map(propertyUnits.flatMap((u) => (u.id != null ? [[u.id, u]] : [])));
+    const unitIds = new Set(unitMap.keys());
+    const typeMap = new Map(types.flatMap((t) => (t.id != null ? [[t.id, t]] : [])));
 
     const propertyMeters = allMeters.filter((m) => m.unitId === null || unitIds.has(m.unitId));
 
@@ -84,7 +103,7 @@ export function MeterList() {
         meter,
         meterType: mt,
         unit: meter.unitId ? (unitMap.get(meter.unitId) ?? null) : null,
-        lastReading: lastByMeter.get(meter.id!) ?? null,
+        lastReading: (meter.id != null ? lastByMeter.get(meter.id) : undefined) ?? null,
       });
     }
     return rows;
@@ -96,6 +115,7 @@ export function MeterList() {
   const handleOpenAdd = () => {
     setEditMeter(null);
     setForm(EMPTY_FORM);
+    clear();
     setShowForm(true);
   };
 
@@ -109,11 +129,12 @@ export function MeterList() {
       calibrationDue: meter.calibrationDue ?? "",
       notes: meter.notes ?? "",
     });
+    clear();
     setShowForm(true);
   };
 
   const handleSave = async () => {
-    if (!form.meterTypeId || !form.serialNumber.trim()) return;
+    if (!validate(form)) return;
 
     const data: Omit<Meter, "id"> = {
       meterTypeId: Number(form.meterTypeId),
@@ -124,23 +145,45 @@ export function MeterList() {
       notes: form.notes.trim() || undefined,
     };
 
-    if (editMeter?.id) {
-      await db.meters.put({ ...data, id: editMeter.id });
-    } else {
-      await db.meters.add(data as Meter);
+    setSaving(true);
+    try {
+      if (editMeter?.id) {
+        await db.meters.put({ ...data, id: editMeter.id });
+      } else {
+        await db.meters.add(data as Meter);
+      }
+      toast.success(editMeter ? "Zähler aktualisiert." : "Zähler angelegt.");
+      setShowForm(false);
+      setEditMeter(null);
+      setForm(EMPTY_FORM);
+    } catch (err) {
+      toast.error("Speichern fehlgeschlagen.");
+      console.error(err);
+    } finally {
+      setSaving(false);
     }
-
-    setShowForm(false);
-    setEditMeter(null);
-    setForm(EMPTY_FORM);
   };
 
-  const handleDelete = async () => {
-    if (!deleteTarget?.id) return;
-    await cascadeDeleteMeter(deleteTarget.id);
-    setDeleteTarget(null);
-    setShowForm(false);
-    setEditMeter(null);
+  const handleDelete = async (meter: Meter) => {
+    if (meter.id == null) return;
+    const ok = await confirm({
+      title: "Zähler löschen?",
+      message: `Der Zähler „${meter.serialNumber}“ wird gelöscht. Alle zugehörigen Ablesungen werden ebenfalls gelöscht.`,
+      confirmLabel: "Löschen",
+      danger: true,
+    });
+    if (!ok) return;
+    try {
+      await cascadeDeleteMeter(meter.id);
+      toast.success("Zähler gelöscht.");
+      if (editMeter?.id === meter.id) {
+        setShowForm(false);
+        setEditMeter(null);
+      }
+    } catch (err) {
+      toast.error("Löschen fehlgeschlagen.");
+      console.error(err);
+    }
   };
 
   const getCalibrationStatus = (
@@ -213,195 +256,166 @@ export function MeterList() {
       header: "",
       render: (r) => (
         <div className="flex gap-2">
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={(e) => {
               e.stopPropagation();
               handleOpenEdit(r.meter);
             }}
-            className="text-xs text-fg-subtle hover:text-fg"
           >
             Bearbeiten
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
+            variant="dangerGhost"
+            size="sm"
             onClick={(e) => {
               e.stopPropagation();
-              setDeleteTarget(r.meter);
+              void handleDelete(r.meter);
             }}
-            className="text-xs text-red-400 hover:text-red-600"
           >
             Löschen
-          </button>
+          </Button>
         </div>
       ),
     },
   ];
 
   const formContent = (
-    <div className="mb-4 p-4 bg-surface-muted rounded-lg border border-border">
+    <form
+      noValidate
+      className="mb-4 p-4 bg-surface-muted rounded-lg border border-border"
+      onSubmit={(e) => {
+        e.preventDefault();
+        void handleSave();
+      }}
+    >
       <h3 className="text-sm font-semibold text-fg mb-3">
         {editMeter ? "Zähler bearbeiten" : "Neuer Zähler"}
       </h3>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-        <div>
-          <label className="block">
-            <span className="block text-xs font-medium text-fg-muted mb-1">Zählertyp *</span>
-            <select
-              value={form.meterTypeId}
-              onChange={(e) => setForm({ ...form, meterTypeId: e.target.value })}
-              className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
-            >
-              <option value="">– Typ wählen –</option>
-              {meterTypes.map((mt) => (
-                <option key={mt.id!} value={mt.id!}>
-                  {mt.name} ({mt.unit})
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-        <div>
-          <label className="block">
-            <span className="block text-xs font-medium text-fg-muted mb-1">Seriennummer *</span>
-            <input
-              type="text"
-              value={form.serialNumber}
-              onChange={(e) => setForm({ ...form, serialNumber: e.target.value })}
-              placeholder="z.B. WZ-2024-001"
-              className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
-            />
-          </label>
-        </div>
-        <div>
-          <label className="block">
-            <span className="block text-xs font-medium text-fg-muted mb-1">Zuordnung</span>
-            <select
-              value={form.unitId}
-              onChange={(e) => setForm({ ...form, unitId: e.target.value })}
-              className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
-            >
-              <option value="">Hauptzähler (kein Wohnungsbezug)</option>
-              {units.map((u) => (
-                <option key={u.id!} value={u.id!}>
-                  {u.name}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-        <div>
-          <label className="block">
-            <span className="block text-xs font-medium text-fg-muted mb-1">Einbaudatum</span>
-            <input
-              type="date"
-              value={form.installDate}
-              onChange={(e) => setForm({ ...form, installDate: e.target.value })}
-              className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
-            />
-          </label>
-        </div>
-        <div>
-          <label className="block">
-            <span className="block text-xs font-medium text-fg-muted mb-1">Eichfrist bis</span>
-            <input
-              type="date"
-              value={form.calibrationDue}
-              onChange={(e) => setForm({ ...form, calibrationDue: e.target.value })}
-              className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
-            />
-          </label>
-        </div>
-        <div>
-          <label className="block">
-            <span className="block text-xs font-medium text-fg-muted mb-1">Notizen</span>
-            <input
-              type="text"
-              value={form.notes}
-              onChange={(e) => setForm({ ...form, notes: e.target.value })}
-              placeholder="Optionale Bemerkungen"
-              className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
-            />
-          </label>
-        </div>
+        <FormField label="Zählertyp" required error={errors.meterTypeId}>
+          <Select
+            value={form.meterTypeId}
+            onChange={(e) => setForm({ ...form, meterTypeId: e.target.value })}
+          >
+            <option value="">– Typ wählen –</option>
+            {meterTypes.flatMap((mt) =>
+              mt.id != null
+                ? [
+                    <option key={mt.id} value={mt.id}>
+                      {mt.name} ({mt.unit})
+                    </option>,
+                  ]
+                : [],
+            )}
+          </Select>
+        </FormField>
+        <FormField label="Seriennummer" required error={errors.serialNumber}>
+          <Input
+            value={form.serialNumber}
+            onChange={(e) => setForm({ ...form, serialNumber: e.target.value })}
+            placeholder="z.B. WZ-2024-001"
+          />
+        </FormField>
+        <FormField label="Zuordnung">
+          <Select
+            value={form.unitId}
+            onChange={(e) => setForm({ ...form, unitId: e.target.value })}
+          >
+            <option value="">Hauptzähler (kein Wohnungsbezug)</option>
+            {units.flatMap((u) =>
+              u.id != null
+                ? [
+                    <option key={u.id} value={u.id}>
+                      {u.name}
+                    </option>,
+                  ]
+                : [],
+            )}
+          </Select>
+        </FormField>
+        <FormField label="Einbaudatum">
+          <Input
+            type="date"
+            value={form.installDate}
+            onChange={(e) => setForm({ ...form, installDate: e.target.value })}
+          />
+        </FormField>
+        <FormField label="Eichfrist bis">
+          <Input
+            type="date"
+            value={form.calibrationDue}
+            onChange={(e) => setForm({ ...form, calibrationDue: e.target.value })}
+          />
+        </FormField>
+        <FormField label="Notizen">
+          <Input
+            value={form.notes}
+            onChange={(e) => setForm({ ...form, notes: e.target.value })}
+            placeholder="Optionale Bemerkungen"
+          />
+        </FormField>
       </div>
       <div className="flex gap-2 mt-3">
-        <button
-          type="button"
-          onClick={handleSave}
-          disabled={!form.meterTypeId || !form.serialNumber.trim()}
-          className="px-4 py-1.5 text-sm bg-fg text-surface rounded-lg hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
+        <Button type="submit" variant="primary" size="sm" loading={saving}>
           Speichern
-        </button>
-        <button
-          type="button"
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
           onClick={() => {
             setShowForm(false);
             setEditMeter(null);
           }}
-          className="px-4 py-1.5 text-sm border border-border text-fg-muted rounded-lg hover:bg-surface-muted transition-colors"
         >
           Abbrechen
-        </button>
+        </Button>
       </div>
-    </div>
+    </form>
   );
 
+  const meterKey = (r: MeterRow) => r.meter.id ?? r.meter.serialNumber;
+
   return (
-    <>
-      <Card
-        title="Zähler-Übersicht"
-        action={
-          <button
-            type="button"
-            onClick={handleOpenAdd}
-            className="text-sm px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-          >
-            + Zähler
-          </button>
-        }
-      >
-        {showForm && formContent}
+    <Card
+      title="Zähler-Übersicht"
+      action={
+        <Button variant="primary" size="sm" leftIcon={<Plus size={14} />} onClick={handleOpenAdd}>
+          Zähler
+        </Button>
+      }
+    >
+      {showForm && formContent}
 
-        {hauptzaehler.length > 0 && (
-          <div className="mb-4">
-            <h3 className="text-xs font-semibold text-fg-muted uppercase tracking-wide mb-2">
-              Hauptzähler
-            </h3>
-            <DataTable columns={makeColumns()} data={hauptzaehler} keyFn={(r) => r.meter.id!} />
-          </div>
-        )}
+      {meterRows === undefined && <Skeleton height="8rem" />}
 
-        {wohnungszaehler.length > 0 && (
-          <div>
-            <h3 className="text-xs font-semibold text-fg-muted uppercase tracking-wide mb-2">
-              Wohnungszähler
-            </h3>
-            <DataTable columns={makeColumns()} data={wohnungszaehler} keyFn={(r) => r.meter.id!} />
-          </div>
-        )}
+      {hauptzaehler.length > 0 && (
+        <div className="mb-4">
+          <h3 className="text-xs font-semibold text-fg-muted uppercase tracking-wide mb-2">
+            Hauptzähler
+          </h3>
+          <DataTable columns={makeColumns()} data={hauptzaehler} keyFn={meterKey} />
+        </div>
+      )}
 
-        {(!meterRows || meterRows.length === 0) && !showForm && (
-          <EmptyState
-            icon={<Gauge size={24} strokeWidth={1.75} />}
-            title="Keine Zähler"
-            description="Legen Sie Ihre Zähler an, um Ablesungen zu erfassen."
-            action={{ label: "Zähler anlegen", onClick: handleOpenAdd }}
-          />
-        )}
-      </Card>
+      {wohnungszaehler.length > 0 && (
+        <div>
+          <h3 className="text-xs font-semibold text-fg-muted uppercase tracking-wide mb-2">
+            Wohnungszähler
+          </h3>
+          <DataTable columns={makeColumns()} data={wohnungszaehler} keyFn={meterKey} />
+        </div>
+      )}
 
-      <ConfirmDialog
-        open={deleteTarget !== null}
-        title="Zähler löschen"
-        message={`Möchten Sie den Zähler „${deleteTarget?.serialNumber ?? ""}" wirklich löschen? Alle zugehörigen Ablesungen werden ebenfalls gelöscht.`}
-        confirmLabel="Löschen"
-        cancelLabel="Abbrechen"
-        danger
-        onConfirm={handleDelete}
-        onCancel={() => setDeleteTarget(null)}
-      />
-    </>
+      {meterRows && meterRows.length === 0 && !showForm && (
+        <EmptyState
+          icon={<Gauge size={24} strokeWidth={1.75} />}
+          title="Keine Zähler"
+          description="Legen Sie Ihre Zähler an, um Ablesungen zu erfassen."
+          action={{ label: "Zähler anlegen", onClick: handleOpenAdd }}
+        />
+      )}
+    </Card>
   );
 }

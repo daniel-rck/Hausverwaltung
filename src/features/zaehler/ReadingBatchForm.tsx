@@ -4,6 +4,16 @@ import type { MeterReading, MeterType } from "../../lib/db/schema";
 import { useProperty } from "../../lib/hooks/useProperty";
 import { Card } from "../../lib/ui/shared/Card";
 import { NumInput } from "../../lib/ui/shared/NumInput";
+import {
+  Button,
+  FormField,
+  IconButton,
+  Input,
+  Select,
+  useConfirm,
+  useToast,
+} from "../../lib/ui/ui";
+import { Plus, X } from "../../lib/ui/ui/icons";
 import { YEAR_RANGE_BACK } from "../../lib/utils/years";
 import {
   buildReadingsFromRows,
@@ -19,9 +29,6 @@ interface ReadingBatchFormProps {
   onMeterChange: (meterId: number | null) => void;
 }
 
-const INPUT_CLASS =
-  "w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500";
-
 function makeInitialRows(): ReadingBatchRow[] {
   return [makeEmptyRow(), makeEmptyRow(), makeEmptyRow()];
 }
@@ -36,6 +43,9 @@ export function ReadingBatchForm({ selectedMeterId, onMeterChange }: ReadingBatc
   const [rows, setRows] = useState<ReadingBatchRow[]>(makeInitialRows);
   const [saving, setSaving] = useState(false);
   const [result, setResult] = useState<{ added: number; skipped: number } | null>(null);
+  const [meterError, setMeterError] = useState<string | null>(null);
+  const toast = useToast();
+  const confirm = useConfirm();
 
   const meterOptions = useMeterOptions(activeProperty?.id);
 
@@ -51,13 +61,43 @@ export function ReadingBatchForm({ selectedMeterId, onMeterChange }: ReadingBatc
     setResult(null);
   };
 
-  const removeRow = (key: string) => {
-    setRows((prev) => prev.filter((r) => r.key !== key));
+  const removeRow = async (row: ReadingBatchRow) => {
+    if (isReadingRowFilled(row)) {
+      const ok = await confirm({
+        title: "Zeile entfernen?",
+        message: "Die eingegebene Ablesung in dieser Zeile wird verworfen.",
+        confirmLabel: "Entfernen",
+        danger: true,
+      });
+      if (!ok) return;
+    }
+    setRows((prev) => prev.filter((r) => r.key !== row.key));
+    setResult(null);
+  };
+
+  const prefillYearEnds = async () => {
+    if (rows.some(isReadingRowFilled)) {
+      const ok = await confirm({
+        title: "Zeilen ersetzen?",
+        message: "Die bereits eingegebenen Zeilen werden durch leere Jahresend-Zeilen ersetzt.",
+        confirmLabel: "Ersetzen",
+        danger: true,
+      });
+      if (!ok) return;
+    }
+    setRows(buildYearEndRows({ years: YEAR_RANGE_BACK }));
     setResult(null);
   };
 
   const handleSave = async () => {
-    if (!selectedMeterId) return;
+    if (!selectedMeterId) {
+      setMeterError("Bitte Zähler wählen");
+      return;
+    }
+    if (!rows.some(isReadingRowFilled)) {
+      toast.warning("Bitte mindestens eine Zeile mit Datum und Zählerstand ausfüllen.");
+      return;
+    }
     setSaving(true);
     try {
       const existing = await db.meterReadings
@@ -76,111 +116,112 @@ export function ReadingBatchForm({ selectedMeterId, onMeterChange }: ReadingBatc
       }
       setRows(makeInitialRows());
       setResult({ added: toAdd.length, skipped: skippedDuplicates });
+      toast.success(
+        `${toAdd.length} ${toAdd.length === 1 ? "Ablesung" : "Ablesungen"} gespeichert.`,
+      );
+    } catch (err) {
+      toast.error("Speichern fehlgeschlagen.");
+      console.error(err);
     } finally {
       setSaving(false);
     }
   };
 
-  const hasFilledRow = rows.some(isReadingRowFilled);
-
   return (
     <Card title="Ablesungen im Batch erfassen">
-      <div className="space-y-4">
+      <form
+        noValidate
+        className="space-y-4"
+        onSubmit={(e) => {
+          e.preventDefault();
+          void handleSave();
+        }}
+      >
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label className="block">
-              <span className="block text-xs font-medium text-fg-muted mb-1">Zähler *</span>
-              <select
-                value={selectedMeterId ?? ""}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  onMeterChange(val ? Number(val) : null);
-                }}
-                className={INPUT_CLASS}
-              >
-                <option value="">– Zähler wählen –</option>
-                {(meterOptions ?? []).map((opt) => (
-                  <option key={opt.meter.id!} value={opt.meter.id!}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-          <div>
-            <label className="block">
-              <span className="block text-xs font-medium text-fg-muted mb-1">Quelle *</span>
-              <select
-                value={source}
-                onChange={(e) => setSource(e.target.value as MeterReading["source"])}
-                className={INPUT_CLASS}
-              >
-                {Object.entries(SOURCE_LABELS).map(([value, label]) => (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
+          <FormField label="Zähler" required error={meterError ?? undefined}>
+            <Select
+              value={selectedMeterId ?? ""}
+              onChange={(e) => {
+                const val = e.target.value;
+                setMeterError(null);
+                onMeterChange(val ? Number(val) : null);
+              }}
+            >
+              <option value="">– Zähler wählen –</option>
+              {(meterOptions ?? []).flatMap((opt) =>
+                opt.meter.id != null
+                  ? [
+                      <option key={opt.meter.id} value={opt.meter.id}>
+                        {opt.label}
+                      </option>,
+                    ]
+                  : [],
+              )}
+            </Select>
+          </FormField>
+          <FormField label="Quelle" required>
+            <Select
+              value={source}
+              onChange={(e) => setSource(e.target.value as MeterReading["source"])}
+            >
+              {Object.entries(SOURCE_LABELS).map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </Select>
+          </FormField>
         </div>
 
         <div className="space-y-2">
           {rows.map((row) => (
             <div key={row.key} className="flex items-end gap-2">
               <div className="flex-1">
-                <label className="block">
-                  <span className="block text-xs font-medium text-fg-muted mb-1">Datum</span>
-                  <input
+                <FormField label="Datum">
+                  <Input
                     type="date"
                     value={row.date}
                     onChange={(e) => updateRow(row.key, { date: e.target.value })}
-                    className={INPUT_CLASS}
                   />
-                </label>
+                </FormField>
               </div>
               <div className="flex-1">
-                <NumInput
-                  value={row.value}
-                  onChange={(v) => updateRow(row.key, { value: v })}
-                  label="Zählerstand"
-                  suffix={selectedMeterType?.unit}
-                  min={0}
+                <FormField label="Zählerstand">
+                  <NumInput
+                    value={row.value}
+                    onChange={(v) => updateRow(row.key, { value: v })}
+                    suffix={selectedMeterType?.unit}
+                    min={0}
+                    decimals={3}
+                  />
+                </FormField>
+              </div>
+              <div className="pb-5">
+                <IconButton
+                  aria-label="Zeile entfernen"
+                  icon={<X size={16} />}
+                  onClick={() => void removeRow(row)}
                 />
               </div>
-              <button
-                type="button"
-                onClick={() => removeRow(row.key)}
-                className="px-3 py-1.5 text-sm text-red-500 hover:text-red-700 border border-border rounded-lg"
-                title="Zeile entfernen"
-              >
-                ✕
-              </button>
             </div>
           ))}
         </div>
 
         <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
+          <Button
+            variant="outline"
+            size="sm"
+            leftIcon={<Plus size={14} />}
             onClick={() => {
               setRows((prev) => [...prev, makeEmptyRow()]);
               setResult(null);
             }}
-            className="px-3 py-1.5 text-sm border border-border rounded-lg text-fg hover:bg-surface-muted transition-colors"
           >
             Zeile hinzufügen
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setRows(buildYearEndRows({ years: YEAR_RANGE_BACK }));
-              setResult(null);
-            }}
-            className="px-3 py-1.5 text-sm border border-border rounded-lg text-fg hover:bg-surface-muted transition-colors"
-          >
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => void prefillYearEnds()}>
             Jahresenden vorbefüllen (letzte {YEAR_RANGE_BACK} Jahre)
-          </button>
+          </Button>
         </div>
 
         <p className="text-xs text-fg-muted">
@@ -189,14 +230,9 @@ export function ReadingBatchForm({ selectedMeterId, onMeterChange }: ReadingBatc
         </p>
 
         <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={!selectedMeterId || !hasFilledRow || saving}
-            className="px-4 py-1.5 text-sm bg-fg text-surface rounded-lg hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {saving ? "Speichere..." : "Ablesungen speichern"}
-          </button>
+          <Button type="submit" variant="primary" loading={saving}>
+            Ablesungen speichern
+          </Button>
           {result && (
             <span className="text-sm text-fg-muted">
               {result.added} gespeichert
@@ -204,7 +240,7 @@ export function ReadingBatchForm({ selectedMeterId, onMeterChange }: ReadingBatc
             </span>
           )}
         </div>
-      </div>
+      </form>
     </Card>
   );
 }
