@@ -1,17 +1,26 @@
 import { db, useLiveQuery } from "../../lib/db";
+import { isMaintenanceForProperty } from "../../lib/db/queries";
 import { useProperty } from "../../lib/hooks/useProperty";
 import { Card } from "../../lib/ui/shared/Card";
+import { Skeleton } from "../../lib/ui/ui";
 import type { LucideIcon } from "../../lib/ui/ui/icons";
 import { AlertTriangle, Gauge, Home, Wrench } from "../../lib/ui/ui/icons";
+import { currentMonth, isoInDays, todayIso } from "../../lib/utils/dates";
+import { formatDate } from "../../lib/utils/format";
 
 type AlertKind = "vacant" | "maintenance" | "calibration";
 type Severity = "warning" | "info";
 
-interface Alert {
+type Alert = {
   kind: AlertKind;
   severity: Severity;
   message: string;
-}
+};
+
+const SEVERITY_LABEL: Record<Severity, string> = {
+  warning: "Warnung",
+  info: "Hinweis",
+};
 
 const iconMap: Record<AlertKind, LucideIcon> = {
   vacant: Home,
@@ -26,11 +35,12 @@ export function AlertsList() {
     if (!activeProperty?.id) return [];
 
     const result: Alert[] = [];
-    const now = new Date().toISOString().slice(0, 7);
-    const today = new Date().toISOString().slice(0, 10);
+    const now = currentMonth();
+    const today = todayIso();
 
-    const units = await db.units.where("propertyId").equals(activeProperty.id).toArray();
-    const unitIds = units.map((u) => u.id!);
+    const propertyId = activeProperty.id;
+    const units = await db.units.where("propertyId").equals(propertyId).toArray();
+    const unitIds = units.flatMap((u) => (u.id === undefined ? [] : [u.id]));
 
     // Leerstand
     const occupancies = await db.occupancies.toArray();
@@ -42,7 +52,7 @@ export function AlertsList() {
         .map((o) => o.unitId),
     );
 
-    const vacantUnits = units.filter((u) => !occupiedIds.has(u.id!));
+    const vacantUnits = units.filter((u) => u.id !== undefined && !occupiedIds.has(u.id));
     for (const u of vacantUnits) {
       result.push({ kind: "vacant", severity: "warning", message: `${u.name} steht leer` });
     }
@@ -51,15 +61,15 @@ export function AlertsList() {
     const maintenance = await db.maintenanceItems.toArray();
     const dueSoon = maintenance.filter(
       (m) =>
-        m.nextDue &&
-        m.nextDue <= new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10) &&
-        m.nextDue >= today,
+        m.nextDue && m.nextDue <= isoInDays(30) && isMaintenanceForProperty(m, propertyId, unitIds),
     );
     for (const m of dueSoon) {
+      const due = m.nextDue ?? "";
+      const overdue = due < today;
       result.push({
         kind: "maintenance",
-        severity: "info",
-        message: `${m.title} fällig am ${m.nextDue}`,
+        severity: overdue ? "warning" : "info",
+        message: `${m.title} ${overdue ? "überfällig seit" : "fällig am"} ${formatDate(due)}`,
       });
     }
 
@@ -68,20 +78,32 @@ export function AlertsList() {
     const soonExpiring = meters.filter(
       (m) =>
         m.calibrationDue &&
-        m.calibrationDue <= new Date(Date.now() + 90 * 86400000).toISOString().slice(0, 10),
+        m.calibrationDue <= isoInDays(90) &&
+        (m.unitId === null || unitIds.includes(m.unitId)),
     );
     for (const m of soonExpiring) {
       result.push({
         kind: "calibration",
         severity: "warning",
-        message: `Zähler ${m.serialNumber}: Eichfrist läuft ab (${m.calibrationDue})`,
+        message: `Zähler ${m.serialNumber}: Eichfrist ${(m.calibrationDue ?? "") < today ? "abgelaufen" : "läuft ab"} (${formatDate(m.calibrationDue ?? "")})`,
       });
     }
 
     return result;
   }, [activeProperty?.id]);
 
-  if (!alerts || alerts.length === 0) {
+  if (alerts === undefined) {
+    return (
+      <Card title="Heute zu tun">
+        <div className="space-y-2">
+          <Skeleton variant="text" width="70%" />
+          <Skeleton variant="text" width="55%" />
+        </div>
+      </Card>
+    );
+  }
+
+  if (alerts.length === 0) {
     return (
       <Card title="Heute zu tun">
         <p className="text-sm text-fg-muted">Alles erledigt — keine offenen Hinweise.</p>
@@ -98,9 +120,7 @@ export function AlertsList() {
         {alerts.slice(0, 8).map((alert) => {
           const Icon = iconMap[alert.kind] ?? AlertTriangle;
           const iconColor =
-            alert.severity === "warning"
-              ? "text-amber-600 dark:text-amber-400"
-              : "text-[--color-accent] dark:text-[--color-accent-dark]";
+            alert.severity === "warning" ? "text-warning" : "text-accent dark:text-accent-dark";
           return (
             <li key={alert.message} className="flex items-start gap-3 text-sm text-fg">
               <Icon
@@ -109,7 +129,10 @@ export function AlertsList() {
                 className={`mt-0.5 shrink-0 ${iconColor}`}
                 aria-hidden="true"
               />
-              <span className="min-w-0">{alert.message}</span>
+              <span className="min-w-0">
+                <span className="sr-only">{SEVERITY_LABEL[alert.severity]}: </span>
+                {alert.message}
+              </span>
             </li>
           );
         })}

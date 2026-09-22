@@ -21,9 +21,9 @@ export function KpiTile({ label, value, hint, accent, delta, loading = false }: 
     delta?.trend === "up" ? TrendingUp : delta?.trend === "down" ? TrendingDown : Minus;
   const trendColor =
     delta?.trend === "up"
-      ? "text-green-600 dark:text-green-400"
+      ? "text-success-fg"
       : delta?.trend === "down"
-        ? "text-red-600 dark:text-red-400"
+        ? "text-danger-fg"
         : "text-fg-muted";
 
   return (

@@ -6,8 +6,11 @@ import { Card } from "../../lib/ui/shared/Card";
 import { type Column, DataTable } from "../../lib/ui/shared/DataTable";
 import { EmptyState } from "../../lib/ui/shared/EmptyState";
 import { StatusBadge } from "../../lib/ui/shared/StatusBadge";
+import { Skeleton } from "../../lib/ui/ui";
 import { CheckCircle2 } from "../../lib/ui/ui/icons";
+import { lastDueMonth } from "../../lib/utils/dates";
 import { formatEuro, formatMonth } from "../../lib/utils/format";
+import { buildRentLookup } from "../../lib/utils/rent";
 
 interface OpenItem {
   id: string;
@@ -33,15 +36,21 @@ export function OpenItems({ year }: OpenItemsProps) {
 
     const units = await db.units.where("propertyId").equals(activeProperty.id).toArray();
 
-    const unitIds = units.map((u) => u.id!);
+    const unitIds = units.flatMap((u) => (u.id != null ? [u.id] : []));
     const allOccupancies = await db.occupancies.toArray();
     const occupancies = allOccupancies.filter((o) => unitIds.includes(o.unitId));
 
     const tenantIds = [...new Set(occupancies.map((o) => o.tenantId))];
     const tenants = await db.tenants.bulkGet(tenantIds);
-    const tenantMap = new Map(tenants.filter(Boolean).map((t) => [t!.id!, t!]));
+    const tenantMap = new Map<number, Tenant>();
+    for (const t of tenants) {
+      if (t?.id != null) tenantMap.set(t.id, t);
+    }
 
-    const unitMap = new Map(units.map((u) => [u.id!, u]));
+    const unitMap = new Map<number, Unit>();
+    for (const u of units) {
+      if (u.id != null) unitMap.set(u.id, u);
+    }
 
     const allPayments = await db.payments.toArray();
     const paymentMap = new Map<string, Payment>();
@@ -49,24 +58,24 @@ export function OpenItems({ year }: OpenItemsProps) {
       paymentMap.set(`${p.occupancyId}-${p.month}`, p);
     }
 
-    return { occupancies, unitMap, tenantMap, paymentMap };
+    const rentChanges = await db.rentChanges.toArray();
+    return { occupancies, unitMap, tenantMap, paymentMap, rentChanges };
   }, [activeProperty?.id]);
 
   const items = useMemo((): OpenItem[] => {
     if (!data) return [];
 
-    const { occupancies, unitMap, tenantMap, paymentMap } = data;
+    const { occupancies, unitMap, tenantMap, paymentMap, rentChanges } = data;
+    const rentAt = buildRentLookup(rentChanges);
     const result: OpenItem[] = [];
 
     const yearStart = `${year}-01`;
     const yearEnd = `${year}-12`;
 
     // Only consider months up to current month
-    const now = new Date();
-    const currentMonth =
-      now.getFullYear() === year
-        ? `${year}-${String(now.getMonth() + 1).padStart(2, "0")}`
-        : yearEnd;
+    // Nur bereits fällige Monate (laufender Monat erst ab dem 4.).
+    const dueUntil = lastDueMonth();
+    const currentMonth = dueUntil < yearEnd ? dueUntil : yearEnd;
 
     for (const occ of occupancies) {
       if (occ.from > yearEnd || (occ.to !== null && occ.to < yearStart)) continue;
@@ -81,7 +90,7 @@ export function OpenItems({ year }: OpenItemsProps) {
         if (month < occ.from) continue;
         if (occ.to !== null && month > occ.to) continue;
 
-        const expected = occ.rentCold + occ.rentUtilities;
+        const expected = rentAt(occ, month) + occ.rentUtilities;
         const payment = paymentMap.get(`${occ.id}-${month}`);
         const received = payment ? payment.amountCold + payment.amountUtilities : 0;
 
@@ -106,6 +115,18 @@ export function OpenItems({ year }: OpenItemsProps) {
 
     return result;
   }, [data, year]);
+
+  if (data === undefined) {
+    return (
+      <Card title="Offene Posten">
+        <div className="space-y-2">
+          <Skeleton height="2rem" />
+          <Skeleton height="2rem" />
+          <Skeleton height="2rem" />
+        </div>
+      </Card>
+    );
+  }
 
   if (!data) return null;
 
@@ -147,7 +168,7 @@ export function OpenItems({ year }: OpenItemsProps) {
       header: "Differenz",
       align: "right",
       render: (row) => (
-        <span className="font-mono font-medium text-red-600">{formatEuro(row.difference)}</span>
+        <span className="font-mono font-medium text-danger-fg">{formatEuro(row.difference)}</span>
       ),
       sortValue: (row) => row.difference,
     },
@@ -167,7 +188,7 @@ export function OpenItems({ year }: OpenItemsProps) {
       title="Offene Posten"
       action={
         items.length > 0 ? (
-          <span className="text-sm font-medium text-red-600">
+          <span className="text-sm font-medium text-danger-fg">
             Gesamt offen: {formatEuro(totalDifference)}
           </span>
         ) : undefined

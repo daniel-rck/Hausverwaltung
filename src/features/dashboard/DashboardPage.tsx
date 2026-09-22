@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { Link } from "react-router-dom";
 import { db, useLiveQuery } from "../../lib/db";
 import { seedDatabase } from "../../lib/db/seed";
@@ -18,18 +18,20 @@ import {
 } from "../../lib/ui/ui";
 import { Building2, type ModulIconKey, ModulIcons } from "../../lib/ui/ui/icons";
 import { required, useFormValidation } from "../../lib/ui/ui/useFormValidation";
+import { currentMonth } from "../../lib/utils/dates";
 import { formatEuro } from "../../lib/utils/format";
+import { buildRentLookup } from "../../lib/utils/rent";
 import { AlertsList } from "./AlertsList";
 import { AnnualReport } from "./AnnualReport";
 import { QuickStats } from "./QuickStats";
 
-interface ModuleLink {
+type ModuleLink = {
   path: string;
   label: string;
   iconKey: ModulIconKey;
   desc: string;
   accent: ModulKey;
-}
+};
 
 const moduleLinks: ModuleLink[] = [
   {
@@ -141,7 +143,7 @@ export function DashboardPage() {
               <Link
                 key={m.path}
                 to={m.path}
-                className="group block bg-surface rounded-lg border border-border p-4 transition-colors hover:border-border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[--color-accent]/40 dark:focus-visible:ring-offset-zinc-950"
+                className="group block bg-surface rounded-lg border border-border p-4 transition-colors hover:border-border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-accent/40 focus-visible:ring-offset-surface"
               >
                 <span
                   aria-hidden="true"
@@ -158,7 +160,7 @@ export function DashboardPage() {
       </div>
 
       {/* Jahresabschluss */}
-      <AnnualReport propertyId={activeProperty.id!} />
+      {activeProperty.id !== undefined && <AnnualReport propertyId={activeProperty.id} />}
 
       {/* Portfolio-Übersicht wenn mehrere Objekte */}
       {properties.length > 1 && <PortfolioOverview />}
@@ -211,9 +213,9 @@ function PropertyCard() {
       confirmLabel: "Endgültig löschen",
       danger: true,
     });
-    if (!ok) return;
+    if (!ok || activeProperty.id === undefined) return;
     try {
-      await deleteProperty(activeProperty.id!);
+      await deleteProperty(activeProperty.id);
       toast.success("Objekt gelöscht.");
     } catch (err) {
       toast.error("Löschen fehlgeschlagen.");
@@ -238,7 +240,14 @@ function PropertyCard() {
 
   return (
     <Card title="Objekt bearbeiten">
-      <div className="space-y-3">
+      <form
+        className="space-y-3"
+        noValidate
+        onSubmit={(e) => {
+          e.preventDefault();
+          void handleSave();
+        }}
+      >
         <FormField label="Name" required error={errors.name}>
           <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
         </FormField>
@@ -249,7 +258,7 @@ function PropertyCard() {
           />
         </FormField>
         <div className="flex gap-2">
-          <Button variant="primary" onClick={handleSave} loading={busy}>
+          <Button type="submit" variant="primary" loading={busy}>
             Speichern
           </Button>
           <Button variant="secondary" onClick={() => setEditing(false)} disabled={busy}>
@@ -257,27 +266,28 @@ function PropertyCard() {
           </Button>
           {properties.length > 1 && (
             <div className="ml-auto">
-              <Button variant="danger" size="sm" onClick={handleDelete}>
+              <Button variant="danger" size="sm" onClick={() => void handleDelete()}>
                 Objekt löschen
               </Button>
             </div>
           )}
         </div>
-      </div>
+      </form>
     </Card>
   );
 }
 
-interface WelcomeModalProps {
+type WelcomeModalProps = {
   open: boolean;
   onClose: () => void;
   onCreate: (data: { name: string; address: string; units: number }) => Promise<void>;
-}
+};
 
 function WelcomeModal({ open, onClose, onCreate }: WelcomeModalProps) {
   const [form, setForm] = useState({ name: "", address: "", units: 1 });
   const [busy, setBusy] = useState(false);
   const toast = useToast();
+  const formId = useId();
   const { errors, validate } = useFormValidation<typeof form>({
     name: required("Bitte Name angeben"),
   });
@@ -312,18 +322,26 @@ function WelcomeModal({ open, onClose, onCreate }: WelcomeModalProps) {
           <Button variant="secondary" onClick={onClose} disabled={busy}>
             Abbrechen
           </Button>
-          <Button variant="primary" onClick={handleCreate} loading={busy}>
+          <Button type="submit" form={formId} variant="primary" loading={busy}>
             Objekt anlegen
           </Button>
         </>
       }
     >
-      <div className="space-y-3">
+      <form
+        id={formId}
+        className="space-y-3"
+        noValidate
+        onSubmit={(e) => {
+          e.preventDefault();
+          void handleCreate();
+        }}
+      >
         <FormField label="Name" required error={errors.name}>
           <Input
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
-            placeholder="z.B. Hauptstr. 12"
+            placeholder="z. B. Hauptstr. 12"
             autoFocus
           />
         </FormField>
@@ -337,12 +355,14 @@ function WelcomeModal({ open, onClose, onCreate }: WelcomeModalProps) {
         <FormField label="Anzahl Wohneinheiten" hint="optional">
           <Input
             type="number"
+            inputMode="numeric"
             min={0}
+            step={1}
             value={form.units}
             onChange={(e) => setForm({ ...form, units: Number(e.target.value) })}
           />
         </FormField>
-      </div>
+      </form>
     </Modal>
   );
 }
@@ -352,15 +372,17 @@ function PortfolioOverview() {
   const { properties } = useProperty();
 
   const portfolioData = useLiveQuery(async () => {
-    const now = new Date().toISOString().slice(0, 7);
+    const now = currentMonth();
     let totalUnits = 0;
     let totalOccupied = 0;
     let totalMonthlyRent = 0;
+    const rentAt = buildRentLookup(await db.rentChanges.toArray());
 
     for (const prop of properties) {
-      const units = await db.units.where("propertyId").equals(prop.id!).toArray();
+      if (prop.id === undefined) continue;
+      const units = await db.units.where("propertyId").equals(prop.id).toArray();
 
-      const unitIds = units.map((u) => u.id!);
+      const unitIds = units.map((u) => u.id);
       totalUnits += units.length;
 
       const occupancies = await db.occupancies.toArray();
@@ -370,7 +392,7 @@ function PortfolioOverview() {
 
       const occupied = new Set(active.map((o) => o.unitId)).size;
       totalOccupied += occupied;
-      totalMonthlyRent += active.reduce((s, o) => s + o.rentCold + o.rentUtilities, 0);
+      totalMonthlyRent += active.reduce((s, o) => s + rentAt(o, now) + o.rentUtilities, 0);
     }
 
     return {
@@ -382,7 +404,19 @@ function PortfolioOverview() {
     };
   }, [properties]);
 
-  if (!portfolioData) return null;
+  if (!portfolioData) {
+    return (
+      <Card title="Portfolio-Übersicht" description="Alle Objekte zusammengefasst">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+          {["Objekte", "Wohneinheiten", "Vermietet", "Leerstand", "Monatsmiete gesamt"].map(
+            (label) => (
+              <KpiTile key={label} label={label} value="" loading />
+            ),
+          )}
+        </div>
+      </Card>
+    );
+  }
 
   return (
     <Card title="Portfolio-Übersicht" description="Alle Objekte zusammengefasst">

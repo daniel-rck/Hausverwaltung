@@ -29,11 +29,11 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="h-14 flex items-center justify-between gap-2">
           <Link
             to="/"
-            className="flex items-center gap-2 min-w-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--color-accent]/40 rounded-md px-1"
+            className="flex items-center gap-2 min-w-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 rounded-md px-1"
           >
             <span
               aria-hidden="true"
-              className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-[--color-accent]/10 text-[--color-accent] dark:text-[--color-accent-dark]"
+              className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-accent/10 text-accent dark:text-accent-dark"
             >
               <Building2 size={14} strokeWidth={2} />
             </span>

@@ -147,6 +147,31 @@ describe("getDistributionShare — units key", () => {
   });
 });
 
+describe("getDistributionShare — Leerstand trägt der Vermieter", () => {
+  it("area: Verteilbasis ist die Gesamtfläche des Objekts", () => {
+    // Zwei 50-m²-Einheiten, eine ganzjährig leer → Mieter trägt 50 %, nicht 100 %.
+    const a = occUnit({ area: 50 }, { from: "2024-01", to: null });
+    expect(getDistributionShare("area", a, [a], 2024, [{ area: 50 }, { area: 50 }])).toBeCloseTo(
+      0.5,
+    );
+  });
+
+  it("area: unterjähriger Leerstand reduziert nur den Anteil des Betroffenen", () => {
+    const a = occUnit({ area: 50 }, { from: "2024-01", to: null });
+    const b = occUnit({ area: 50 }, { from: "2024-07", to: null });
+    const units = [{ area: 50 }, { area: 50 }];
+    expect(getDistributionShare("area", a, [a, b], 2024, units)).toBeCloseTo(0.5);
+    expect(getDistributionShare("area", b, [a, b], 2024, units)).toBeCloseTo(0.25);
+  });
+
+  it("units: Verteilbasis ist die Einheitenzahl", () => {
+    const a = occUnit({}, { from: "2024-01", to: null });
+    expect(
+      getDistributionShare("units", a, [a], 2024, [{ area: 1 }, { area: 1 }, { area: 1 }]),
+    ).toBeCloseTo(1 / 3);
+  });
+});
+
 describe("getDistributionShare — normalization invariant", () => {
   // Design-Festschreibung: die Anteile aller übergebenen Belegungen summieren
   // sich (per Konstruktion weight/totalWeight) auf 1. Leerstandskosten werden
@@ -181,11 +206,9 @@ describe("getOccupiedMonthsFractional", () => {
     expect(getOccupiedMonthsFractional({ from: "2024-01", to: null }, 2024)).toBeCloseTo(12, 1);
   });
 
-  it("returns ~6 for a half-year occupancy (Jan–Jun)", () => {
-    const m = getOccupiedMonthsFractional({ from: "2024-01", to: "2024-06" }, 2024);
-    // Jan 1 .. Jun 30 = 182 days / 366 (leap) * 12 ≈ 5.97
-    expect(m).toBeGreaterThan(5.9);
-    expect(m).toBeLessThan(6.1);
+  it("returns exactly 6 for a month-granular half-year occupancy (Jan–Jun)", () => {
+    expect(getOccupiedMonthsFractional({ from: "2025-01", to: "2025-06" }, 2025)).toBe(6);
+    expect(getOccupiedMonthsFractional({ from: "2023-11", to: "2025-02" }, 2025)).toBe(2);
   });
 
   it("returns 0 when occupancy ends before the requested year", () => {

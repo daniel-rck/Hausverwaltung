@@ -1,7 +1,8 @@
 import { db, useLiveQuery } from "../../lib/db";
 import type { Occupancy, Tenant, Unit } from "../../lib/db/schema";
 import { EmptyState } from "../../lib/ui/shared/EmptyState";
-import { Receipt } from "../../lib/ui/ui/icons";
+import { Button, Skeleton } from "../../lib/ui/ui";
+import { ChevronLeft, Printer, Receipt } from "../../lib/ui/ui/icons";
 import { AbrechnungView } from "./AbrechnungView";
 
 interface AbrechnungPrintProps {
@@ -25,7 +26,8 @@ export function AbrechnungPrint({ propertyId, year, onBack }: AbrechnungPrintPro
     const result: OccupancyInfo[] = [];
 
     for (const unit of units) {
-      const occs = await db.occupancies.where("unitId").equals(unit.id!).toArray();
+      if (unit.id == null) continue;
+      const occs = await db.occupancies.where("unitId").equals(unit.id).toArray();
 
       const active = occs.filter((o) => o.from <= yearEnd && (o.to === null || o.to >= yearStart));
 
@@ -39,7 +41,12 @@ export function AbrechnungPrint({ propertyId, year, onBack }: AbrechnungPrintPro
   }, [propertyId, year]);
 
   if (!occupancies) {
-    return <div className="text-center py-8 text-sm text-fg-muted">Lade Abrechnungen...</div>;
+    return (
+      <div className="space-y-3 py-4">
+        <Skeleton variant="text" width="30%" />
+        <Skeleton height="20rem" />
+      </div>
+    );
   }
 
   if (occupancies.length === 0) {
@@ -56,20 +63,12 @@ export function AbrechnungPrint({ propertyId, year, onBack }: AbrechnungPrintPro
     <div>
       {/* Controls - hidden when printing */}
       <div className="no-print mb-6 flex items-center gap-4">
-        <button
-          type="button"
-          onClick={onBack}
-          className="text-sm text-fg-muted hover:text-fg flex items-center gap-1"
-        >
-          ← Zurück
-        </button>
-        <button
-          type="button"
-          onClick={() => window.print()}
-          className="px-4 py-2 text-sm bg-fg text-surface rounded-lg hover:opacity-90 transition-colors"
-        >
+        <Button variant="ghost" size="sm" leftIcon={<ChevronLeft size={14} />} onClick={onBack}>
+          Zurück
+        </Button>
+        <Button variant="primary" leftIcon={<Printer size={14} />} onClick={() => window.print()}>
           Alle drucken ({occupancies.length} Abrechnungen)
-        </button>
+        </Button>
       </div>
 
       {/* Render each billing view with page breaks */}

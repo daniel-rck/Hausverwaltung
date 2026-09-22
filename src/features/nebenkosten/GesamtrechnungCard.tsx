@@ -3,7 +3,15 @@ import { db, useLiveQuery } from "../../lib/db";
 import type { HeatingStatement, StatementPosition } from "../../lib/db/schema";
 import { Card } from "../../lib/ui/shared/Card";
 import { NumInput } from "../../lib/ui/shared/NumInput";
-import { Button, Input } from "../../lib/ui/ui";
+import {
+  Button,
+  FormField,
+  IconButton,
+  Input,
+  Skeleton,
+  useConfirm,
+  useToast,
+} from "../../lib/ui/ui";
 import { AlertTriangle, CheckCircle2, Plus, Trash2 } from "../../lib/ui/ui/icons";
 import { formatEuro } from "../../lib/utils/format";
 import { computedConsumptionLiters, plausibility } from "./gesamtrechnung";
@@ -18,17 +26,26 @@ function TextCell({
   onCommit,
   placeholder,
   type = "text",
+  id,
+  "aria-label": ariaLabel,
+  "aria-describedby": ariaDescribedBy,
 }: {
   value: string;
   onCommit: (next: string) => void;
   placeholder?: string;
   type?: "text" | "date";
+  id?: string;
+  "aria-label"?: string;
+  "aria-describedby"?: string;
 }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState("");
 
   return (
     <Input
+      id={id}
+      aria-label={ariaLabel}
+      aria-describedby={ariaDescribedBy}
       type={type}
       placeholder={placeholder}
       value={editing ? draft : value}
@@ -73,6 +90,8 @@ function emptyStatement(propertyId: number, year: number): HeatingStatement {
  * Plausibilität — verteilt wird über die Messdienst-Anteile, nicht hier.
  */
 export function GesamtrechnungCard({ propertyId, year }: GesamtrechnungCardProps) {
+  const toast = useToast();
+  const confirm = useConfirm();
   const statement = useLiveQuery(
     () =>
       db.heatingStatements
@@ -96,7 +115,7 @@ export function GesamtrechnungCard({ propertyId, year }: GesamtrechnungCardProps
       db.costs.where("propertyId").equals(propertyId).toArray(),
     ]);
     const messdienstIds = new Set(
-      costTypes.filter((ct) => ct.distribution === "messdienst").map((ct) => ct.id!),
+      costTypes.flatMap((ct) => (ct.distribution === "messdienst" && ct.id != null ? [ct.id] : [])),
     );
     const relevant = costs.filter(
       (c) => c.year === year && messdienstIds.has(c.costTypeId) && c.totalAmount > 0,
@@ -105,17 +124,41 @@ export function GesamtrechnungCard({ propertyId, year }: GesamtrechnungCardProps
     return relevant.reduce((sum, c) => sum + c.totalAmount, 0);
   }, [propertyId, year]);
 
-  if (statement === undefined) return null;
+  const cardTitle = `Gesamtrechnung (Gebäude) ${year} – Brennstoff & Heizungsbetriebskosten`;
+
+  if (statement === undefined) {
+    return (
+      <Card title={cardTitle}>
+        <Skeleton height="20rem" />
+      </Card>
+    );
+  }
 
   const s = statement ?? emptyStatement(propertyId, year);
 
   const update = async (patch: Partial<HeatingStatement>) => {
-    if (statement?.id) {
-      await db.heatingStatements.update(statement.id, patch);
-    } else {
-      await db.heatingStatements.add({ ...emptyStatement(propertyId, year), ...patch });
+    try {
+      if (statement?.id) {
+        await db.heatingStatements.update(statement.id, patch);
+      } else {
+        await db.heatingStatements.add({ ...emptyStatement(propertyId, year), ...patch });
+      }
+    } catch (err) {
+      toast.error("Speichern fehlgeschlagen.");
+      console.error(err);
     }
   };
+
+  /** Fragt nach, bevor eine Zeile mit eingetragenen Werten verworfen wird. */
+  const confirmRemove = (hasData: boolean, what: string) =>
+    hasData
+      ? confirm({
+          title: `${what} entfernen?`,
+          message: `Die eingetragenen Werte dieser Zeile (${what}) werden gelöscht.`,
+          confirmLabel: "Entfernen",
+          danger: true,
+        })
+      : Promise.resolve(true);
 
   const updatePositions = <K extends "purchases" | "otherHeatingCosts" | "separateCosts">(
     field: K,
@@ -125,25 +168,23 @@ export function GesamtrechnungCard({ propertyId, year }: GesamtrechnungCardProps
   const checks = statement ? plausibility(statement, messdienstCostsTotal ?? null) : [];
 
   return (
-    <Card title={`Gesamtrechnung (Gebäude) ${year} – Brennstoff & Heizungsbetriebskosten`}>
+    <Card title={cardTitle}>
       <div className="space-y-5">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <span className="block text-xs font-medium text-fg-muted mb-1">Messdienstleister</span>
+          <FormField label="Messdienstleister">
             <TextCell
               value={s.provider}
               placeholder="z. B. BRUNATA-METRONA"
-              onCommit={(provider) => update({ provider })}
+              onCommit={(provider) => void update({ provider })}
             />
-          </div>
-          <div>
-            <span className="block text-xs font-medium text-fg-muted mb-1">Energieart</span>
+          </FormField>
+          <FormField label="Energieart">
             <TextCell
               value={s.fuelType}
               placeholder="z. B. Heizöl"
-              onCommit={(fuelType) => update({ fuelType })}
+              onCommit={(fuelType) => void update({ fuelType })}
             />
-          </div>
+          </FormField>
         </div>
 
         <div>
@@ -153,12 +194,14 @@ export function GesamtrechnungCard({ propertyId, year }: GesamtrechnungCardProps
               <span className="text-sm text-fg">Anfangsbestand</span>
               <NumInput
                 value={s.openingStock.liters}
+                aria-label="Anfangsbestand Liter"
                 onChange={(liters) => update({ openingStock: { ...s.openingStock, liters } })}
                 suffix="l"
                 min={0}
               />
               <NumInput
                 value={s.openingStock.amount}
+                aria-label="Anfangsbestand Betrag"
                 onChange={(amount) => update({ openingStock: { ...s.openingStock, amount } })}
                 suffix="€"
                 min={0}
@@ -173,6 +216,7 @@ export function GesamtrechnungCard({ propertyId, year }: GesamtrechnungCardProps
               >
                 <TextCell
                   type="date"
+                  aria-label={`Bezug ${i + 1} Datum`}
                   value={purchase.date}
                   onCommit={(date) =>
                     updatePositions(
@@ -183,6 +227,7 @@ export function GesamtrechnungCard({ propertyId, year }: GesamtrechnungCardProps
                 />
                 <NumInput
                   value={purchase.liters}
+                  aria-label={`Bezug ${i + 1} Liter`}
                   onChange={(liters) =>
                     updatePositions(
                       "purchases",
@@ -194,6 +239,7 @@ export function GesamtrechnungCard({ propertyId, year }: GesamtrechnungCardProps
                 />
                 <NumInput
                   value={purchase.amount}
+                  aria-label={`Bezug ${i + 1} Betrag`}
                   onChange={(amount) =>
                     updatePositions(
                       "purchases",
@@ -203,31 +249,33 @@ export function GesamtrechnungCard({ propertyId, year }: GesamtrechnungCardProps
                   suffix="€"
                   min={0}
                 />
-                <Button
-                  variant="ghost"
+                <IconButton
                   size="sm"
-                  aria-label="Bezug entfernen"
-                  onClick={() =>
-                    updatePositions(
+                  aria-label={`Bezug ${i + 1} entfernen`}
+                  icon={<Trash2 size={14} />}
+                  onClick={async () => {
+                    if (!(await confirmRemove(purchase.liters > 0 || purchase.amount > 0, "Bezug")))
+                      return;
+                    await updatePositions(
                       "purchases",
                       s.purchases.filter((_, j) => j !== i),
-                    )
-                  }
-                >
-                  <Trash2 size={14} />
-                </Button>
+                    );
+                  }}
+                />
               </div>
             ))}
             <div className="grid grid-cols-[1fr_8rem_8rem_2rem] gap-2 items-center">
               <span className="text-sm text-fg">abzüglich Endbestand</span>
               <NumInput
                 value={s.closingStock.liters}
+                aria-label="Endbestand Liter"
                 onChange={(liters) => update({ closingStock: { ...s.closingStock, liters } })}
                 suffix="l"
                 min={0}
               />
               <NumInput
                 value={s.closingStock.amount}
+                aria-label="Endbestand Betrag"
                 onChange={(amount) => update({ closingStock: { ...s.closingStock, amount } })}
                 suffix="€"
                 min={0}
@@ -238,12 +286,14 @@ export function GesamtrechnungCard({ propertyId, year }: GesamtrechnungCardProps
               <span className="text-sm text-fg">Summe Verbrauch (lt. Abrechnung)</span>
               <NumInput
                 value={s.consumption.liters}
+                aria-label="Verbrauch Liter"
                 onChange={(liters) => update({ consumption: { ...s.consumption, liters } })}
                 suffix="l"
                 min={0}
               />
               <NumInput
                 value={s.consumption.amount}
+                aria-label="Verbrauch Betrag"
                 onChange={(amount) => update({ consumption: { ...s.consumption, amount } })}
                 suffix="€"
                 min={0}
@@ -281,12 +331,14 @@ export function GesamtrechnungCard({ propertyId, year }: GesamtrechnungCardProps
           placeholder="z. B. Brennerwartung"
           positions={s.otherHeatingCosts}
           onChange={(next) => updatePositions("otherHeatingCosts", next)}
+          confirmRemove={confirmRemove}
         />
 
         <div className="grid grid-cols-[1fr_8rem_2rem] gap-2 items-center">
           <span className="text-sm text-fg">abzgl. Vermieteranteil CO2-Kosten</span>
           <NumInput
             value={s.co2LandlordShare}
+            aria-label="Vermieteranteil CO2-Kosten"
             onChange={(co2LandlordShare) => update({ co2LandlordShare })}
             suffix="€"
             min={0}
@@ -300,6 +352,7 @@ export function GesamtrechnungCard({ propertyId, year }: GesamtrechnungCardProps
           placeholder="z. B. Kalt- und Abwasser"
           positions={s.separateCosts}
           onChange={(next) => updatePositions("separateCosts", next)}
+          confirmRemove={confirmRemove}
         />
 
         <div className="grid grid-cols-[1fr_8rem_2rem] gap-2 items-center pt-2 border-t border-border">
@@ -308,6 +361,7 @@ export function GesamtrechnungCard({ propertyId, year }: GesamtrechnungCardProps
           </span>
           <NumInput
             value={s.totalDistributed}
+            aria-label="Summe der zu verteilenden Kosten"
             onChange={(totalDistributed) => update({ totalDistributed })}
             suffix="€"
             min={0}
@@ -320,11 +374,19 @@ export function GesamtrechnungCard({ propertyId, year }: GesamtrechnungCardProps
             {checks.map((check) => (
               <li key={check.message} className="flex items-start gap-2 text-xs">
                 {check.level === "ok" ? (
-                  <CheckCircle2 size={14} className="text-emerald-600 shrink-0 mt-0.5" />
+                  <CheckCircle2
+                    size={14}
+                    className="text-success-fg shrink-0 mt-0.5"
+                    aria-label="OK"
+                  />
                 ) : (
-                  <AlertTriangle size={14} className="text-amber-600 shrink-0 mt-0.5" />
+                  <AlertTriangle
+                    size={14}
+                    className="text-warning-fg shrink-0 mt-0.5"
+                    aria-label="Warnung"
+                  />
                 )}
-                <span className={check.level === "ok" ? "text-fg-muted" : "text-amber-600"}>
+                <span className={check.level === "ok" ? "text-fg-muted" : "text-warning-fg"}>
                   {check.message}
                 </span>
               </li>
@@ -342,12 +404,14 @@ function PositionList({
   placeholder,
   positions,
   onChange,
+  confirmRemove,
 }: {
   title: string;
   addLabel: string;
   placeholder: string;
   positions: StatementPosition[];
-  onChange: (next: StatementPosition[]) => void;
+  onChange: (next: StatementPosition[]) => void | Promise<void>;
+  confirmRemove: (hasData: boolean, what: string) => Promise<boolean>;
 }) {
   const total = positions.reduce((sum, p) => sum + p.amount, 0);
 
@@ -360,6 +424,7 @@ function PositionList({
           <div key={i} className="grid grid-cols-[1fr_8rem_2rem] gap-2 items-center">
             <TextCell
               value={position.label}
+              aria-label={`${title}: Position ${i + 1} Bezeichnung`}
               placeholder={placeholder}
               onCommit={(label) =>
                 onChange(positions.map((p, j) => (j === i ? { ...p, label } : p)))
@@ -367,19 +432,22 @@ function PositionList({
             />
             <NumInput
               value={position.amount}
+              aria-label={`${title}: Position ${i + 1} Betrag`}
               onChange={(amount) =>
                 onChange(positions.map((p, j) => (j === i ? { ...p, amount } : p)))
               }
               suffix="€"
             />
-            <Button
-              variant="ghost"
+            <IconButton
               size="sm"
-              aria-label="Position entfernen"
-              onClick={() => onChange(positions.filter((_, j) => j !== i))}
-            >
-              <Trash2 size={14} />
-            </Button>
+              aria-label={`Position ${i + 1} entfernen`}
+              icon={<Trash2 size={14} />}
+              onClick={async () => {
+                const hasData = position.label.trim() !== "" || position.amount !== 0;
+                if (!(await confirmRemove(hasData, "Position"))) return;
+                await onChange(positions.filter((_, j) => j !== i));
+              }}
+            />
           </div>
         ))}
         <div className="flex items-center justify-between">

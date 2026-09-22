@@ -92,7 +92,7 @@ export function Tabs<T extends string>({
               onKeyDown={(e) => handleKeyDown(e, idx)}
               className={[
                 "relative inline-flex items-center gap-2 px-3 py-2.5 text-sm font-medium whitespace-nowrap transition-colors",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--color-accent]/40 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-900",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-surface",
                 "disabled:opacity-50 disabled:cursor-not-allowed",
                 fullWidth ? "flex-1 justify-center" : "",
                 active ? activeText : "text-fg-muted hover:text-fg",

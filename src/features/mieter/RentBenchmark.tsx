@@ -5,6 +5,8 @@ import { Card } from "../../lib/ui/shared/Card";
 import { type Column, DataTable } from "../../lib/ui/shared/DataTable";
 import { NumInput } from "../../lib/ui/shared/NumInput";
 import { StatusBadge } from "../../lib/ui/shared/StatusBadge";
+import { Callout, FormField, Input, useToast } from "../../lib/ui/ui";
+import { currentMonth } from "../../lib/utils/dates";
 import { formatEuro, formatNumber } from "../../lib/utils/format";
 
 interface RentBenchmarkProps {
@@ -56,18 +58,25 @@ export function RentBenchmark({ propertyId, units, occupancies }: RentBenchmarkP
     setInitialized(false);
   }
 
+  const toast = useToast();
+
   const saveSettings = useCallback(
     async (next: MietspiegelSettings) => {
       setSettings(next);
-      await db.settings.put({ key: settingsKey, value: next });
+      try {
+        await db.settings.put({ key: settingsKey, value: next });
+      } catch (err) {
+        toast.error("Speichern fehlgeschlagen.");
+        console.error(err);
+      }
     },
-    [settingsKey],
+    [settingsKey, toast],
   );
 
   const rows = useMemo((): BenchmarkRow[] => {
     if (settings.pricePerSqm <= 0) return [];
 
-    const now = new Date().toISOString().slice(0, 7);
+    const now = currentMonth();
 
     return units.map((unit) => {
       const active =
@@ -165,12 +174,7 @@ export function RentBenchmark({ propertyId, units, occupancies }: RentBenchmarkP
       header: "Differenz",
       render: (r) => {
         if (r.area <= 0) return <span className="text-fg-subtle">–</span>;
-        const cls =
-          r.diff > 0
-            ? "text-red-600 dark:text-red-400"
-            : r.diff < 0
-              ? "text-green-600 dark:text-green-400"
-              : "";
+        const cls = r.diff > 0 ? "text-danger-fg" : r.diff < 0 ? "text-success-fg" : "";
         return (
           <span className={`font-mono ${cls}`}>
             {r.diff > 0 ? "+" : ""}
@@ -196,65 +200,56 @@ export function RentBenchmark({ propertyId, units, occupancies }: RentBenchmarkP
       <div className="mb-4 p-4 bg-surface-muted rounded-lg border border-border">
         <h3 className="text-sm font-semibold text-fg mb-3">Ortsübliche Vergleichsmiete</h3>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <NumInput
-            label="Vergleichsmiete pro m²"
-            value={settings.pricePerSqm}
-            onChange={(v) => saveSettings({ ...settings, pricePerSqm: v })}
-            suffix="€/m²"
-            min={0}
-          />
-          <div>
-            <label className="block">
-              <span className="block text-xs font-medium text-fg-muted mb-1">Quelle</span>
-              <input
-                type="text"
-                value={settings.source}
-                onChange={(e) => saveSettings({ ...settings, source: e.target.value })}
-                placeholder="z.B. Mietspiegel 2025 Stadt XY"
-                className="w-full border border-border rounded-lg px-3 py-1.5 text-sm bg-surface text-fg focus:outline-none focus:ring-2 focus:ring-accent-500"
-              />
-            </label>
-          </div>
-          <div>
-            <label className="block">
-              <span className="block text-xs font-medium text-fg-muted mb-1">Gültig bis</span>
-              <input
-                type="month"
-                value={settings.validUntil}
-                onChange={(e) => saveSettings({ ...settings, validUntil: e.target.value })}
-                className="w-full border border-border rounded-lg px-3 py-1.5 text-sm bg-surface text-fg focus:outline-none focus:ring-2 focus:ring-accent-500"
-              />
-            </label>
-          </div>
+          <FormField label="Vergleichsmiete pro m²">
+            <NumInput
+              value={settings.pricePerSqm}
+              onChange={(v) => void saveSettings({ ...settings, pricePerSqm: v })}
+              suffix="€/m²"
+              min={0}
+            />
+          </FormField>
+          <FormField label="Quelle">
+            <Input
+              value={settings.source}
+              onChange={(e) => void saveSettings({ ...settings, source: e.target.value })}
+              placeholder="z.B. Mietspiegel 2025 Stadt XY"
+            />
+          </FormField>
+          <FormField label="Gültig bis">
+            <Input
+              type="month"
+              value={settings.validUntil}
+              onChange={(e) => void saveSettings({ ...settings, validUntil: e.target.value })}
+            />
+          </FormField>
         </div>
       </div>
 
       {/* Comparison table */}
       {settings.pricePerSqm > 0 ? (
         <>
-          <DataTable columns={columns} data={rows} keyFn={(r) => r.unit.id!} />
+          <DataTable columns={columns} data={rows} keyFn={(r) => r.unit.id ?? r.unit.name} />
 
           {/* Potential summary */}
           {totalPotential > 0 && (
-            <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg">
-              <p className="text-sm font-medium text-green-700 dark:text-green-400 mb-2">
-                Erhöhungspotenzial
-              </p>
+            <Callout variant="success" title="Erhöhungspotenzial" className="mt-4">
               <ul className="space-y-1">
-                {rows
-                  .filter((r) => r.potential !== null && r.potential > 0)
-                  .map((r) => (
-                    <li key={r.unit.id} className="text-sm text-green-600 dark:text-green-400">
-                      <span className="font-medium">{r.unit.name}:</span> Erhöhung möglich um{" "}
-                      <span className="font-mono">{formatEuro(r.potential!)}</span> (auf{" "}
-                      {formatNumber(r.mietspiegelPerSqm)} €/m²)
-                    </li>
-                  ))}
+                {rows.flatMap((r) =>
+                  r.potential !== null && r.potential > 0
+                    ? [
+                        <li key={r.unit.id ?? r.unit.name}>
+                          <span className="font-medium text-fg">{r.unit.name}:</span> Erhöhung
+                          möglich um <span className="font-mono">{formatEuro(r.potential)}</span>{" "}
+                          (auf {formatNumber(r.mietspiegelPerSqm)} €/m²)
+                        </li>,
+                      ]
+                    : [],
+                )}
               </ul>
-              <p className="mt-2 text-sm font-mono font-semibold text-green-700 dark:text-green-300">
+              <p className="mt-2 font-mono font-semibold text-success-fg">
                 Gesamt: {formatEuro(totalPotential)} / Monat
               </p>
-            </div>
+            </Callout>
           )}
 
           {/* Legal note */}

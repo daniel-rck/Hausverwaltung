@@ -1,7 +1,9 @@
 import { db, useLiveQuery } from "../../lib/db";
 import { useProperty } from "../../lib/hooks/useProperty";
 import { KpiTile } from "../../lib/ui/ui";
+import { currentMonth } from "../../lib/utils/dates";
 import { formatEuro } from "../../lib/utils/format";
+import { buildRentLookup } from "../../lib/utils/rent";
 
 export function QuickStats() {
   const { activeProperty } = useProperty();
@@ -11,8 +13,8 @@ export function QuickStats() {
 
     const units = await db.units.where("propertyId").equals(activeProperty.id).toArray();
 
-    const unitIds = units.map((u) => u.id!);
-    const now = new Date().toISOString().slice(0, 7);
+    const unitIds = units.flatMap((u) => (u.id === undefined ? [] : [u.id]));
+    const now = currentMonth();
 
     const occupancies = await db.occupancies.toArray();
     const activeOccupancies = occupancies.filter(
@@ -22,7 +24,11 @@ export function QuickStats() {
     const occupiedCount = new Set(activeOccupancies.map((o) => o.unitId)).size;
     const vacantCount = units.length - occupiedCount;
 
-    const monthlyRent = activeOccupancies.reduce((sum, o) => sum + o.rentCold + o.rentUtilities, 0);
+    const rentAt = buildRentLookup(await db.rentChanges.toArray());
+    const monthlyRent = activeOccupancies.reduce(
+      (sum, o) => sum + rentAt(o, now) + o.rentUtilities,
+      0,
+    );
 
     return {
       totalUnits: units.length,

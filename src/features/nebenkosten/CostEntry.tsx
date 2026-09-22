@@ -2,9 +2,8 @@ import { useMemo } from "react";
 import { db, useLiveQuery } from "../../lib/db";
 import type { Cost, CostCategory, CostType } from "../../lib/db/schema";
 import { Card } from "../../lib/ui/shared/Card";
-import { EmptyState } from "../../lib/ui/shared/EmptyState";
 import { NumInput } from "../../lib/ui/shared/NumInput";
-import { Loader2 } from "../../lib/ui/ui/icons";
+import { Skeleton, useToast } from "../../lib/ui/ui";
 import { formatEuro } from "../../lib/utils/format";
 import { findDoubleBookingCostTypeIds } from "./doubleBooking";
 
@@ -38,6 +37,7 @@ interface CostRow {
 }
 
 export function CostEntry({ propertyId, year }: CostEntryProps) {
+  const toast = useToast();
   const costTypes = useLiveQuery(() => db.costTypes.orderBy("sortOrder").toArray());
 
   const costs = useLiveQuery(
@@ -63,7 +63,7 @@ export function CostEntry({ propertyId, year }: CostEntryProps) {
     };
 
     for (const ct of costTypes) {
-      const existing = costs.find((c) => c.costTypeId === ct.id!);
+      const existing = costs.find((c) => c.costTypeId === ct.id);
       groups[ct.category].push({ costType: ct, cost: existing });
     }
 
@@ -78,27 +78,33 @@ export function CostEntry({ propertyId, year }: CostEntryProps) {
   const handleAmountChange = async (costTypeId: number, amount: number) => {
     const existing = costs?.find((c) => c.costTypeId === costTypeId);
 
-    if (existing?.id) {
-      await db.costs.update(existing.id, { totalAmount: amount });
-    } else {
-      await db.costs.add({
-        propertyId,
-        year,
-        costTypeId,
-        totalAmount: amount,
-      });
+    try {
+      if (existing?.id) {
+        await db.costs.update(existing.id, { totalAmount: amount });
+      } else {
+        await db.costs.add({
+          propertyId,
+          year,
+          costTypeId,
+          totalAmount: amount,
+        });
+      }
+    } catch (err) {
+      toast.error("Speichern fehlgeschlagen.");
+      console.error(err);
     }
   };
 
   if (!grouped) {
     return (
-      <Card>
-        <EmptyState
-          icon={<Loader2 size={24} strokeWidth={1.75} className="animate-spin" />}
-          title="Lade Kostenarten…"
-          description="Bitte warten."
-        />
-      </Card>
+      <div className="space-y-4">
+        <Card>
+          <Skeleton height="10rem" />
+        </Card>
+        <Card>
+          <Skeleton height="10rem" />
+        </Card>
+      </div>
     );
   }
 
@@ -115,29 +121,40 @@ export function CostEntry({ propertyId, year }: CostEntryProps) {
         return (
           <Card key={cat} title={CATEGORY_LABELS[cat]}>
             <div className="space-y-3">
-              {rows.map((row) => (
-                <div key={row.costType.id} className="flex items-center gap-4">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-fg truncate">{row.costType.name}</p>
-                    <p className="text-xs text-fg-subtle">
-                      {DISTRIBUTION_LABELS[row.costType.distribution]}
-                    </p>
-                    {doubleBookingIds.has(row.costType.id!) && (
-                      <p className="text-xs text-amber-600 font-medium">
-                        Hinweis: Diese Position ist in der Messdienst-Abrechnung möglicherweise
-                        bereits enthalten — bitte Doppelbuchung prüfen.
+              {rows.map((row) => {
+                const costTypeId = row.costType.id;
+                if (costTypeId == null) return null;
+                const inputId = `cost-${costTypeId}`;
+                return (
+                  <div key={costTypeId} className="flex items-center gap-4">
+                    <div className="flex-1 min-w-0">
+                      <label
+                        htmlFor={inputId}
+                        className="block text-sm font-medium text-fg truncate"
+                      >
+                        {row.costType.name}
+                      </label>
+                      <p className="text-xs text-fg-subtle">
+                        {DISTRIBUTION_LABELS[row.costType.distribution]}
                       </p>
-                    )}
+                      {doubleBookingIds.has(costTypeId) && (
+                        <p className="text-xs text-warning-fg font-medium">
+                          Hinweis: Diese Position ist in der Messdienst-Abrechnung möglicherweise
+                          bereits enthalten — bitte Doppelbuchung prüfen.
+                        </p>
+                      )}
+                    </div>
+                    <NumInput
+                      id={inputId}
+                      value={row.cost?.totalAmount ?? 0}
+                      onChange={(v) => void handleAmountChange(costTypeId, v)}
+                      suffix="€"
+                      min={0}
+                      className="w-40"
+                    />
                   </div>
-                  <NumInput
-                    value={row.cost?.totalAmount ?? 0}
-                    onChange={(v) => handleAmountChange(row.costType.id!, v)}
-                    suffix="€"
-                    min={0}
-                    className="w-40"
-                  />
-                </div>
-              ))}
+                );
+              })}
               <div className="flex items-center justify-between pt-2 border-t border-border">
                 <span className="text-sm font-semibold text-fg-muted">Zwischensumme</span>
                 <span className="text-sm font-semibold font-mono font-tabular text-fg">

@@ -26,14 +26,14 @@ export function CalibrationAlerts() {
     if (!activeProperty?.id) return [];
 
     const units = await db.units.where("propertyId").equals(activeProperty.id).toArray();
-    const unitIds = units.map((u) => u.id!);
-    const unitMap = new Map(units.map((u) => [u.id!, u]));
+    const unitMap = new Map(units.flatMap((u) => (u.id != null ? [[u.id, u] as const] : [])));
+    const unitIds = [...unitMap.keys()];
 
     const allMeters = await db.meters.toArray();
     const propertyMeters = allMeters.filter((m) => m.unitId === null || unitIds.includes(m.unitId));
 
     const meterTypes = await db.meterTypes.toArray();
-    const typeMap = new Map(meterTypes.map((t) => [t.id!, t]));
+    const typeMap = new Map(meterTypes.flatMap((t) => (t.id != null ? [[t.id, t] as const] : [])));
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -130,7 +130,7 @@ export function CalibrationAlerts() {
         <DataTable
           columns={columns}
           data={alertRows}
-          keyFn={(r) => r.meter.id!}
+          keyFn={(r) => r.meter.id ?? r.meter.serialNumber}
           emptyMessage="Keine Warnungen."
         />
       )}

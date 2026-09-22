@@ -1,6 +1,8 @@
 import { useEffect } from "react";
 import { db, useLiveQuery } from "../../lib/db";
 import { Card } from "../../lib/ui/shared/Card";
+import { NumInput } from "../../lib/ui/shared/NumInput";
+import { Skeleton } from "../../lib/ui/ui";
 
 interface MeterReading {
   meterId: number;
@@ -29,17 +31,19 @@ export function MeterSnapshot({ unitId, readings, onChange }: MeterSnapshotProps
     const results: MeterSnapshot[] = [];
 
     for (const meter of meters) {
+      const meterId = meter.id;
+      if (meterId === undefined) continue;
       const meterType = await db.meterTypes.get(meter.meterTypeId);
       const allReadings = await db.meterReadings
         .where("[meterId+date]")
-        .between([meter.id!, ""], [meter.id!, "\uffff"])
+        .between([meterId, ""], [meterId, "\uffff"])
         .toArray();
 
       const sorted = allReadings.sort((a, b) => b.date.localeCompare(a.date));
       const lastReading = sorted[0]?.value ?? null;
 
       results.push({
-        meterId: meter.id!,
+        meterId,
         meterTypeId: meter.meterTypeId,
         typeName: meterType?.name ?? "Unbekannt",
         typeUnit: meterType?.unit ?? "",
@@ -80,7 +84,7 @@ export function MeterSnapshot({ unitId, readings, onChange }: MeterSnapshotProps
   if (!snapshots) {
     return (
       <Card>
-        <p className="text-sm text-fg-muted">Zähler werden geladen...</p>
+        <Skeleton height="4rem" />
       </Card>
     );
   }
@@ -117,26 +121,14 @@ export function MeterSnapshot({ unitId, readings, onChange }: MeterSnapshotProps
             </div>
 
             <div className="sm:w-48">
-              <label className="block">
-                <span className="block text-xs font-medium text-fg-muted mb-1">
-                  Aktueller Stand
-                </span>
-                <div className="flex items-center gap-1">
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={getReadingValue(snapshot.meterId) || ""}
-                    onChange={(e) =>
-                      updateReading(snapshot.meterId, parseFloat(e.target.value) || 0)
-                    }
-                    className="w-full border border-border rounded-lg px-3 py-1.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-accent-500"
-                  />
-                  <span className="text-xs text-fg-muted whitespace-nowrap">
-                    {snapshot.typeUnit}
-                  </span>
-                </div>
-              </label>
+              <NumInput
+                label="Aktueller Stand"
+                value={getReadingValue(snapshot.meterId)}
+                onChange={(v) => updateReading(snapshot.meterId, v)}
+                suffix={snapshot.typeUnit}
+                min={0}
+                decimals={3}
+              />
             </div>
           </div>
         </Card>

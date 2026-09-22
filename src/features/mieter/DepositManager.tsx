@@ -6,7 +6,19 @@ import { type Column, DataTable } from "../../lib/ui/shared/DataTable";
 import { EmptyState } from "../../lib/ui/shared/EmptyState";
 import { NumInput } from "../../lib/ui/shared/NumInput";
 import { StatusBadge } from "../../lib/ui/shared/StatusBadge";
-import { AlertTriangle, Landmark } from "../../lib/ui/ui/icons";
+import {
+  Button,
+  Callout,
+  FormField,
+  Input,
+  required,
+  Select,
+  Skeleton,
+  useFormValidation,
+  useToast,
+  type ValidationSchema,
+} from "../../lib/ui/ui";
+import { Landmark, Plus } from "../../lib/ui/ui/icons";
 import { formatDate, formatEuro } from "../../lib/utils/format";
 
 interface DepositManagerProps {
@@ -20,44 +32,59 @@ const EVENT_TYPE_LABELS: Record<DepositEventType, string> = {
   refund: "Erstattung",
 };
 
+type DepositFormValues = {
+  date: string;
+  type: DepositEventType;
+  amount: number;
+  description: string;
+};
+
+const EMPTY_FORM: DepositFormValues = { date: "", type: "payment", amount: 0, description: "" };
+
+const depositSchema: ValidationSchema<DepositFormValues> = {
+  date: required("Bitte Datum angeben"),
+  amount: (value) =>
+    typeof value === "number" && value > 0 ? null : "Betrag muss größer als 0 sein",
+};
+
 export function DepositManager({ occupancy }: DepositManagerProps) {
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({
-    date: "",
-    type: "payment" as DepositEventType,
-    amount: 0,
-    description: "",
-  });
+  const [form, setForm] = useState<DepositFormValues>(EMPTY_FORM);
+  const toast = useToast();
+  const { errors, validate, clear } = useFormValidation<DepositFormValues>(depositSchema);
 
-  const events = useLiveQuery(
-    () =>
-      db.depositEvents
-        .where("occupancyId")
-        .equals(occupancy.id!)
-        .toArray()
-        .then((rows) => rows.sort((a, b) => a.date.localeCompare(b.date))),
-    [occupancy.id],
-  );
+  const events = useLiveQuery(async () => {
+    if (occupancy.id == null) return [];
+    const rows = await db.depositEvents.where("occupancyId").equals(occupancy.id).toArray();
+    return rows.sort((a, b) => a.date.localeCompare(b.date));
+  }, [occupancy.id]);
 
-  const balance = useMemo(() => {
-    if (!events) return 0;
-    return events.reduce((sum, e) => {
+  // Nur Einzahlungen tilgen die Soll-Kaution; Zinsen erhöhen zwar das Guthaben
+  // des Mieters, zählen aber nicht als eingezahlte Kaution.
+  const totals = useMemo(() => {
+    const t = { paid: 0, interest: 0, deducted: 0, refunded: 0 };
+    for (const e of events ?? []) {
       switch (e.type) {
         case "payment":
-          return sum + e.amount;
+          t.paid += e.amount;
+          break;
         case "interest":
-          return sum + e.amount;
+          t.interest += e.amount;
+          break;
         case "deduction":
-          return sum - e.amount;
+          t.deducted += e.amount;
+          break;
         case "refund":
-          return sum - e.amount;
-        default:
-          return sum;
+          t.refunded += e.amount;
+          break;
       }
-    }, 0);
+    }
+    return t;
   }, [events]);
 
-  const remaining = occupancy.deposit - balance;
+  // Aktuell gehaltenes Kautionsguthaben (inkl. Zinsen, abzgl. Abzüge/Erstattungen).
+  const balance = totals.paid + totals.interest - totals.deducted - totals.refunded;
+  const remaining = occupancy.deposit - totals.paid;
   const isPaid = remaining <= 0;
 
   // Move-out warning: > 6 months since moveout and balance > 0.
@@ -79,19 +106,30 @@ export function DepositManager({ occupancy }: DepositManagerProps) {
     return null;
   }, [occupancy.to, balance]);
 
-  const handleSave = async () => {
-    if (!form.date || form.amount <= 0) return;
-
-    await db.depositEvents.add({
-      occupancyId: occupancy.id!,
-      date: form.date,
-      type: form.type,
-      amount: form.amount,
-      description: form.description || undefined,
-    });
-
-    setForm({ date: "", type: "payment", amount: 0, description: "" });
+  const closeForm = () => {
+    setForm(EMPTY_FORM);
+    clear();
     setShowForm(false);
+  };
+
+  const handleSave = async () => {
+    if (occupancy.id == null) return;
+    if (!validate(form)) return;
+
+    try {
+      await db.depositEvents.add({
+        occupancyId: occupancy.id,
+        date: form.date,
+        type: form.type,
+        amount: form.amount,
+        description: form.description || undefined,
+      });
+      toast.success("Kautionsvorgang gespeichert.");
+      closeForm();
+    } catch (err) {
+      toast.error("Speichern fehlgeschlagen.");
+      console.error(err);
+    }
   };
 
   const columns: Column<DepositEvent>[] = [
@@ -112,9 +150,7 @@ export function DepositManager({ occupancy }: DepositManagerProps) {
       render: (r) => {
         const isNegative = r.type === "deduction" || r.type === "refund";
         return (
-          <span
-            className={`font-mono ${isNegative ? "text-red-600 dark:text-red-400" : "text-green-600 dark:text-green-400"}`}
-          >
+          <span className={`font-mono ${isNegative ? "text-danger-fg" : "text-success-fg"}`}>
             {isNegative ? "−" : "+"}
             {formatEuro(r.amount)}
           </span>
@@ -139,29 +175,37 @@ export function DepositManager({ occupancy }: DepositManagerProps) {
       title="Kautionsverwaltung"
       action={
         !showForm ? (
-          <button
-            type="button"
+          <Button
+            variant="primary"
+            size="sm"
+            leftIcon={<Plus size={14} />}
             onClick={() => setShowForm(true)}
-            className="text-sm px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
           >
             Vorgang erfassen
-          </button>
+          </Button>
         ) : undefined
       }
     >
       {/* Header info */}
-      <div className="mb-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div className="mb-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <div className="p-3 bg-surface-sunken rounded-lg">
           <p className="text-xs text-fg-muted mb-0.5">Soll-Kaution</p>
           <p className="font-semibold font-mono text-fg">{formatEuro(occupancy.deposit)}</p>
         </div>
         <div className="p-3 bg-surface-sunken rounded-lg">
           <p className="text-xs text-fg-muted mb-0.5">Eingezahlt</p>
-          <p className="font-semibold font-mono text-fg">{formatEuro(balance)}</p>
+          <p className="font-semibold font-mono text-fg">{formatEuro(totals.paid)}</p>
+        </div>
+        <div className="p-3 bg-surface-sunken rounded-lg">
+          <p className="text-xs text-fg-muted mb-0.5">Zinsen</p>
+          <p className="font-semibold font-mono text-fg">{formatEuro(totals.interest)}</p>
+          <p className="text-xs text-fg-subtle mt-0.5">
+            Guthaben: <span className="font-mono">{formatEuro(balance)}</span>
+          </p>
         </div>
         <div className="p-3 bg-surface-sunken rounded-lg flex items-center justify-between">
           <div>
-            <p className="text-xs text-fg-muted mb-0.5">Status</p>
+            <p className="text-xs text-fg-muted mb-0.5">Offen</p>
             <p className="font-semibold font-mono text-fg">
               {isPaid ? formatEuro(0) : formatEuro(remaining)}
             </p>
@@ -172,91 +216,79 @@ export function DepositManager({ occupancy }: DepositManagerProps) {
 
       {/* Move-out warning */}
       {moveoutWarning && (
-        <div className="mb-4 p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-200/60 dark:border-amber-900/60 rounded-md">
-          <p className="flex items-start gap-2 text-sm text-amber-700 dark:text-amber-300">
-            <AlertTriangle
-              size={14}
-              strokeWidth={1.75}
-              className="mt-0.5 shrink-0"
-              aria-hidden="true"
-            />
-            <span>{moveoutWarning}</span>
-          </p>
-        </div>
+        <Callout variant="warning" className="mb-4">
+          {moveoutWarning}
+        </Callout>
       )}
 
       {/* Inline form */}
       {showForm && (
-        <div className="mb-4 p-4 bg-surface-muted rounded-lg border border-border">
+        <form
+          className="mb-4 p-4 bg-surface-muted rounded-lg border border-border"
+          onSubmit={(e) => {
+            e.preventDefault();
+            void handleSave();
+          }}
+          noValidate
+        >
           <h3 className="text-sm font-semibold text-fg mb-3">Vorgang erfassen</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="block">
-                <span className="block text-xs font-medium text-fg-muted mb-1">Datum *</span>
-                <input
-                  type="date"
-                  value={form.date}
-                  onChange={(e) => setForm({ ...form, date: e.target.value })}
-                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm bg-surface text-fg focus:outline-none focus:ring-2 focus:ring-accent-500"
-                />
-              </label>
-            </div>
-            <div>
-              <label className="block">
-                <span className="block text-xs font-medium text-fg-muted mb-1">Art *</span>
-                <select
-                  value={form.type}
-                  onChange={(e) => setForm({ ...form, type: e.target.value as DepositEventType })}
-                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm bg-surface text-fg focus:outline-none focus:ring-2 focus:ring-accent-500"
-                >
-                  <option value="payment">Einzahlung</option>
-                  <option value="interest">Verzinsung</option>
-                  <option value="deduction">Abzug</option>
-                  <option value="refund">Erstattung</option>
-                </select>
-              </label>
-            </div>
-            <NumInput
-              label="Betrag *"
-              value={form.amount}
-              onChange={(v) => setForm({ ...form, amount: v })}
-              suffix="€"
-              min={0}
-            />
-            <div>
-              <label className="block">
-                <span className="block text-xs font-medium text-fg-muted mb-1">Beschreibung</span>
-                <input
-                  type="text"
-                  value={form.description}
-                  onChange={(e) => setForm({ ...form, description: e.target.value })}
-                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm bg-surface text-fg focus:outline-none focus:ring-2 focus:ring-accent-500"
-                />
-              </label>
-            </div>
+            <FormField label="Datum" required error={errors.date}>
+              <Input
+                type="date"
+                value={form.date}
+                onChange={(e) => setForm({ ...form, date: e.target.value })}
+              />
+            </FormField>
+            <FormField label="Art" required>
+              <Select
+                value={form.type}
+                onChange={(e) => setForm({ ...form, type: e.target.value as DepositEventType })}
+              >
+                <option value="payment">Einzahlung</option>
+                <option value="interest">Verzinsung</option>
+                <option value="deduction">Abzug</option>
+                <option value="refund">Erstattung</option>
+              </Select>
+            </FormField>
+            <FormField label="Betrag" required error={errors.amount}>
+              <NumInput
+                value={form.amount}
+                onChange={(v) => setForm({ ...form, amount: v })}
+                suffix="€"
+                min={0}
+              />
+            </FormField>
+            <FormField label="Beschreibung">
+              <Input
+                value={form.description}
+                onChange={(e) => setForm({ ...form, description: e.target.value })}
+              />
+            </FormField>
           </div>
-          <div className="flex gap-2 mt-3">
-            <button
-              type="button"
-              onClick={handleSave}
-              className="px-4 py-1.5 text-sm bg-fg text-surface rounded-lg hover:opacity-90 transition-colors"
-            >
+          <div className="flex gap-2 mt-1">
+            <Button type="submit" variant="primary" size="sm">
               Speichern
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowForm(false)}
-              className="px-4 py-1.5 text-sm border border-border text-fg-muted rounded-lg hover:bg-surface-muted transition-colors"
-            >
+            </Button>
+            <Button variant="outline" size="sm" onClick={closeForm}>
               Abbrechen
-            </button>
+            </Button>
           </div>
-        </div>
+        </form>
       )}
 
       {/* Events table */}
-      {events && events.length > 0 ? (
-        <DataTable columns={columns} data={events} keyFn={(r) => r.id!} />
+      {events === undefined ? (
+        <div className="space-y-2">
+          <Skeleton height="2rem" />
+          <Skeleton height="2rem" />
+        </div>
+      ) : events.length > 0 ? (
+        <DataTable
+          columns={columns}
+          data={events}
+          keyFn={(r) => r.id ?? `${r.date}-${r.type}-${r.amount}`}
+        />
       ) : (
         <EmptyState
           icon={<Landmark size={24} strokeWidth={1.75} />}

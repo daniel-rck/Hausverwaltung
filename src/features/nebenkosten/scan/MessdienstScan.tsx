@@ -10,7 +10,7 @@ import {
   getModel,
 } from "../../../lib/gemini";
 import { Card } from "../../../lib/ui/shared/Card";
-import { Button, Checkbox, FormField, Select, useToast } from "../../../lib/ui/ui";
+import { Button, Checkbox, FormField, Select, useConfirm, useToast } from "../../../lib/ui/ui";
 import { formatEuro } from "../../../lib/utils/format";
 import { buildYearOptions } from "../../../lib/utils/years";
 import {
@@ -36,11 +36,13 @@ async function loadCandidates(propertyId: number, year: number): Promise<Occupan
   const yearEnd = `${year}-12`;
   const result: OccupancyCandidate[] = [];
   for (const unit of units) {
-    const occs = await db.occupancies.where("unitId").equals(unit.id!).toArray();
+    if (unit.id == null) continue;
+    const occs = await db.occupancies.where("unitId").equals(unit.id).toArray();
     const active = occs.filter((o) => o.from <= yearEnd && (o.to === null || o.to >= yearStart));
     for (const occ of active) {
+      if (occ.id == null) continue;
       const tenant = (await db.tenants.get(occ.tenantId)) ?? null;
-      result.push({ occupancyId: occ.id!, tenantName: tenant?.name ?? "", unitName: unit.name });
+      result.push({ occupancyId: occ.id, tenantName: tenant?.name ?? "", unitName: unit.name });
     }
   }
   return result;
@@ -53,6 +55,7 @@ async function loadCandidates(propertyId: number, year: number): Promise<Occupan
  */
 export function MessdienstScan({ propertyId, year }: MessdienstScanProps) {
   const toast = useToast();
+  const confirm = useConfirm();
   const [files, setFiles] = useState<File[]>([]);
   const [consent, setConsent] = useState(false);
   const [scanning, setScanning] = useState(false);
@@ -114,10 +117,25 @@ export function MessdienstScan({ propertyId, year }: MessdienstScanProps) {
       ];
       setPositionMapping(prefillPositionMapping(labels, costTypes ?? []));
     } catch (err) {
+      // ExtractionError trägt kuratierte deutsche Meldungen (ohne Response-Body/API-Key).
       toast.error(err instanceof ExtractionError ? err.message : "Scan fehlgeschlagen.");
+      console.error(err);
     } finally {
       setScanning(false);
     }
+  };
+
+  const handleDiscard = async () => {
+    const ok = await confirm({
+      title: "Scan verwerfen?",
+      message:
+        "Das ausgelesene Ergebnis und alle Zuordnungen werden verworfen. Bereits übernommene Kosten bleiben erhalten.",
+      confirmLabel: "Verwerfen",
+      danger: true,
+    });
+    if (!ok) return;
+    setScan(null);
+    toast.success("Scan verworfen.");
   };
 
   const drafts = scan ? buildCostDrafts({ abrechnung: scan, positionMapping, unitMapping }) : [];
@@ -202,14 +220,16 @@ export function MessdienstScan({ propertyId, year }: MessdienstScanProps) {
             auswählen — die Pro-Wohnung-Beträge werden automatisch extrahiert und unten zur
             Kontrolle angezeigt.
           </p>
-          <input
-            type="file"
-            accept="image/*"
-            capture="environment"
-            multiple
-            onChange={(e) => setFiles(Array.from(e.target.files ?? []))}
-            className="block text-sm text-fg-muted file:mr-3 file:px-3 file:py-1.5 file:text-sm file:border file:border-border file:rounded-lg file:bg-surface file:text-fg"
-          />
+          <FormField label="Foto(s) der Abrechnung">
+            <input
+              type="file"
+              accept="image/*"
+              capture="environment"
+              multiple
+              onChange={(e) => setFiles(Array.from(e.target.files ?? []))}
+              className="block text-sm text-fg-muted file:mr-3 file:px-3 file:py-1.5 file:text-sm file:border file:border-border file:rounded-lg file:bg-surface file:text-fg"
+            />
+          </FormField>
           <Checkbox
             checked={consent}
             onChange={(e) => setConsent(e.target.checked)}
@@ -218,10 +238,11 @@ export function MessdienstScan({ propertyId, year }: MessdienstScanProps) {
           <Button
             variant="primary"
             accent="nebenkosten"
-            disabled={files.length === 0 || !consent || scanning}
+            disabled={files.length === 0 || !consent}
+            loading={scanning}
             onClick={() => void handleScan()}
           >
-            {scanning ? "Wird ausgelesen…" : "Auslesen"}
+            Auslesen
           </Button>
         </div>
       ) : (
@@ -255,6 +276,7 @@ export function MessdienstScan({ propertyId, year }: MessdienstScanProps) {
                 <div key={label} className="flex items-center gap-3">
                   <span className="text-sm text-fg flex-1">{label}</span>
                   <Select
+                    aria-label={`Kostenart für „${label}“`}
                     value={positionMapping.get(label) ?? IGNORE}
                     onChange={(e) => {
                       const value = e.target.value === IGNORE ? IGNORE : Number(e.target.value);
@@ -287,6 +309,7 @@ export function MessdienstScan({ propertyId, year }: MessdienstScanProps) {
                     <span className="text-fg-muted">({formatEuro(unit.total)})</span>
                   </span>
                   <Select
+                    aria-label={`Belegung für ${unit.unitLabel} – ${unit.tenantName}`}
                     value={unitMapping.get(index) ?? ""}
                     onChange={(e) => {
                       const value = e.target.value;
@@ -322,12 +345,13 @@ export function MessdienstScan({ propertyId, year }: MessdienstScanProps) {
             <Button
               variant="primary"
               accent="nebenkosten"
-              disabled={drafts.length === 0 || applying}
+              disabled={drafts.length === 0}
+              loading={applying}
               onClick={() => void handleApply()}
             >
-              {applying ? "Übernehme…" : "Übernehmen"}
+              Übernehmen
             </Button>
-            <Button variant="secondary" onClick={() => setScan(null)}>
+            <Button variant="secondary" onClick={() => void handleDiscard()}>
               Verwerfen
             </Button>
           </div>

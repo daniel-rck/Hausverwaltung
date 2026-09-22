@@ -3,7 +3,8 @@ import type { Cost, CostShare, CostType, Occupancy, Tenant, Unit } from "../../l
 import { Card } from "../../lib/ui/shared/Card";
 import { EmptyState } from "../../lib/ui/shared/EmptyState";
 import { NumInput } from "../../lib/ui/shared/NumInput";
-import { BarChart3, Loader2, Users } from "../../lib/ui/ui/icons";
+import { Skeleton, useToast } from "../../lib/ui/ui";
+import { BarChart3, Users } from "../../lib/ui/ui/icons";
 import { formatEuro } from "../../lib/utils/format";
 
 interface MessdienstInputProps {
@@ -24,6 +25,7 @@ interface CostWithShares {
 }
 
 export function MessdienstInput({ propertyId, year }: MessdienstInputProps) {
+  const toast = useToast();
   const messdienstName = useLiveQuery(async () => {
     const setting = await db.settings.get("messdienstName");
     return (setting?.value as string) ?? "Messdienstleister";
@@ -56,7 +58,8 @@ export function MessdienstInput({ propertyId, year }: MessdienstInputProps) {
     const result: OccupancyInfo[] = [];
 
     for (const unit of units) {
-      const occs = await db.occupancies.where("unitId").equals(unit.id!).toArray();
+      if (unit.id == null) continue;
+      const occs = await db.occupancies.where("unitId").equals(unit.id).toArray();
 
       const active = occs.filter((o) => o.from <= yearEnd && (o.to === null || o.to >= yearStart));
 
@@ -71,7 +74,7 @@ export function MessdienstInput({ propertyId, year }: MessdienstInputProps) {
 
   const costShares = useLiveQuery(async () => {
     if (!costs || costs.length === 0) return [];
-    const costIds = costs.map((c) => c.id!).filter(Boolean);
+    const costIds = costs.flatMap((c) => (c.id ? [c.id] : []));
     const allShares = await db.costShares.toArray();
     return allShares.filter((s) => costIds.includes(s.costId));
   }, [costs]);
@@ -79,39 +82,39 @@ export function MessdienstInput({ propertyId, year }: MessdienstInputProps) {
   const costsWithShares: CostWithShares[] | null =
     costTypes && costs && costShares
       ? costTypes.map((ct) => {
-          const cost = costs.find((c) => c.costTypeId === ct.id!);
-          const shares = cost?.id ? costShares.filter((s) => s.costId === cost.id!) : [];
+          const cost = costs.find((c) => c.costTypeId === ct.id);
+          const shares = cost?.id ? costShares.filter((s) => s.costId === cost.id) : [];
           return { costType: ct, cost, shares };
         })
       : null;
 
   const handleShareChange = async (costTypeId: number, occupancyId: number, amount: number) => {
     const cost = costs?.find((c) => c.costTypeId === costTypeId);
-    if (!cost?.id) return;
+    const costId = cost?.id;
+    if (!costId) return;
 
-    const existing = costShares?.find(
-      (s) => s.costId === cost.id! && s.occupancyId === occupancyId,
-    );
+    const existing = costShares?.find((s) => s.costId === costId && s.occupancyId === occupancyId);
 
-    if (existing?.id) {
-      await db.costShares.update(existing.id, { amount });
-    } else {
-      await db.costShares.add({
-        costId: cost.id!,
-        occupancyId,
-        amount,
-      });
+    try {
+      if (existing?.id) {
+        await db.costShares.update(existing.id, { amount });
+      } else {
+        await db.costShares.add({
+          costId,
+          occupancyId,
+          amount,
+        });
+      }
+    } catch (err) {
+      toast.error("Speichern fehlgeschlagen.");
+      console.error(err);
     }
   };
 
   if (!costsWithShares || !occupancies) {
     return (
       <Card>
-        <EmptyState
-          icon={<Loader2 size={24} strokeWidth={1.75} className="animate-spin" />}
-          title="Lade Daten…"
-          description="Bitte warten."
-        />
+        <Skeleton height="12rem" />
       </Card>
     );
   }
@@ -156,7 +159,7 @@ export function MessdienstInput({ propertyId, year }: MessdienstInputProps) {
                 <p className="text-xs text-fg-muted">
                   Gesamtbetrag: {formatEuro(cost.totalAmount)} | Verteilt: {formatEuro(sharesTotal)}{" "}
                   {Math.abs(cost.totalAmount - sharesTotal) > 0.01 && (
-                    <span className="text-amber-600 font-medium">
+                    <span className="text-warning-fg font-medium">
                       (Differenz: {formatEuro(cost.totalAmount - sharesTotal)})
                     </span>
                   )}
@@ -172,7 +175,10 @@ export function MessdienstInput({ propertyId, year }: MessdienstInputProps) {
                     </thead>
                     <tbody>
                       {occupancies.map(({ occupancy, tenant, unit }) => {
-                        const share = shares.find((s) => s.occupancyId === occupancy.id!);
+                        const occupancyId = occupancy.id;
+                        const costTypeId = costType.id;
+                        if (occupancyId == null || costTypeId == null) return null;
+                        const share = shares.find((s) => s.occupancyId === occupancyId);
                         return (
                           <tr key={occupancy.id} className="border-b border-border">
                             <td className="py-2 px-3 text-fg">{unit?.name ?? "–"}</td>
@@ -180,7 +186,8 @@ export function MessdienstInput({ propertyId, year }: MessdienstInputProps) {
                             <td className="py-2 px-3">
                               <NumInput
                                 value={share?.amount ?? 0}
-                                onChange={(v) => handleShareChange(costType.id!, occupancy.id!, v)}
+                                onChange={(v) => void handleShareChange(costTypeId, occupancyId, v)}
+                                aria-label={`${costType.name}: Anteil ${unit?.name ?? ""} ${tenant?.name ?? ""}`.trim()}
                                 suffix="€"
                                 min={0}
                                 className="w-32 ml-auto"

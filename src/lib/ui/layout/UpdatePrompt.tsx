@@ -1,4 +1,5 @@
 import { useRegisterSW } from "virtual:pwa-register/react";
+import { Button } from "../ui/Button";
 
 export function UpdatePrompt() {
   const {
@@ -19,20 +20,12 @@ export function UpdatePrompt() {
     >
       <p className="text-sm text-fg mb-3">Eine neue Version ist verfügbar.</p>
       <div className="flex justify-end gap-2">
-        <button
-          type="button"
-          onClick={() => setNeedRefresh(false)}
-          className="px-3 py-1.5 text-xs rounded-lg bg-surface-sunken text-fg-muted hover:bg-border transition-colors"
-        >
+        <Button variant="ghost" size="sm" onClick={() => setNeedRefresh(false)}>
           Später
-        </button>
-        <button
-          type="button"
-          onClick={() => void updateServiceWorker(true)}
-          className="px-3 py-1.5 text-xs rounded-lg bg-fg text-surface hover:opacity-90 transition-colors"
-        >
+        </Button>
+        <Button variant="primary" size="sm" onClick={() => void updateServiceWorker(true)}>
           Jetzt laden
-        </button>
+        </Button>
       </div>
     </div>
   );

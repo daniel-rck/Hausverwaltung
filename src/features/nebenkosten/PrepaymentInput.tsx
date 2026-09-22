@@ -3,7 +3,8 @@ import type { Occupancy, Prepayment, Tenant, Unit } from "../../lib/db/schema";
 import { Card } from "../../lib/ui/shared/Card";
 import { EmptyState } from "../../lib/ui/shared/EmptyState";
 import { NumInput } from "../../lib/ui/shared/NumInput";
-import { Coins, Loader2 } from "../../lib/ui/ui/icons";
+import { Button, Skeleton, useConfirm, useToast } from "../../lib/ui/ui";
+import { Coins } from "../../lib/ui/ui/icons";
 import { getOccupiedMonthsFractional } from "../../lib/utils/calc";
 import { formatEuro, formatNumber } from "../../lib/utils/format";
 
@@ -13,6 +14,7 @@ interface PrepaymentInputProps {
 }
 
 interface OccupancyRow {
+  occupancyId: number;
   occupancy: Occupancy;
   tenant: Tenant | null;
   unit: Unit | null;
@@ -26,6 +28,8 @@ function getOccupiedMonths(occupancy: Occupancy, year: number): number {
 }
 
 export function PrepaymentInput({ propertyId, year }: PrepaymentInputProps) {
+  const toast = useToast();
+  const confirm = useConfirm();
   const rows = useLiveQuery(async () => {
     const units = await db.units.where("propertyId").equals(propertyId).toArray();
 
@@ -34,21 +38,24 @@ export function PrepaymentInput({ propertyId, year }: PrepaymentInputProps) {
     const result: OccupancyRow[] = [];
 
     for (const unit of units) {
-      const occs = await db.occupancies.where("unitId").equals(unit.id!).toArray();
+      if (unit.id == null) continue;
+      const occs = await db.occupancies.where("unitId").equals(unit.id).toArray();
 
       const active = occs.filter((o) => o.from <= yearEnd && (o.to === null || o.to >= yearStart));
 
       for (const occ of active) {
+        if (occ.id == null) continue;
         const tenant = (await db.tenants.get(occ.tenantId)) ?? null;
         const prepayment = await db.prepayments
           .where("[occupancyId+year]")
-          .equals([occ.id!, year])
+          .equals([occ.id, year])
           .first();
 
         const months = getOccupiedMonths(occ, year);
         const autoAmount = occ.rentUtilities * months;
 
         result.push({
+          occupancyId: occ.id,
           occupancy: occ,
           tenant,
           unit,
@@ -63,41 +70,58 @@ export function PrepaymentInput({ propertyId, year }: PrepaymentInputProps) {
   }, [propertyId, year]);
 
   const handleChange = async (occupancyId: number, amount: number) => {
-    const existing = await db.prepayments
-      .where("[occupancyId+year]")
-      .equals([occupancyId, year])
-      .first();
+    try {
+      const existing = await db.prepayments
+        .where("[occupancyId+year]")
+        .equals([occupancyId, year])
+        .first();
 
-    if (existing?.id) {
-      await db.prepayments.update(existing.id, { amount });
-    } else {
-      await db.prepayments.add({
-        occupancyId,
-        year,
-        amount,
-      });
+      if (existing?.id) {
+        await db.prepayments.update(existing.id, { amount });
+      } else {
+        await db.prepayments.add({
+          occupancyId,
+          year,
+          amount,
+        });
+      }
+    } catch (err) {
+      toast.error("Speichern fehlgeschlagen.");
+      console.error(err);
     }
   };
 
-  const handleReset = async (occupancyId: number) => {
-    const existing = await db.prepayments
-      .where("[occupancyId+year]")
-      .equals([occupancyId, year])
-      .first();
+  const handleReset = async (row: OccupancyRow) => {
+    const ok = await confirm({
+      title: "Vorauszahlung zurücksetzen?",
+      message: `Der manuell eingetragene Betrag für ${row.unit?.name ?? "diese Wohnung"} (${row.tenant?.name ?? "–"}) wird gelöscht; es gilt wieder der automatisch berechnete Wert von ${formatEuro(row.autoAmount)}.`,
+      confirmLabel: "Zurücksetzen",
+      danger: true,
+    });
+    if (!ok) return;
+    try {
+      const existing = await db.prepayments
+        .where("[occupancyId+year]")
+        .equals([row.occupancyId, year])
+        .first();
 
-    if (existing?.id) {
-      await deleteWithTombstone("prepayments", existing.id);
+      if (existing?.id) {
+        await deleteWithTombstone("prepayments", existing.id);
+      }
+      toast.success("Vorauszahlung zurückgesetzt.");
+    } catch (err) {
+      toast.error("Zurücksetzen fehlgeschlagen.");
+      console.error(err);
     }
   };
 
   if (!rows) {
     return (
-      <Card>
-        <EmptyState
-          icon={<Loader2 size={24} strokeWidth={1.75} className="animate-spin" />}
-          title="Lade Daten…"
-          description="Bitte warten."
-        />
+      <Card title={`Vorauszahlungen ${year}`}>
+        <div className="space-y-2">
+          <Skeleton variant="text" width="60%" />
+          <Skeleton height="8rem" />
+        </div>
       </Card>
     );
   }
@@ -156,7 +180,8 @@ export function PrepaymentInput({ propertyId, year }: PrepaymentInputProps) {
                   <td className="py-2 px-3">
                     <NumInput
                       value={effectiveAmount}
-                      onChange={(v) => handleChange(row.occupancy.id!, v)}
+                      onChange={(v) => void handleChange(row.occupancyId, v)}
+                      aria-label={`Vorauszahlung ${row.unit?.name ?? ""} ${row.tenant?.name ?? ""}`.trim()}
                       suffix="€"
                       min={0}
                       className="w-32 ml-auto"
@@ -164,14 +189,14 @@ export function PrepaymentInput({ propertyId, year }: PrepaymentInputProps) {
                   </td>
                   <td className="py-2 px-3 text-center">
                     {isOverridden && (
-                      <button
-                        type="button"
-                        onClick={() => handleReset(row.occupancy.id!)}
-                        className="text-xs text-fg-subtle hover:text-fg"
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => void handleReset(row)}
                         title="Auf automatischen Wert zurücksetzen"
                       >
                         Zurücksetzen
-                      </button>
+                      </Button>
                     )}
                   </td>
                 </tr>

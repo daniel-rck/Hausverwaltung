@@ -1,12 +1,25 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useId, useMemo, useState } from "react";
 import { db, deleteWithTombstone, useLiveQuery } from "../../lib/db";
 import type { Occupancy, Payment, Tenant, Unit } from "../../lib/db/schema";
 import { useProperty } from "../../lib/hooks/useProperty";
 import { Card } from "../../lib/ui/shared/Card";
 import { EmptyState } from "../../lib/ui/shared/EmptyState";
 import { NumInput } from "../../lib/ui/shared/NumInput";
+import {
+  Button,
+  FormField,
+  Input,
+  Modal,
+  Select,
+  Skeleton,
+  Textarea,
+  useConfirm,
+  useToast,
+} from "../../lib/ui/ui";
 import { Calendar } from "../../lib/ui/ui/icons";
+import { todayIso } from "../../lib/utils/dates";
 import { formatEuro, MONTH_NAMES } from "../../lib/utils/format";
+import { buildRentLookup } from "../../lib/utils/rent";
 
 interface PaymentForm {
   amountCold: number;
@@ -22,6 +35,7 @@ interface CellData {
   tenant: Tenant;
   month: string;
   expected: number;
+  expectedCold: number;
   payment: Payment | undefined;
   received: number;
   status: "green" | "yellow" | "red" | "gray";
@@ -35,6 +49,20 @@ const METHOD_LABELS: Record<Payment["method"], string> = {
   transfer: "Überweisung",
   cash: "Bar",
   debit: "Lastschrift",
+};
+
+const STATUS_LABELS: Record<CellData["status"], string> = {
+  green: "Vollständig bezahlt",
+  yellow: "Teilweise bezahlt",
+  red: "Offen",
+  gray: "Kein Mietverhältnis",
+};
+
+const STATUS_CLASSES: Record<CellData["status"], string> = {
+  green: "bg-success/15 text-success-fg hover:bg-success/25",
+  yellow: "bg-warning/15 text-warning-fg hover:bg-warning/25",
+  red: "bg-danger/15 text-danger-fg hover:bg-danger/25",
+  gray: "bg-surface-muted text-fg-subtle cursor-default",
 };
 
 export function MonthOverview({ year }: MonthOverviewProps) {
@@ -51,21 +79,30 @@ export function MonthOverview({ year }: MonthOverviewProps) {
     notes: "",
   });
   const [saving, setSaving] = useState(false);
+  const confirm = useConfirm();
+  const toast = useToast();
+  const formId = useId();
 
   const data = useLiveQuery(async () => {
     if (!activeProperty?.id) return null;
 
     const units = await db.units.where("propertyId").equals(activeProperty.id).toArray();
 
-    const unitIds = units.map((u) => u.id!);
+    const unitIds = units.flatMap((u) => (u.id != null ? [u.id] : []));
     const allOccupancies = await db.occupancies.toArray();
     const occupancies = allOccupancies.filter((o) => unitIds.includes(o.unitId));
 
     const tenantIds = [...new Set(occupancies.map((o) => o.tenantId))];
     const tenants = await db.tenants.bulkGet(tenantIds);
-    const tenantMap = new Map(tenants.filter(Boolean).map((t) => [t!.id!, t!]));
+    const tenantMap = new Map<number, Tenant>();
+    for (const t of tenants) {
+      if (t?.id != null) tenantMap.set(t.id, t);
+    }
 
-    const unitMap = new Map(units.map((u) => [u.id!, u]));
+    const unitMap = new Map<number, Unit>();
+    for (const u of units) {
+      if (u.id != null) unitMap.set(u.id, u);
+    }
 
     const allPayments = await db.payments.toArray();
     const paymentMap = new Map<string, Payment>();
@@ -73,13 +110,15 @@ export function MonthOverview({ year }: MonthOverviewProps) {
       paymentMap.set(`${p.occupancyId}-${p.month}`, p);
     }
 
-    return { occupancies, unitMap, tenantMap, paymentMap };
+    const rentChanges = await db.rentChanges.toArray();
+    return { occupancies, unitMap, tenantMap, paymentMap, rentChanges };
   }, [activeProperty?.id]);
 
   const grid = useMemo((): CellData[][] => {
     if (!data) return [];
 
-    const { occupancies, unitMap, tenantMap, paymentMap } = data;
+    const { occupancies, unitMap, tenantMap, paymentMap, rentChanges } = data;
+    const rentAt = buildRentLookup(rentChanges);
     const rows: CellData[][] = [];
 
     // Filter to occupancies active during this year
@@ -110,7 +149,8 @@ export function MonthOverview({ year }: MonthOverviewProps) {
         const month = `${year}-${String(m).padStart(2, "0")}`;
         const isActive = occ.from <= month && (occ.to === null || occ.to >= month);
 
-        const expected = isActive ? occ.rentCold + occ.rentUtilities : 0;
+        const expectedCold = isActive ? rentAt(occ, month) : 0;
+        const expected = isActive ? expectedCold + occ.rentUtilities : 0;
         const payment = paymentMap.get(`${occ.id}-${month}`);
         const received = payment ? payment.amountCold + payment.amountUtilities : 0;
 
@@ -125,7 +165,17 @@ export function MonthOverview({ year }: MonthOverviewProps) {
           status = "red";
         }
 
-        row.push({ occupancy: occ, unit, tenant, month, expected, payment, received, status });
+        row.push({
+          occupancy: occ,
+          unit,
+          tenant,
+          month,
+          expected,
+          expectedCold,
+          payment,
+          received,
+          status,
+        });
       }
       rows.push(row);
     }
@@ -134,9 +184,9 @@ export function MonthOverview({ year }: MonthOverviewProps) {
   }, [data, year]);
 
   const openEditor = useCallback((cell: CellData) => {
-    if (cell.status === "gray") return;
+    if (cell.status === "gray" || cell.occupancy.id == null) return;
     setEditingCell({
-      occupancyId: cell.occupancy.id!,
+      occupancyId: cell.occupancy.id,
       month: cell.month,
     });
     if (cell.payment) {
@@ -149,9 +199,9 @@ export function MonthOverview({ year }: MonthOverviewProps) {
       });
     } else {
       setForm({
-        amountCold: cell.occupancy.rentCold,
+        amountCold: cell.expectedCold,
         amountUtilities: cell.occupancy.rentUtilities,
-        receivedDate: new Date().toISOString().slice(0, 10),
+        receivedDate: todayIso(),
         method: "transfer",
         notes: "",
       });
@@ -183,14 +233,25 @@ export function MonthOverview({ year }: MonthOverviewProps) {
       } else {
         await db.payments.add(paymentData);
       }
+      toast.success("Zahlung gespeichert.");
       setEditingCell(null);
+    } catch (err) {
+      toast.error("Speichern fehlgeschlagen.");
+      console.error(err);
     } finally {
       setSaving(false);
     }
-  }, [editingCell, form]);
+  }, [editingCell, form, toast]);
 
   const handleDelete = useCallback(async () => {
     if (!editingCell) return;
+    const ok = await confirm({
+      title: "Zahlung löschen?",
+      message: "Die erfasste Zahlung für diesen Monat wird unwiderruflich gelöscht.",
+      confirmLabel: "Löschen",
+      danger: true,
+    });
+    if (!ok) return;
     setSaving(true);
     try {
       const existing = await db.payments
@@ -200,11 +261,32 @@ export function MonthOverview({ year }: MonthOverviewProps) {
       if (existing?.id) {
         await deleteWithTombstone("payments", existing.id);
       }
+      toast.success("Zahlung gelöscht.");
       setEditingCell(null);
+    } catch (err) {
+      toast.error("Löschen fehlgeschlagen.");
+      console.error(err);
     } finally {
       setSaving(false);
     }
-  }, [editingCell]);
+  }, [editingCell, confirm, toast]);
+
+  const closeEditor = useCallback(() => {
+    if (!saving) setEditingCell(null);
+  }, [saving]);
+
+  if (data === undefined) {
+    return (
+      <Card title="Monatsübersicht">
+        <div className="space-y-2">
+          <Skeleton height="2rem" />
+          <Skeleton height="2.5rem" />
+          <Skeleton height="2.5rem" />
+          <Skeleton height="2.5rem" />
+        </div>
+      </Card>
+    );
+  }
 
   if (!data) {
     return null;
@@ -270,35 +352,36 @@ export function MonthOverview({ year }: MonthOverviewProps) {
                         {first.tenant.name}
                       </div>
                     </td>
-                    {row.map((cell) => (
-                      <td key={cell.month} className="py-1.5 px-1 text-center">
-                        <button
-                          type="button"
-                          onClick={() => openEditor(cell)}
-                          disabled={cell.status === "gray"}
-                          className={`w-full rounded-md py-1.5 px-0.5 text-xs font-mono transition-colors ${
-                            cell.status === "green"
-                              ? "bg-green-100 text-green-700 hover:bg-green-200"
-                              : cell.status === "yellow"
-                                ? "bg-amber-100 text-amber-700 hover:bg-amber-200"
-                                : cell.status === "red"
-                                  ? "bg-red-100 text-red-700 hover:bg-red-200"
-                                  : "bg-surface-muted text-fg-subtle cursor-default"
-                          }`}
-                          title={
-                            cell.status === "gray"
-                              ? "Kein Mietverhältnis"
-                              : `Soll: ${formatEuro(cell.expected)}\nIst: ${formatEuro(cell.received)}`
-                          }
-                        >
-                          {cell.status === "gray"
-                            ? "–"
-                            : cell.received > 0
-                              ? formatEuro(cell.received).replace(/\s?€/, "")
-                              : "0"}
-                        </button>
-                      </td>
-                    ))}
+                    {row.map((cell) => {
+                      const monthName =
+                        MONTH_NAMES[parseInt(cell.month.slice(5), 10) - 1] ?? cell.month;
+                      const ariaLabel =
+                        cell.status === "gray"
+                          ? `${monthName}: ${STATUS_LABELS.gray}`
+                          : `${monthName}: ${STATUS_LABELS[cell.status]}, Soll ${formatEuro(cell.expected)}, Ist ${formatEuro(cell.received)}`;
+                      return (
+                        <td key={cell.month} className="py-1.5 px-1 text-center">
+                          <button
+                            type="button"
+                            onClick={() => openEditor(cell)}
+                            disabled={cell.status === "gray"}
+                            aria-label={ariaLabel}
+                            className={`w-full rounded-md py-1.5 px-0.5 text-xs font-mono transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 ${STATUS_CLASSES[cell.status]}`}
+                            title={
+                              cell.status === "gray"
+                                ? "Kein Mietverhältnis"
+                                : `Soll: ${formatEuro(cell.expected)}\nIst: ${formatEuro(cell.received)}`
+                            }
+                          >
+                            {cell.status === "gray"
+                              ? "–"
+                              : cell.received > 0
+                                ? formatEuro(cell.received).replace(/\s?€/, "")
+                                : "0"}
+                          </button>
+                        </td>
+                      );
+                    })}
                     <td className="py-1.5 px-2 text-right font-mono font-medium text-fg">
                       {formatEuro(yearTotal)}
                     </td>
@@ -312,146 +395,130 @@ export function MonthOverview({ year }: MonthOverviewProps) {
         {/* Legende */}
         <div className="flex flex-wrap gap-4 mt-4 text-xs text-fg-muted">
           <span className="flex items-center gap-1">
-            <span className="w-3 h-3 rounded bg-green-100 border border-green-300" />
-            Vollständig bezahlt
+            <span className="w-3 h-3 rounded bg-success/15 border border-success/30" />
+            {STATUS_LABELS.green}
           </span>
           <span className="flex items-center gap-1">
-            <span className="w-3 h-3 rounded bg-amber-100 border border-amber-300" />
-            Teilweise bezahlt
+            <span className="w-3 h-3 rounded bg-warning/15 border border-warning/40" />
+            {STATUS_LABELS.yellow}
           </span>
           <span className="flex items-center gap-1">
-            <span className="w-3 h-3 rounded bg-red-100 border border-red-300" />
-            Offen
+            <span className="w-3 h-3 rounded bg-danger/15 border border-danger/30" />
+            {STATUS_LABELS.red}
           </span>
           <span className="flex items-center gap-1">
             <span className="w-3 h-3 rounded bg-surface-muted border border-border" />
-            Kein Mietverhältnis
+            {STATUS_LABELS.gray}
           </span>
         </div>
       </Card>
 
       {/* Payment Editor Dialog */}
-      {editingCell && editingCellData && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-          <div className="bg-surface rounded-lg shadow-lg max-w-md w-full p-5">
-            <h3 className="text-base font-semibold text-fg mb-1">Zahlung erfassen</h3>
-            <p className="text-sm text-fg-muted mb-4">
+      <Modal
+        open={Boolean(editingCell && editingCellData)}
+        onClose={closeEditor}
+        title="Zahlung erfassen"
+        description={
+          editingCell && editingCellData ? (
+            <>
               {editingCellData.unit.name} &middot; {editingCellData.tenant.name} &middot;{" "}
               {MONTH_NAMES[parseInt(editingCell.month.slice(5), 10) - 1]}{" "}
               {editingCell.month.slice(0, 4)}
-            </p>
-
-            <div className="space-y-3">
-              <div className="p-2 bg-surface-muted rounded-lg text-xs text-fg-muted">
-                Soll-Miete: {formatEuro(editingCellData.occupancy.rentCold)} Kaltmiete +{" "}
-                {formatEuro(editingCellData.occupancy.rentUtilities)} Nebenkosten ={" "}
-                <strong className="text-fg">{formatEuro(editingCellData.expected)}</strong>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <NumInput
-                  label="Kaltmiete"
-                  value={form.amountCold}
-                  onChange={(v) => setForm((f) => ({ ...f, amountCold: v }))}
-                  suffix="€"
-                  min={0}
-                />
-                <NumInput
-                  label="Nebenkosten"
-                  value={form.amountUtilities}
-                  onChange={(v) => setForm((f) => ({ ...f, amountUtilities: v }))}
-                  suffix="€"
-                  min={0}
-                />
-              </div>
-
-              <div>
-                <label className="block">
-                  <span className="block text-xs font-medium text-fg-muted mb-1">
-                    Eingangsdatum
-                  </span>
-                  <input
-                    type="date"
-                    value={form.receivedDate}
-                    onChange={(e) => setForm((f) => ({ ...f, receivedDate: e.target.value }))}
-                    className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
-                  />
-                </label>
-              </div>
-
-              <div>
-                <label className="block">
-                  <span className="block text-xs font-medium text-fg-muted mb-1">Zahlungsart</span>
-                  <select
-                    value={form.method}
-                    onChange={(e) =>
-                      setForm((f) => ({
-                        ...f,
-                        method: e.target.value as Payment["method"],
-                      }))
-                    }
-                    className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
-                  >
-                    {(Object.entries(METHOD_LABELS) as [Payment["method"], string][]).map(
-                      ([value, label]) => (
-                        <option key={value} value={value}>
-                          {label}
-                        </option>
-                      ),
-                    )}
-                  </select>
-                </label>
-              </div>
-
-              <div>
-                <label className="block">
-                  <span className="block text-xs font-medium text-fg-muted mb-1">Bemerkung</span>
-                  <input
-                    type="text"
-                    value={form.notes}
-                    onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
-                    placeholder="Optional"
-                    className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
-                  />
-                </label>
-              </div>
+            </>
+          ) : undefined
+        }
+        footer={
+          <>
+            {editingCellData?.payment && (
+              <Button
+                variant="dangerGhost"
+                onClick={() => void handleDelete()}
+                disabled={saving}
+                className="mr-auto"
+              >
+                Löschen
+              </Button>
+            )}
+            <Button variant="secondary" onClick={closeEditor} disabled={saving}>
+              Abbrechen
+            </Button>
+            <Button type="submit" form={formId} variant="primary" loading={saving}>
+              Speichern
+            </Button>
+          </>
+        }
+      >
+        {editingCellData && (
+          <form
+            id={formId}
+            className="space-y-3"
+            onSubmit={(e) => {
+              e.preventDefault();
+              void handleSave();
+            }}
+          >
+            <div className="p-2 bg-surface-muted rounded-lg text-xs text-fg-muted">
+              Soll-Miete: {formatEuro(editingCellData.expectedCold)} Kaltmiete +{" "}
+              {formatEuro(editingCellData.occupancy.rentUtilities)} Nebenkosten ={" "}
+              <strong className="text-fg">{formatEuro(editingCellData.expected)}</strong>
             </div>
 
-            <div className="flex justify-between mt-5">
-              <div>
-                {editingCellData.payment && (
-                  <button
-                    type="button"
-                    onClick={handleDelete}
-                    disabled={saving}
-                    className="px-3 py-2 text-sm text-red-600 hover:text-red-700 transition-colors disabled:opacity-50"
-                  >
-                    Löschen
-                  </button>
+            <div className="grid grid-cols-2 gap-3">
+              <NumInput
+                label="Kaltmiete"
+                value={form.amountCold}
+                onChange={(v) => setForm((f) => ({ ...f, amountCold: v }))}
+                suffix="€"
+                min={0}
+              />
+              <NumInput
+                label="Nebenkosten"
+                value={form.amountUtilities}
+                onChange={(v) => setForm((f) => ({ ...f, amountUtilities: v }))}
+                suffix="€"
+                min={0}
+              />
+            </div>
+
+            <FormField label="Eingangsdatum">
+              <Input
+                type="date"
+                value={form.receivedDate}
+                onChange={(e) => setForm((f) => ({ ...f, receivedDate: e.target.value }))}
+              />
+            </FormField>
+
+            <FormField label="Zahlungsart">
+              <Select
+                value={form.method}
+                onChange={(e) =>
+                  setForm((f) => ({
+                    ...f,
+                    method: e.target.value as Payment["method"],
+                  }))
+                }
+              >
+                {(Object.entries(METHOD_LABELS) as [Payment["method"], string][]).map(
+                  ([value, label]) => (
+                    <option key={value} value={value}>
+                      {label}
+                    </option>
+                  ),
                 )}
-              </div>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => setEditingCell(null)}
-                  disabled={saving}
-                  className="px-4 py-2 text-sm rounded-lg border border-border text-fg-muted hover:bg-surface-muted transition-colors disabled:opacity-50"
-                >
-                  Abbrechen
-                </button>
-                <button
-                  type="button"
-                  onClick={handleSave}
-                  disabled={saving}
-                  className="px-4 py-2 text-sm rounded-lg bg-fg text-surface hover:opacity-90 transition-colors disabled:opacity-50"
-                >
-                  {saving ? "Speichern..." : "Speichern"}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+              </Select>
+            </FormField>
+
+            <FormField label="Bemerkung">
+              <Textarea
+                rows={2}
+                value={form.notes}
+                onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
+                placeholder="Optional"
+              />
+            </FormField>
+          </form>
+        )}
+      </Modal>
     </>
   );
 }

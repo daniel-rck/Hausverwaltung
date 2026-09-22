@@ -4,8 +4,10 @@ import { useProperty } from "../../lib/hooks/useProperty";
 import { BarChart } from "../../lib/ui/charts/BarChart";
 import { Card } from "../../lib/ui/shared/Card";
 import { EmptyState } from "../../lib/ui/shared/EmptyState";
+import { Skeleton } from "../../lib/ui/ui";
 import { BarChart3 } from "../../lib/ui/ui/icons";
 import { formatEuro, MONTH_NAMES } from "../../lib/utils/format";
+import { buildRentLookup } from "../../lib/utils/rent";
 
 interface RevenueChartProps {
   year: number;
@@ -19,19 +21,21 @@ export function RevenueChart({ year }: RevenueChartProps) {
 
     const units = await db.units.where("propertyId").equals(activeProperty.id).toArray();
 
-    const unitIds = units.map((u) => u.id!);
+    const unitIds = units.flatMap((u) => (u.id != null ? [u.id] : []));
     const allOccupancies = await db.occupancies.toArray();
     const occupancies = allOccupancies.filter((o) => unitIds.includes(o.unitId));
 
     const allPayments = await db.payments.toArray();
 
-    return { occupancies, allPayments };
+    const rentChanges = await db.rentChanges.toArray();
+    return { occupancies, allPayments, rentChanges };
   }, [activeProperty?.id]);
 
   const chartData = useMemo(() => {
     if (!data) return null;
 
-    const { occupancies, allPayments } = data;
+    const { occupancies, allPayments, rentChanges } = data;
+    const rentAt = buildRentLookup(rentChanges);
     const expected: number[] = new Array(12).fill(0) as number[];
     const received: number[] = new Array(12).fill(0) as number[];
 
@@ -42,18 +46,16 @@ export function RevenueChart({ year }: RevenueChartProps) {
     for (const occ of occupancies) {
       if (occ.from > yearEnd || (occ.to !== null && occ.to < yearStart)) continue;
 
-      const monthlyRent = occ.rentCold + occ.rentUtilities;
-
       for (let m = 1; m <= 12; m++) {
         const month = `${year}-${String(m).padStart(2, "0")}`;
         if (month < occ.from) continue;
         if (occ.to !== null && month > occ.to) continue;
-        expected[m - 1] = (expected[m - 1] ?? 0) + monthlyRent;
+        expected[m - 1] = (expected[m - 1] ?? 0) + rentAt(occ, month) + occ.rentUtilities;
       }
     }
 
     // Calculate received per month from payments
-    const occupancyIds = new Set(occupancies.map((o) => o.id!));
+    const occupancyIds = new Set(occupancies.flatMap((o) => (o.id != null ? [o.id] : [])));
     for (const p of allPayments) {
       if (!occupancyIds.has(p.occupancyId)) continue;
       if (!p.month.startsWith(`${year}-`)) continue;
@@ -69,6 +71,14 @@ export function RevenueChart({ year }: RevenueChartProps) {
 
     return { expected, received, totalExpected, totalReceived };
   }, [data, year]);
+
+  if (data === undefined) {
+    return (
+      <Card title="Jahresübersicht">
+        <Skeleton height="300px" />
+      </Card>
+    );
+  }
 
   if (!data || !chartData) return null;
 
@@ -88,8 +98,8 @@ export function RevenueChart({ year }: RevenueChartProps) {
               <strong
                 className={
                   chartData.totalReceived >= chartData.totalExpected
-                    ? "text-green-600"
-                    : "text-amber-600"
+                    ? "text-success-fg"
+                    : "text-warning-fg"
                 }
               >
                 {formatEuro(chartData.totalReceived)}
@@ -108,6 +118,7 @@ export function RevenueChart({ year }: RevenueChartProps) {
       ) : (
         <div className="h-[300px]">
           <BarChart
+            valueFormat="euro"
             labels={MONTH_NAMES.map((n) => n.slice(0, 3))}
             datasets={[
               {

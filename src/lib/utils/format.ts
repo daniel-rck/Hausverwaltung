@@ -71,3 +71,44 @@ export const MONTH_NAMES = [
   "November",
   "Dezember",
 ];
+
+/**
+ * Parst eine Zahleneingabe in deutscher Notation.
+ * - Komma vorhanden → Komma ist Dezimaltrenner, Punkte sind Tausender:
+ *   "1.234,56" → 1234.56
+ * - Nur Punkte: genau ein Punkt mit exakt drei Ziffern danach bzw. mehrere
+ *   Dreiergruppen gelten als Tausender ("1.234" → 1234, "1.234.567"),
+ *   sonst ist der letzte Punkt Dezimaltrenner ("12.5" → 12.5).
+ * Gibt `null` für leere oder ungültige Eingaben zurück.
+ */
+export function parseGermanNumber(input: string): number | null {
+  let s = input.trim().replace(/\s/g, "");
+  if (s === "") return null;
+  if (s.includes(",")) {
+    // Genau ein Komma; Punkte nur als korrekte Tausendergruppen ("1.234,5"),
+    // sonst würde z. B. "1.2,3" stillschweigend zu 12,3.
+    const [intPart = "", fracPart = "", ...rest] = s.split(",");
+    if (rest.length > 0 || !/^\d+$/.test(fracPart)) return null;
+    if (!/^-?\d+$/.test(intPart) && !/^-?\d{1,3}(\.\d{3})+$/.test(intPart)) return null;
+    s = `${intPart.replace(/\./g, "")}.${fracPart}`;
+  } else {
+    const parts = s.split(".");
+    if (parts.length > 1) {
+      const head = parts.slice(0, -1);
+      const last = parts[parts.length - 1] ?? "";
+      const isGrouping =
+        last.length === 3 &&
+        /^-?\d{1,3}$/.test(head[0] ?? "") &&
+        head.slice(1).every((p) => /^\d{3}$/.test(p));
+      s = isGrouping ? parts.join("") : `${head.join("")}.${last}`;
+    }
+  }
+  if (!/^-?\d*\.?\d+$|^-?\d+\.$/.test(s)) return null;
+  const n = Number.parseFloat(s);
+  return Number.isFinite(n) ? n : null;
+}
+
+/** Zahl ohne Tausenderpunkte für Eingabefelder: 3.875 → "3,875" */
+export function formatNumberForInput(value: number): string {
+  return value.toLocaleString("de-DE", { useGrouping: false, maximumFractionDigits: 10 });
+}

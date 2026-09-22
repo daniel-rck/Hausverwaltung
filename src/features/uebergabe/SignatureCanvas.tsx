@@ -1,15 +1,18 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Button, useConfirm, useToast } from "../../lib/ui/ui";
 
-interface SignatureCanvasProps {
+type SignatureCanvasProps = {
   label: string;
   value: string | undefined;
   onChange: (dataUrl: string | undefined) => void;
-}
+};
 
 export function SignatureCanvas({ label, value, onChange }: SignatureCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const hasDrawnRef = useRef(false);
+  const confirm = useConfirm();
+  const toast = useToast();
 
   const getCtx = useCallback(() => {
     const canvas = canvasRef.current;
@@ -111,31 +114,39 @@ export function SignatureCanvas({ label, value, onChange }: SignatureCanvasProps
     [isDrawing, onChange],
   );
 
-  const handleClear = useCallback(() => {
+  const handleClear = useCallback(async () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+    if (value || hasDrawnRef.current) {
+      const ok = await confirm({
+        title: "Unterschrift löschen?",
+        message: `Die Unterschrift „${label}“ wird entfernt und muss neu geleistet werden.`,
+        confirmLabel: "Löschen",
+        danger: true,
+      });
+      if (!ok) return;
+    }
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
     const dpr = window.devicePixelRatio || 1;
     ctx.clearRect(0, 0, canvas.width / dpr, canvas.height / dpr);
     hasDrawnRef.current = false;
     onChange(undefined);
-  }, [onChange]);
+    toast.success("Unterschrift gelöscht.");
+  }, [onChange, confirm, toast, label, value]);
 
   return (
     <div>
       <div className="flex items-center justify-between mb-2">
         <span className="text-sm font-semibold text-fg">{label}</span>
-        <button
-          type="button"
-          onClick={handleClear}
-          className="text-xs px-2 py-1 text-red-600 hover:text-red-700 border border-red-200 rounded hover:bg-red-50 transition-colors"
-        >
+        <Button variant="dangerGhost" size="sm" onClick={() => void handleClear()}>
           Löschen
-        </button>
+        </Button>
       </div>
       <canvas
         ref={canvasRef}
+        role="img"
+        aria-label={value ? `Unterschrift ${label} (vorhanden)` : `Unterschriftenfeld ${label}`}
         className="w-full h-32 border border-border rounded-lg bg-white cursor-crosshair touch-none"
         onMouseDown={startDraw}
         onMouseMove={draw}

@@ -18,13 +18,10 @@ interface BadgeProps {
 
 const variantClasses: Record<BadgeVariant, string> = {
   neutral: "bg-surface-sunken text-fg border border-border/60",
-  success:
-    "bg-green-50 dark:bg-green-950/60 text-green-700 dark:text-green-300 border border-green-200/60 dark:border-green-900/60",
-  warning:
-    "bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200/60 dark:border-amber-900/60",
-  danger:
-    "bg-red-50 dark:bg-red-950/60 text-red-700 dark:text-red-300 border border-red-200/60 dark:border-red-900/60",
-  info: "bg-[--color-accent-soft] dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-900/60",
+  success: "bg-success/10 text-success-fg border border-success/30",
+  warning: "bg-warning/10 text-warning-fg border border-warning/30",
+  danger: "bg-danger/10 text-danger-fg border border-danger/30",
+  info: "bg-info/10 text-info-fg border border-info/30",
 };
 
 const sizeClasses: Record<BadgeSize, string> = {

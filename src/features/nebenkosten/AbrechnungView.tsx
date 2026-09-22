@@ -8,8 +8,10 @@ import type {
   Occupancy,
   Unit,
 } from "../../lib/db/schema";
+import { Skeleton } from "../../lib/ui/ui";
 import { getDistributionShare, getOccupiedMonthsFractional } from "../../lib/utils/calc";
-import { formatArea, formatDate, formatEuro, formatNumber } from "../../lib/utils/format";
+import { todayIso } from "../../lib/utils/dates";
+import { formatArea, formatDate, formatEuro, formatPercent } from "../../lib/utils/format";
 
 interface AbrechnungViewProps {
   occupancy: Occupancy;
@@ -49,6 +51,10 @@ const DISTRIBUTION_LABELS: Record<string, string> = {
   messdienst: "Messdienst",
   direct: "Direkt",
 };
+
+function roundCents(value: number): number {
+  return Math.round(value * 100) / 100;
+}
 
 function getOccupiedMonths(occupancy: Occupancy, year: number): number {
   return getOccupiedMonthsFractional(occupancy, year);
@@ -93,7 +99,8 @@ export function AbrechnungView({
     const allOccupancies: OccupancyWithUnit[] = [];
 
     for (const u of allUnits) {
-      const occs = await db.occupancies.where("unitId").equals(u.id!).toArray();
+      if (u.id == null) continue;
+      const occs = await db.occupancies.where("unitId").equals(u.id).toArray();
       const active = occs.filter((o) => o.from <= yearEnd && (o.to === null || o.to >= yearStart));
       for (const o of active) {
         allOccupancies.push({ occupancy: o, unit: u });
@@ -103,7 +110,7 @@ export function AbrechnungView({
     const currentOccWithUnit: OccupancyWithUnit = { occupancy, unit };
 
     // Get all cost shares
-    const costIds = allCosts.map((c) => c.id!).filter(Boolean);
+    const costIds = allCosts.flatMap((c) => (c.id ? [c.id] : []));
     const allShares: CostShare[] =
       costIds.length > 0
         ? (await db.costShares.toArray()).filter((s) => costIds.includes(s.costId))
@@ -113,7 +120,7 @@ export function AbrechnungView({
     const costLines: CostLine[] = [];
 
     for (const costType of allCostTypes) {
-      const cost = allCosts.find((c) => c.costTypeId === costType.id!);
+      const cost = allCosts.find((c) => c.costTypeId === costType.id);
       if (!cost || cost.totalAmount === 0) continue;
 
       let share = 0;
@@ -121,7 +128,7 @@ export function AbrechnungView({
 
       if (costType.distribution === "messdienst" || costType.distribution === "direct") {
         const costShare = allShares.find(
-          (s) => s.costId === cost.id! && s.occupancyId === occupancy.id!,
+          (s) => s.costId === cost.id && s.occupancyId === occupancy.id,
         );
         share = costShare?.amount ?? 0;
         distributionLabel =
@@ -132,25 +139,27 @@ export function AbrechnungView({
           currentOccWithUnit,
           allOccupancies,
           year,
+          allUnits,
         );
-        share = cost.totalAmount * fraction;
-        distributionLabel = `${DISTRIBUTION_LABELS[costType.distribution]} (${(fraction * 100).toFixed(1)}%)`;
+        share = roundCents(cost.totalAmount * fraction);
+        distributionLabel = `${DISTRIBUTION_LABELS[costType.distribution]} (${formatPercent(fraction)})`;
       }
 
       costLines.push({ costType, cost, share, distributionLabel });
     }
 
     // Get prepayment
-    const prepayment = await db.prepayments
-      .where("[occupancyId+year]")
-      .equals([occupancy.id!, year])
-      .first();
+    const prepayment =
+      occupancy.id != null
+        ? await db.prepayments.where("[occupancyId+year]").equals([occupancy.id, year]).first()
+        : undefined;
 
     const months = getOccupiedMonths(occupancy, year);
-    const prepaymentAmount = prepayment?.amount ?? occupancy.rentUtilities * months;
+    const prepaymentAmount = roundCents(prepayment?.amount ?? occupancy.rentUtilities * months);
 
-    const totalCostShare = costLines.reduce((sum, l) => sum + l.share, 0);
-    const result = totalCostShare - prepaymentAmount;
+    // Summe aus den gedruckten (gerundeten) Zeilen — sonst weicht sie um Cents ab.
+    const totalCostShare = roundCents(costLines.reduce((sum, l) => sum + l.share, 0));
+    const result = roundCents(totalCostShare - prepaymentAmount);
 
     return {
       property,
@@ -165,8 +174,22 @@ export function AbrechnungView({
     };
   }, [occupancy, year, propertyId]);
 
+  if (data === undefined) {
+    return (
+      <div className="max-w-3xl mx-auto space-y-3 py-4">
+        <Skeleton variant="text" width="40%" />
+        <Skeleton variant="text" width="60%" />
+        <Skeleton height="16rem" />
+      </div>
+    );
+  }
+
   if (!data) {
-    return <div className="text-center py-8 text-sm text-zinc-500">Lade Abrechnung...</div>;
+    return (
+      <p className="text-center py-8 text-sm text-fg-muted">
+        Abrechnung nicht verfügbar – Objekt oder Wohnung wurde nicht gefunden.
+      </p>
+    );
   }
 
   const {
@@ -194,10 +217,10 @@ export function AbrechnungView({
     grouped[line.costType.category].push(line);
   }
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayIso();
 
   const content = (
-    <div className="bg-white max-w-3xl mx-auto">
+    <div className="bg-white text-zinc-900 max-w-3xl mx-auto">
       {/* Header */}
       <div className="mb-6">
         {landlord.name && (
@@ -220,63 +243,65 @@ export function AbrechnungView({
         </p>
         <p className="text-sm text-zinc-500">
           Wohnung: {unit.name} ({formatArea(unit.area)}) | Abrechnungszeitraum:{" "}
-          {formatNumber(months)} Monate
+          {months.toLocaleString("de-DE", { maximumFractionDigits: 2 })} Monate
         </p>
       </div>
 
       {/* Cost table */}
-      <table className="w-full text-sm mb-6">
-        <thead>
-          <tr className="border-b-2 border-zinc-300">
-            <th className="py-2 text-left font-semibold text-zinc-700">Kostenart</th>
-            <th className="py-2 text-right font-semibold text-zinc-700">Gesamtkosten</th>
-            <th className="py-2 text-left font-semibold text-zinc-700 pl-4">Verteilung</th>
-            <th className="py-2 text-right font-semibold text-zinc-700">Ihr Anteil</th>
-          </tr>
-        </thead>
-        {CATEGORY_ORDER.map((cat) => {
-          const lines = grouped[cat];
-          if (lines.length === 0) return null;
+      <div className="overflow-x-auto mb-6">
+        <table className="w-full min-w-[32rem] text-sm">
+          <thead>
+            <tr className="border-b-2 border-zinc-300">
+              <th className="py-2 text-left font-semibold text-zinc-700">Kostenart</th>
+              <th className="py-2 text-right font-semibold text-zinc-700">Gesamtkosten</th>
+              <th className="py-2 text-left font-semibold text-zinc-700 pl-4">Verteilung</th>
+              <th className="py-2 text-right font-semibold text-zinc-700">Ihr Anteil</th>
+            </tr>
+          </thead>
+          {CATEGORY_ORDER.map((cat) => {
+            const lines = grouped[cat];
+            if (lines.length === 0) return null;
 
-          const catSubtotal = lines.reduce((s, l) => s + l.share, 0);
+            const catSubtotal = lines.reduce((s, l) => s + l.share, 0);
 
-          return (
-            <tbody key={cat}>
-              <tr>
-                <td
-                  colSpan={4}
-                  className="pt-3 pb-1 text-xs font-semibold text-zinc-500 uppercase tracking-wide"
-                >
-                  {CATEGORY_LABELS[cat]}
-                </td>
-              </tr>
-              {lines.map((line) => (
-                <tr key={line.costType.id} className="border-b border-zinc-100">
-                  <td className="py-1.5 text-zinc-700">{line.costType.name}</td>
-                  <td className="py-1.5 text-right font-mono font-tabular text-zinc-600">
-                    {formatEuro(line.cost.totalAmount)}
-                  </td>
-                  <td className="py-1.5 pl-4 text-zinc-500 text-xs">{line.distributionLabel}</td>
-                  <td className="py-1.5 text-right font-mono font-tabular text-zinc-800">
-                    {formatEuro(line.share)}
+            return (
+              <tbody key={cat}>
+                <tr>
+                  <td
+                    colSpan={4}
+                    className="pt-3 pb-1 text-xs font-semibold text-zinc-500 uppercase tracking-wide"
+                  >
+                    {CATEGORY_LABELS[cat]}
                   </td>
                 </tr>
-              ))}
-              <tr className="border-b border-zinc-200">
-                <td
-                  colSpan={3}
-                  className="py-1.5 text-xs font-medium text-zinc-500 text-right pr-4"
-                >
-                  Zwischensumme {CATEGORY_LABELS[cat]}
-                </td>
-                <td className="py-1.5 text-right font-mono font-tabular font-medium text-zinc-700">
-                  {formatEuro(catSubtotal)}
-                </td>
-              </tr>
-            </tbody>
-          );
-        })}
-      </table>
+                {lines.map((line) => (
+                  <tr key={line.costType.id} className="border-b border-zinc-100">
+                    <td className="py-1.5 text-zinc-700">{line.costType.name}</td>
+                    <td className="py-1.5 text-right font-mono font-tabular text-zinc-600">
+                      {formatEuro(line.cost.totalAmount)}
+                    </td>
+                    <td className="py-1.5 pl-4 text-zinc-500 text-xs">{line.distributionLabel}</td>
+                    <td className="py-1.5 text-right font-mono font-tabular text-zinc-800">
+                      {formatEuro(line.share)}
+                    </td>
+                  </tr>
+                ))}
+                <tr className="border-b border-zinc-200">
+                  <td
+                    colSpan={3}
+                    className="py-1.5 text-xs font-medium text-zinc-500 text-right pr-4"
+                  >
+                    Zwischensumme {CATEGORY_LABELS[cat]}
+                  </td>
+                  <td className="py-1.5 text-right font-mono font-tabular font-medium text-zinc-700">
+                    {formatEuro(catSubtotal)}
+                  </td>
+                </tr>
+              </tbody>
+            );
+          })}
+        </table>
+      </div>
 
       {/* Summary */}
       <div className="border-t-2 border-zinc-300 pt-4 space-y-2">
@@ -288,7 +313,8 @@ export function AbrechnungView({
         </div>
         <div className="flex justify-between text-sm">
           <span className="text-zinc-600">
-            abzgl. Vorauszahlungen ({formatNumber(months)} Monate)
+            abzgl. Vorauszahlungen ({months.toLocaleString("de-DE", { maximumFractionDigits: 2 })}{" "}
+            Monate)
           </span>
           <span className="font-mono font-tabular text-zinc-600">
             - {formatEuro(prepaymentAmount)}
@@ -296,7 +322,7 @@ export function AbrechnungView({
         </div>
         <div className="flex justify-between text-base pt-2 border-t border-zinc-200">
           <span className="font-bold text-zinc-800">
-            {result >= 0 ? "Nachzahlung" : "Guthaben"}
+            {result > 0 ? "Nachzahlung" : result < 0 ? "Guthaben" : "Ausgeglichen"}
           </span>
           <span
             className={`font-mono font-tabular font-bold ${

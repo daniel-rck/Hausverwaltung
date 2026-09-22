@@ -1,14 +1,28 @@
 import { useMemo, useState } from "react";
-import { db, deleteWithTombstone, useLiveQuery } from "../../lib/db";
+import { bulkDeleteWithTombstones, db, deleteWithTombstone, useLiveQuery } from "../../lib/db";
 import { isMaintenanceForProperty } from "../../lib/db/queries";
 import type { MaintenanceItem, Unit } from "../../lib/db/schema";
 import { useProperty } from "../../lib/hooks/useProperty";
 import { Card } from "../../lib/ui/shared/Card";
-import { ConfirmDialog } from "../../lib/ui/shared/ConfirmDialog";
 import { type Column, DataTable } from "../../lib/ui/shared/DataTable";
 import { EmptyState } from "../../lib/ui/shared/EmptyState";
 import { NumInput } from "../../lib/ui/shared/NumInput";
-import { Wrench } from "../../lib/ui/ui/icons";
+import {
+  Badge,
+  Button,
+  Checkbox,
+  FormField,
+  Input,
+  Select,
+  Skeleton,
+  Textarea,
+  useConfirm,
+  useFormValidation,
+  useToast,
+  type ValidationSchema,
+} from "../../lib/ui/ui";
+import { Plus, Wrench } from "../../lib/ui/ui/icons";
+import { todayIso } from "../../lib/utils/dates";
 import { formatDate, formatEuro } from "../../lib/utils/format";
 
 type Category = MaintenanceItem["category"];
@@ -20,19 +34,19 @@ const CATEGORY_LABELS: Record<Category, string> = {
   modernization: "Modernisierung",
 };
 
-const CATEGORY_COLORS: Record<Category, string> = {
-  repair: "text-red-600 bg-red-50 dark:bg-red-900/30 dark:text-red-400",
-  maintenance: "text-amber-600 bg-amber-50 dark:bg-amber-900/30 dark:text-amber-400",
-  inspection: "text-blue-600 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400",
-  modernization: "text-purple-600 bg-purple-50 dark:bg-purple-900/30 dark:text-purple-400",
+const CATEGORY_BADGE: Record<Category, "danger" | "warning" | "info" | "success"> = {
+  repair: "danger",
+  maintenance: "warning",
+  inspection: "info",
+  modernization: "success",
 };
 
-interface MaintenanceRow {
+type MaintenanceRow = {
   item: MaintenanceItem;
   unitName: string;
-}
+};
 
-interface FormState {
+type FormState = {
   unitId: string;
   date: string;
   category: Category;
@@ -44,11 +58,22 @@ interface FormState {
   recurringInterval: string;
   nextDue: string;
   notes: string;
-}
+};
+
+const validationSchema: ValidationSchema<FormState> = {
+  title: (v) => (typeof v === "string" && v.trim() !== "" ? null : "Bitte Titel angeben"),
+  date: (v) => (v ? null : "Bitte Datum angeben"),
+  cost: (v) => (typeof v === "number" && v >= 0 ? null : "Kosten dürfen nicht negativ sein"),
+  recurringInterval: (v, values) => {
+    if (!values.recurring || v === "") return null;
+    const n = Number(v);
+    return Number.isInteger(n) && n >= 1 ? null : "Bitte ganze Zahl ≥ 1 angeben";
+  },
+};
 
 const emptyForm: FormState = {
   unitId: "",
-  date: new Date().toISOString().slice(0, 10),
+  date: todayIso(),
   category: "repair",
   title: "",
   description: "",
@@ -65,7 +90,10 @@ export function MaintenanceList() {
   const [showForm, setShowForm] = useState(false);
   const [editItem, setEditItem] = useState<MaintenanceItem | null>(null);
   const [form, setForm] = useState<FormState>(emptyForm);
-  const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [saving, setSaving] = useState(false);
+  const toast = useToast();
+  const confirm = useConfirm();
+  const { errors, validate, clear } = useFormValidation<FormState>(validationSchema);
   const [filterCategory, setFilterCategory] = useState<Category | "">("");
 
   const units = useLiveQuery(
@@ -76,11 +104,14 @@ export function MaintenanceList() {
     [activeProperty?.id],
   );
 
-  const unitIds = useMemo(() => (units ?? []).map((u) => u.id!), [units]);
+  const unitIds = useMemo(
+    () => (units ?? []).flatMap((u) => (u.id === undefined ? [] : [u.id])),
+    [units],
+  );
   const unitMap = useMemo(() => {
     const map = new Map<number, Unit>();
     for (const u of units ?? []) {
-      map.set(u.id!, u);
+      if (u.id !== undefined) map.set(u.id, u);
     }
     return map;
   }, [units]);
@@ -109,8 +140,15 @@ export function MaintenanceList() {
 
   const openAdd = () => {
     setEditItem(null);
-    setForm(emptyForm);
+    setForm({ ...emptyForm, date: todayIso() });
+    clear();
     setShowForm(true);
+  };
+
+  const closeForm = () => {
+    setShowForm(false);
+    setEditItem(null);
+    clear();
   };
 
   const openEdit = (row: MaintenanceRow) => {
@@ -129,11 +167,12 @@ export function MaintenanceList() {
       nextDue: i.nextDue ?? "",
       notes: i.notes ?? "",
     });
+    clear();
     setShowForm(true);
   };
 
   const handleSave = async () => {
-    if (!form.title.trim() || !form.date) return;
+    if (!validate(form)) return;
 
     const data: Omit<MaintenanceItem, "id"> = {
       unitId: form.unitId === "" ? null : parseInt(form.unitId, 10),
@@ -153,21 +192,52 @@ export function MaintenanceList() {
       notes: form.notes || undefined,
     };
 
-    if (editItem?.id) {
-      await db.maintenanceItems.put({ ...data, id: editItem.id });
-    } else {
-      await db.maintenanceItems.add(data as MaintenanceItem);
+    setSaving(true);
+    try {
+      if (editItem?.id) {
+        await db.maintenanceItems.put({ ...data, id: editItem.id });
+        toast.success("Maßnahme aktualisiert.");
+      } else {
+        await db.maintenanceItems.add(data as MaintenanceItem);
+        toast.success("Maßnahme angelegt.");
+      }
+      setShowForm(false);
+      setEditItem(null);
+      setForm(emptyForm);
+    } catch (err) {
+      toast.error("Speichern fehlgeschlagen.");
+      console.error(err);
+    } finally {
+      setSaving(false);
     }
-
-    setShowForm(false);
-    setEditItem(null);
-    setForm(emptyForm);
   };
 
-  const handleDelete = async () => {
-    if (deleteId !== null) {
-      await deleteWithTombstone("maintenanceItems", deleteId);
-      setDeleteId(null);
+  const handleDelete = async (item: MaintenanceItem) => {
+    const id = item.id;
+    if (id === undefined) return;
+    const ok = await confirm({
+      title: "Maßnahme löschen?",
+      message: `„${item.title}“ und alle zugehörigen Dokumente werden gelöscht. Dies kann nicht rückgängig gemacht werden.`,
+      confirmLabel: "Löschen",
+      danger: true,
+    });
+    if (!ok) return;
+    try {
+      // Angehängte Dokumente mitlöschen (inkl. Tombstones für den Sync).
+      const docs = await db.documents
+        .where("[entityType+entityId]")
+        .equals(["maintenance", id])
+        .toArray();
+      await bulkDeleteWithTombstones(
+        "documents",
+        docs.flatMap((d) => (d.id === undefined ? [] : [d.id])),
+      );
+      await deleteWithTombstone("maintenanceItems", id);
+      if (editItem?.id === id) closeForm();
+      toast.success("Maßnahme gelöscht.");
+    } catch (err) {
+      toast.error("Löschen fehlgeschlagen.");
+      console.error(err);
     }
   };
 
@@ -190,11 +260,7 @@ export function MaintenanceList() {
       key: "category",
       header: "Kategorie",
       render: (r) => (
-        <span
-          className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${CATEGORY_COLORS[r.item.category]}`}
-        >
-          {CATEGORY_LABELS[r.item.category]}
-        </span>
+        <Badge variant={CATEGORY_BADGE[r.item.category]}>{CATEGORY_LABELS[r.item.category]}</Badge>
       ),
       sortValue: (r) => CATEGORY_LABELS[r.item.category],
     },
@@ -221,258 +287,201 @@ export function MaintenanceList() {
       key: "actions",
       header: "",
       render: (r) => (
-        <div className="flex gap-2">
-          <button
-            type="button"
+        <div className="flex gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={(e) => {
               e.stopPropagation();
               openEdit(r);
             }}
-            className="text-xs text-fg-subtle hover:text-fg"
           >
             Bearbeiten
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
+            variant="dangerGhost"
+            size="sm"
             onClick={(e) => {
               e.stopPropagation();
-              setDeleteId(r.item.id!);
+              void handleDelete(r.item);
             }}
-            className="text-xs text-red-400 hover:text-red-600"
           >
             Löschen
-          </button>
+          </Button>
         </div>
       ),
     },
   ];
 
-  const inputCls =
-    "w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500";
+  const categoryOptions = Object.entries(CATEGORY_LABELS) as [Category, string][];
 
   return (
-    <>
-      <Card
-        title="Alle Maßnahmen"
-        action={
-          <div className="flex gap-2 items-center">
-            <select
-              value={filterCategory}
-              onChange={(e) => setFilterCategory(e.target.value as Category | "")}
-              className="text-sm border border-border rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-accent-500"
-            >
-              <option value="">Alle Kategorien</option>
-              {(Object.entries(CATEGORY_LABELS) as [Category, string][]).map(([k, v]) => (
-                <option key={k} value={k}>
-                  {v}
-                </option>
-              ))}
-            </select>
-            <button
-              type="button"
-              onClick={openAdd}
-              className="text-sm px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-            >
-              + Neue Maßnahme
-            </button>
-          </div>
-        }
-      >
-        {showForm && (
-          <div className="mb-4 p-4 bg-surface-muted rounded-lg border border-border">
-            <h3 className="text-sm font-semibold text-fg mb-3">
-              {editItem ? "Maßnahme bearbeiten" : "Neue Maßnahme"}
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              <div>
-                <label className="block">
-                  <span className="block text-xs font-medium text-fg-muted mb-1">Titel *</span>
-                  <input
-                    type="text"
-                    value={form.title}
-                    onChange={(e) => setForm({ ...form, title: e.target.value })}
-                    placeholder="z.B. Heizungswartung"
-                    className={inputCls}
-                  />
-                </label>
-              </div>
-              <div>
-                <label className="block">
-                  <span className="block text-xs font-medium text-fg-muted mb-1">Datum *</span>
-                  <input
-                    type="date"
-                    value={form.date}
-                    onChange={(e) => setForm({ ...form, date: e.target.value })}
-                    className={inputCls}
-                  />
-                </label>
-              </div>
-              <div>
-                <label className="block">
-                  <span className="block text-xs font-medium text-fg-muted mb-1">Kategorie</span>
-                  <select
-                    value={form.category}
-                    onChange={(e) => setForm({ ...form, category: e.target.value as Category })}
-                    className={inputCls}
-                  >
-                    {(Object.entries(CATEGORY_LABELS) as [Category, string][]).map(([k, v]) => (
-                      <option key={k} value={k}>
-                        {v}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              </div>
-              <div>
-                <label className="block">
-                  <span className="block text-xs font-medium text-fg-muted mb-1">Wohnung</span>
-                  <select
-                    value={form.unitId}
-                    onChange={(e) => setForm({ ...form, unitId: e.target.value })}
-                    className={inputCls}
-                  >
-                    <option value="">Gemeinschaft</option>
-                    {(units ?? []).map((u) => (
-                      <option key={u.id} value={u.id}>
-                        {u.name}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              </div>
+    <Card
+      title="Alle Maßnahmen"
+      action={
+        <div className="flex gap-2 items-center">
+          <Select
+            aria-label="Nach Kategorie filtern"
+            value={filterCategory}
+            onChange={(e) => setFilterCategory(e.target.value as Category | "")}
+            className="w-auto"
+          >
+            <option value="">Alle Kategorien</option>
+            {categoryOptions.map(([k, v]) => (
+              <option key={k} value={k}>
+                {v}
+              </option>
+            ))}
+          </Select>
+          <Button variant="primary" size="sm" leftIcon={<Plus size={14} />} onClick={openAdd}>
+            Neue Maßnahme
+          </Button>
+        </div>
+      }
+    >
+      {showForm && (
+        <form
+          className="mb-4 p-4 bg-surface-muted rounded-lg border border-border"
+          onSubmit={(e) => {
+            e.preventDefault();
+            void handleSave();
+          }}
+          noValidate
+        >
+          <h3 className="text-sm font-semibold text-fg mb-3">
+            {editItem ? "Maßnahme bearbeiten" : "Neue Maßnahme"}
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-3 gap-y-1">
+            <FormField label="Titel" required error={errors.title}>
+              <Input
+                value={form.title}
+                onChange={(e) => setForm({ ...form, title: e.target.value })}
+                placeholder="z. B. Heizungswartung"
+              />
+            </FormField>
+            <FormField label="Datum" required error={errors.date}>
+              <Input
+                type="date"
+                value={form.date}
+                onChange={(e) => setForm({ ...form, date: e.target.value })}
+              />
+            </FormField>
+            <FormField label="Kategorie">
+              <Select
+                value={form.category}
+                onChange={(e) => setForm({ ...form, category: e.target.value as Category })}
+              >
+                {categoryOptions.map(([k, v]) => (
+                  <option key={k} value={k}>
+                    {v}
+                  </option>
+                ))}
+              </Select>
+            </FormField>
+            <FormField label="Wohnung">
+              <Select
+                value={form.unitId}
+                onChange={(e) => setForm({ ...form, unitId: e.target.value })}
+              >
+                <option value="">Gemeinschaft</option>
+                {(units ?? []).map((u) => (
+                  <option key={u.id} value={u.id}>
+                    {u.name}
+                  </option>
+                ))}
+              </Select>
+            </FormField>
+            <FormField label="Kosten" error={errors.cost}>
               <NumInput
-                label="Kosten (EUR)"
                 value={form.cost}
                 onChange={(v) => setForm({ ...form, cost: v })}
                 min={0}
+                suffix="€"
               />
-              <div>
-                <label className="block">
-                  <span className="block text-xs font-medium text-fg-muted mb-1">Handwerker</span>
-                  <input
-                    type="text"
-                    value={form.contractor}
-                    onChange={(e) => setForm({ ...form, contractor: e.target.value })}
-                    placeholder="Firmenname"
-                    className={inputCls}
-                  />
-                </label>
-              </div>
-              <div className="sm:col-span-2 lg:col-span-3">
-                <label className="block">
-                  <span className="block text-xs font-medium text-fg-muted mb-1">Beschreibung</span>
-                  <textarea
-                    value={form.description}
-                    onChange={(e) => setForm({ ...form, description: e.target.value })}
-                    rows={2}
-                    className={inputCls}
-                  />
-                </label>
-              </div>
-              <div className="flex items-end">
-                <label className="flex items-center gap-2 text-sm text-fg-muted pb-1.5">
-                  <input
-                    type="checkbox"
-                    checked={form.recurring}
-                    onChange={(e) => setForm({ ...form, recurring: e.target.checked })}
-                    className="rounded border-border"
-                  />
-                  Wiederkehrend
-                </label>
-              </div>
-              {form.recurring && (
-                <>
-                  <div>
-                    <label className="block">
-                      <span className="block text-xs font-medium text-fg-muted mb-1">
-                        Intervall (Monate)
-                      </span>
-                      <input
-                        type="number"
-                        min="1"
-                        value={form.recurringInterval}
-                        onChange={(e) => setForm({ ...form, recurringInterval: e.target.value })}
-                        placeholder="z.B. 12"
-                        className={inputCls}
-                      />
-                    </label>
-                  </div>
-                  <div>
-                    <label className="block">
-                      <span className="block text-xs font-medium text-fg-muted mb-1">
-                        Nächste Fälligkeit
-                      </span>
-                      <input
-                        type="date"
-                        value={form.nextDue}
-                        onChange={(e) => setForm({ ...form, nextDue: e.target.value })}
-                        className={inputCls}
-                      />
-                    </label>
-                  </div>
-                </>
-              )}
-              <div className="sm:col-span-2 lg:col-span-3">
-                <label className="block">
-                  <span className="block text-xs font-medium text-fg-muted mb-1">Notizen</span>
-                  <textarea
-                    value={form.notes}
-                    onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                    rows={2}
-                    className={inputCls}
-                  />
-                </label>
-              </div>
+            </FormField>
+            <FormField label="Handwerker">
+              <Input
+                value={form.contractor}
+                onChange={(e) => setForm({ ...form, contractor: e.target.value })}
+                placeholder="Firmenname"
+              />
+            </FormField>
+            <div className="sm:col-span-2 lg:col-span-3">
+              <FormField label="Beschreibung">
+                <Textarea
+                  value={form.description}
+                  onChange={(e) => setForm({ ...form, description: e.target.value })}
+                  rows={2}
+                />
+              </FormField>
             </div>
-            <div className="flex gap-2 mt-3">
-              <button
-                type="button"
-                onClick={handleSave}
-                className="px-4 py-1.5 text-sm bg-fg text-surface rounded-lg hover:opacity-90 transition-colors"
-              >
-                Speichern
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setShowForm(false);
-                  setEditItem(null);
-                }}
-                className="px-4 py-1.5 text-sm border border-border text-fg-muted rounded-lg hover:bg-surface-muted transition-colors"
-              >
-                Abbrechen
-              </button>
+            <div className="flex items-center pb-4">
+              <Checkbox
+                label="Wiederkehrend"
+                checked={form.recurring}
+                onChange={(e) => setForm({ ...form, recurring: e.target.checked })}
+              />
+            </div>
+            {form.recurring && (
+              <>
+                <FormField label="Intervall (Monate)" error={errors.recurringInterval}>
+                  <Input
+                    type="number"
+                    inputMode="numeric"
+                    min={1}
+                    step={1}
+                    value={form.recurringInterval}
+                    onChange={(e) => setForm({ ...form, recurringInterval: e.target.value })}
+                    placeholder="z. B. 12"
+                  />
+                </FormField>
+                <FormField label="Nächste Fälligkeit">
+                  <Input
+                    type="date"
+                    value={form.nextDue}
+                    onChange={(e) => setForm({ ...form, nextDue: e.target.value })}
+                  />
+                </FormField>
+              </>
+            )}
+            <div className="sm:col-span-2 lg:col-span-3">
+              <FormField label="Notizen">
+                <Textarea
+                  value={form.notes}
+                  onChange={(e) => setForm({ ...form, notes: e.target.value })}
+                  rows={2}
+                />
+              </FormField>
             </div>
           </div>
-        )}
+          <div className="flex gap-2 mt-1">
+            <Button type="submit" variant="primary" loading={saving}>
+              Speichern
+            </Button>
+            <Button variant="secondary" onClick={closeForm}>
+              Abbrechen
+            </Button>
+          </div>
+        </form>
+      )}
 
-        {rows.length === 0 ? (
-          <EmptyState
-            icon={<Wrench size={24} strokeWidth={1.75} />}
-            title="Keine Maßnahmen"
-            description="Legen Sie Reparaturen, Wartungen und Prüfungen an."
-            action={{ label: "+ Neue Maßnahme", onClick: openAdd }}
-          />
-        ) : (
-          <DataTable
-            columns={columns}
-            data={rows}
-            keyFn={(r) => r.item.id!}
-            onRowClick={openEdit}
-          />
-        )}
-      </Card>
-
-      <ConfirmDialog
-        open={deleteId !== null}
-        title="Maßnahme löschen"
-        message="Möchten Sie diese Maßnahme wirklich löschen? Dies kann nicht rückgängig gemacht werden."
-        confirmLabel="Löschen"
-        cancelLabel="Abbrechen"
-        danger
-        onConfirm={handleDelete}
-        onCancel={() => setDeleteId(null)}
-      />
-    </>
+      {items === undefined ? (
+        <Skeleton height="10rem" />
+      ) : rows.length === 0 ? (
+        <EmptyState
+          icon={<Wrench size={24} strokeWidth={1.75} />}
+          title="Keine Maßnahmen"
+          description="Legen Sie Reparaturen, Wartungen und Prüfungen an."
+          action={{ label: "Neue Maßnahme", onClick: openAdd }}
+        />
+      ) : (
+        <DataTable
+          columns={columns}
+          data={rows}
+          keyFn={(r) => r.item.id ?? r.item.title}
+          onRowClick={openEdit}
+        />
+      )}
+    </Card>
   );
 }

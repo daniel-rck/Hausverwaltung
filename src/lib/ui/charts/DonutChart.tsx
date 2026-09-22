@@ -1,15 +1,18 @@
 import { ArcElement, Chart as ChartJS, Legend, Tooltip } from "chart.js";
 import { Doughnut } from "react-chartjs-2";
+import { CHART_LOCALE, type ChartValueFormat, formatTooltipValue } from "./chartFormat";
 import { useChartTheme } from "./useChartTheme";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-interface DonutChartProps {
+type DonutChartProps = {
   labels: string[];
   data: number[];
   colors?: string[];
   height?: number;
-}
+  /** Tooltip-Format; "euro" für Geldbeträge (Default: Zahl, de-DE). */
+  valueFormat?: ChartValueFormat;
+};
 
 const defaultColors = [
   "#78716c",
@@ -28,6 +31,7 @@ export function DonutChart({
   data,
   colors = defaultColors,
   height = 250,
+  valueFormat = "number",
 }: DonutChartProps) {
   const theme = useChartTheme();
 
@@ -48,8 +52,14 @@ export function DonutChart({
       options={{
         responsive: true,
         maintainAspectRatio: false,
+        locale: CHART_LOCALE,
         plugins: {
           legend: { position: "bottom", labels: { color: theme.text } },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => `${ctx.label}: ${formatTooltipValue(ctx.parsed, valueFormat)}`,
+            },
+          },
         },
       }}
     />

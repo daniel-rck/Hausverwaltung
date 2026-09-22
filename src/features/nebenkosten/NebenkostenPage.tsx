@@ -51,7 +51,8 @@ export function NebenkostenPage() {
     const result: OccupancyInfo[] = [];
 
     for (const unit of units) {
-      const occs = await db.occupancies.where("unitId").equals(unit.id!).toArray();
+      if (unit.id == null) continue;
+      const occs = await db.occupancies.where("unitId").equals(unit.id).toArray();
 
       const active = occs.filter((o) => o.from <= yearEnd && (o.to === null || o.to >= yearStart));
 
@@ -64,7 +65,9 @@ export function NebenkostenPage() {
     return result;
   }, [activeProperty?.id, year]);
 
-  if (!activeProperty) {
+  const propertyId = activeProperty?.id;
+
+  if (!activeProperty || propertyId == null) {
     return (
       <EmptyState
         icon={<Building2 size={24} strokeWidth={1.75} />}
@@ -81,11 +84,7 @@ export function NebenkostenPage() {
   // Print all view
   if (showPrintAll) {
     return (
-      <AbrechnungPrint
-        propertyId={activeProperty.id!}
-        year={year}
-        onBack={() => setShowPrintAll(false)}
-      />
+      <AbrechnungPrint propertyId={propertyId} year={year} onBack={() => setShowPrintAll(false)} />
     );
   }
 
@@ -134,19 +133,17 @@ export function NebenkostenPage() {
       </div>
 
       {/* Tab content */}
-      {activeTab === "kosten" && <CostEntry propertyId={activeProperty.id!} year={year} />}
+      {activeTab === "kosten" && <CostEntry propertyId={propertyId} year={year} />}
 
       {activeTab === "messdienst" && (
         <div className="space-y-4">
-          <MessdienstScan propertyId={activeProperty.id!} year={year} />
-          <MessdienstInput propertyId={activeProperty.id!} year={year} />
-          <GesamtrechnungCard propertyId={activeProperty.id!} year={year} />
+          <MessdienstScan propertyId={propertyId} year={year} />
+          <MessdienstInput propertyId={propertyId} year={year} />
+          <GesamtrechnungCard propertyId={propertyId} year={year} />
         </div>
       )}
 
-      {activeTab === "vorauszahlung" && (
-        <PrepaymentInput propertyId={activeProperty.id!} year={year} />
-      )}
+      {activeTab === "vorauszahlung" && <PrepaymentInput propertyId={propertyId} year={year} />}
 
       {activeTab === "abrechnung" && (
         <div className="space-y-4">
@@ -187,7 +184,7 @@ export function NebenkostenPage() {
               <AbrechnungView
                 occupancy={selectedOccupancy.occupancy}
                 year={year}
-                propertyId={activeProperty.id!}
+                propertyId={propertyId}
               />
             </Card>
           ) : (

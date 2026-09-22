@@ -5,6 +5,17 @@ import { useProperty } from "../../lib/hooks/useProperty";
 import { Card } from "../../lib/ui/shared/Card";
 import { type Column, DataTable } from "../../lib/ui/shared/DataTable";
 import { NumInput } from "../../lib/ui/shared/NumInput";
+import {
+  Button,
+  FormField,
+  Input,
+  required,
+  Select,
+  useConfirm,
+  useFormValidation,
+  useToast,
+  type ValidationSchema,
+} from "../../lib/ui/ui";
 import { formatDate, formatEuro, formatNumber } from "../../lib/utils/format";
 import { type SupplierType, typeConfig } from "./supplierConfig";
 
@@ -13,7 +24,7 @@ interface SupplierInputProps {
   type: SupplierType;
 }
 
-interface BillForm {
+type BillForm = {
   supplier: string;
   totalAmount: number;
   totalConsumption: number;
@@ -21,7 +32,22 @@ interface BillForm {
   billingFrom: string;
   billingTo: string;
   notes: string;
-}
+};
+
+const positive = (message: string) => (value: unknown) =>
+  typeof value === "number" && value > 0 ? null : message;
+
+const billSchema: ValidationSchema<BillForm> = {
+  supplier: required("Bitte Versorger angeben"),
+  totalAmount: positive("Bitte Betrag größer 0 angeben"),
+  totalConsumption: positive("Bitte Verbrauch größer 0 angeben"),
+  billingFrom: required("Bitte Beginn angeben"),
+  billingTo: (value, values) => {
+    if (typeof value !== "string" || value === "") return "Bitte Ende angeben";
+    if (values.billingFrom && value < values.billingFrom) return "Ende liegt vor Beginn";
+    return null;
+  },
+};
 
 function makeEmptyForm(type: SupplierType): BillForm {
   return {
@@ -39,6 +65,9 @@ export function SupplierInput({ year, type }: SupplierInputProps) {
   const { activeProperty } = useProperty();
   const [form, setForm] = useState<BillForm>(() => makeEmptyForm(type));
   const [saving, setSaving] = useState(false);
+  const toast = useToast();
+  const confirm = useConfirm();
+  const { errors, validate } = useFormValidation<BillForm>(billSchema);
 
   const config = typeConfig[type];
   const propertyId = activeProperty?.id;
@@ -56,7 +85,8 @@ export function SupplierInput({ year, type }: SupplierInputProps) {
   );
 
   const handleSave = useCallback(async () => {
-    if (!propertyId || !form.supplier.trim() || !form.billingFrom || !form.billingTo) return;
+    if (!propertyId) return;
+    if (!validate(form)) return;
     setSaving(true);
     try {
       const bill: Omit<SupplierBill, "id"> = {
@@ -73,14 +103,35 @@ export function SupplierInput({ year, type }: SupplierInputProps) {
       };
       await db.supplierBills.add(bill as SupplierBill);
       setForm(makeEmptyForm(type));
+      toast.success("Rechnung gespeichert.");
+    } catch (err) {
+      toast.error("Speichern fehlgeschlagen.");
+      console.error(err);
     } finally {
       setSaving(false);
     }
-  }, [propertyId, year, type, form]);
+  }, [propertyId, year, type, form, validate, toast]);
 
-  const handleDelete = useCallback(async (id: number) => {
-    await deleteWithTombstone("supplierBills", id);
-  }, []);
+  const handleDelete = useCallback(
+    async (bill: SupplierBill) => {
+      if (bill.id == null) return;
+      const ok = await confirm({
+        title: "Rechnung löschen?",
+        message: `Die Rechnung von „${bill.supplier}“ (${formatDate(bill.billingFrom)} – ${formatDate(bill.billingTo)}) wird unwiderruflich gelöscht.`,
+        confirmLabel: "Löschen",
+        danger: true,
+      });
+      if (!ok) return;
+      try {
+        await deleteWithTombstone("supplierBills", bill.id);
+        toast.success("Rechnung gelöscht.");
+      } catch (err) {
+        toast.error("Löschen fehlgeschlagen.");
+        console.error(err);
+      }
+    },
+    [confirm, toast],
+  );
 
   const columns: Column<SupplierBill>[] = [
     {
@@ -120,118 +171,93 @@ export function SupplierInput({ year, type }: SupplierInputProps) {
       header: "",
       align: "center",
       render: (row) => (
-        <button
-          type="button"
-          onClick={() => row.id != null && handleDelete(row.id)}
-          className="text-red-500 hover:text-red-700 text-xs"
-          title="Löschen"
-        >
+        <Button variant="dangerGhost" size="sm" onClick={() => void handleDelete(row)}>
           Löschen
-        </button>
+        </Button>
       ),
     },
   ];
 
-  const isValid =
-    form.supplier.trim().length > 0 &&
-    form.totalAmount > 0 &&
-    form.totalConsumption > 0 &&
-    form.billingFrom.length > 0 &&
-    form.billingTo.length > 0;
-
   return (
     <Card title={`${config.label} – Daten eingeben`}>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-        <div>
-          <label className="block">
-            <span className="block text-xs font-medium text-fg-muted mb-1">{config.label}</span>
-            <input
-              type="text"
+      <form
+        noValidate
+        onSubmit={(e) => {
+          e.preventDefault();
+          void handleSave();
+        }}
+      >
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          <FormField label={config.label} required error={errors.supplier}>
+            <Input
               value={form.supplier}
               onChange={(e) => setForm((f) => ({ ...f, supplier: e.target.value }))}
               placeholder="z.B. Stadtwerke"
-              className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
             />
-          </label>
-        </div>
-        <NumInput
-          label="Gesamtbetrag"
-          suffix="€"
-          value={form.totalAmount}
-          onChange={(v) => setForm((f) => ({ ...f, totalAmount: v }))}
-          min={0}
-        />
-        <div>
-          <NumInput
-            label="Gesamtverbrauch"
-            suffix={form.unit}
-            value={form.totalConsumption}
-            onChange={(v) => setForm((f) => ({ ...f, totalConsumption: v }))}
-            min={0}
-          />
-          {config.units.length > 1 && (
-            <select
-              value={form.unit}
-              onChange={(e) => setForm((f) => ({ ...f, unit: e.target.value }))}
-              className="mt-1 border border-border rounded-lg px-2 py-1 text-xs bg-surface focus:outline-none focus:ring-2 focus:ring-accent-500"
-            >
-              {config.units.map((u) => (
-                <option key={u} value={u}>
-                  {u}
-                </option>
-              ))}
-            </select>
-          )}
-        </div>
-        <div>
-          <label className="block">
-            <span className="block text-xs font-medium text-fg-muted mb-1">
-              Abrechnungszeitraum von
-            </span>
-            <input
+          </FormField>
+          <FormField label="Gesamtbetrag" required error={errors.totalAmount}>
+            <NumInput
+              suffix="€"
+              value={form.totalAmount}
+              onChange={(v) => setForm((f) => ({ ...f, totalAmount: v }))}
+              min={0}
+            />
+          </FormField>
+          <div className="flex gap-2 items-start">
+            <div className="flex-1 min-w-0">
+              <FormField label="Gesamtverbrauch" required error={errors.totalConsumption}>
+                <NumInput
+                  suffix={form.unit}
+                  value={form.totalConsumption}
+                  onChange={(v) => setForm((f) => ({ ...f, totalConsumption: v }))}
+                  min={0}
+                />
+              </FormField>
+            </div>
+            {config.units.length > 1 && (
+              <FormField label="Einheit">
+                <Select
+                  value={form.unit}
+                  onChange={(e) => setForm((f) => ({ ...f, unit: e.target.value }))}
+                  className="w-24"
+                >
+                  {config.units.map((u) => (
+                    <option key={u} value={u}>
+                      {u}
+                    </option>
+                  ))}
+                </Select>
+              </FormField>
+            )}
+          </div>
+          <FormField label="Abrechnungszeitraum von" required error={errors.billingFrom}>
+            <Input
               type="date"
               value={form.billingFrom}
               onChange={(e) => setForm((f) => ({ ...f, billingFrom: e.target.value }))}
-              className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
             />
-          </label>
-        </div>
-        <div>
-          <label className="block">
-            <span className="block text-xs font-medium text-fg-muted mb-1">
-              Abrechnungszeitraum bis
-            </span>
-            <input
+          </FormField>
+          <FormField label="Abrechnungszeitraum bis" required error={errors.billingTo}>
+            <Input
               type="date"
               value={form.billingTo}
               onChange={(e) => setForm((f) => ({ ...f, billingTo: e.target.value }))}
-              className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
             />
-          </label>
-        </div>
-        <div>
-          <label className="block">
-            <span className="block text-xs font-medium text-fg-muted mb-1">Hinweise</span>
-            <input
-              type="text"
+          </FormField>
+          <FormField label="Hinweise">
+            <Input
               value={form.notes}
               onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
               placeholder="optional"
-              className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
             />
-          </label>
+          </FormField>
         </div>
-      </div>
-      <div className="flex justify-end mb-6">
-        <button
-          type="button"
-          onClick={handleSave}
-          disabled={!isValid || saving}
-          className="px-4 py-2 text-sm bg-fg text-surface rounded-lg hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {saving ? "Speichern..." : "Rechnung speichern"}
-        </button>
-      </div>
+        <div className="flex justify-end mb-6">
+          <Button type="submit" variant="primary" loading={saving} disabled={!propertyId}>
+            Rechnung speichern
+          </Button>
+        </div>
+      </form>
 
       <h3 className="text-sm font-medium text-fg-muted mb-2">Erfasste Rechnungen ({year})</h3>
       <DataTable

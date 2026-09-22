@@ -168,7 +168,7 @@ export async function applySnapshot(snapshot: SyncSnapshot): Promise<void> {
           // `put` upserted nach `key`; falls lokal bereits ein Record mit
           // gleichem `key` existiert, gewinnt der Wert aus dem Snapshot —
           // der Merge-Layer hat den LWW-Sieger schon ermittelt.
-          await db.table(tableName).put(localRecord);
+          await db.table(tableName).put(localRecord, { raw: true });
           continue;
         }
 
@@ -177,11 +177,44 @@ export async function applySnapshot(snapshot: SyncSnapshot): Promise<void> {
           | undefined;
 
         if (existing?.id !== undefined) {
+          const existingId = existing.id as number;
+          // Ändert der Record seinen natürlichen Schlüssel auf einen, den lokal
+          // schon ein anderer Record belegt, würfe das put am Unique-Index.
+          const clash = await findUniqueClash(tableName, localRecord, existingId);
+          if (clash && !incomingWins(localRecord, clash)) {
+            // Der lokale Record gewinnt: eingehende Version (und ihre lokale
+            // Kopie unter existingId) verwerfen.
+            await tombstoneLoser(tableName, syncId, localRecord);
+            await db.table(tableName).delete(existingId);
+            syncIdToLocalId.set(syncId, clash.id as number);
+            continue;
+          }
+          if (clash) {
+            await tombstoneLoser(tableName, clash.syncId, clash);
+            await db.table(tableName).delete(clash.id as number);
+          }
           // Update: lokale ID beibehalten
-          (localRecord as { id?: number }).id = existing.id as number;
-          await db.table(tableName).put(localRecord);
-          syncIdToLocalId.set(syncId, existing.id as number);
+          (localRecord as { id?: number }).id = existingId;
+          await db.table(tableName).put(localRecord, { raw: true });
+          syncIdToLocalId.set(syncId, existingId);
         } else {
+          // Zwei Geräte können offline denselben natürlichen Schlüssel anlegen
+          // (z. B. Zahlung für Belegung+Monat). Ein blindes add() würfe dann
+          // am Unique-Index — und jeder weitere Sync bräche genauso ab. Statt-
+          // dessen LWW auf dem natürlichen Schlüssel, der Verlierer bekommt
+          // eine Tombstone, damit er auch remote verschwindet.
+          const clash = await findUniqueClash(tableName, localRecord);
+          if (clash) {
+            if (incomingWins(localRecord, clash)) {
+              await tombstoneLoser(tableName, clash.syncId, clash);
+              (localRecord as { id?: number }).id = clash.id as number;
+              await db.table(tableName).put(localRecord, { raw: true });
+            } else {
+              await tombstoneLoser(tableName, syncId, localRecord);
+            }
+            syncIdToLocalId.set(syncId, clash.id as number);
+            continue;
+          }
           // Insert: lokale Auto-ID wird vergeben
           const newId = (await db.table(tableName).add(localRecord)) as number | string;
           if (typeof newId === "number") {
@@ -353,4 +386,52 @@ function topologicalOrder(): readonly string[] {
     "documents",
     "settings",
   ];
+}
+
+/** Unique compound indexes per table (see idb.ts) — natural keys for LWW on clash. */
+const UNIQUE_KEYS: Record<string, { index: string; fields: string[] }> = {
+  occupancies: { index: "[unitId+from]", fields: ["unitId", "from"] },
+  payments: { index: "[occupancyId+month]", fields: ["occupancyId", "month"] },
+};
+
+async function findUniqueClash(
+  tableName: string,
+  record: AnyRecord,
+  excludeId?: number,
+): Promise<AnyRecord | undefined> {
+  const spec = UNIQUE_KEYS[tableName];
+  if (!spec) return undefined;
+  const key = spec.fields.map((f) => record[f]);
+  if (key.some((k) => k === undefined || k === null)) return undefined;
+  const rows = (await db
+    .table(tableName)
+    .where(spec.index)
+    .equals(key as IDBValidKey)
+    .toArray()) as AnyRecord[];
+  return rows.find((r) => r.id !== excludeId);
+}
+
+/**
+ * LWW mit deterministischem Tie-Break: höheres `updatedAt` gewinnt, bei
+ * Gleichstand der größere `syncId`. So wählen alle Geräte denselben Sieger —
+ * sonst hielte bei Gleichstand jedes Gerät seinen lokalen Record und
+ * tombstonte den jeweils anderen, und der nächste Merge löschte beide.
+ */
+function incomingWins(incoming: AnyRecord, local: AnyRecord): boolean {
+  const a = (incoming.updatedAt as number) ?? 0;
+  const b = (local.updatedAt as number) ?? 0;
+  if (a !== b) return a > b;
+  return String(incoming.syncId ?? "") > String(local.syncId ?? "");
+}
+
+/**
+ * Tombstone für den Kollisions-Verlierer. `mergeSnapshots` unterdrückt einen
+ * Record nur bei `deletedAt >= updatedAt` — bei Clock-Skew (Verlierer mit
+ * Zeitstempel in der Zukunft) muss die Tombstone daher mindestens dessen
+ * `updatedAt` tragen, sonst taucht er beim nächsten Merge wieder auf.
+ */
+async function tombstoneLoser(tableName: string, syncId: unknown, loser: AnyRecord): Promise<void> {
+  if (typeof syncId !== "string") return;
+  const deletedAt = Math.max(Date.now(), (loser.updatedAt as number) ?? 0);
+  await db.tombstones.put({ syncId, tableName, deletedAt });
 }

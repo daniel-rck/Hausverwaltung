@@ -12,7 +12,7 @@ import {
 import { PageHeader } from "../../lib/ui/layout/PageHeader";
 import { Card } from "../../lib/ui/shared/Card";
 import { SyncSettings } from "../../lib/ui/sync/SyncSettings";
-import { Button, FormField, Input, type TabItem, Tabs, useToast } from "../../lib/ui/ui";
+import { Button, FormField, Input, Skeleton, type TabItem, Tabs, useToast } from "../../lib/ui/ui";
 import { Settings } from "../../lib/ui/ui/icons";
 import { ExportImport } from "../dashboard/ExportImport";
 
@@ -102,7 +102,13 @@ function AllgemeinTab() {
         ) : undefined
       }
     >
-      {!editing ? (
+      {!loaded ? (
+        <div className="space-y-2">
+          {["name", "address", "iban", "taxId", "messdienst"].map((k) => (
+            <Skeleton key={k} variant="text" width="60%" />
+          ))}
+        </div>
+      ) : !editing ? (
         <dl className="text-sm text-fg-muted space-y-1.5">
           <Row label="Vermieter" value={landlord?.name} />
           <Row label="Adresse" value={landlord?.address} />
@@ -111,7 +117,13 @@ function AllgemeinTab() {
           <Row label="Messdienstleister" value={messdienst} />
         </dl>
       ) : (
-        <div className="space-y-3">
+        <form
+          className="space-y-3"
+          onSubmit={(e) => {
+            e.preventDefault();
+            void handleSave();
+          }}
+        >
           {(
             [
               { key: "name", label: "Vermieter-Name" },
@@ -131,18 +143,18 @@ function AllgemeinTab() {
             <Input
               value={messdienstName}
               onChange={(e) => setMessdienstName(e.target.value)}
-              placeholder="z.B. Brunata, Techem, Ista"
+              placeholder="z. B. Brunata, Techem, Ista"
             />
           </FormField>
           <div className="flex gap-2 pt-1">
-            <Button variant="primary" onClick={handleSave} loading={busy}>
+            <Button type="submit" variant="primary" loading={busy}>
               Speichern
             </Button>
             <Button variant="secondary" onClick={() => setEditing(false)} disabled={busy}>
               Abbrechen
             </Button>
           </div>
-        </div>
+        </form>
       )}
     </Card>
   );
@@ -218,10 +230,12 @@ function GeminiCard() {
           >
             {keyTest === "testing" ? "Key wird getestet…" : "Key testen"}
           </Button>
-          {keyTest === "ok" && <span className="text-sm text-emerald-600">Key funktioniert.</span>}
-          {keyTest === "fail" && (
-            <span className="text-sm text-red-500">Key oder Modell ungültig.</span>
-          )}
+          <span role="status" aria-live="polite" className="text-sm">
+            {keyTest === "ok" && <span className="text-success-fg">Key funktioniert.</span>}
+            {keyTest === "fail" && (
+              <span className="text-danger-fg">Key oder Modell ungültig.</span>
+            )}
+          </span>
         </div>
       </div>
     </Card>

@@ -48,7 +48,7 @@ export function FormField({
         <label htmlFor={fieldId} className="text-xs font-medium text-fg-muted">
           {label}
           {required && (
-            <span className="text-red-600 dark:text-red-400 ml-0.5" aria-hidden="true">
+            <span className="text-danger-fg ml-0.5" aria-hidden="true">
               *
             </span>
           )}
@@ -62,7 +62,7 @@ export function FormField({
       {enhanced}
       <div className="min-h-[1rem] flex items-start justify-between gap-2">
         {error ? (
-          <p id={errorId} className="text-xs text-red-600 dark:text-red-400" role="alert">
+          <p id={errorId} className="text-xs text-danger-fg" role="alert">
             {error}
           </p>
         ) : (

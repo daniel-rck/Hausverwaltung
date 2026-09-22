@@ -99,10 +99,11 @@ async function deleteUnitsCascade(unitIds: number[]): Promise<void> {
     .map((m) => m.id!);
   await deleteMetersCascade(meterIds);
 
-  // Wartungs-Einträge unitId === null (objektweit) werden nicht angefasst
+  // Objektweite Wartungen (unitId === null) räumt cascadeDeleteProperty ab.
   const maintenanceUnitIds = maintenance
     .filter((m) => m.unitId !== null && unitIdSet.has(m.unitId))
     .map((m) => m.id!);
+  await deleteDocumentsForEntity("maintenance", maintenanceUnitIds);
   await bulkDeleteWithTombstones("maintenanceItems", maintenanceUnitIds);
 
   await deleteDocumentsForEntity("unit", unitIds);
@@ -131,6 +132,15 @@ export async function cascadeDeleteProperty(propertyId: number): Promise<void> {
 
   const unitIds = units.map((u) => u.id!);
   await deleteUnitsCascade(unitIds);
+
+  // Objektweite Wartungen (unitId === null) dieses Objekts. Blieben sie
+  // liegen, verlöre der Export ihren propertyId-FK — und isMaintenanceFor-
+  // Property zeigte sie danach in *jedem* Objekt (Anlage V, Jahresbericht).
+  const sharedMaintenanceIds = (await db.maintenanceItems.toArray())
+    .filter((m) => m.unitId === null && m.propertyId === propertyId)
+    .flatMap((m) => (m.id === undefined ? [] : [m.id]));
+  await deleteDocumentsForEntity("maintenance", sharedMaintenanceIds);
+  await bulkDeleteWithTombstones("maintenanceItems", sharedMaintenanceIds);
 
   if (costs.length > 0) {
     const costIds = new Set(costs.map((c) => c.id!));

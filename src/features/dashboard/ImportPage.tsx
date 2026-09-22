@@ -5,9 +5,13 @@ import { importDatabase } from "../../lib/db/export-import";
 import { syncService } from "../../lib/sync/service";
 import { useSyncStatus } from "../../lib/sync/useSyncStatus";
 import { Card } from "../../lib/ui/shared/Card";
+import { Button, Callout, Skeleton } from "../../lib/ui/ui";
 
 const MAX_PAYLOAD_BASE64 = 512 * 1024; // 512 KB komprimiert via URL
 const MAX_DECOMPRESSED_BYTES = 20 * 1024 * 1024; // 20 MB JSON-Limit gegen ZIP-Bomben
+
+/** Fehler mit bereits nutzerfreundlicher (deutscher) Meldung. */
+class PayloadError extends Error {}
 
 function safeInflateToString(binary: Uint8Array): string {
   const inflator = new Inflate({ to: "string" });
@@ -17,7 +21,7 @@ function safeInflateToString(binary: Uint8Array): string {
     const text = chunk as unknown as string;
     totalLen += text.length;
     if (totalLen > MAX_DECOMPRESSED_BYTES) {
-      throw new Error(
+      throw new PayloadError(
         `Import-Daten überschreiten ${Math.round(MAX_DECOMPRESSED_BYTES / 1024 / 1024)} MB Grenze.`,
       );
     }
@@ -25,7 +29,8 @@ function safeInflateToString(binary: Uint8Array): string {
   };
   inflator.push(binary, true);
   if (inflator.err) {
-    throw new Error(inflator.msg || "Dekompression fehlgeschlagen.");
+    console.error("Inflate failed:", inflator.msg);
+    throw new PayloadError("Import-Link ist beschädigt (Dekompression fehlgeschlagen).");
   }
   return result;
 }
@@ -38,20 +43,24 @@ function parsePayload(payload: string | undefined): ParsedPayload {
   }
   try {
     if (payload.length > MAX_PAYLOAD_BASE64) {
-      throw new Error("Import-Link ist zu groß. Bitte JSON-Datei verwenden.");
+      throw new PayloadError("Import-Link ist zu groß. Bitte JSON-Datei verwenden.");
     }
     const base64 = payload.replace(/-/g, "+").replace(/_/g, "/");
     const binary = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
     const decompressed = safeInflateToString(binary);
     const parsed = JSON.parse(decompressed);
     if (parsed.app !== "hausverwaltung") {
-      throw new Error("Ungültige Daten: Kein Hausverwaltung-Export.");
+      throw new PayloadError("Ungültige Daten: Kein Hausverwaltung-Export.");
     }
     return { ok: true, jsonData: decompressed };
   } catch (err) {
+    if (!(err instanceof PayloadError)) console.error(err);
     return {
       ok: false,
-      error: err instanceof Error ? err.message : "Import-Daten konnten nicht gelesen werden.",
+      error:
+        err instanceof PayloadError
+          ? err.message
+          : "Import-Daten konnten nicht gelesen werden. Ist der Link vollständig?",
     };
   }
 }
@@ -85,7 +94,10 @@ export function ImportPage() {
       setPhase("success");
       setTimeout(() => navigate("/"), 2000);
     } catch (err) {
-      setImportError(err instanceof Error ? err.message : "Import fehlgeschlagen.");
+      console.error(err);
+      setImportError(
+        "Import fehlgeschlagen. Bitte prüfen Sie, ob der Link einen gültigen Hausverwaltung-Export enthält.",
+      );
       setPhase("error");
     }
   };
@@ -108,42 +120,37 @@ export function ImportPage() {
               )}
             </p>
             <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={handleImport}
-                className="px-4 py-2 text-sm bg-fg text-surface rounded-lg hover:opacity-90 transition-colors"
-              >
+              <Button variant="danger" onClick={() => void handleImport()}>
                 Jetzt importieren
-              </button>
-              <button
-                type="button"
-                onClick={() => navigate("/")}
-                className="px-4 py-2 text-sm border border-border text-fg-muted rounded-lg hover:bg-surface-muted transition-colors"
-              >
+              </Button>
+              <Button variant="secondary" onClick={() => navigate("/")}>
                 Abbrechen
-              </button>
+              </Button>
             </div>
           </div>
         )}
 
-        {status === "importing" && <p className="text-sm text-fg-muted">Import läuft...</p>}
+        {status === "importing" && (
+          <div className="space-y-2">
+            <p className="text-sm text-fg-muted">Import läuft …</p>
+            <Skeleton variant="text" width="60%" />
+          </div>
+        )}
 
         {status === "success" && (
-          <p className="text-sm text-green-600">
-            Daten erfolgreich importiert. Sie werden weitergeleitet...
-          </p>
+          <Callout variant="success" title="Daten erfolgreich importiert.">
+            Sie werden weitergeleitet …
+          </Callout>
         )}
 
         {status === "error" && (
           <div className="space-y-3">
-            <p className="text-sm text-red-600">{error}</p>
-            <button
-              type="button"
-              onClick={() => navigate("/")}
-              className="px-4 py-2 text-sm border border-border text-fg-muted rounded-lg hover:bg-surface-muted transition-colors"
-            >
-              Zum Dashboard
-            </button>
+            <Callout variant="danger" title="Import nicht möglich">
+              {error}
+            </Callout>
+            <Button variant="secondary" onClick={() => navigate("/")}>
+              Zur Übersicht
+            </Button>
           </div>
         )}
       </Card>

@@ -4,7 +4,25 @@ import { cascadeDeleteOccupancy } from "../../lib/db/cascade";
 import type { Occupancy, Tenant, Unit } from "../../lib/db/schema";
 import { Card } from "../../lib/ui/shared/Card";
 import { type Column, DataTable } from "../../lib/ui/shared/DataTable";
+import { NumInput } from "../../lib/ui/shared/NumInput";
 import { StatusBadge } from "../../lib/ui/shared/StatusBadge";
+import {
+  Button,
+  Checkbox,
+  email,
+  FormField,
+  Input,
+  min,
+  required,
+  Select,
+  Skeleton,
+  useConfirm,
+  useFormValidation,
+  useToast,
+  type ValidationSchema,
+} from "../../lib/ui/ui";
+import { Plus } from "../../lib/ui/ui/icons";
+import { currentMonth } from "../../lib/utils/dates";
 import { formatEuro, formatMonth } from "../../lib/utils/format";
 import { ContractTemplate } from "./ContractTemplate";
 import { DepositManager } from "./DepositManager";
@@ -21,21 +39,67 @@ interface OccupancyRow {
   tenant: Tenant | null;
 }
 
+type TenantFormValues = { name: string; email: string; phone: string; notes: string };
+
+const EMPTY_TENANT: TenantFormValues = { name: "", email: "", phone: "", notes: "" };
+
+const tenantSchema: ValidationSchema<TenantFormValues> = {
+  name: required("Bitte Namen angeben"),
+  email: email("Ungültige E-Mail-Adresse"),
+};
+
+type OccFormValues = {
+  tenantId: string;
+  persons: string;
+  from: string;
+  to: string;
+  rentCold: number;
+  rentUtilities: number;
+  deposit: number;
+  depositPaid: boolean;
+};
+
+const EMPTY_OCC: OccFormValues = {
+  tenantId: "",
+  persons: "1",
+  from: "",
+  to: "",
+  rentCold: 0,
+  rentUtilities: 0,
+  deposit: 0,
+  depositPaid: false,
+};
+
+const occSchema: ValidationSchema<OccFormValues> = {
+  tenantId: required("Bitte Mieter wählen"),
+  persons: min(1, "Mindestens 1 Person"),
+  from: required("Bitte Einzugsmonat angeben"),
+  to: (value, values) =>
+    typeof value === "string" && value !== "" && values.from !== "" && value < values.from
+      ? "Auszug darf nicht vor dem Einzug liegen"
+      : null,
+};
+
 export function TenantForm({ unit, onBack }: TenantFormProps) {
   const [showTenantForm, setShowTenantForm] = useState(false);
   const [showOccForm, setShowOccForm] = useState(false);
   const [contractOcc, setContractOcc] = useState<{ occupancy: Occupancy; tenant: Tenant } | null>(
     null,
   );
-  const [tenantForm, setTenantForm] = useState({ name: "", email: "", phone: "", notes: "" });
+  const [tenantForm, setTenantForm] = useState<TenantFormValues>(EMPTY_TENANT);
+  const toast = useToast();
+  const confirm = useConfirm();
+  const tenantValidation = useFormValidation<TenantFormValues>(tenantSchema);
+  const occValidation = useFormValidation<OccFormValues>(occSchema);
 
-  const tenants = useLiveQuery(
-    () => db.tenants.where("unitId").equals(unit.id!).toArray(),
-    [unit.id],
-  );
+  const tenants = useLiveQuery(async () => {
+    if (unit.id == null) return [];
+    return db.tenants.where("unitId").equals(unit.id).toArray();
+  }, [unit.id]);
 
   const rows = useLiveQuery(async () => {
-    const occupancies = await db.occupancies.where("unitId").equals(unit.id!).toArray();
+    if (unit.id == null) return [];
+    const occupancies = await db.occupancies.where("unitId").equals(unit.id).toArray();
 
     const result: OccupancyRow[] = [];
     for (const occ of occupancies) {
@@ -46,64 +110,88 @@ export function TenantForm({ unit, onBack }: TenantFormProps) {
     return result.sort((a, b) => b.occupancy.from.localeCompare(a.occupancy.from));
   }, [unit.id]);
 
-  const handleSaveTenant = async () => {
-    if (!tenantForm.name.trim()) return;
-
-    await db.tenants.add({
-      unitId: unit.id!,
-      name: tenantForm.name.trim(),
-      email: tenantForm.email || undefined,
-      phone: tenantForm.phone || undefined,
-      notes: tenantForm.notes || undefined,
-    });
-
-    setTenantForm({ name: "", email: "", phone: "", notes: "" });
+  const closeTenantForm = () => {
+    setTenantForm(EMPTY_TENANT);
+    tenantValidation.clear();
     setShowTenantForm(false);
   };
 
+  const handleSaveTenant = async () => {
+    if (unit.id == null) return;
+    if (!tenantValidation.validate(tenantForm)) return;
+
+    try {
+      await db.tenants.add({
+        unitId: unit.id,
+        name: tenantForm.name.trim(),
+        email: tenantForm.email || undefined,
+        phone: tenantForm.phone || undefined,
+        notes: tenantForm.notes || undefined,
+      });
+      toast.success("Mieter angelegt.");
+      closeTenantForm();
+    } catch (err) {
+      toast.error("Speichern fehlgeschlagen.");
+      console.error(err);
+    }
+  };
+
   // Occupancy form state
-  const [occForm, setOccForm] = useState({
-    tenantId: "",
-    persons: "1",
-    from: "",
-    to: "",
-    rentCold: "",
-    rentUtilities: "",
-    deposit: "",
-    depositPaid: false,
-  });
+  const [occForm, setOccForm] = useState<OccFormValues>(EMPTY_OCC);
 
-  const handleSaveOccupancy = async () => {
-    const tenantId = parseInt(occForm.tenantId, 10);
-    if (!tenantId || !occForm.from) return;
-
-    await db.occupancies.add({
-      unitId: unit.id!,
-      tenantId,
-      persons: parseInt(occForm.persons, 10) || 1,
-      from: occForm.from,
-      to: occForm.to || null,
-      rentCold: parseFloat(occForm.rentCold.replace(",", ".")) || 0,
-      rentUtilities: parseFloat(occForm.rentUtilities.replace(",", ".")) || 0,
-      deposit: parseFloat(occForm.deposit.replace(",", ".")) || 0,
-      depositPaid: occForm.depositPaid,
-    });
-
-    setOccForm({
-      tenantId: "",
-      persons: "1",
-      from: "",
-      to: "",
-      rentCold: "",
-      rentUtilities: "",
-      deposit: "",
-      depositPaid: false,
-    });
+  const closeOccForm = () => {
+    setOccForm(EMPTY_OCC);
+    occValidation.clear();
     setShowOccForm(false);
   };
 
-  const handleDeleteOccupancy = async (id: number) => {
-    await cascadeDeleteOccupancy(id);
+  const handleSaveOccupancy = async () => {
+    if (unit.id == null) return;
+    if (!occValidation.validate(occForm)) return;
+    const tenantId = parseInt(occForm.tenantId, 10);
+    if (!tenantId) {
+      occValidation.setError("tenantId", "Bitte Mieter wählen");
+      return;
+    }
+
+    try {
+      await db.occupancies.add({
+        unitId: unit.id,
+        tenantId,
+        persons: parseInt(occForm.persons, 10) || 1,
+        from: occForm.from,
+        to: occForm.to || null,
+        rentCold: occForm.rentCold,
+        rentUtilities: occForm.rentUtilities,
+        deposit: occForm.deposit,
+        depositPaid: occForm.depositPaid,
+      });
+      toast.success("Belegung gespeichert.");
+      closeOccForm();
+    } catch (err) {
+      toast.error("Speichern fehlgeschlagen.");
+      console.error(err);
+    }
+  };
+
+  const handleDeleteOccupancy = async (row: OccupancyRow) => {
+    const id = row.occupancy.id;
+    if (id == null) return;
+    const who = row.tenant ? ` von „${row.tenant.name}“` : "";
+    const ok = await confirm({
+      title: "Belegung löschen?",
+      message: `Das Mietverhältnis${who} (ab ${formatMonth(row.occupancy.from)}) wird mit allen Zahlungen, Vorauszahlungen, Kautionsbuchungen, Mieterhöhungen, Übergabeprotokollen und Dokumenten unwiderruflich gelöscht.`,
+      confirmLabel: "Löschen",
+      danger: true,
+    });
+    if (!ok) return;
+    try {
+      await cascadeDeleteOccupancy(id);
+      toast.success("Belegung gelöscht.");
+    } catch (err) {
+      toast.error("Löschen fehlgeschlagen.");
+      console.error(err);
+    }
   };
 
   const columns: Column<OccupancyRow>[] = [
@@ -163,29 +251,30 @@ export function TenantForm({ unit, onBack }: TenantFormProps) {
       key: "actions",
       header: "",
       render: (r) => (
-        <div className="flex gap-2">
+        <div className="flex gap-1">
           {r.tenant && (
-            <button
-              type="button"
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={(e) => {
                 e.stopPropagation();
-                setContractOcc({ occupancy: r.occupancy, tenant: r.tenant! });
+                const tenant = r.tenant;
+                if (tenant) setContractOcc({ occupancy: r.occupancy, tenant });
               }}
-              className="text-xs text-blue-500 hover:text-blue-700"
             >
               Vertrag
-            </button>
+            </Button>
           )}
-          <button
-            type="button"
+          <Button
+            variant="dangerGhost"
+            size="sm"
             onClick={(e) => {
               e.stopPropagation();
-              handleDeleteOccupancy(r.occupancy.id!);
+              void handleDeleteOccupancy(r);
             }}
-            className="text-xs text-red-500 hover:text-red-700"
           >
             Löschen
-          </button>
+          </Button>
         </div>
       ),
     },
@@ -194,13 +283,9 @@ export function TenantForm({ unit, onBack }: TenantFormProps) {
   if (contractOcc) {
     return (
       <div className="space-y-4">
-        <button
-          type="button"
-          onClick={() => setContractOcc(null)}
-          className="text-sm text-fg-muted hover:text-fg"
-        >
+        <Button variant="ghost" size="sm" onClick={() => setContractOcc(null)}>
           ← Zurück zur Wohnung
-        </button>
+        </Button>
         <ContractTemplate
           occupancy={contractOcc.occupancy}
           unit={unit}
@@ -210,15 +295,14 @@ export function TenantForm({ unit, onBack }: TenantFormProps) {
     );
   }
 
+  const tErr = tenantValidation.errors;
+  const oErr = occValidation.errors;
+
   return (
     <div className="space-y-4">
-      <button
-        type="button"
-        onClick={onBack}
-        className="text-sm text-fg-muted hover:text-fg flex items-center gap-1"
-      >
+      <Button variant="ghost" size="sm" onClick={onBack}>
         ← Zurück zur Übersicht
-      </button>
+      </Button>
 
       <h2 className="text-lg font-bold text-fg">
         Wohnung: {unit.name}
@@ -229,103 +313,93 @@ export function TenantForm({ unit, onBack }: TenantFormProps) {
       <Card
         title="Mieter"
         action={
-          <button
-            type="button"
+          <Button
+            variant="primary"
+            size="sm"
+            leftIcon={<Plus size={14} />}
             onClick={() => setShowTenantForm(true)}
-            className="text-sm px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
           >
-            + Mieter
-          </button>
+            Mieter
+          </Button>
         }
       >
         {showTenantForm && (
-          <div className="mb-4 p-4 bg-surface-muted rounded-lg border border-border">
+          <form
+            className="mb-4 p-4 bg-surface-muted rounded-lg border border-border"
+            onSubmit={(e) => {
+              e.preventDefault();
+              void handleSaveTenant();
+            }}
+            noValidate
+          >
             <h3 className="text-sm font-semibold text-fg mb-3">Neuer Mieter</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="block">
-                  <span className="block text-xs font-medium text-fg-muted mb-1">Name *</span>
-                  <input
-                    type="text"
-                    value={tenantForm.name}
-                    onChange={(e) => setTenantForm({ ...tenantForm, name: e.target.value })}
-                    className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
-                  />
-                </label>
-              </div>
-              <div>
-                <label className="block">
-                  <span className="block text-xs font-medium text-fg-muted mb-1">E-Mail</span>
-                  <input
-                    type="email"
-                    value={tenantForm.email}
-                    onChange={(e) => setTenantForm({ ...tenantForm, email: e.target.value })}
-                    className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
-                  />
-                </label>
-              </div>
-              <div>
-                <label className="block">
-                  <span className="block text-xs font-medium text-fg-muted mb-1">Telefon</span>
-                  <input
-                    type="tel"
-                    value={tenantForm.phone}
-                    onChange={(e) => setTenantForm({ ...tenantForm, phone: e.target.value })}
-                    className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
-                  />
-                </label>
-              </div>
-              <div>
-                <label className="block">
-                  <span className="block text-xs font-medium text-fg-muted mb-1">Notizen</span>
-                  <input
-                    type="text"
-                    value={tenantForm.notes}
-                    onChange={(e) => setTenantForm({ ...tenantForm, notes: e.target.value })}
-                    className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
-                  />
-                </label>
-              </div>
+              <FormField label="Name" required error={tErr.name}>
+                <Input
+                  value={tenantForm.name}
+                  onChange={(e) => setTenantForm({ ...tenantForm, name: e.target.value })}
+                  autoComplete="name"
+                />
+              </FormField>
+              <FormField label="E-Mail" error={tErr.email}>
+                <Input
+                  type="email"
+                  value={tenantForm.email}
+                  onChange={(e) => setTenantForm({ ...tenantForm, email: e.target.value })}
+                  autoComplete="email"
+                />
+              </FormField>
+              <FormField label="Telefon">
+                <Input
+                  type="tel"
+                  value={tenantForm.phone}
+                  onChange={(e) => setTenantForm({ ...tenantForm, phone: e.target.value })}
+                  autoComplete="tel"
+                />
+              </FormField>
+              <FormField label="Notizen">
+                <Input
+                  value={tenantForm.notes}
+                  onChange={(e) => setTenantForm({ ...tenantForm, notes: e.target.value })}
+                />
+              </FormField>
             </div>
-            <div className="flex gap-2 mt-3">
-              <button
-                type="button"
-                onClick={handleSaveTenant}
-                className="px-4 py-1.5 text-sm bg-fg text-surface rounded-lg hover:opacity-90 transition-colors"
-              >
+            <div className="flex gap-2 mt-1">
+              <Button type="submit" variant="primary" size="sm">
                 Speichern
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowTenantForm(false)}
-                className="px-4 py-1.5 text-sm border border-border text-fg-muted rounded-lg hover:bg-surface-muted transition-colors"
-              >
+              </Button>
+              <Button variant="outline" size="sm" onClick={closeTenantForm}>
                 Abbrechen
-              </button>
+              </Button>
             </div>
-          </div>
+          </form>
         )}
 
-        {tenants && tenants.length > 0 ? (
+        {tenants === undefined ? (
+          <div className="space-y-2">
+            <Skeleton height="2.5rem" />
+            <Skeleton height="2.5rem" />
+          </div>
+        ) : tenants.length > 0 ? (
           <ul className="divide-y divide-border">
             {tenants.map((t) => (
-              <li key={t.id} className="py-2 flex items-center justify-between">
+              <li key={t.id} className="py-2 flex items-center justify-between gap-2">
                 <div>
                   <p className="text-sm font-medium text-fg">{t.name}</p>
                   <p className="text-xs text-fg-muted">
                     {[t.email, t.phone].filter(Boolean).join(" | ") || "Keine Kontaktdaten"}
                   </p>
                 </div>
-                <button
-                  type="button"
+                <Button
+                  variant="secondary"
+                  size="sm"
                   onClick={() => {
-                    setOccForm((f) => ({ ...f, tenantId: String(t.id!) }));
+                    setOccForm((f) => ({ ...f, tenantId: t.id != null ? String(t.id) : "" }));
                     setShowOccForm(true);
                   }}
-                  className="text-xs px-2 py-1 bg-surface-sunken text-fg-muted rounded hover:bg-border transition-colors"
                 >
                   Belegung anlegen
-                </button>
+                </Button>
               </li>
             ))}
           </ul>
@@ -337,14 +411,18 @@ export function TenantForm({ unit, onBack }: TenantFormProps) {
       {/* Belegung anlegen */}
       {showOccForm && (
         <Card title="Neue Belegung">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="block">
-                <span className="block text-xs font-medium text-fg-muted mb-1">Mieter *</span>
-                <select
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              void handleSaveOccupancy();
+            }}
+            noValidate
+          >
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <FormField label="Mieter" required error={oErr.tenantId}>
+                <Select
                   value={occForm.tenantId}
                   onChange={(e) => setOccForm({ ...occForm, tenantId: e.target.value })}
-                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
                 >
                   <option value="">Bitte wählen</option>
                   {tenants?.map((t) => (
@@ -352,135 +430,99 @@ export function TenantForm({ unit, onBack }: TenantFormProps) {
                       {t.name}
                     </option>
                   ))}
-                </select>
-              </label>
-            </div>
-            <div>
-              <label className="block">
-                <span className="block text-xs font-medium text-fg-muted mb-1">Personen</span>
-                <input
+                </Select>
+              </FormField>
+              <FormField label="Personen" required error={oErr.persons}>
+                <Input
                   type="number"
-                  min="1"
+                  inputMode="numeric"
+                  min={1}
+                  step={1}
                   value={occForm.persons}
                   onChange={(e) => setOccForm({ ...occForm, persons: e.target.value })}
-                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
                 />
-              </label>
-            </div>
-            <div>
-              <label className="block">
-                <span className="block text-xs font-medium text-fg-muted mb-1">
-                  Einzug (Monat) *
-                </span>
-                <input
+              </FormField>
+              <FormField label="Einzug (Monat)" required error={oErr.from}>
+                <Input
                   type="month"
                   value={occForm.from}
                   onChange={(e) => setOccForm({ ...occForm, from: e.target.value })}
-                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
                 />
-              </label>
-            </div>
-            <div>
-              <label className="block">
-                <span className="block text-xs font-medium text-fg-muted mb-1">
-                  Auszug (leer = aktuell)
-                </span>
-                <input
+              </FormField>
+              <FormField label="Auszug (Monat)" hint="leer = aktuell" error={oErr.to}>
+                <Input
                   type="month"
                   value={occForm.to}
+                  min={occForm.from || undefined}
                   onChange={(e) => setOccForm({ ...occForm, to: e.target.value })}
-                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
                 />
-              </label>
-            </div>
-            <div>
-              <label className="block">
-                <span className="block text-xs font-medium text-fg-muted mb-1">Kaltmiete</span>
-                <input
-                  type="text"
-                  inputMode="decimal"
+              </FormField>
+              <FormField label="Kaltmiete">
+                <NumInput
                   value={occForm.rentCold}
-                  onChange={(e) => setOccForm({ ...occForm, rentCold: e.target.value })}
-                  placeholder="z.B. 450,00"
-                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
+                  onChange={(rentCold) => setOccForm({ ...occForm, rentCold })}
+                  suffix="€"
+                  min={0}
                 />
-              </label>
-            </div>
-            <div>
-              <label className="block">
-                <span className="block text-xs font-medium text-fg-muted mb-1">
-                  NK-Vorauszahlung
-                </span>
-                <input
-                  type="text"
-                  inputMode="decimal"
+              </FormField>
+              <FormField label="NK-Vorauszahlung">
+                <NumInput
                   value={occForm.rentUtilities}
-                  onChange={(e) => setOccForm({ ...occForm, rentUtilities: e.target.value })}
-                  placeholder="z.B. 150,00"
-                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
+                  onChange={(rentUtilities) => setOccForm({ ...occForm, rentUtilities })}
+                  suffix="€"
+                  min={0}
                 />
-              </label>
-            </div>
-            <div>
-              <label className="block">
-                <span className="block text-xs font-medium text-fg-muted mb-1">Kaution</span>
-                <input
-                  type="text"
-                  inputMode="decimal"
+              </FormField>
+              <FormField label="Kaution">
+                <NumInput
                   value={occForm.deposit}
-                  onChange={(e) => setOccForm({ ...occForm, deposit: e.target.value })}
-                  placeholder="z.B. 1350,00"
-                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
+                  onChange={(deposit) => setOccForm({ ...occForm, deposit })}
+                  suffix="€"
+                  min={0}
                 />
-              </label>
-            </div>
-            <div className="flex items-end">
-              <label className="flex items-center gap-2 text-sm text-fg-muted pb-1.5">
-                <input
-                  type="checkbox"
+              </FormField>
+              <div className="flex items-center pb-4">
+                <Checkbox
+                  label="Kaution bezahlt"
                   checked={occForm.depositPaid}
                   onChange={(e) => setOccForm({ ...occForm, depositPaid: e.target.checked })}
-                  className="rounded border-border"
                 />
-                Kaution bezahlt
-              </label>
+              </div>
             </div>
-          </div>
-          <div className="flex gap-2 mt-4">
-            <button
-              type="button"
-              onClick={handleSaveOccupancy}
-              className="px-4 py-1.5 text-sm bg-fg text-surface rounded-lg hover:opacity-90 transition-colors"
-            >
-              Belegung speichern
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setShowOccForm(false);
-              }}
-              className="px-4 py-1.5 text-sm border border-border text-fg-muted rounded-lg hover:bg-surface-muted transition-colors"
-            >
-              Abbrechen
-            </button>
-          </div>
+            <div className="flex gap-2 mt-2">
+              <Button type="submit" variant="primary" size="sm">
+                Belegung speichern
+              </Button>
+              <Button variant="outline" size="sm" onClick={closeOccForm}>
+                Abbrechen
+              </Button>
+            </div>
+          </form>
         </Card>
       )}
 
       {/* Belegungshistorie */}
       <Card title="Belegungshistorie">
-        {rows && rows.length > 0 ? (
-          <DataTable columns={columns} data={rows} keyFn={(r) => r.occupancy.id!} />
+        {rows === undefined ? (
+          <div className="space-y-2">
+            <Skeleton height="2rem" />
+            <Skeleton height="2rem" />
+          </div>
+        ) : rows.length > 0 ? (
+          <DataTable
+            columns={columns}
+            data={rows}
+            keyFn={(r) => r.occupancy.id ?? `${r.occupancy.tenantId}-${r.occupancy.from}`}
+          />
         ) : (
           <p className="text-sm text-fg-muted">Noch keine Belegungen vorhanden.</p>
         )}
       </Card>
-
       {/* Miethistorie & Kaution für aktuelle Belegung */}
       {rows &&
         rows.length > 0 &&
         (() => {
-          const now = new Date().toISOString().slice(0, 7);
+          const now = currentMonth();
           const current = rows.find(
             (r) => r.occupancy.from <= now && (r.occupancy.to === null || r.occupancy.to >= now),
           );
@@ -494,7 +536,9 @@ export function TenantForm({ unit, onBack }: TenantFormProps) {
         })()}
 
       {/* Dokumente */}
-      <DocumentStore entityType="unit" entityId={unit.id!} title="Dokumente zur Wohnung" />
+      {unit.id != null && (
+        <DocumentStore entityType="unit" entityId={unit.id} title="Dokumente zur Wohnung" />
+      )}
     </div>
   );
 }

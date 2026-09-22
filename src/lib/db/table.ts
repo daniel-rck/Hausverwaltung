@@ -138,8 +138,26 @@ export class Table<T> {
     return key;
   }
 
-  async put(value: T): Promise<IDBValidKey> {
-    const key = await (await getDB()).put(this.name, stampForWrite(this.name, value as Rec));
+  /**
+   * Upsert. User edits typically rebuild the record from form state without
+   * `syncId`/`updatedAt`; without care that would mint a new `syncId` (the old
+   * one lingers remotely → duplicate after sync) or keep a stale `updatedAt`
+   * (the edit loses LWW on other devices). So by default an existing record's
+   * `syncId` is carried over and `updatedAt` is refreshed. The sync apply path
+   * passes `raw: true` to keep the snapshot's LWW timestamps verbatim.
+   */
+  async put(value: T, opts: { raw?: boolean } = {}): Promise<IDBValidKey> {
+    const db = await getDB();
+    const obj = value as Rec;
+    if (!opts.raw && isSyncable(this.name)) {
+      const key = obj[this.keyPath] as IDBValidKey | undefined;
+      if (key !== undefined && key !== null) {
+        const existing = (await db.get(this.name, key)) as Rec | undefined;
+        if (!obj.syncId && existing?.syncId) obj.syncId = existing.syncId;
+      }
+      obj.updatedAt = Date.now();
+    }
+    const key = await db.put(this.name, stampForWrite(this.name, obj));
     fireWrite();
     return key;
   }

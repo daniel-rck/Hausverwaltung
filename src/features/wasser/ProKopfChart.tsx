@@ -5,10 +5,12 @@ import { useProperty } from "../../lib/hooks/useProperty";
 import { BarChart } from "../../lib/ui/charts/BarChart";
 import { Card } from "../../lib/ui/shared/Card";
 import { EmptyState } from "../../lib/ui/shared/EmptyState";
+import { Skeleton } from "../../lib/ui/ui";
 import { ShowerHead } from "../../lib/ui/ui/icons";
 import { monthDiff, waterPerCapitaPerDay } from "../../lib/utils/calc";
 import { WATER_AVG_LITERS_PER_PERSON_DAY } from "../../lib/utils/constants";
 import { formatNumber } from "../../lib/utils/format";
+import { combineConsumption, consumptionForYear } from "./consumption";
 
 interface ProKopfChartProps {
   year: number;
@@ -43,8 +45,7 @@ export function ProKopfChart({ year }: ProKopfChartProps) {
       return null;
     }
 
-    const waterTypeIds = waterMeterTypes.map((mt) => mt.id!);
-    const yearStart = `${year}-01-01`;
+    const waterTypeIds = waterMeterTypes.flatMap((mt) => (mt.id != null ? [mt.id] : []));
     const yearEnd = `${year}-12-31`;
     const yearStartMonth = `${year}-01`;
     const yearEndMonth = `${year}-12`;
@@ -57,22 +58,25 @@ export function ProKopfChart({ year }: ProKopfChartProps) {
     }[] = [];
 
     for (const unit of units) {
+      if (unit.id == null) continue;
       const unitMeters = await db.meters
         .where("unitId")
-        .equals(unit.id!)
+        .equals(unit.id)
         .filter((m) => waterTypeIds.includes(m.meterTypeId))
         .toArray();
 
+      // Alle Ablesungen bis Jahresende — die Vorjahres-Ablesung ist der Anfangsstand.
       const readings: MeterReading[] = [];
       for (const meter of unitMeters) {
+        if (meter.id == null) continue;
         const meterReadings = await db.meterReadings
           .where("[meterId+date]")
-          .between([meter.id!, yearStart], [meter.id!, yearEnd], true, true)
+          .between([meter.id, ""], [meter.id, yearEnd], true, true)
           .toArray();
         readings.push(...meterReadings);
       }
 
-      const allOccupancies = await db.occupancies.where("unitId").equals(unit.id!).toArray();
+      const allOccupancies = await db.occupancies.where("unitId").equals(unit.id).toArray();
 
       const occupancies = allOccupancies.filter(
         (o) => o.from <= yearEndMonth && (o.to === null || o.to >= yearStartMonth),
@@ -91,20 +95,16 @@ export function ProKopfChart({ year }: ProKopfChartProps) {
 
     for (const { unit, meters, readings, occupancies } of allData) {
       // Calculate total water consumption for this unit
-      let totalConsumption = 0;
-      for (const meter of meters) {
-        const meterReadings = readings
-          .filter((r) => r.meterId === meter.id!)
-          .sort((a, b) => a.date.localeCompare(b.date));
-
-        const first = meterReadings[0];
-        const last = meterReadings.at(-1);
-        if (meterReadings.length >= 2 && first && last) {
-          totalConsumption += last.value - first.value;
-        }
-      }
-
-      if (totalConsumption <= 0) continue;
+      const combined = combineConsumption(
+        meters.map((meter) =>
+          consumptionForYear(
+            readings.filter((r) => r.meterId === meter.id),
+            year,
+          ),
+        ),
+      );
+      if (!combined || combined.consumption <= 0) continue;
+      const totalConsumption = combined.consumption;
 
       // Calculate weighted average persons across the year
       const yearStartMonth = `${year}-01`;
@@ -121,7 +121,8 @@ export function ProKopfChart({ year }: ProKopfChartProps) {
       if (totalPersonMonths <= 0) continue;
 
       const avgPersons = totalPersonMonths / 12;
-      const lpd = waterPerCapitaPerDay(totalConsumption, avgPersons, 365);
+      // Tagesmittel aus dem tatsächlichen Ablesezeitraum je Zähler statt fixer 365 Tage.
+      const lpd = waterPerCapitaPerDay(combined.perDay, avgPersons, 1);
 
       results.push({
         unitName: unit.name,
@@ -133,6 +134,14 @@ export function ProKopfChart({ year }: ProKopfChartProps) {
 
     return results.sort((a, b) => a.unitName.localeCompare(b.unitName));
   }, [allData, year]);
+
+  if (allData === undefined) {
+    return (
+      <Card title="Pro-Kopf-Verbrauch">
+        <Skeleton height="16rem" />
+      </Card>
+    );
+  }
 
   if (unitConsumptions.length === 0) {
     return (
@@ -203,7 +212,7 @@ export function ProKopfChart({ year }: ProKopfChartProps) {
                   </td>
                   <td
                     className={`py-2.5 px-3 text-right font-mono ${
-                      isHigh ? "text-red-600 font-semibold" : ""
+                      isHigh ? "text-danger-fg font-semibold" : ""
                     }`}
                   >
                     {formatNumber(uc.litersPerPersonPerDay)}
@@ -211,10 +220,10 @@ export function ProKopfChart({ year }: ProKopfChartProps) {
                   <td
                     className={`py-2.5 px-3 text-right font-mono ${
                       isHigh
-                        ? "text-red-600 font-semibold"
+                        ? "text-danger-fg font-semibold"
                         : deviation > 0
-                          ? "text-amber-600"
-                          : "text-green-600"
+                          ? "text-warning-fg"
+                          : "text-success-fg"
                     }`}
                   >
                     {deviation >= 0 ? "+" : ""}

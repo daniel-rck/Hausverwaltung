@@ -17,12 +17,14 @@ import {
   FormField,
   Input,
   Select,
+  Skeleton,
   Textarea,
   useConfirm,
   useToast,
   Wizard,
 } from "../../lib/ui/ui";
 import { Building2, KeyRound, Plus } from "../../lib/ui/ui/icons";
+import { todayIso } from "../../lib/utils/dates";
 import { formatDate } from "../../lib/utils/format";
 import { createDefaultKeys, KeyHandover } from "./KeyHandover";
 import { MeterSnapshot as MeterSnapshotComponent } from "./MeterSnapshot";
@@ -33,11 +35,11 @@ import { UebergabePrint } from "./UebergabePrint";
 
 type Step = "list" | "setup" | "rooms" | "meters" | "keys" | "signatures" | "preview";
 
-interface OccRow {
+type OccRow = {
   occupancy: Occupancy;
   tenant: Tenant | null;
   unit: Unit;
-}
+};
 
 const WIZARD_STEPS: { id: Step; label: string }[] = [
   { id: "setup", label: "Grunddaten" },
@@ -56,7 +58,7 @@ export function UebergabePage() {
   // Form state
   const [selectedOccId, setSelectedOccId] = useState<number | null>(null);
   const [protocolType, setProtocolType] = useState<"move-in" | "move-out">("move-in");
-  const [protocolDate, setProtocolDate] = useState(new Date().toISOString().slice(0, 10));
+  const [protocolDate, setProtocolDate] = useState(todayIso());
   const [rooms, setRooms] = useState<RoomCondition[]>(createDefaultRooms());
   const [meterReadings, setMeterReadings] = useState<{ meterId: number; value: number }[]>([]);
   const [keys, setKeys] = useState(createDefaultKeys());
@@ -70,7 +72,8 @@ export function UebergabePage() {
     const units = await db.units.where("propertyId").equals(activeProperty.id).toArray();
     const result: OccRow[] = [];
     for (const unit of units) {
-      const occs = await db.occupancies.where("unitId").equals(unit.id!).toArray();
+      if (unit.id === undefined) continue;
+      const occs = await db.occupancies.where("unitId").equals(unit.id).toArray();
       for (const occ of occs) {
         const tenant = (await db.tenants.get(occ.tenantId)) ?? null;
         result.push({ occupancy: occ, tenant, unit });
@@ -85,7 +88,7 @@ export function UebergabePage() {
     if (!activeProperty?.id) return [];
     const all = await db.handoverProtocols.toArray();
     const units = await db.units.where("propertyId").equals(activeProperty.id).toArray();
-    const unitIds = new Set(units.map((u) => u.id!));
+    const unitIds = new Set(units.map((u) => u.id));
     const result: (HandoverProtocol & { tenantName: string; unitName: string })[] = [];
     for (const p of all) {
       const occ = await db.occupancies.get(p.occupancyId);
@@ -114,7 +117,7 @@ export function UebergabePage() {
   const resetForm = () => {
     setSelectedOccId(null);
     setProtocolType("move-in");
-    setProtocolDate(new Date().toISOString().slice(0, 10));
+    setProtocolDate(todayIso());
     setRooms(createDefaultRooms());
     setMeterReadings([]);
     setKeys(createDefaultKeys());
@@ -154,8 +157,13 @@ export function UebergabePage() {
       danger: true,
     });
     if (!ok) return;
-    await deleteWithTombstone("handoverProtocols", id);
-    toast.success("Protokoll gelöscht.");
+    try {
+      await deleteWithTombstone("handoverProtocols", id);
+      toast.success("Protokoll gelöscht.");
+    } catch (err) {
+      toast.error("Löschen fehlgeschlagen.");
+      console.error(err);
+    }
   };
 
   const selectedOcc = occupancies?.find((o) => o.occupancy.id === selectedOccId);
@@ -245,10 +253,10 @@ export function UebergabePage() {
           </>
         )}
 
-        {step === "meters" && selectedOcc && (
+        {step === "meters" && selectedOcc?.unit.id !== undefined && (
           <>
             <MeterSnapshotComponent
-              unitId={selectedOcc.unit.id!}
+              unitId={selectedOcc.unit.id}
               readings={meterReadings}
               onChange={setMeterReadings}
             />
@@ -327,7 +335,11 @@ export function UebergabePage() {
         }
       />
 
-      {!protocols || protocols.length === 0 ? (
+      {protocols === undefined ? (
+        <Card>
+          <Skeleton height="6rem" />
+        </Card>
+      ) : protocols.length === 0 ? (
         <Card>
           <EmptyState
             icon={<KeyRound size={24} strokeWidth={1.75} />}
@@ -339,33 +351,32 @@ export function UebergabePage() {
       ) : (
         <Card>
           <ul className="space-y-2">
-            {protocols.map((p) => (
-              <li
-                key={p.id}
-                className="flex items-center justify-between p-3 rounded-lg border border-border hover:bg-surface-muted"
-              >
-                <button
-                  type="button"
-                  onClick={() => setPreviewId(p.id!)}
-                  className="flex-1 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500 rounded-lg"
+            {protocols.flatMap((p) => {
+              const id = p.id;
+              if (id === undefined) return [];
+              return [
+                <li
+                  key={id}
+                  className="flex items-center justify-between p-3 rounded-lg border border-border hover:bg-surface-muted"
                 >
-                  <p className="text-sm font-medium text-fg">
-                    {p.type === "move-in" ? "Einzug" : "Auszug"} – {p.unitName}
-                  </p>
-                  <p className="text-xs text-fg-muted">
-                    {p.tenantName} | {formatDate(p.date)}
-                  </p>
-                </button>
-                <Button
-                  variant="link"
-                  size="sm"
-                  onClick={() => handleDelete(p.id!)}
-                  className="text-red-500"
-                >
-                  Löschen
-                </Button>
-              </li>
-            ))}
+                  <button
+                    type="button"
+                    onClick={() => setPreviewId(id)}
+                    className="flex-1 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 rounded-lg"
+                  >
+                    <p className="text-sm font-medium text-fg">
+                      {p.type === "move-in" ? "Einzug" : "Auszug"} – {p.unitName}
+                    </p>
+                    <p className="text-xs text-fg-muted">
+                      {p.tenantName} | {formatDate(p.date)}
+                    </p>
+                  </button>
+                  <Button variant="dangerGhost" size="sm" onClick={() => void handleDelete(id)}>
+                    Löschen
+                  </Button>
+                </li>,
+              ];
+            })}
           </ul>
         </Card>
       )}
@@ -411,8 +422,28 @@ function ProtocolPreview({ protocolId, onBack }: { protocolId: number; onBack: (
     };
   }, [protocolId]);
 
-  if (!data) {
-    return <p className="text-sm text-fg-muted">Lade Protokoll...</p>;
+  if (data === undefined) {
+    return (
+      <div className="space-y-4">
+        <Skeleton height="2rem" width="12rem" />
+        <Skeleton height="24rem" />
+      </div>
+    );
+  }
+
+  if (data === null) {
+    return (
+      <div className="space-y-4">
+        <Button variant="ghost" size="sm" onClick={onBack}>
+          ← Zurück zur Übersicht
+        </Button>
+        <EmptyState
+          icon={<KeyRound size={24} strokeWidth={1.75} />}
+          title="Protokoll nicht gefunden"
+          description="Das Protokoll oder die zugehörige Belegung existiert nicht mehr."
+        />
+      </div>
+    );
   }
 
   return (

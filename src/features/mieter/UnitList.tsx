@@ -6,8 +6,20 @@ import { useProperty } from "../../lib/hooks/useProperty";
 import { Card } from "../../lib/ui/shared/Card";
 import { type Column, DataTable } from "../../lib/ui/shared/DataTable";
 import { EmptyState } from "../../lib/ui/shared/EmptyState";
+import { NumInput } from "../../lib/ui/shared/NumInput";
 import { StatusBadge } from "../../lib/ui/shared/StatusBadge";
-import { Building2 } from "../../lib/ui/ui/icons";
+import {
+  Button,
+  FormField,
+  Input,
+  required,
+  Skeleton,
+  useConfirm,
+  useFormValidation,
+  useToast,
+} from "../../lib/ui/ui";
+import { Building2, Plus } from "../../lib/ui/ui/icons";
+import { currentMonth } from "../../lib/utils/dates";
 import { formatArea } from "../../lib/utils/format";
 
 interface UnitRow {
@@ -20,22 +32,34 @@ interface UnitListProps {
   onSelectUnit: (unit: Unit) => void;
 }
 
+type UnitFormValues = { name: string; area: number; floor: string };
+
+const EMPTY_FORM: UnitFormValues = { name: "", area: 0, floor: "" };
+
+const unitSchema = {
+  name: required("Bitte Bezeichnung angeben"),
+};
+
 export function UnitList({ onSelectUnit }: UnitListProps) {
   const { activeProperty } = useProperty();
   const [showForm, setShowForm] = useState(false);
   const [editUnit, setEditUnit] = useState<Unit | null>(null);
-  const [form, setForm] = useState({ name: "", area: "", floor: "" });
+  const [form, setForm] = useState<UnitFormValues>(EMPTY_FORM);
+  const toast = useToast();
+  const confirm = useConfirm();
+  const { errors, validate, clear } = useFormValidation<UnitFormValues>(unitSchema);
 
   const rows = useLiveQuery(async () => {
     if (!activeProperty?.id) return [];
 
     const units = await db.units.where("propertyId").equals(activeProperty.id).toArray();
 
-    const now = new Date().toISOString().slice(0, 7);
+    const now = currentMonth();
     const result: UnitRow[] = [];
 
     for (const unit of units) {
-      const occupancies = await db.occupancies.where("unitId").equals(unit.id!).toArray();
+      if (unit.id == null) continue;
+      const occupancies = await db.occupancies.where("unitId").equals(unit.id).toArray();
 
       const active = occupancies.find((o) => o.from <= now && (o.to === null || o.to >= now));
 
@@ -50,29 +74,56 @@ export function UnitList({ onSelectUnit }: UnitListProps) {
     return result;
   }, [activeProperty?.id]);
 
+  const closeForm = () => {
+    setShowForm(false);
+    setEditUnit(null);
+    setForm(EMPTY_FORM);
+    clear();
+  };
+
   const handleSave = async () => {
-    if (!activeProperty?.id || !form.name.trim()) return;
+    if (!activeProperty?.id) return;
+    if (!validate(form)) return;
 
     const data = {
       propertyId: activeProperty.id,
       name: form.name.trim(),
-      area: parseFloat(form.area.replace(",", ".")) || 0,
+      area: form.area,
       floor: form.floor || undefined,
     };
 
-    if (editUnit?.id) {
-      await db.units.put({ ...data, id: editUnit.id });
-    } else {
-      await db.units.add(data);
+    try {
+      if (editUnit?.id) {
+        await db.units.put({ ...data, id: editUnit.id });
+        toast.success("Wohnung aktualisiert.");
+      } else {
+        await db.units.add(data);
+        toast.success("Wohnung angelegt.");
+      }
+      closeForm();
+    } catch (err) {
+      toast.error("Speichern fehlgeschlagen.");
+      console.error(err);
     }
-
-    setShowForm(false);
-    setEditUnit(null);
-    setForm({ name: "", area: "", floor: "" });
   };
 
-  const handleDelete = async (id: number) => {
-    await cascadeDeleteUnit(id);
+  const handleDelete = async (unit: Unit) => {
+    if (unit.id == null) return;
+    const ok = await confirm({
+      title: "Wohnung löschen?",
+      message: `„${unit.name}“ wird mit allen Mietverhältnissen, Zahlungen, Kautionen, Mieterhöhungen, Zählern, Zählerständen, Wartungen und Dokumenten unwiderruflich gelöscht.`,
+      confirmLabel: "Löschen",
+      danger: true,
+    });
+    if (!ok) return;
+    try {
+      await cascadeDeleteUnit(unit.id);
+      toast.success("Wohnung gelöscht.");
+      closeForm();
+    } catch (err) {
+      toast.error("Löschen fehlgeschlagen.");
+      console.error(err);
+    }
   };
 
   const columns: Column<UnitRow>[] = [
@@ -108,22 +159,23 @@ export function UnitList({ onSelectUnit }: UnitListProps) {
       key: "actions",
       header: "",
       render: (r) => (
-        <button
-          type="button"
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={(e) => {
             e.stopPropagation();
             setEditUnit(r.unit);
             setForm({
               name: r.unit.name,
-              area: String(r.unit.area),
+              area: r.unit.area,
               floor: r.unit.floor ?? "",
             });
+            clear();
             setShowForm(true);
           }}
-          className="text-xs text-fg-subtle hover:text-fg"
         >
           Bearbeiten
-        </button>
+        </Button>
       ),
     },
   ];
@@ -134,99 +186,82 @@ export function UnitList({ onSelectUnit }: UnitListProps) {
     <Card
       title="Wohneinheiten"
       action={
-        <button
-          type="button"
+        <Button
+          variant="primary"
+          size="sm"
+          leftIcon={<Plus size={14} />}
           onClick={() => {
             setEditUnit(null);
-            setForm({ name: "", area: "", floor: "" });
+            setForm(EMPTY_FORM);
+            clear();
             setShowForm(true);
           }}
-          className="text-sm px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
         >
-          + Wohnung
-        </button>
+          Wohnung
+        </Button>
       }
     >
       {showForm && (
-        <div className="mb-4 p-4 bg-surface-muted rounded-lg border border-border">
+        <form
+          className="mb-4 p-4 bg-surface-muted rounded-lg border border-border"
+          onSubmit={(e) => {
+            e.preventDefault();
+            void handleSave();
+          }}
+          noValidate
+        >
           <h3 className="text-sm font-semibold text-fg mb-3">
             {editUnit ? "Wohnung bearbeiten" : "Neue Wohnung"}
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div>
-              <label className="block">
-                <span className="block text-xs font-medium text-fg-muted mb-1">Bezeichnung *</span>
-                <input
-                  type="text"
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  placeholder="z.B. EG, OG, KG"
-                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
-                />
-              </label>
-            </div>
-            <div>
-              <label className="block">
-                <span className="block text-xs font-medium text-fg-muted mb-1">Fläche (m²)</span>
-                <input
-                  type="text"
-                  inputMode="decimal"
-                  value={form.area}
-                  onChange={(e) => setForm({ ...form, area: e.target.value })}
-                  placeholder="z.B. 65,5"
-                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
-                />
-              </label>
-            </div>
-            <div>
-              <label className="block">
-                <span className="block text-xs font-medium text-fg-muted mb-1">Stockwerk</span>
-                <input
-                  type="text"
-                  value={form.floor}
-                  onChange={(e) => setForm({ ...form, floor: e.target.value })}
-                  placeholder="z.B. Erdgeschoss"
-                  className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
-                />
-              </label>
-            </div>
+            <FormField label="Bezeichnung" required error={errors.name}>
+              <Input
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                placeholder="z.B. EG, OG, KG"
+              />
+            </FormField>
+            <FormField label="Fläche">
+              <NumInput
+                value={form.area}
+                onChange={(area) => setForm({ ...form, area })}
+                suffix="m²"
+                min={0}
+              />
+            </FormField>
+            <FormField label="Stockwerk">
+              <Input
+                value={form.floor}
+                onChange={(e) => setForm({ ...form, floor: e.target.value })}
+                placeholder="z.B. Erdgeschoss"
+              />
+            </FormField>
           </div>
-          <div className="flex gap-2 mt-3">
-            <button
-              type="button"
-              onClick={handleSave}
-              className="px-4 py-1.5 text-sm bg-fg text-surface rounded-lg hover:opacity-90 transition-colors"
-            >
+          <div className="flex gap-2 mt-1">
+            <Button type="submit" variant="primary" size="sm">
               Speichern
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setShowForm(false);
-                setEditUnit(null);
-              }}
-              className="px-4 py-1.5 text-sm border border-border text-fg-muted rounded-lg hover:bg-surface-muted transition-colors"
-            >
+            </Button>
+            <Button variant="outline" size="sm" onClick={closeForm}>
               Abbrechen
-            </button>
-            {editUnit?.id && (
-              <button
-                type="button"
-                onClick={() => {
-                  handleDelete(editUnit.id!);
-                  setShowForm(false);
-                  setEditUnit(null);
-                }}
-                className="px-4 py-1.5 text-sm text-red-600 hover:text-red-700 ml-auto"
-              >
-                Löschen
-              </button>
+            </Button>
+            {editUnit?.id != null && (
+              <div className="ml-auto">
+                <Button variant="dangerGhost" size="sm" onClick={() => void handleDelete(editUnit)}>
+                  Löschen
+                </Button>
+              </div>
             )}
           </div>
-        </div>
+        </form>
       )}
 
-      {!rows || rows.length === 0 ? (
+      {rows === undefined ? (
+        <div className="space-y-2">
+          <Skeleton height="2rem" />
+          <Skeleton height="2rem" />
+          <Skeleton height="2rem" />
+        </div>
+      ) : rows.length === 0 ? (
         <EmptyState
           icon={<Building2 size={24} strokeWidth={1.75} />}
           title="Keine Wohnungen"
@@ -236,7 +271,7 @@ export function UnitList({ onSelectUnit }: UnitListProps) {
         <DataTable
           columns={columns}
           data={rows}
-          keyFn={(r) => r.unit.id!}
+          keyFn={(r) => r.unit.id ?? r.unit.name}
           onRowClick={(r) => {
             if (!showForm) onSelectUnit(r.unit);
           }}

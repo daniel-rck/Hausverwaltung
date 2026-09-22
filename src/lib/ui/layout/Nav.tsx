@@ -4,16 +4,16 @@ import { Drawer } from "../ui/Drawer";
 import { type ModulIconKey, ModulIcons, MoreHorizontal } from "../ui/icons";
 import { type ModulKey, moduleAccent } from "../ui/moduleAccent";
 
-interface NavItem {
+type NavItem = {
   path: string;
   label: string;
   iconKey: ModulIconKey;
   accent?: ModulKey;
   group: string;
-}
+};
 
 const navItems: NavItem[] = [
-  { path: "/", label: "Dashboard", iconKey: "dashboard", group: "Übersicht" },
+  { path: "/", label: "Übersicht", iconKey: "dashboard", group: "Übersicht" },
   { path: "/mieter", label: "Mieter", iconKey: "mieter", accent: "mieter", group: "Stammdaten" },
   { path: "/zaehler", label: "Zähler", iconKey: "zaehler", accent: "zaehler", group: "Verbrauch" },
   { path: "/wasser", label: "Versorger", iconKey: "wasser", accent: "wasser", group: "Verbrauch" },
@@ -86,7 +86,7 @@ export function SidebarNav() {
                 to={item.path}
                 end={item.path === "/"}
                 className={({ isActive }) =>
-                  `relative flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-[13px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--color-accent]/40 ${
+                  `relative flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-[13px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 ${
                     isActive
                       ? "bg-surface-sunken/80 text-fg font-medium"
                       : "text-fg-muted hover:bg-surface-sunken/60 hover:text-fg"
@@ -143,10 +143,8 @@ export function BottomNav() {
                 to={item.path}
                 end={item.path === "/"}
                 className={({ isActive }) =>
-                  `relative flex flex-col items-center gap-0.5 min-w-[60px] py-2 px-2 text-[10px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--color-accent]/40 rounded-md ${
-                    isActive
-                      ? "text-[--color-accent] dark:text-[--color-accent-dark] font-semibold"
-                      : "text-fg-muted"
+                  `relative flex flex-col items-center gap-0.5 min-w-[60px] py-2 px-2 text-[10px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 rounded-md ${
+                    isActive ? "text-accent dark:text-accent-dark font-semibold" : "text-fg-muted"
                   }`
                 }
               >
@@ -170,10 +168,8 @@ export function BottomNav() {
             onClick={() => setOpen(true)}
             aria-label="Weitere Module öffnen"
             aria-expanded={open}
-            className={`flex flex-col items-center gap-0.5 min-w-[60px] py-2 px-2 text-[10px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--color-accent]/40 rounded-md ${
-              moreActive
-                ? "text-[--color-accent] dark:text-[--color-accent-dark] font-semibold"
-                : "text-fg-muted"
+            className={`flex flex-col items-center gap-0.5 min-w-[60px] py-2 px-2 text-[10px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 rounded-md ${
+              moreActive ? "text-accent dark:text-accent-dark font-semibold" : "text-fg-muted"
             }`}
           >
             <MoreHorizontal size={20} strokeWidth={1.75} aria-hidden="true" />

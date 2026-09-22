@@ -32,7 +32,7 @@ export function Wizard({ steps, current, ariaLabel = "Fortschritt" }: WizardProp
         </div>
         <div className="h-1 rounded-full bg-surface-sunken overflow-hidden">
           <div
-            className="h-full bg-[--color-accent] transition-all"
+            className="h-full bg-accent transition-all"
             style={{ width: `${((current + 1) / steps.length) * 100}%` }}
             aria-hidden="true"
           />
@@ -49,7 +49,7 @@ export function Wizard({ steps, current, ariaLabel = "Fortschritt" }: WizardProp
               <span
                 className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-semibold ${
                   active
-                    ? "bg-[--color-accent] text-fg-on-accent"
+                    ? "bg-accent text-fg-on-accent"
                     : done
                       ? "bg-surface-sunken text-fg"
                       : "bg-surface-sunken text-fg-muted"
@@ -121,7 +121,7 @@ export function WizardFooter({
             type="button"
             onClick={onNext}
             disabled={!canNext || busy}
-            className="h-9 px-3.5 text-sm rounded-md bg-[--color-accent] text-fg-on-accent hover:bg-[--color-accent-hover] disabled:opacity-50 transition-colors"
+            className="h-9 px-3.5 text-sm rounded-md bg-accent text-fg-on-accent hover:bg-accent-hover disabled:opacity-50 transition-colors"
           >
             {busy ? "…" : nextLabel}
           </button>

@@ -1,20 +1,20 @@
 import { Modal } from "./Modal";
 
-interface ShortcutsModalProps {
+type ShortcutsModalProps = {
   open: boolean;
   onClose: () => void;
-}
+};
 
-interface Shortcut {
+type Shortcut = {
   keys: string[];
   description: string;
-}
+};
 
 const SHORTCUTS: { group: string; items: Shortcut[] }[] = [
   {
     group: "Navigation",
     items: [
-      { keys: ["g", "d"], description: "Dashboard" },
+      { keys: ["g", "d"], description: "Übersicht" },
       { keys: ["g", "m"], description: "Mieter" },
       { keys: ["g", "z"], description: "Zähler" },
       { keys: ["g", "w"], description: "Versorger" },

@@ -6,16 +6,16 @@ interface StatusBadgeProps {
 }
 
 const statusStyles: Record<Status, string> = {
-  green: "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400",
-  yellow: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400",
-  red: "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400",
+  green: "bg-success/10 text-success-fg",
+  yellow: "bg-warning/10 text-warning-fg",
+  red: "bg-danger/10 text-danger-fg",
   gray: "bg-surface-sunken text-fg-muted",
 };
 
 const dotStyles: Record<Status, string> = {
-  green: "bg-green-500",
-  yellow: "bg-amber-500",
-  red: "bg-red-500",
+  green: "bg-success",
+  yellow: "bg-warning",
+  red: "bg-danger",
   gray: "bg-fg-subtle",
 };
 

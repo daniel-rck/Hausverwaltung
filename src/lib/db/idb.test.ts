@@ -32,6 +32,26 @@ describe("Table CRUD", () => {
     expect(await db.units.update(9999, { area: 1 })).toBe(0);
   });
 
+  it("put auf bestehenden Record behält syncId und erneuert updatedAt", async () => {
+    const id = (await db.units.add({ propertyId: 1, name: "EG", area: 50 })) as number;
+    const before = await db.units.get(id);
+    await new Promise((r) => setTimeout(r, 2));
+    // Formular-Edit: Record ohne syncId/updatedAt neu aufgebaut
+    await db.units.put({ id, propertyId: 1, name: "EG links", area: 51 });
+    const after = await db.units.get(id);
+    expect(after?.syncId).toBe(before?.syncId);
+    expect(after?.updatedAt).toBeGreaterThan(before?.updatedAt ?? 0);
+    expect(after?.name).toBe("EG links");
+  });
+
+  it("put mit raw übernimmt updatedAt unverändert (Sync-Pfad)", async () => {
+    await db.units.put(
+      { id: 7, propertyId: 1, name: "OG", area: 40, syncId: "s-7", updatedAt: 42 },
+      { raw: true },
+    );
+    expect((await db.units.get(7))?.updatedAt).toBe(42);
+  });
+
   it("delete entfernt den Record", async () => {
     const id = (await db.tenants.add({ unitId: 1, name: "Müller" })) as number;
     await db.tenants.delete(id);

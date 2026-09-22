@@ -4,6 +4,7 @@ import type { MeterType } from "../../lib/db/schema";
 import { LineChart } from "../../lib/ui/charts/LineChart";
 import { Card } from "../../lib/ui/shared/Card";
 import { EmptyState } from "../../lib/ui/shared/EmptyState";
+import { Skeleton } from "../../lib/ui/ui";
 import { BarChart3 } from "../../lib/ui/ui/icons";
 import { formatDate, formatNumber } from "../../lib/utils/format";
 
@@ -52,6 +53,14 @@ export function ConsumptionChart({ meterId }: ConsumptionChartProps) {
           title="Kein Zähler ausgewählt"
           description="Wählen Sie einen Zähler, um den Verbrauchsverlauf anzuzeigen."
         />
+      </Card>
+    );
+  }
+
+  if (readings === undefined) {
+    return (
+      <Card title="Verbrauchsverlauf">
+        <Skeleton height="16rem" />
       </Card>
     );
   }

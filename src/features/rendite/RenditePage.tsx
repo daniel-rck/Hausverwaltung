@@ -10,7 +10,9 @@ import { YieldCalculation } from "./YieldCalculation";
 export function RenditePage() {
   const { activeProperty } = useProperty();
 
-  if (!activeProperty) {
+  const propertyId = activeProperty?.id;
+
+  if (!activeProperty || propertyId == null) {
     return (
       <EmptyState
         icon={<TrendingUp size={24} strokeWidth={1.75} />}
@@ -19,8 +21,6 @@ export function RenditePage() {
       />
     );
   }
-
-  const propertyId = activeProperty.id!;
 
   return (
     <div className="space-y-6">

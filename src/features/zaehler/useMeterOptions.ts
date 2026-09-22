@@ -20,14 +20,14 @@ export function useMeterOptions(propertyId: number | undefined): MeterOption[] |
     if (!propertyId) return [];
 
     const units = await db.units.where("propertyId").equals(propertyId).toArray();
-    const unitIds = units.map((u) => u.id!);
-    const unitMap = new Map(units.map((u) => [u.id!, u]));
+    const unitMap = new Map(units.flatMap((u) => (u.id != null ? [[u.id, u] as const] : [])));
+    const unitIds = [...unitMap.keys()];
 
     const allMeters = await db.meters.toArray();
     const propertyMeters = allMeters.filter((m) => m.unitId === null || unitIds.includes(m.unitId));
 
     const meterTypes = await db.meterTypes.toArray();
-    const typeMap = new Map(meterTypes.map((t) => [t.id!, t]));
+    const typeMap = new Map(meterTypes.flatMap((t) => (t.id != null ? [[t.id, t] as const] : [])));
 
     return propertyMeters.map((meter) => {
       const mt = typeMap.get(meter.meterTypeId);

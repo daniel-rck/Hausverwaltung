@@ -49,12 +49,12 @@ const neutralLegacy = {
   bgSoft: "bg-zinc-50 dark:bg-zinc-800/40",
   border: "border-zinc-200 dark:border-zinc-700",
   hoverBg: "hover:bg-zinc-100 dark:hover:bg-zinc-800",
-  ring: "focus-visible:ring-[--color-accent]/40",
+  ring: "focus-visible:ring-accent/40",
   pillBg: "bg-zinc-100 dark:bg-zinc-800",
   pillText: "text-zinc-700 dark:text-zinc-200",
   /** Primary-Buttons nutzen jetzt den globalen Indigo-Akzent, unabhängig vom Modul */
-  buttonBg: "bg-[--color-accent]",
-  buttonHover: "hover:bg-[--color-accent-hover]",
+  buttonBg: "bg-accent",
+  buttonHover: "hover:bg-accent-hover",
 } as const;
 
 const accentMap: Record<ModulKey, AccentClassSet> = {

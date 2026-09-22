@@ -218,4 +218,36 @@ describe("cascadeDeleteProperty", () => {
     expect(tables).toContain("properties");
     expect(tables).toContain("settings");
   });
+
+  it("löscht objektweite Wartungen des Objekts samt Dokumenten, fremde bleiben", async () => {
+    const { propertyId } = await seed();
+    const otherId = (await db.properties.add({ name: "B", address: "", units: 0 })) as number;
+    const base = {
+      unitId: null,
+      date: "2024-05-01",
+      category: "repair",
+      title: "Dach",
+      cost: 1000,
+    };
+    const sharedId = (await db.maintenanceItems.add({
+      ...base,
+      propertyId,
+      isRecoverable: false,
+    } as never)) as number;
+    await db.maintenanceItems.add({ ...base, propertyId: otherId, isRecoverable: false } as never);
+    await db.documents.add({
+      entityType: "maintenance",
+      entityId: sharedId,
+      name: "Rechnung.pdf",
+      mimeType: "application/pdf",
+      data: new Blob(),
+      uploadedAt: "2024-05-02",
+    } as never);
+
+    await cascadeDeleteProperty(propertyId);
+
+    const remaining = await db.maintenanceItems.toArray();
+    expect(remaining.map((m) => m.propertyId)).toEqual([otherId]);
+    expect(await db.documents.count()).toBe(0);
+  });
 });

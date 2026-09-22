@@ -2,9 +2,9 @@ import { useRef, useState } from "react";
 import { db, deleteWithTombstone, useLiveQuery } from "../../lib/db";
 import type { AppDocument } from "../../lib/db/schema";
 import { Card } from "../../lib/ui/shared/Card";
-import { ConfirmDialog } from "../../lib/ui/shared/ConfirmDialog";
 import { EmptyState } from "../../lib/ui/shared/EmptyState";
-import { FileText } from "../../lib/ui/ui/icons";
+import { Button, Callout, Modal, Skeleton, useConfirm, useToast } from "../../lib/ui/ui";
+import { FileText, Image as ImageIcon, Plus } from "../../lib/ui/ui/icons";
 
 interface DocumentStoreProps {
   entityType: "unit" | "occupancy" | "property" | "maintenance";
@@ -14,10 +14,15 @@ interface DocumentStoreProps {
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
 
+const mbFormatter = new Intl.NumberFormat("de-DE", {
+  minimumFractionDigits: 1,
+  maximumFractionDigits: 1,
+});
+
 function formatSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  return `${mbFormatter.format(bytes / (1024 * 1024))} MB`;
 }
 
 function isPdf(mimeType: string): boolean {
@@ -55,8 +60,10 @@ function dataUrlToBlob(dataUrl: string): Blob {
 export function DocumentStore({ entityType, entityId, title = "Dokumente" }: DocumentStoreProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
-  const [deleteDoc, setDeleteDoc] = useState<AppDocument | null>(null);
   const [previewDoc, setPreviewDoc] = useState<AppDocument | null>(null);
+
+  const toast = useToast();
+  const confirm = useConfirm();
 
   const documents = useLiveQuery(async () => {
     const docs = await db.documents
@@ -91,29 +98,41 @@ export function DocumentStore({ entityType, entityId, title = "Dokumente" }: Doc
       return;
     }
 
-    const data = await new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = () => reject(reader.error);
-      reader.readAsDataURL(file);
-    });
+    let data: string;
+    try {
+      data = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(file);
+      });
+    } catch (err) {
+      console.error(err);
+      setError("Datei konnte nicht gelesen werden.");
+      return;
+    }
 
     if (!data.startsWith(`data:${file.type};base64,`)) {
       setError("Datei konnte nicht gelesen werden.");
       return;
     }
 
-    await db.documents.add({
-      entityType,
-      entityId,
-      name: file.name,
-      mimeType: file.type,
-      size: file.size,
-      data,
-      uploadedAt: new Date().toISOString(),
-    });
-
-    setError(null);
+    try {
+      await db.documents.add({
+        entityType,
+        entityId,
+        name: file.name,
+        mimeType: file.type,
+        size: file.size,
+        data,
+        uploadedAt: new Date().toISOString(),
+      });
+      setError(null);
+      toast.success("Dokument hochgeladen.");
+    } catch (err) {
+      toast.error("Hochladen fehlgeschlagen.");
+      console.error(err);
+    }
   };
 
   const handlePreview = (doc: AppDocument) => {
@@ -129,7 +148,8 @@ export function DocumentStore({ entityType, entityId, title = "Dokumente" }: Doc
         if (!win) {
           setError("Pop-up wurde blockiert. Bitte in den Browser-Einstellungen erlauben.");
         }
-      } catch {
+      } catch (err) {
+        console.error(err);
         setError("PDF konnte nicht geöffnet werden.");
       }
     } else if (isImage(doc.mimeType)) {
@@ -137,10 +157,21 @@ export function DocumentStore({ entityType, entityId, title = "Dokumente" }: Doc
     }
   };
 
-  const handleDelete = async () => {
-    if (deleteDoc?.id) {
-      await deleteWithTombstone("documents", deleteDoc.id);
-      setDeleteDoc(null);
+  const handleDelete = async (doc: AppDocument) => {
+    if (doc.id == null) return;
+    const ok = await confirm({
+      title: "Dokument löschen?",
+      message: `„${doc.name}“ wird unwiderruflich gelöscht.`,
+      confirmLabel: "Löschen",
+      danger: true,
+    });
+    if (!ok) return;
+    try {
+      await deleteWithTombstone("documents", doc.id);
+      toast.success("Dokument gelöscht.");
+    } catch (err) {
+      toast.error("Löschen fehlgeschlagen.");
+      console.error(err);
     }
   };
 
@@ -149,30 +180,33 @@ export function DocumentStore({ entityType, entityId, title = "Dokumente" }: Doc
       <Card
         title={title}
         action={
-          <button
-            type="button"
-            onClick={handleUpload}
-            className="text-sm px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-          >
-            + Datei hochladen
-          </button>
+          <Button variant="primary" size="sm" leftIcon={<Plus size={14} />} onClick={handleUpload}>
+            Datei hochladen
+          </Button>
         }
       >
         <input
           ref={fileInputRef}
           type="file"
-          accept=".pdf,.jpg,.jpeg,.png"
-          onChange={handleFileChange}
+          accept=".pdf,.jpg,.jpeg,.png,.webp,.gif"
+          onChange={(e) => void handleFileChange(e)}
           className="hidden"
+          aria-label="Datei auswählen"
+          tabIndex={-1}
         />
 
         {error && (
-          <div className="mb-3 p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-700 dark:text-red-300">
+          <Callout variant="danger" className="mb-3">
             {error}
-          </div>
+          </Callout>
         )}
 
-        {!documents || documents.length === 0 ? (
+        {documents === undefined ? (
+          <div className="space-y-2">
+            <Skeleton height="2rem" />
+            <Skeleton height="2rem" />
+          </div>
+        ) : documents.length === 0 ? (
           <EmptyState
             icon={<FileText size={24} strokeWidth={1.75} />}
             title="Keine Dokumente vorhanden"
@@ -204,44 +238,26 @@ export function DocumentStore({ entityType, entityId, title = "Dokumente" }: Doc
                     >
                       <td className="py-2 px-2 text-center">
                         {isPdf(doc.mimeType) ? (
-                          <span className="text-red-500" title="PDF">
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              viewBox="0 0 20 20"
-                              fill="currentColor"
-                              className="w-5 h-5 inline-block"
-                            >
-                              <title>PDF</title>
-                              <path
-                                fillRule="evenodd"
-                                d="M4.5 2A1.5 1.5 0 003 3.5v13A1.5 1.5 0 004.5 18h11a1.5 1.5 0 001.5-1.5V7.621a1.5 1.5 0 00-.44-1.06l-4.12-4.122A1.5 1.5 0 0011.378 2H4.5zM10 8a.75.75 0 01.75.75v1.5h1.5a.75.75 0 010 1.5h-1.5v1.5a.75.75 0 01-1.5 0v-1.5h-1.5a.75.75 0 010-1.5h1.5v-1.5A.75.75 0 0110 8z"
-                                clipRule="evenodd"
-                              />
-                            </svg>
-                          </span>
+                          <FileText
+                            size={18}
+                            strokeWidth={1.75}
+                            className="inline-block text-danger-fg"
+                            aria-label="PDF"
+                          />
                         ) : (
-                          <span className="text-blue-500" title="Bild">
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              viewBox="0 0 20 20"
-                              fill="currentColor"
-                              className="w-5 h-5 inline-block"
-                            >
-                              <title>Bild</title>
-                              <path
-                                fillRule="evenodd"
-                                d="M1 5.25A2.25 2.25 0 013.25 3h13.5A2.25 2.25 0 0119 5.25v9.5A2.25 2.25 0 0116.75 17H3.25A2.25 2.25 0 011 14.75v-9.5zm1.5 5.81v3.69c0 .414.336.75.75.75h13.5a.75.75 0 00.75-.75v-2.69l-2.22-2.219a.75.75 0 00-1.06 0l-1.91 1.909-4.221-4.22a.75.75 0 00-1.06 0L2.5 11.06zm6.72-4.06a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"
-                                clipRule="evenodd"
-                              />
-                            </svg>
-                          </span>
+                          <ImageIcon
+                            size={18}
+                            strokeWidth={1.75}
+                            className="inline-block text-info-fg"
+                            aria-label="Bild"
+                          />
                         )}
                       </td>
                       <td className="py-2 px-2">
                         <button
                           type="button"
                           onClick={() => handlePreview(doc)}
-                          className="text-fg hover:text-blue-600 dark:hover:text-blue-400 hover:underline text-left truncate max-w-[200px] block"
+                          className="text-fg hover:text-accent dark:hover:text-accent-dark hover:underline text-left truncate max-w-[200px] block"
                           title={doc.name}
                         >
                           {doc.name}
@@ -254,13 +270,14 @@ export function DocumentStore({ entityType, entityId, title = "Dokumente" }: Doc
                         {new Date(doc.uploadedAt).toLocaleDateString("de-DE")}
                       </td>
                       <td className="py-2 px-2 text-right">
-                        <button
-                          type="button"
-                          onClick={() => setDeleteDoc(doc)}
-                          className="text-xs text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                        <Button
+                          variant="dangerGhost"
+                          size="sm"
+                          onClick={() => void handleDelete(doc)}
+                          aria-label={`${doc.name} löschen`}
                         >
                           Löschen
-                        </button>
+                        </Button>
                       </td>
                     </tr>
                   ))}
@@ -276,47 +293,27 @@ export function DocumentStore({ entityType, entityId, title = "Dokumente" }: Doc
         )}
       </Card>
 
-      <ConfirmDialog
-        open={deleteDoc !== null}
-        title="Dokument löschen"
-        message={`Möchten Sie „${deleteDoc?.name}" wirklich löschen? Dies kann nicht rückgängig gemacht werden.`}
-        confirmLabel="Löschen"
-        cancelLabel="Abbrechen"
-        onConfirm={handleDelete}
-        onCancel={() => setDeleteDoc(null)}
-        danger
-      />
-
-      {previewDoc && isImage(previewDoc.mimeType) && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-          <button
-            type="button"
-            aria-label="Schließen"
-            tabIndex={-1}
-            className="absolute inset-0 cursor-default"
-            onClick={() => setPreviewDoc(null)}
-          />
-          <div className="relative bg-surface rounded-lg shadow-lg max-w-3xl w-full max-h-[90vh] flex flex-col">
-            <div className="flex items-center justify-between px-5 py-3 border-b border-border">
-              <h3 className="text-sm font-semibold text-fg truncate">{previewDoc.name}</h3>
-              <button
-                type="button"
-                onClick={() => setPreviewDoc(null)}
-                className="text-fg-subtle hover:text-fg text-lg leading-none"
-              >
-                &times;
-              </button>
-            </div>
-            <div className="p-4 overflow-auto flex items-center justify-center">
-              <img
-                src={previewDoc.data}
-                alt={previewDoc.name}
-                className="max-w-full max-h-[70vh] object-contain rounded"
-              />
-            </div>
+      <Modal
+        open={previewDoc !== null && isImage(previewDoc.mimeType)}
+        onClose={() => setPreviewDoc(null)}
+        title={<span className="block truncate">{previewDoc?.name}</span>}
+        size="lg"
+        footer={
+          <Button variant="secondary" size="sm" onClick={() => setPreviewDoc(null)}>
+            Schließen
+          </Button>
+        }
+      >
+        {previewDoc && (
+          <div className="flex items-center justify-center">
+            <img
+              src={previewDoc.data}
+              alt={previewDoc.name}
+              className="max-w-full max-h-[70vh] object-contain rounded"
+            />
           </div>
-        </div>
-      )}
+        )}
+      </Modal>
     </>
   );
 }
