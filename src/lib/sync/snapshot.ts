@@ -168,7 +168,7 @@ export async function applySnapshot(snapshot: SyncSnapshot): Promise<void> {
           // `put` upserted nach `key`; falls lokal bereits ein Record mit
           // gleichem `key` existiert, gewinnt der Wert aus dem Snapshot —
           // der Merge-Layer hat den LWW-Sieger schon ermittelt.
-          await db.table(tableName).put(localRecord);
+          await db.table(tableName).put(localRecord, { raw: true });
           continue;
         }
 
@@ -179,9 +179,29 @@ export async function applySnapshot(snapshot: SyncSnapshot): Promise<void> {
         if (existing?.id !== undefined) {
           // Update: lokale ID beibehalten
           (localRecord as { id?: number }).id = existing.id as number;
-          await db.table(tableName).put(localRecord);
+          await db.table(tableName).put(localRecord, { raw: true });
           syncIdToLocalId.set(syncId, existing.id as number);
         } else {
+          // Zwei Geräte können offline denselben natürlichen Schlüssel anlegen
+          // (z. B. Zahlung für Belegung+Monat). Ein blindes add() würfe dann
+          // am Unique-Index — und jeder weitere Sync bräche genauso ab. Statt-
+          // dessen LWW auf dem natürlichen Schlüssel, der Verlierer bekommt
+          // eine Tombstone, damit er auch remote verschwindet.
+          const clash = await findUniqueClash(tableName, localRecord);
+          if (clash) {
+            const remoteWins =
+              ((localRecord.updatedAt as number) ?? 0) > ((clash.updatedAt as number) ?? 0);
+            const loserSyncId = remoteWins ? clash.syncId : syncId;
+            if (remoteWins) {
+              (localRecord as { id?: number }).id = clash.id as number;
+              await db.table(tableName).put(localRecord, { raw: true });
+            }
+            syncIdToLocalId.set(syncId, clash.id as number);
+            if (typeof loserSyncId === "string") {
+              await db.tombstones.put({ syncId: loserSyncId, tableName, deletedAt: Date.now() });
+            }
+            continue;
+          }
           // Insert: lokale Auto-ID wird vergeben
           const newId = (await db.table(tableName).add(localRecord)) as number | string;
           if (typeof newId === "number") {
@@ -353,4 +373,25 @@ function topologicalOrder(): readonly string[] {
     "documents",
     "settings",
   ];
+}
+
+/** Unique compound indexes per table (see idb.ts) — natural keys for LWW on clash. */
+const UNIQUE_KEYS: Record<string, { index: string; fields: string[] }> = {
+  occupancies: { index: "[unitId+from]", fields: ["unitId", "from"] },
+  payments: { index: "[occupancyId+month]", fields: ["occupancyId", "month"] },
+};
+
+async function findUniqueClash(
+  tableName: string,
+  record: AnyRecord,
+): Promise<AnyRecord | undefined> {
+  const spec = UNIQUE_KEYS[tableName];
+  if (!spec) return undefined;
+  const key = spec.fields.map((f) => record[f]);
+  if (key.some((k) => k === undefined || k === null)) return undefined;
+  return (await db
+    .table(tableName)
+    .where(spec.index)
+    .equals(key as IDBValidKey)
+    .first()) as AnyRecord | undefined;
 }

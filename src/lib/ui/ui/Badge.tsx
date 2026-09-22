@@ -24,7 +24,7 @@ const variantClasses: Record<BadgeVariant, string> = {
     "bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200/60 dark:border-amber-900/60",
   danger:
     "bg-red-50 dark:bg-red-950/60 text-red-700 dark:text-red-300 border border-red-200/60 dark:border-red-900/60",
-  info: "bg-[--color-accent-soft] dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-900/60",
+  info: "bg-accent-soft dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-900/60",
 };
 
 const sizeClasses: Record<BadgeSize, string> = {

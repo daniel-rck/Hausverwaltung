@@ -142,7 +142,7 @@ export function DataTable<T>({
                     setPage(0);
                   }}
                   placeholder={searchPlaceholder}
-                  className="h-8 w-full rounded-md border border-border bg-surface text-sm pl-8 pr-3 placeholder:text-fg-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--color-accent]/40 focus-visible:border-[--color-accent]"
+                  className="h-8 w-full rounded-md border border-border bg-surface text-sm pl-8 pr-3 placeholder:text-fg-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:border-accent"
                 />
               </div>
             ) : (

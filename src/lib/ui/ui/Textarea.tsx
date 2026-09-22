@@ -8,7 +8,7 @@ interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
 const textareaBase =
   "w-full rounded-md border bg-surface text-sm text-fg " +
   "placeholder:text-fg-subtle px-3 py-2 " +
-  "focus:outline-none focus-visible:ring-2 focus-visible:ring-[--color-accent]/40 focus-visible:border-[--color-accent] " +
+  "focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:border-accent " +
   "disabled:opacity-60 disabled:cursor-not-allowed resize-y min-h-[80px] transition-colors";
 
 export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(

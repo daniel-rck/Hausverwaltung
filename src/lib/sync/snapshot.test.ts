@@ -176,6 +176,53 @@ describe("buildLocalSnapshot / applySnapshot", () => {
   });
 });
 
+describe("applySnapshot — Unique-Index-Kollisionen", () => {
+  it("löst doppelt angelegte Zahlung per LWW auf statt am Index zu scheitern", async () => {
+    const unitId = (await db.units.add({ propertyId: 1, name: "EG", area: 50 })) as number;
+    const tenantId = (await db.tenants.add({ unitId, name: "Müller" })) as number;
+    const occupancyId = (await db.occupancies.add({
+      unitId,
+      tenantId,
+      persons: 1,
+      from: "2025-01",
+      to: null,
+      rentCold: 500,
+      rentUtilities: 100,
+      deposit: 0,
+      depositPaid: false,
+    })) as number;
+    const paymentId = (await db.payments.add({
+      occupancyId,
+      month: "2025-03",
+      amountCold: 500,
+      amountUtilities: 100,
+      method: "transfer",
+    })) as number;
+    const remote = await buildLocalSnapshot();
+    const remoteRow = remote.tables.payments?.[0] as { updatedAt: number };
+    remoteRow.updatedAt = Date.now() + 1000;
+
+    // Lokal existiert dieselbe Zahlung unter anderer syncId (offline doppelt erfasst).
+    const local = await db.payments.get(paymentId);
+    await db.payments.put(
+      {
+        ...(local as NonNullable<typeof local>),
+        syncId: "local-dup",
+        amountCold: 450,
+        updatedAt: 1,
+      },
+      { raw: true },
+    );
+
+    await expect(applySnapshot(remote)).resolves.not.toThrow();
+    const payments = await db.payments.toArray();
+    expect(payments).toHaveLength(1);
+    expect(payments[0]?.amountCold).toBe(500);
+    const tombstones = await db.tombstones.toArray();
+    expect(tombstones.map((t) => t.syncId)).toContain("local-dup");
+  });
+});
+
 describe("parseSnapshot", () => {
   it("akzeptiert einen gültigen Snapshot", async () => {
     const snap = await buildLocalSnapshot();

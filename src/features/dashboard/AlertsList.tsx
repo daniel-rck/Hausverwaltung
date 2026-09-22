@@ -100,7 +100,7 @@ export function AlertsList() {
           const iconColor =
             alert.severity === "warning"
               ? "text-amber-600 dark:text-amber-400"
-              : "text-[--color-accent] dark:text-[--color-accent-dark]";
+              : "text-accent dark:text-accent-dark";
           return (
             <li key={alert.message} className="flex items-start gap-3 text-sm text-fg">
               <Icon

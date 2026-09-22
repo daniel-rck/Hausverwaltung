@@ -28,13 +28,13 @@ const sizeClasses: Record<Size, string> = {
 const baseClasses =
   "inline-flex items-center justify-center font-medium rounded-md transition-colors select-none " +
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-900 " +
-  "focus-visible:ring-[--color-accent]/40 " +
+  "focus-visible:ring-accent/40 " +
   "disabled:opacity-50 disabled:cursor-not-allowed";
 
 function variantClasses(variant: Variant): string {
   switch (variant) {
     case "primary":
-      return "bg-[--color-accent] text-fg-on-accent hover:bg-[--color-accent-hover]";
+      return "bg-accent text-fg-on-accent hover:bg-accent-hover";
     case "secondary":
       return "bg-surface text-fg border border-border hover:bg-surface-muted/60";
     case "outline":
@@ -44,7 +44,7 @@ function variantClasses(variant: Variant): string {
     case "danger":
       return "bg-red-600 text-fg-on-accent hover:bg-red-700 focus-visible:ring-red-400/40";
     case "link":
-      return "bg-transparent text-[--color-accent] dark:text-[--color-accent-dark] underline-offset-4 hover:underline px-0 h-auto";
+      return "bg-transparent text-accent dark:text-accent-dark underline-offset-4 hover:underline px-0 h-auto";
   }
 }
 

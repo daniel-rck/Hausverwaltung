@@ -19,7 +19,7 @@ const sizeClasses: Record<Size, string> = {
 const variantClasses: Record<Variant, string> = {
   ghost: "bg-transparent text-fg-muted hover:bg-surface-sunken hover:text-fg",
   subtle: "bg-surface-sunken text-fg-muted hover:bg-surface-sunken",
-  solid: "bg-[--color-accent] text-fg-on-accent hover:bg-[--color-accent-hover]",
+  solid: "bg-accent text-fg-on-accent hover:bg-accent-hover",
 };
 
 export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
@@ -29,7 +29,7 @@ export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
   ) => {
     const cls = [
       "inline-flex items-center justify-center rounded-md transition-colors",
-      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--color-accent]/40 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-900",
+      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-900",
       "disabled:opacity-50 disabled:cursor-not-allowed",
       sizeClasses[size],
       variantClasses[variant],

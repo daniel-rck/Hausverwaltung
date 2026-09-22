@@ -138,7 +138,7 @@ const variantClasses: Record<ToastVariant, string> = {
 const variantIconColor: Record<ToastVariant, string> = {
   success: "text-green-600 dark:text-green-400",
   error: "text-red-600 dark:text-red-400",
-  info: "text-[--color-accent] dark:text-[--color-accent-dark]",
+  info: "text-accent dark:text-accent-dark",
   warning: "text-amber-600 dark:text-amber-400",
 };
 
@@ -165,7 +165,7 @@ function ToastView({ item, onDismiss }: { item: ToastItem; onDismiss: (id: numbe
               item.action?.onClick();
               onDismiss(item.id);
             }}
-            className="text-xs font-medium text-[--color-accent] dark:text-[--color-accent-dark] hover:underline mt-1"
+            className="text-xs font-medium text-accent dark:text-accent-dark hover:underline mt-1"
           >
             {item.action.label}
           </button>
@@ -175,7 +175,7 @@ function ToastView({ item, onDismiss }: { item: ToastItem; onDismiss: (id: numbe
         type="button"
         onClick={() => onDismiss(item.id)}
         aria-label="Schließen"
-        className="text-fg-subtle hover:text-fg -mr-1 -mt-0.5 p-1 rounded-md hover:bg-surface-sunken focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--color-accent]/40"
+        className="text-fg-subtle hover:text-fg -mr-1 -mt-0.5 p-1 rounded-md hover:bg-surface-sunken focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
       >
         <X size={14} aria-hidden="true" />
       </button>

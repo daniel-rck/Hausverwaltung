@@ -10,7 +10,7 @@ export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 export const inputBaseClasses =
   "h-9 w-full rounded-md border bg-surface text-sm text-fg " +
   "placeholder:text-fg-subtle " +
-  "focus:outline-none focus-visible:ring-2 focus-visible:ring-[--color-accent]/40 focus-visible:border-[--color-accent] " +
+  "focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:border-accent " +
   "disabled:opacity-60 disabled:cursor-not-allowed transition-colors";
 
 export const inputBorderClasses = "border-border";
