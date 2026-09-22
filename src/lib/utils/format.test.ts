@@ -5,6 +5,8 @@ describe("parseGermanNumber", () => {
   it.each([
     ["1.234,56", 1234.56],
     ["1234,5", 1234.5],
+    ["1.234,5", 1234.5],
+    ["12.345.678,9", 12345678.9],
     ["2.400", 2400],
     ["1.234.567", 1234567],
     ["12.5", 12.5],
@@ -20,6 +22,9 @@ describe("parseGermanNumber", () => {
     expect(parseGermanNumber("")).toBeNull();
     expect(parseGermanNumber("abc")).toBeNull();
     expect(parseGermanNumber("1,2,3")).toBeNull();
+    expect(parseGermanNumber("1.2,3")).toBeNull();
+    expect(parseGermanNumber("12.34,5")).toBeNull();
+    expect(parseGermanNumber("1.234,")).toBeNull();
   });
 
   it("Roundtrip über formatNumberForInput verändert den Wert nicht", () => {

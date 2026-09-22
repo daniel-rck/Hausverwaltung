@@ -85,7 +85,12 @@ export function parseGermanNumber(input: string): number | null {
   let s = input.trim().replace(/\s/g, "");
   if (s === "") return null;
   if (s.includes(",")) {
-    s = s.replace(/\./g, "").replace(",", ".");
+    // Genau ein Komma; Punkte nur als korrekte Tausendergruppen ("1.234,5"),
+    // sonst würde z. B. "1.2,3" stillschweigend zu 12,3.
+    const [intPart = "", fracPart = "", ...rest] = s.split(",");
+    if (rest.length > 0 || !/^\d+$/.test(fracPart)) return null;
+    if (!/^-?\d+$/.test(intPart) && !/^-?\d{1,3}(\.\d{3})+$/.test(intPart)) return null;
+    s = `${intPart.replace(/\./g, "")}.${fracPart}`;
   } else {
     const parts = s.split(".");
     if (parts.length > 1) {

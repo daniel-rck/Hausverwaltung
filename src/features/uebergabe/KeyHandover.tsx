@@ -67,8 +67,8 @@ export function KeyHandover({ keys, onChange }: KeyHandoverProps) {
               className="text-center font-mono"
             />
             <IconButton
-              aria-label="Schlüssel entfernen"
-              title="Schlüssel entfernen"
+              aria-label={`${key.type || `Schlüssel ${index + 1}`} entfernen`}
+              title={`${key.type || `Schlüssel ${index + 1}`} entfernen`}
               size="sm"
               icon={<X size={16} />}
               onClick={() => removeKey(index)}
