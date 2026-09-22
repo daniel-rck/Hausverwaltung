@@ -42,3 +42,31 @@ export function consumptionForYear(
   if (days <= 0) return null;
   return { consumption: Math.max(0, to.value - from.value), days, from, to };
 }
+
+export type CombinedConsumption = {
+  /** Summierter Verbrauch aller Zähler (m³). */
+  consumption: number;
+  /** Summierte Tagesmittel (m³/Tag) — je Zähler über dessen eigenen Ablesezeitraum. */
+  perDay: number;
+};
+
+/**
+ * Fasst die Jahresverbräuche mehrerer Zähler zusammen (z. B. Warm- + Kaltwasser
+ * einer Einheit). Zähler ohne auswertbaren Zeitraum (`null`) werden übersprungen.
+ * Das Tagesmittel wird je Zähler gebildet, weil die Ablesezeiträume abweichen
+ * können. Liefert `null`, wenn kein Zähler auswertbar ist.
+ */
+export function combineConsumption(
+  parts: readonly (YearConsumption | null)[],
+): CombinedConsumption | null {
+  let consumption = 0;
+  let perDay = 0;
+  let any = false;
+  for (const part of parts) {
+    if (!part) continue;
+    any = true;
+    consumption += part.consumption;
+    perDay += part.consumption / part.days;
+  }
+  return any ? { consumption, perDay } : null;
+}

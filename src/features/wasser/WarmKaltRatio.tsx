@@ -6,9 +6,11 @@ import { BarChart } from "../../lib/ui/charts/BarChart";
 import { Card } from "../../lib/ui/shared/Card";
 import { EmptyState } from "../../lib/ui/shared/EmptyState";
 import { StatusBadge } from "../../lib/ui/shared/StatusBadge";
+import { Skeleton } from "../../lib/ui/ui";
 import { Thermometer } from "../../lib/ui/ui/icons";
 import { WARM_WATER_RATIO_MAX, WARM_WATER_RATIO_MIN } from "../../lib/utils/constants";
 import { formatNumber } from "../../lib/utils/format";
+import { consumptionForYear } from "./consumption";
 
 interface WarmKaltRatioProps {
   year: number;
@@ -65,8 +67,7 @@ export function WarmKaltRatio({ year }: WarmKaltRatioProps) {
     const waterTypes = meterTypes.filter((mt) => mt.category === "water");
     if (waterTypes.length === 0) return null;
 
-    const waterTypeIds = waterTypes.map((mt) => mt.id!);
-    const yearStart = `${year}-01-01`;
+    const waterTypeIds = waterTypes.flatMap((mt) => (mt.id != null ? [mt.id] : []));
     const yearEnd = `${year}-12-31`;
 
     const result: {
@@ -76,22 +77,25 @@ export function WarmKaltRatio({ year }: WarmKaltRatioProps) {
     }[] = [];
 
     for (const unit of units) {
+      if (unit.id == null) continue;
       const unitMeters = await db.meters
         .where("unitId")
-        .equals(unit.id!)
+        .equals(unit.id)
         .filter((m) => waterTypeIds.includes(m.meterTypeId))
         .toArray();
 
-      const metersWithTypes = unitMeters.map((m) => ({
-        ...m,
-        meterType: waterTypes.find((mt) => mt.id === m.meterTypeId)!,
-      }));
+      const metersWithTypes = unitMeters.flatMap((m) => {
+        const meterType = waterTypes.find((mt) => mt.id === m.meterTypeId);
+        return meterType ? [{ ...m, meterType }] : [];
+      });
 
+      // Alle Ablesungen bis Jahresende — die Vorjahres-Ablesung ist der Anfangsstand.
       const readings: MeterReading[] = [];
       for (const meter of unitMeters) {
+        if (meter.id == null) continue;
         const meterReadings = await db.meterReadings
           .where("[meterId+date]")
-          .between([meter.id!, yearStart], [meter.id!, yearEnd], true, true)
+          .between([meter.id, ""], [meter.id, yearEnd], true, true)
           .toArray();
         readings.push(...meterReadings);
       }
@@ -112,14 +116,12 @@ export function WarmKaltRatio({ year }: WarmKaltRatioProps) {
       let coldTotal = 0;
 
       for (const meter of meters) {
-        const meterReadings = readings
-          .filter((r) => r.meterId === meter.id!)
-          .sort((a, b) => a.date.localeCompare(b.date));
-
-        const first = meterReadings[0];
-        const last = meterReadings.at(-1);
-        if (meterReadings.length >= 2 && first && last) {
-          const consumption = last.value - first.value;
+        const yc = consumptionForYear(
+          readings.filter((r) => r.meterId === meter.id),
+          year,
+        );
+        if (yc) {
+          const consumption = yc.consumption;
 
           const typeName = meter.meterType.name.toLowerCase();
           if (typeName.includes("warm")) {
@@ -148,7 +150,15 @@ export function WarmKaltRatio({ year }: WarmKaltRatioProps) {
     }
 
     return results.sort((a, b) => a.unitName.localeCompare(b.unitName));
-  }, [allData]);
+  }, [allData, year]);
+
+  if (allData === undefined) {
+    return (
+      <Card title="Warm/Kalt-Verhältnis">
+        <Skeleton height="16rem" />
+      </Card>
+    );
+  }
 
   if (unitRatios.length === 0) {
     return (

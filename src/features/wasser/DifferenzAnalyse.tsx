@@ -6,9 +6,11 @@ import { BarChart } from "../../lib/ui/charts/BarChart";
 import { Card } from "../../lib/ui/shared/Card";
 import { EmptyState } from "../../lib/ui/shared/EmptyState";
 import { StatusBadge } from "../../lib/ui/shared/StatusBadge";
+import { Skeleton } from "../../lib/ui/ui";
 import { BarChart3 } from "../../lib/ui/ui/icons";
 import { WATER_DIFF_THRESHOLD_OK, WATER_DIFF_THRESHOLD_WARN } from "../../lib/utils/constants";
 import { formatNumber } from "../../lib/utils/format";
+import { combineConsumption, consumptionForYear } from "./consumption";
 
 interface DifferenzAnalyseProps {
   year: number;
@@ -73,8 +75,8 @@ export function DifferenzAnalyse({ year }: DifferenzAnalyseProps) {
       return { meters: [] as Meter[], readings: [] as MeterReading[] };
     }
 
-    const waterTypeIds = waterMeterTypes.map((mt) => mt.id!);
-    const unitIds = units.map((u) => u.id!);
+    const waterTypeIds = waterMeterTypes.flatMap((mt) => (mt.id != null ? [mt.id] : []));
+    const unitIds = units.flatMap((u) => (u.id != null ? [u.id] : []));
 
     const allMeters = await db.meters.toArray();
     const waterMeters = allMeters.filter(
@@ -85,15 +87,15 @@ export function DifferenzAnalyse({ year }: DifferenzAnalyseProps) {
       return { meters: waterMeters, readings: [] as MeterReading[] };
     }
 
-    const meterIds = waterMeters.map((m) => m.id!);
-    const yearStart = `${year}-01-01`;
+    const meterIds = waterMeters.flatMap((m) => (m.id != null ? [m.id] : []));
     const yearEnd = `${year}-12-31`;
 
+    // Alle Ablesungen bis Jahresende — die Vorjahres-Ablesung ist der Anfangsstand.
     const allReadings: MeterReading[] = [];
     for (const meterId of meterIds) {
       const readings = await db.meterReadings
         .where("[meterId+date]")
-        .between([meterId, yearStart], [meterId, yearEnd], true, true)
+        .between([meterId, ""], [meterId, yearEnd], true, true)
         .toArray();
       allReadings.push(...readings);
     }
@@ -109,18 +111,17 @@ export function DifferenzAnalyse({ year }: DifferenzAnalyseProps) {
 
     const { meters, readings } = metersAndReadings;
 
-    let messdienstTotal = 0;
-    for (const meter of meters) {
-      const meterReadings = readings
-        .filter((r) => r.meterId === meter.id!)
-        .sort((a, b) => a.date.localeCompare(b.date));
-
-      const first = meterReadings[0];
-      const last = meterReadings.at(-1);
-      if (meterReadings.length >= 2 && first && last) {
-        messdienstTotal += last.value - first.value;
-      }
-    }
+    const combined = combineConsumption(
+      meters.map((meter) =>
+        consumptionForYear(
+          readings.filter((r) => r.meterId === meter.id),
+          year,
+        ),
+      ),
+    );
+    // Ohne auswertbare Zählerstände ist kein Vergleich möglich (sonst „100 % kritisch").
+    if (!combined) return null;
+    const messdienstTotal = combined.consumption;
 
     const difference = Math.abs(supplierTotal - messdienstTotal);
     const differencePercent = supplierTotal > 0 ? (difference / supplierTotal) * 100 : 0;
@@ -134,7 +135,7 @@ export function DifferenzAnalyse({ year }: DifferenzAnalyseProps) {
       status,
       statusLabel: label,
     };
-  }, [supplierBills, metersAndReadings]);
+  }, [supplierBills, metersAndReadings, year]);
 
   // Historical data for chart: look at years with supplier bills
   const historicalBills = useLiveQuery(
@@ -170,6 +171,14 @@ export function DifferenzAnalyse({ year }: DifferenzAnalyseProps) {
       ],
     };
   }, [historicalBills, analysis, year, messdienstName]);
+
+  if (supplierBills === undefined || metersAndReadings === undefined) {
+    return (
+      <Card title="Differenzanalyse">
+        <Skeleton height="10rem" />
+      </Card>
+    );
+  }
 
   if (!analysis) {
     return (

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { MeterReading } from "../../lib/db/schema";
-import { consumptionForYear } from "./consumption";
+import { combineConsumption, consumptionForYear } from "./consumption";
 
 const r = (date: string, value: number): MeterReading =>
   ({ meterId: 1, date, value }) as MeterReading;
@@ -28,5 +28,20 @@ describe("consumptionForYear", () => {
 
   it("liefert null bei nur einer Ablesung", () => {
     expect(consumptionForYear([r("2024-12-31", 100)], 2024)).toBeNull();
+  });
+});
+
+describe("combineConsumption", () => {
+  it("summiert Verbrauch und Tagesmittel je Zähler", () => {
+    const a = consumptionForYear([r("2023-12-31", 0), r("2024-12-31", 366)], 2024);
+    const b = consumptionForYear([r("2024-07-01", 0), r("2024-12-31", 183)], 2024);
+    const res = combineConsumption([a, b, null]);
+    expect(res?.consumption).toBe(549);
+    expect(res?.perDay).toBeCloseTo(2);
+  });
+
+  it("liefert null ohne auswertbaren Zähler", () => {
+    expect(combineConsumption([null, null])).toBeNull();
+    expect(combineConsumption([])).toBeNull();
   });
 });

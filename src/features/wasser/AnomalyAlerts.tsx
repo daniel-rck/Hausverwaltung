@@ -11,7 +11,7 @@ import type {
 import { useProperty } from "../../lib/hooks/useProperty";
 // Meter, MeterType, MeterReading, Occupancy used in allData query result type
 import { Card } from "../../lib/ui/shared/Card";
-import { StatusBadge } from "../../lib/ui/shared/StatusBadge";
+import { Callout, Skeleton } from "../../lib/ui/ui";
 import { monthDiff, waterPerCapitaPerDay } from "../../lib/utils/calc";
 import {
   WARM_WATER_RATIO_MAX,
@@ -20,6 +20,7 @@ import {
   WATER_DIFF_THRESHOLD_WARN,
 } from "../../lib/utils/constants";
 import { formatNumber } from "../../lib/utils/format";
+import { combineConsumption, consumptionForYear, type YearConsumption } from "./consumption";
 
 interface AnomalyAlertsProps {
   year: number;
@@ -67,8 +68,7 @@ export function AnomalyAlerts({ year }: AnomalyAlertsProps) {
     const waterTypes = allMeterTypes.filter((mt) => mt.category === "water");
     if (waterTypes.length === 0) return null;
 
-    const waterTypeIds = waterTypes.map((mt) => mt.id!);
-    const yearStart = `${year}-01-01`;
+    const waterTypeIds = waterTypes.flatMap((mt) => (mt.id != null ? [mt.id] : []));
     const yearEnd = `${year}-12-31`;
     const yearStartMonth = `${year}-01`;
     const yearEndMonth = `${year}-12`;
@@ -81,27 +81,30 @@ export function AnomalyAlerts({ year }: AnomalyAlertsProps) {
     }[] = [];
 
     for (const unit of units) {
+      if (unit.id == null) continue;
       const unitMeters = await db.meters
         .where("unitId")
-        .equals(unit.id!)
+        .equals(unit.id)
         .filter((m) => waterTypeIds.includes(m.meterTypeId))
         .toArray();
 
-      const metersWithTypes = unitMeters.map((m) => ({
-        ...m,
-        meterType: waterTypes.find((mt) => mt.id === m.meterTypeId)!,
-      }));
+      const metersWithTypes = unitMeters.flatMap((m) => {
+        const meterType = waterTypes.find((mt) => mt.id === m.meterTypeId);
+        return meterType ? [{ ...m, meterType }] : [];
+      });
 
+      // Alle Ablesungen bis Jahresende — die Vorjahres-Ablesung ist der Anfangsstand.
       const readings: MeterReading[] = [];
       for (const meter of unitMeters) {
+        if (meter.id == null) continue;
         const meterReadings = await db.meterReadings
           .where("[meterId+date]")
-          .between([meter.id!, yearStart], [meter.id!, yearEnd], true, true)
+          .between([meter.id, ""], [meter.id, yearEnd], true, true)
           .toArray();
         readings.push(...meterReadings);
       }
 
-      const allOccupancies = await db.occupancies.where("unitId").equals(unit.id!).toArray();
+      const allOccupancies = await db.occupancies.where("unitId").equals(unit.id).toArray();
 
       const occupancies = allOccupancies.filter(
         (o) => o.from <= yearEndMonth && (o.to === null || o.to >= yearStartMonth),
@@ -120,22 +123,20 @@ export function AnomalyAlerts({ year }: AnomalyAlertsProps) {
     if (supplierBills && supplierBills.length > 0 && allData) {
       const supplierTotal = supplierBills.reduce((sum, b) => sum + b.totalConsumption, 0);
 
-      let messdienstTotal = 0;
-      for (const { meters, readings } of allData) {
-        for (const meter of meters) {
-          const meterReadings = readings
-            .filter((r) => r.meterId === meter.id!)
-            .sort((a, b) => a.date.localeCompare(b.date));
+      const combined = combineConsumption(
+        allData.flatMap(({ meters, readings }) =>
+          meters.map((meter) =>
+            consumptionForYear(
+              readings.filter((r) => r.meterId === meter.id),
+              year,
+            ),
+          ),
+        ),
+      );
 
-          const first = meterReadings[0];
-          const last = meterReadings.at(-1);
-          if (meterReadings.length >= 2 && first && last) {
-            messdienstTotal += last.value - first.value;
-          }
-        }
-      }
-
-      if (supplierTotal > 0) {
+      // Ohne auswertbare Zählerstände kein Vergleich — sonst meldet 0 m³ „100 % Differenz".
+      if (combined && supplierTotal > 0) {
+        const messdienstTotal = combined.consumption;
         const diffPercent = (Math.abs(supplierTotal - messdienstTotal) / supplierTotal) * 100;
         if (diffPercent > WATER_DIFF_THRESHOLD_WARN) {
           results.push({
@@ -152,20 +153,18 @@ export function AnomalyAlerts({ year }: AnomalyAlertsProps) {
     if (allData) {
       for (const { unit, meters, readings, occupancies } of allData) {
         // Calculate total water consumption
-        let totalConsumption = 0;
         let warmTotal = 0;
         let coldTotal = 0;
+        const perMeter: (YearConsumption | null)[] = [];
 
         for (const meter of meters) {
-          const meterReadings = readings
-            .filter((r) => r.meterId === meter.id!)
-            .sort((a, b) => a.date.localeCompare(b.date));
-
-          const first = meterReadings[0];
-          const last = meterReadings.at(-1);
-          if (meterReadings.length >= 2 && first && last) {
-            const consumption = last.value - first.value;
-            totalConsumption += consumption;
+          const yc = consumptionForYear(
+            readings.filter((r) => r.meterId === meter.id),
+            year,
+          );
+          perMeter.push(yc);
+          if (yc) {
+            const consumption = yc.consumption;
 
             const typeName = meter.meterType.name.toLowerCase();
             if (typeName.includes("warm")) {
@@ -176,8 +175,10 @@ export function AnomalyAlerts({ year }: AnomalyAlertsProps) {
           }
         }
 
+        const combinedUnit = combineConsumption(perMeter);
+
         // Per-capita check
-        if (totalConsumption > 0 && occupancies.length > 0) {
+        if (combinedUnit && combinedUnit.consumption > 0 && occupancies.length > 0) {
           const yearStartMonth = `${year}-01`;
           const yearEndMonth = `${year}-12`;
           let totalPersonMonths = 0;
@@ -191,7 +192,8 @@ export function AnomalyAlerts({ year }: AnomalyAlertsProps) {
 
           if (totalPersonMonths > 0) {
             const avgPersons = totalPersonMonths / 12;
-            const lpd = waterPerCapitaPerDay(totalConsumption, avgPersons, 365);
+            // Tagesmittel aus dem tatsächlichen Ablesezeitraum je Zähler statt fixer 365 Tage.
+            const lpd = waterPerCapitaPerDay(combinedUnit.perDay, avgPersons, 1);
             const deviation =
               ((lpd - WATER_AVG_LITERS_PER_PERSON_DAY) / WATER_AVG_LITERS_PER_PERSON_DAY) * 100;
 
@@ -227,15 +229,20 @@ export function AnomalyAlerts({ year }: AnomalyAlertsProps) {
     return results;
   }, [supplierBills, allData, year]);
 
+  if (supplierBills === undefined || allData === undefined) {
+    return (
+      <Card title="Hinweise / Anomalien">
+        <Skeleton height="4rem" />
+      </Card>
+    );
+  }
+
   if (anomalies.length === 0) {
     return (
       <Card title="Hinweise / Anomalien">
-        <div className="flex items-center gap-3 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-          <StatusBadge status="green" label="Alles in Ordnung" />
-          <p className="text-sm text-green-700 dark:text-green-400">
-            Es wurden keine Anomalien im Wasserverbrauch festgestellt.
-          </p>
-        </div>
+        <Callout variant="success" title="Alles in Ordnung">
+          Es wurden keine Anomalien im Wasserverbrauch festgestellt.
+        </Callout>
       </Card>
     );
   }
@@ -244,27 +251,13 @@ export function AnomalyAlerts({ year }: AnomalyAlertsProps) {
     <Card title="Hinweise / Anomalien">
       <div className="space-y-3">
         {anomalies.map((anomaly) => (
-          <div
+          <Callout
             key={`${anomaly.type}-${anomaly.unitName ?? ""}-${anomaly.title}`}
-            className={`p-4 rounded-lg border ${
-              anomaly.severity === "red"
-                ? "bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800"
-                : "bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800"
-            }`}
+            variant={anomaly.severity === "red" ? "danger" : "warning"}
+            title={`${anomaly.severity === "red" ? "Warnung" : "Hinweis"}: ${anomaly.title}`}
           >
-            <div className="flex items-start gap-3">
-              <div className="mt-0.5">
-                <StatusBadge
-                  status={anomaly.severity}
-                  label={anomaly.severity === "red" ? "Warnung" : "Hinweis"}
-                />
-              </div>
-              <div>
-                <h4 className="text-sm font-semibold text-fg mb-1">{anomaly.title}</h4>
-                <p className="text-sm text-fg-muted">{anomaly.description}</p>
-              </div>
-            </div>
-          </div>
+            {anomaly.description}
+          </Callout>
         ))}
       </div>
     </Card>
