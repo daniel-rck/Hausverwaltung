@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { db, useLiveQuery } from "../../lib/db";
 import { Card } from "../../lib/ui/shared/Card";
+import { NumInput } from "../../lib/ui/shared/NumInput";
 
 interface MeterReading {
   meterId: number;
@@ -117,26 +118,14 @@ export function MeterSnapshot({ unitId, readings, onChange }: MeterSnapshotProps
             </div>
 
             <div className="sm:w-48">
-              <label className="block">
-                <span className="block text-xs font-medium text-fg-muted mb-1">
-                  Aktueller Stand
-                </span>
-                <div className="flex items-center gap-1">
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={getReadingValue(snapshot.meterId) || ""}
-                    onChange={(e) =>
-                      updateReading(snapshot.meterId, parseFloat(e.target.value) || 0)
-                    }
-                    className="w-full border border-border rounded-lg px-3 py-1.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-accent-500"
-                  />
-                  <span className="text-xs text-fg-muted whitespace-nowrap">
-                    {snapshot.typeUnit}
-                  </span>
-                </div>
-              </label>
+              <NumInput
+                label="Aktueller Stand"
+                value={getReadingValue(snapshot.meterId)}
+                onChange={(v) => updateReading(snapshot.meterId, v)}
+                suffix={snapshot.typeUnit}
+                min={0}
+                decimals={3}
+              />
             </div>
           </div>
         </Card>

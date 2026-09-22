@@ -9,6 +9,7 @@ import { type Column, DataTable } from "../../lib/ui/shared/DataTable";
 import { EmptyState } from "../../lib/ui/shared/EmptyState";
 import { NumInput } from "../../lib/ui/shared/NumInput";
 import { Wrench } from "../../lib/ui/ui/icons";
+import { todayIso } from "../../lib/utils/dates";
 import { formatDate, formatEuro } from "../../lib/utils/format";
 
 type Category = MaintenanceItem["category"];
@@ -48,7 +49,7 @@ interface FormState {
 
 const emptyForm: FormState = {
   unitId: "",
-  date: new Date().toISOString().slice(0, 10),
+  date: todayIso(),
   category: "repair",
   title: "",
   description: "",

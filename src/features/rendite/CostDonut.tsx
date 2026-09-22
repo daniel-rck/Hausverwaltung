@@ -1,6 +1,8 @@
 import { db, useLiveQuery } from "../../lib/db";
+import { isMaintenanceForProperty } from "../../lib/db/queries";
 import { DonutChart } from "../../lib/ui/charts/DonutChart";
 import { Card } from "../../lib/ui/shared/Card";
+import { currentMonth } from "../../lib/utils/dates";
 import type { FinancingData } from "./FinancingInput";
 
 interface CostDonutProps {
@@ -16,7 +18,7 @@ export function CostDonut({ propertyId }: CostDonutProps) {
     const nichtUmlagefaehig = financing?.nichtUmlagefaehigeKosten ?? 0;
 
     // Annual rent from active occupancies
-    const now = new Date().toISOString().slice(0, 10);
+    const now = currentMonth();
     const units = await db.units.where("propertyId").equals(propertyId).toArray();
     const unitIds = units.map((u) => u.id!);
 
@@ -32,10 +34,10 @@ export function CostDonut({ propertyId }: CostDonutProps) {
     // Maintenance costs for current year
     const currentYear = new Date().getFullYear();
     const allMaintenance = await db.maintenanceItems.toArray();
-    const propertyMaintenance = allMaintenance.filter((m) => {
-      if (m.unitId === null) return false;
-      return unitIds.includes(m.unitId) && m.date.startsWith(String(currentYear));
-    });
+    const propertyMaintenance = allMaintenance.filter(
+      (m) =>
+        isMaintenanceForProperty(m, propertyId, unitIds) && m.date.startsWith(String(currentYear)),
+    );
     const instandhaltung = propertyMaintenance.reduce((sum, m) => sum + m.cost, 0);
 
     const totalCosts = jaehrlicheKreditrate + nichtUmlagefaehig + instandhaltung;

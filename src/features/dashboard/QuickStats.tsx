@@ -1,6 +1,7 @@
 import { db, useLiveQuery } from "../../lib/db";
 import { useProperty } from "../../lib/hooks/useProperty";
 import { KpiTile } from "../../lib/ui/ui";
+import { currentMonth } from "../../lib/utils/dates";
 import { formatEuro } from "../../lib/utils/format";
 
 export function QuickStats() {
@@ -12,7 +13,7 @@ export function QuickStats() {
     const units = await db.units.where("propertyId").equals(activeProperty.id).toArray();
 
     const unitIds = units.map((u) => u.id!);
-    const now = new Date().toISOString().slice(0, 7);
+    const now = currentMonth();
 
     const occupancies = await db.occupancies.toArray();
     const activeOccupancies = occupancies.filter(

@@ -5,6 +5,7 @@ import { Card } from "../../lib/ui/shared/Card";
 import { type Column, DataTable } from "../../lib/ui/shared/DataTable";
 import { NumInput } from "../../lib/ui/shared/NumInput";
 import { StatusBadge } from "../../lib/ui/shared/StatusBadge";
+import { currentMonth } from "../../lib/utils/dates";
 import { formatEuro, formatNumber } from "../../lib/utils/format";
 
 interface RentBenchmarkProps {
@@ -67,7 +68,7 @@ export function RentBenchmark({ propertyId, units, occupancies }: RentBenchmarkP
   const rows = useMemo((): BenchmarkRow[] => {
     if (settings.pricePerSqm <= 0) return [];
 
-    const now = new Date().toISOString().slice(0, 7);
+    const now = currentMonth();
 
     return units.map((unit) => {
       const active =

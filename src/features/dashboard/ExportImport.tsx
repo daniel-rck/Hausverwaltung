@@ -9,6 +9,7 @@ import { syncService } from "../../lib/sync/service";
 import { useSyncStatus } from "../../lib/sync/useSyncStatus";
 import { Card } from "../../lib/ui/shared/Card";
 import { ConfirmDialog } from "../../lib/ui/shared/ConfirmDialog";
+import { todayIso } from "../../lib/utils/dates";
 
 export function ExportImport() {
   const fileInput = useRef<HTMLInputElement>(null);
@@ -23,7 +24,7 @@ export function ExportImport() {
   const handleExport = async () => {
     try {
       const json = await exportDatabase();
-      const date = new Date().toISOString().slice(0, 10);
+      const date = todayIso();
       downloadJson(json, `hausverwaltung-backup-${date}.json`);
       setMessage({ type: "success", text: "Backup erfolgreich heruntergeladen." });
     } catch {

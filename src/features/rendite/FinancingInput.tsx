@@ -97,7 +97,6 @@ export function FinancingInput({ propertyId }: FinancingInputProps) {
           suffix="%"
           min={0}
           max={100}
-          step={0.1}
         />
         <NumInput
           label="Tilgung"
@@ -106,7 +105,6 @@ export function FinancingInput({ propertyId }: FinancingInputProps) {
           suffix="%"
           min={0}
           max={100}
-          step={0.1}
         />
         <div>
           <div className="block text-xs font-medium text-fg-muted mb-1">Jährliche Kreditrate</div>
@@ -129,7 +127,6 @@ export function FinancingInput({ propertyId }: FinancingInputProps) {
           suffix="%"
           min={0}
           max={5}
-          step={0.5}
         />
       </div>
 

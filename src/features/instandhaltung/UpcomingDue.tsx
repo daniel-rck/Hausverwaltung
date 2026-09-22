@@ -8,6 +8,7 @@ import { type Column, DataTable } from "../../lib/ui/shared/DataTable";
 import { EmptyState } from "../../lib/ui/shared/EmptyState";
 import { StatusBadge } from "../../lib/ui/shared/StatusBadge";
 import { ClipboardList } from "../../lib/ui/ui/icons";
+import { todayIso } from "../../lib/utils/dates";
 import { formatDate, formatEuro } from "../../lib/utils/format";
 
 const CATEGORY_LABELS: Record<MaintenanceItem["category"], string> = {
@@ -63,7 +64,7 @@ export function UpcomingDue() {
     return map;
   }, [units]);
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayIso();
 
   const items = useLiveQuery(async () => {
     if (!activeProperty?.id) return [];

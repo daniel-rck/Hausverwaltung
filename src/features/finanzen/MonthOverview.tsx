@@ -6,6 +6,7 @@ import { Card } from "../../lib/ui/shared/Card";
 import { EmptyState } from "../../lib/ui/shared/EmptyState";
 import { NumInput } from "../../lib/ui/shared/NumInput";
 import { Calendar } from "../../lib/ui/ui/icons";
+import { todayIso } from "../../lib/utils/dates";
 import { formatEuro, MONTH_NAMES } from "../../lib/utils/format";
 
 interface PaymentForm {
@@ -151,7 +152,7 @@ export function MonthOverview({ year }: MonthOverviewProps) {
       setForm({
         amountCold: cell.occupancy.rentCold,
         amountUtilities: cell.occupancy.rentUtilities,
-        receivedDate: new Date().toISOString().slice(0, 10),
+        receivedDate: todayIso(),
         method: "transfer",
         notes: "",
       });

@@ -8,6 +8,7 @@ import { type Column, DataTable } from "../../lib/ui/shared/DataTable";
 import { EmptyState } from "../../lib/ui/shared/EmptyState";
 import { StatusBadge } from "../../lib/ui/shared/StatusBadge";
 import { Repeat } from "../../lib/ui/ui/icons";
+import { todayIso } from "../../lib/utils/dates";
 import { formatDate } from "../../lib/utils/format";
 
 const CATEGORY_LABELS: Record<MaintenanceItem["category"], string> = {
@@ -52,7 +53,7 @@ export function RecurringTasks() {
     );
   }, [activeProperty?.id, unitIds]);
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayIso();
 
   const rows: RecurringRow[] = useMemo(() => {
     if (!items) return [];

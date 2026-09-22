@@ -23,6 +23,7 @@ import {
   Wizard,
 } from "../../lib/ui/ui";
 import { Building2, KeyRound, Plus } from "../../lib/ui/ui/icons";
+import { todayIso } from "../../lib/utils/dates";
 import { formatDate } from "../../lib/utils/format";
 import { createDefaultKeys, KeyHandover } from "./KeyHandover";
 import { MeterSnapshot as MeterSnapshotComponent } from "./MeterSnapshot";
@@ -56,7 +57,7 @@ export function UebergabePage() {
   // Form state
   const [selectedOccId, setSelectedOccId] = useState<number | null>(null);
   const [protocolType, setProtocolType] = useState<"move-in" | "move-out">("move-in");
-  const [protocolDate, setProtocolDate] = useState(new Date().toISOString().slice(0, 10));
+  const [protocolDate, setProtocolDate] = useState(todayIso());
   const [rooms, setRooms] = useState<RoomCondition[]>(createDefaultRooms());
   const [meterReadings, setMeterReadings] = useState<{ meterId: number; value: number }[]>([]);
   const [keys, setKeys] = useState(createDefaultKeys());
@@ -114,7 +115,7 @@ export function UebergabePage() {
   const resetForm = () => {
     setSelectedOccId(null);
     setProtocolType("move-in");
-    setProtocolDate(new Date().toISOString().slice(0, 10));
+    setProtocolDate(todayIso());
     setRooms(createDefaultRooms());
     setMeterReadings([]);
     setKeys(createDefaultKeys());

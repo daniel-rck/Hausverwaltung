@@ -1,4 +1,5 @@
 import { monthDiff } from "../utils/calc";
+import { currentMonth } from "../utils/dates";
 import { db } from "./index";
 import type { MaintenanceItem, Occupancy, Unit } from "./schema";
 
@@ -21,7 +22,7 @@ export function isMaintenanceForProperty(
 /** Aktuelle Belegung einer Wohneinheit zu einem Stichtag */
 export async function getActiveOccupancy(
   unitId: number,
-  date: string = new Date().toISOString().slice(0, 7),
+  date: string = currentMonth(),
 ): Promise<Occupancy | undefined> {
   const occupancies = await db.occupancies.where("unitId").equals(unitId).toArray();
 

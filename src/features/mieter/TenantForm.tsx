@@ -5,7 +5,8 @@ import type { Occupancy, Tenant, Unit } from "../../lib/db/schema";
 import { Card } from "../../lib/ui/shared/Card";
 import { type Column, DataTable } from "../../lib/ui/shared/DataTable";
 import { StatusBadge } from "../../lib/ui/shared/StatusBadge";
-import { formatEuro, formatMonth } from "../../lib/utils/format";
+import { currentMonth } from "../../lib/utils/dates";
+import { formatEuro, formatMonth, parseGermanNumber } from "../../lib/utils/format";
 import { ContractTemplate } from "./ContractTemplate";
 import { DepositManager } from "./DepositManager";
 import { DocumentStore } from "./DocumentStore";
@@ -83,9 +84,9 @@ export function TenantForm({ unit, onBack }: TenantFormProps) {
       persons: parseInt(occForm.persons, 10) || 1,
       from: occForm.from,
       to: occForm.to || null,
-      rentCold: parseFloat(occForm.rentCold.replace(",", ".")) || 0,
-      rentUtilities: parseFloat(occForm.rentUtilities.replace(",", ".")) || 0,
-      deposit: parseFloat(occForm.deposit.replace(",", ".")) || 0,
+      rentCold: parseGermanNumber(occForm.rentCold) ?? 0,
+      rentUtilities: parseGermanNumber(occForm.rentUtilities) ?? 0,
+      deposit: parseGermanNumber(occForm.deposit) ?? 0,
       depositPaid: occForm.depositPaid,
     });
 
@@ -480,7 +481,7 @@ export function TenantForm({ unit, onBack }: TenantFormProps) {
       {rows &&
         rows.length > 0 &&
         (() => {
-          const now = new Date().toISOString().slice(0, 7);
+          const now = currentMonth();
           const current = rows.find(
             (r) => r.occupancy.from <= now && (r.occupancy.to === null || r.occupancy.to >= now),
           );

@@ -5,6 +5,7 @@ import { useProperty } from "../../lib/hooks/useProperty";
 import { Card } from "../../lib/ui/shared/Card";
 import { type Column, DataTable } from "../../lib/ui/shared/DataTable";
 import { NumInput } from "../../lib/ui/shared/NumInput";
+import { todayIso } from "../../lib/utils/dates";
 import { formatDate, formatNumber } from "../../lib/utils/format";
 import { SOURCE_LABELS, useMeterOptions } from "./useMeterOptions";
 
@@ -15,7 +16,7 @@ interface ReadingFormProps {
 
 export function ReadingForm({ selectedMeterId, onMeterChange }: ReadingFormProps) {
   const { activeProperty } = useProperty();
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayIso();
 
   const [date, setDate] = useState(today);
   const [value, setValue] = useState(0);

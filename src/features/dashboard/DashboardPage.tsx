@@ -18,6 +18,7 @@ import {
 } from "../../lib/ui/ui";
 import { Building2, type ModulIconKey, ModulIcons } from "../../lib/ui/ui/icons";
 import { required, useFormValidation } from "../../lib/ui/ui/useFormValidation";
+import { currentMonth } from "../../lib/utils/dates";
 import { formatEuro } from "../../lib/utils/format";
 import { AlertsList } from "./AlertsList";
 import { AnnualReport } from "./AnnualReport";
@@ -352,7 +353,7 @@ function PortfolioOverview() {
   const { properties } = useProperty();
 
   const portfolioData = useLiveQuery(async () => {
-    const now = new Date().toISOString().slice(0, 7);
+    const now = currentMonth();
     let totalUnits = 0;
     let totalOccupied = 0;
     let totalMonthlyRent = 0;

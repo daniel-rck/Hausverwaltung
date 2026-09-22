@@ -9,6 +9,7 @@ import type {
   Unit,
 } from "../../lib/db/schema";
 import { getDistributionShare, getOccupiedMonthsFractional } from "../../lib/utils/calc";
+import { todayIso } from "../../lib/utils/dates";
 import { formatArea, formatDate, formatEuro, formatNumber } from "../../lib/utils/format";
 
 interface AbrechnungViewProps {
@@ -194,7 +195,7 @@ export function AbrechnungView({
     grouped[line.costType.category].push(line);
   }
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayIso();
 
   const content = (
     <div className="bg-white max-w-3xl mx-auto">

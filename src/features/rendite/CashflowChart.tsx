@@ -36,7 +36,8 @@ export function CashflowChart({ propertyId }: CashflowChartProps) {
     for (const p of propertyPayments) {
       const year = parseInt(p.month.slice(0, 4), 10);
       const current = paymentsByYear.get(year) ?? 0;
-      paymentsByYear.set(year, current + p.amountCold + p.amountUtilities);
+      // Nebenkosten-Vorauszahlungen sind durchlaufende Posten, kein Cashflow.
+      paymentsByYear.set(year, current + p.amountCold);
     }
 
     // Determine the range: last 5 years or available data

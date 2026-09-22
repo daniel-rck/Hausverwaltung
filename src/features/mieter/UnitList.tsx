@@ -8,7 +8,8 @@ import { type Column, DataTable } from "../../lib/ui/shared/DataTable";
 import { EmptyState } from "../../lib/ui/shared/EmptyState";
 import { StatusBadge } from "../../lib/ui/shared/StatusBadge";
 import { Building2 } from "../../lib/ui/ui/icons";
-import { formatArea } from "../../lib/utils/format";
+import { currentMonth } from "../../lib/utils/dates";
+import { formatArea, formatNumberForInput, parseGermanNumber } from "../../lib/utils/format";
 
 interface UnitRow {
   unit: Unit;
@@ -31,7 +32,7 @@ export function UnitList({ onSelectUnit }: UnitListProps) {
 
     const units = await db.units.where("propertyId").equals(activeProperty.id).toArray();
 
-    const now = new Date().toISOString().slice(0, 7);
+    const now = currentMonth();
     const result: UnitRow[] = [];
 
     for (const unit of units) {
@@ -56,7 +57,7 @@ export function UnitList({ onSelectUnit }: UnitListProps) {
     const data = {
       propertyId: activeProperty.id,
       name: form.name.trim(),
-      area: parseFloat(form.area.replace(",", ".")) || 0,
+      area: parseGermanNumber(form.area) ?? 0,
       floor: form.floor || undefined,
     };
 
@@ -115,7 +116,7 @@ export function UnitList({ onSelectUnit }: UnitListProps) {
             setEditUnit(r.unit);
             setForm({
               name: r.unit.name,
-              area: String(r.unit.area),
+              area: formatNumberForInput(r.unit.area),
               floor: r.unit.floor ?? "",
             });
             setShowForm(true);

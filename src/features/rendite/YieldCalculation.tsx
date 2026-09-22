@@ -1,6 +1,7 @@
 import { db, useLiveQuery } from "../../lib/db";
 import { Card } from "../../lib/ui/shared/Card";
 import { cashflow, equityYield, grossYield, netYield } from "../../lib/utils/calc";
+import { currentMonth } from "../../lib/utils/dates";
 import { formatEuro, formatPercent } from "../../lib/utils/format";
 import type { FinancingData } from "./FinancingInput";
 
@@ -32,7 +33,7 @@ export function YieldCalculation({ propertyId }: YieldCalculationProps) {
   }, [propertyId]);
 
   const annualColdRent = useLiveQuery(async () => {
-    const now = new Date().toISOString().slice(0, 10);
+    const now = currentMonth();
     const units = await db.units.where("propertyId").equals(propertyId).toArray();
     const unitIds = units.map((u) => u.id!);
 
