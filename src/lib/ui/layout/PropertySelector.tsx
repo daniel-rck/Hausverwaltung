@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useId, useState } from "react";
 import { useProperty } from "../../hooks/useProperty";
 import { Button } from "../ui/Button";
 import { FormField } from "../ui/FormField";
 import { Input } from "../ui/Input";
 import { Modal } from "../ui/Modal";
+import { Select } from "../ui/Select";
 import { useToast } from "../ui/Toast";
 import { required, useFormValidation } from "../ui/useFormValidation";
 
@@ -19,7 +20,7 @@ export function PropertySelector() {
         </label>
       )}
       {properties.length > 0 && (
-        <select
+        <Select
           id="property-select"
           value={activeProperty?.id ?? ""}
           onChange={(e) => {
@@ -30,7 +31,7 @@ export function PropertySelector() {
             }
             setActivePropertyId(Number(v));
           }}
-          className="h-9 text-sm border border-border rounded-lg pl-3 pr-3 bg-surface text-fg focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-500 max-w-[180px]"
+          className="max-w-[180px]"
         >
           {properties.map((p) => (
             <option key={p.id} value={p.id}>
@@ -38,7 +39,7 @@ export function PropertySelector() {
             </option>
           ))}
           <option value="__new__">+ Neues Objekt…</option>
-        </select>
+        </Select>
       )}
 
       {properties.length === 0 && (
@@ -59,16 +60,17 @@ export function PropertySelector() {
   );
 }
 
-interface AddPropertyModalProps {
+type AddPropertyModalProps = {
   open: boolean;
   onClose: () => void;
   onCreate: (data: { name: string; address: string; units: number }) => Promise<void>;
-}
+};
 
 function AddPropertyModal({ open, onClose, onCreate }: AddPropertyModalProps) {
   const [form, setForm] = useState({ name: "", address: "", units: 1 });
   const [busy, setBusy] = useState(false);
   const toast = useToast();
+  const formId = useId();
   const { errors, validate, validateField } = useFormValidation<typeof form>({
     name: required("Bitte Name angeben"),
   });
@@ -112,19 +114,27 @@ function AddPropertyModal({ open, onClose, onCreate }: AddPropertyModalProps) {
           <Button variant="secondary" onClick={handleClose} disabled={busy}>
             Abbrechen
           </Button>
-          <Button variant="primary" onClick={handleCreate} loading={busy}>
+          <Button type="submit" form={formId} variant="primary" loading={busy}>
             Anlegen
           </Button>
         </>
       }
     >
-      <div className="space-y-3">
+      <form
+        id={formId}
+        className="space-y-3"
+        noValidate
+        onSubmit={(e) => {
+          e.preventDefault();
+          void handleCreate();
+        }}
+      >
         <FormField label="Name" required error={errors.name}>
           <Input
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
             onBlur={() => validateField("name", form)}
-            placeholder="z.B. Hauptstr. 12"
+            placeholder="z. B. Hauptstr. 12"
             autoFocus
           />
         </FormField>
@@ -138,12 +148,14 @@ function AddPropertyModal({ open, onClose, onCreate }: AddPropertyModalProps) {
         <FormField label="Anzahl Wohneinheiten" hint="optional">
           <Input
             type="number"
+            inputMode="numeric"
             min={0}
+            step={1}
             value={form.units}
             onChange={(e) => setForm({ ...form, units: Number(e.target.value) })}
           />
         </FormField>
-      </div>
+      </form>
     </Modal>
   );
 }

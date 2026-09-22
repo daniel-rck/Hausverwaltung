@@ -7,6 +7,7 @@ import { Card } from "../../lib/ui/shared/Card";
 import { type Column, DataTable } from "../../lib/ui/shared/DataTable";
 import { EmptyState } from "../../lib/ui/shared/EmptyState";
 import { StatusBadge } from "../../lib/ui/shared/StatusBadge";
+import { Callout, Skeleton } from "../../lib/ui/ui";
 import { Repeat } from "../../lib/ui/ui/icons";
 import { todayIso } from "../../lib/utils/dates";
 import { formatDate } from "../../lib/utils/format";
@@ -18,11 +19,11 @@ const CATEGORY_LABELS: Record<MaintenanceItem["category"], string> = {
   modernization: "Modernisierung",
 };
 
-interface RecurringRow {
+type RecurringRow = {
   item: MaintenanceItem;
   unitName: string;
   isOverdue: boolean;
-}
+};
 
 export function RecurringTasks() {
   const { activeProperty } = useProperty();
@@ -35,11 +36,14 @@ export function RecurringTasks() {
     [activeProperty?.id],
   );
 
-  const unitIds = useMemo(() => (units ?? []).map((u) => u.id!), [units]);
+  const unitIds = useMemo(
+    () => (units ?? []).flatMap((u) => (u.id === undefined ? [] : [u.id])),
+    [units],
+  );
   const unitMap = useMemo(() => {
     const map = new Map<number, Unit>();
     for (const u of units ?? []) {
-      map.set(u.id!, u);
+      if (u.id !== undefined) map.set(u.id, u);
     }
     return map;
   }, [units]);
@@ -78,7 +82,7 @@ export function RecurringTasks() {
       key: "title",
       header: "Aufgabe",
       render: (r) => (
-        <span className={`font-medium ${r.isOverdue ? "text-red-700" : ""}`}>{r.item.title}</span>
+        <span className={`font-medium ${r.isOverdue ? "text-danger-fg" : ""}`}>{r.item.title}</span>
       ),
       sortValue: (r) => r.item.title,
     },
@@ -120,7 +124,7 @@ export function RecurringTasks() {
       render: (r) => {
         if (!r.item.nextDue) return <span className="text-fg-subtle">–</span>;
         return (
-          <span className={r.isOverdue ? "text-red-600 font-semibold" : ""}>
+          <span className={r.isOverdue ? "text-danger-fg font-semibold" : ""}>
             {formatDate(r.item.nextDue)}
           </span>
         );
@@ -152,7 +156,9 @@ export function RecurringTasks() {
 
   return (
     <Card title="Wiederkehrende Aufgaben">
-      {rows.length === 0 ? (
+      {items === undefined ? (
+        <Skeleton height="8rem" />
+      ) : rows.length === 0 ? (
         <EmptyState
           icon={<Repeat size={24} strokeWidth={1.75} />}
           title="Keine wiederkehrenden Aufgaben"
@@ -161,11 +167,13 @@ export function RecurringTasks() {
       ) : (
         <>
           {rows.some((r) => r.isOverdue) && (
-            <div className="mb-3 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-700 dark:text-red-400">
-              {rows.filter((r) => r.isOverdue).length} Aufgabe(n) überfällig
-            </div>
+            <Callout
+              variant="danger"
+              className="mb-3"
+              title={`${rows.filter((r) => r.isOverdue).length} Aufgabe(n) überfällig`}
+            />
           )}
-          <DataTable columns={columns} data={rows} keyFn={(r) => r.item.id!} />
+          <DataTable columns={columns} data={rows} keyFn={(r) => r.item.id ?? r.item.title} />
         </>
       )}
     </Card>

@@ -13,7 +13,7 @@ export function QuickStats() {
 
     const units = await db.units.where("propertyId").equals(activeProperty.id).toArray();
 
-    const unitIds = units.map((u) => u.id!);
+    const unitIds = units.flatMap((u) => (u.id === undefined ? [] : [u.id]));
     const now = currentMonth();
 
     const occupancies = await db.occupancies.toArray();

@@ -2,11 +2,13 @@
 import { useState } from "react";
 import type { Rating, RoomCondition } from "../../lib/db/schema";
 import { Card } from "../../lib/ui/shared/Card";
+import { Button, FormField, Input, Select, useConfirm, useToast } from "../../lib/ui/ui";
+import { Plus } from "../../lib/ui/ui/icons";
 
-interface RoomInspectionProps {
+type RoomInspectionProps = {
   rooms: RoomCondition[];
   onChange: (rooms: RoomCondition[]) => void;
-}
+};
 
 const DEFAULT_ROOMS = ["Flur", "Wohnzimmer", "Schlafzimmer", "Küche", "Bad", "Balkon/Terrasse"];
 
@@ -24,14 +26,15 @@ const ASPECTS = [
   { key: "doors" as const, label: "Türen" },
 ];
 
-function ratingColor(rating: Rating): string {
+/** Status-Punkt neben dem Label; die Bewertung selbst steht als Text im Select. */
+function ratingDot(rating: Rating): string {
   switch (rating) {
     case "good":
-      return "bg-green-100 text-green-700 border-green-300";
+      return "bg-success";
     case "fair":
-      return "bg-amber-100 text-amber-700 border-amber-300";
+      return "bg-warning";
     case "poor":
-      return "bg-red-100 text-red-700 border-red-300";
+      return "bg-danger";
   }
 }
 
@@ -53,14 +56,26 @@ export function createDefaultRooms(): RoomCondition[] {
 
 export function RoomInspection({ rooms, onChange }: RoomInspectionProps) {
   const [newRoomName, setNewRoomName] = useState("");
+  const confirm = useConfirm();
+  const toast = useToast();
 
   const updateRoom = (index: number, updates: Partial<RoomCondition>) => {
     const updated = rooms.map((room, i) => (i === index ? { ...room, ...updates } : room));
     onChange(updated);
   };
 
-  const removeRoom = (index: number) => {
+  const removeRoom = async (index: number) => {
+    const room = rooms[index];
+    if (!room) return;
+    const ok = await confirm({
+      title: "Raum entfernen?",
+      message: `„${room.name}“ wird samt Bewertungen und Bemerkungen aus dem Protokoll entfernt.`,
+      confirmLabel: "Entfernen",
+      danger: true,
+    });
+    if (!ok) return;
     onChange(rooms.filter((_, i) => i !== index));
+    toast.success(`Raum „${room.name}“ entfernt.`);
   };
 
   const addRoom = () => {
@@ -77,79 +92,79 @@ export function RoomInspection({ rooms, onChange }: RoomInspectionProps) {
         <Card key={index}>
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-semibold text-fg">{room.name}</h3>
-            <button
-              type="button"
-              onClick={() => removeRoom(index)}
-              className="text-xs text-red-500 hover:text-red-700"
-            >
+            <Button variant="dangerGhost" size="sm" onClick={() => void removeRoom(index)}>
               Entfernen
-            </button>
+            </Button>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-3">
             {ASPECTS.map((aspect) => (
-              <div key={aspect.key}>
-                <label className="block">
-                  <span className="block text-xs font-medium text-fg-muted mb-1">
+              <FormField
+                key={aspect.key}
+                label={
+                  <span className="inline-flex items-center gap-1.5">
+                    <span
+                      aria-hidden="true"
+                      className={`inline-block h-2 w-2 rounded-full ${ratingDot(room[aspect.key])}`}
+                    />
                     {aspect.label}
                   </span>
-                  <select
-                    value={room[aspect.key]}
-                    onChange={(e) =>
-                      updateRoom(index, {
-                        [aspect.key]: e.target.value as Rating,
-                      })
-                    }
-                    className={`w-full border rounded-lg px-2 py-1.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-accent-500 ${ratingColor(room[aspect.key])}`}
-                  >
-                    {RATING_OPTIONS.map((opt) => (
-                      <option key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              </div>
+                }
+              >
+                <Select
+                  value={room[aspect.key]}
+                  onChange={(e) =>
+                    updateRoom(index, {
+                      [aspect.key]: e.target.value as Rating,
+                    })
+                  }
+                  className="font-medium"
+                >
+                  {RATING_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </Select>
+              </FormField>
             ))}
           </div>
 
-          <div>
-            <label className="block">
-              <span className="block text-xs font-medium text-fg-muted mb-1">Bemerkungen</span>
-              <input
-                type="text"
-                value={room.notes ?? ""}
-                onChange={(e) => updateRoom(index, { notes: e.target.value })}
-                placeholder="z.B. Kratzer an der Tür"
-                className="w-full border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
-              />
-            </label>
-          </div>
+          <FormField label="Bemerkungen">
+            <Input
+              value={room.notes ?? ""}
+              onChange={(e) => updateRoom(index, { notes: e.target.value })}
+              placeholder="z. B. Kratzer an der Tür"
+            />
+          </FormField>
         </Card>
       ))}
 
-      <div className="flex gap-2">
-        <input
-          type="text"
-          value={newRoomName}
-          onChange={(e) => setNewRoomName(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              e.preventDefault();
-              addRoom();
-            }
-          }}
-          placeholder="Weiteren Raum hinzufügen..."
-          className="flex-1 border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
-        />
-        <button
-          type="button"
+      <div className="flex gap-2 items-start">
+        <div className="flex-1">
+          <FormField label="Weiteren Raum hinzufügen">
+            <Input
+              value={newRoomName}
+              onChange={(e) => setNewRoomName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  addRoom();
+                }
+              }}
+              placeholder="z. B. Abstellraum"
+            />
+          </FormField>
+        </div>
+        <Button
+          variant="primary"
+          leftIcon={<Plus size={14} />}
           onClick={addRoom}
           disabled={!newRoomName.trim()}
-          className="px-4 py-1.5 text-sm bg-fg text-surface rounded-lg hover:opacity-90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          className="mt-5"
         >
-          + Raum
-        </button>
+          Raum
+        </Button>
       </div>
     </div>
   );

@@ -4,16 +4,16 @@ import { Drawer } from "../ui/Drawer";
 import { type ModulIconKey, ModulIcons, MoreHorizontal } from "../ui/icons";
 import { type ModulKey, moduleAccent } from "../ui/moduleAccent";
 
-interface NavItem {
+type NavItem = {
   path: string;
   label: string;
   iconKey: ModulIconKey;
   accent?: ModulKey;
   group: string;
-}
+};
 
 const navItems: NavItem[] = [
-  { path: "/", label: "Dashboard", iconKey: "dashboard", group: "Übersicht" },
+  { path: "/", label: "Übersicht", iconKey: "dashboard", group: "Übersicht" },
   { path: "/mieter", label: "Mieter", iconKey: "mieter", accent: "mieter", group: "Stammdaten" },
   { path: "/zaehler", label: "Zähler", iconKey: "zaehler", accent: "zaehler", group: "Verbrauch" },
   { path: "/wasser", label: "Versorger", iconKey: "wasser", accent: "wasser", group: "Verbrauch" },

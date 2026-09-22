@@ -4,15 +4,16 @@ import { isMaintenanceForProperty } from "../../lib/db/queries";
 import type { FinancingData } from "../../lib/db/schema";
 import { Card } from "../../lib/ui/shared/Card";
 import { EmptyState } from "../../lib/ui/shared/EmptyState";
-import { BarChart3 } from "../../lib/ui/ui/icons";
+import { Button, Select, Skeleton } from "../../lib/ui/ui";
+import { BarChart3, Printer } from "../../lib/ui/ui/icons";
 import { lastDueMonth } from "../../lib/utils/dates";
 import { formatEuro, formatPercent } from "../../lib/utils/format";
 import { buildRentLookup } from "../../lib/utils/rent";
 import { buildYearOptions } from "../../lib/utils/years";
 
-interface AnnualReportProps {
+type AnnualReportProps = {
   propertyId: number;
-}
+};
 
 export function AnnualReport({ propertyId }: AnnualReportProps) {
   const currentYear = new Date().getFullYear();
@@ -22,7 +23,7 @@ export function AnnualReport({ propertyId }: AnnualReportProps) {
   const data = useLiveQuery(async () => {
     const units = await db.units.where("propertyId").equals(propertyId).toArray();
 
-    const unitIds = units.map((u) => u.id!);
+    const unitIds = units.flatMap((u) => (u.id === undefined ? [] : [u.id]));
     if (unitIds.length === 0) return null;
 
     const totalUnits = units.length;
@@ -41,7 +42,7 @@ export function AnnualReport({ propertyId }: AnnualReportProps) {
 
     // --- Einnahmen (from payments) ---
     const allPayments = await db.payments.toArray();
-    const occIds = new Set(occupancies.map((o) => o.id!));
+    const occIds = new Set(occupancies.map((o) => o.id));
     const yearPayments = allPayments.filter(
       (p) => p.month.startsWith(`${year}-`) && occIds.has(p.occupancyId),
     );
@@ -148,7 +149,18 @@ export function AnnualReport({ propertyId }: AnnualReportProps) {
 
   const yearOptions = useMemo(() => buildYearOptions({ currentYear }), [currentYear]);
 
-  if (data === undefined) return null;
+  if (data === undefined) {
+    return (
+      <div className="space-y-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {["einnahmen", "ausgaben", "ergebnis", "leerstand"].map((k) => (
+            <Skeleton key={k} height="4.5rem" />
+          ))}
+        </div>
+        <Skeleton height="20rem" />
+      </div>
+    );
+  }
 
   if (data === null) {
     return (
@@ -173,26 +185,22 @@ export function AnnualReport({ propertyId }: AnnualReportProps) {
           <label htmlFor={yearId} className="text-sm font-medium text-fg-muted">
             Jahr:
           </label>
-          <select
+          <Select
             id={yearId}
             value={year}
             onChange={(e) => setYear(Number(e.target.value))}
-            className="border border-border rounded-lg px-3 py-1.5 text-sm bg-surface text-fg focus:outline-none focus:ring-2 focus:ring-accent-500"
+            className="w-auto"
           >
             {yearOptions.map((y) => (
               <option key={y} value={y}>
                 {y}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
-        <button
-          type="button"
-          onClick={() => window.print()}
-          className="px-4 py-2 text-sm bg-fg text-surface rounded-lg hover:opacity-90 transition-colors"
-        >
+        <Button variant="secondary" leftIcon={<Printer size={14} />} onClick={() => window.print()}>
           Drucken
-        </button>
+        </Button>
       </div>
 
       {/* Key numbers */}
@@ -200,7 +208,7 @@ export function AnnualReport({ propertyId }: AnnualReportProps) {
         <Card>
           <div className="text-center">
             <p className="text-xs text-fg-muted mb-1">Einnahmen</p>
-            <p className="text-xl font-semibold font-mono font-tabular text-green-600">
+            <p className="text-xl font-semibold font-mono font-tabular text-success-fg">
               {formatEuro(data.totalEinnahmen)}
             </p>
           </div>
@@ -208,7 +216,7 @@ export function AnnualReport({ propertyId }: AnnualReportProps) {
         <Card>
           <div className="text-center">
             <p className="text-xs text-fg-muted mb-1">Ausgaben</p>
-            <p className="text-xl font-semibold font-mono font-tabular text-red-600">
+            <p className="text-xl font-semibold font-mono font-tabular text-danger-fg">
               {formatEuro(data.totalAusgaben)}
             </p>
           </div>
@@ -218,7 +226,7 @@ export function AnnualReport({ propertyId }: AnnualReportProps) {
             <p className="text-xs text-fg-muted mb-1">Ergebnis</p>
             <p
               className={`text-xl font-bold font-mono font-tabular ${
-                ergebnisPositive ? "text-green-600" : "text-red-600"
+                ergebnisPositive ? "text-success-fg" : "text-danger-fg"
               }`}
             >
               {formatEuro(data.ergebnis)}
@@ -230,7 +238,7 @@ export function AnnualReport({ propertyId }: AnnualReportProps) {
             <p className="text-xs text-fg-muted mb-1">Leerstand</p>
             <p
               className={`text-xl font-semibold font-mono font-tabular ${
-                data.vacantMonths > 0 ? "text-amber-600" : "text-fg-subtle"
+                data.vacantMonths > 0 ? "text-warning-fg" : "text-fg-subtle"
               }`}
             >
               {data.vacantMonths} / {data.totalMonths} Mon.
@@ -266,7 +274,7 @@ export function AnnualReport({ propertyId }: AnnualReportProps) {
               </tr>
               <tr className="border-b-2 border-border font-semibold">
                 <td className="py-2 px-3 text-fg">Summe Einnahmen</td>
-                <td className="py-2 px-3 text-right font-mono text-green-600">
+                <td className="py-2 px-3 text-right font-mono text-success-fg">
                   {formatEuro(data.totalEinnahmen)}
                 </td>
               </tr>
@@ -309,7 +317,7 @@ export function AnnualReport({ propertyId }: AnnualReportProps) {
               )}
               <tr className="border-b-2 border-border font-semibold">
                 <td className="py-2 px-3 text-fg">Summe Ausgaben</td>
-                <td className="py-2 px-3 text-right font-mono text-red-600">
+                <td className="py-2 px-3 text-right font-mono text-danger-fg">
                   {formatEuro(data.totalAusgaben)}
                 </td>
               </tr>
@@ -321,7 +329,7 @@ export function AnnualReport({ propertyId }: AnnualReportProps) {
                 <td className="py-3 px-3 font-bold text-fg text-base">Ergebnis</td>
                 <td
                   className={`py-3 px-3 text-right font-mono font-bold text-base ${
-                    ergebnisPositive ? "text-green-600" : "text-red-600"
+                    ergebnisPositive ? "text-success-fg" : "text-danger-fg"
                   }`}
                 >
                   {formatEuro(data.ergebnis)}
@@ -349,7 +357,7 @@ export function AnnualReport({ propertyId }: AnnualReportProps) {
             <p className="text-xs text-fg-muted mb-1">Offene Posten</p>
             <p
               className={`font-semibold font-mono ${
-                data.openCount > 0 ? "text-red-600" : "text-fg"
+                data.openCount > 0 ? "text-danger-fg" : "text-fg"
               }`}
             >
               {data.openCount > 0

@@ -2,6 +2,7 @@ import { db, useLiveQuery } from "../../lib/db";
 import { isMaintenanceForProperty } from "../../lib/db/queries";
 import { useProperty } from "../../lib/hooks/useProperty";
 import { Card } from "../../lib/ui/shared/Card";
+import { Skeleton } from "../../lib/ui/ui";
 import type { LucideIcon } from "../../lib/ui/ui/icons";
 import { AlertTriangle, Gauge, Home, Wrench } from "../../lib/ui/ui/icons";
 import { currentMonth, isoInDays, todayIso } from "../../lib/utils/dates";
@@ -10,11 +11,16 @@ import { formatDate } from "../../lib/utils/format";
 type AlertKind = "vacant" | "maintenance" | "calibration";
 type Severity = "warning" | "info";
 
-interface Alert {
+type Alert = {
   kind: AlertKind;
   severity: Severity;
   message: string;
-}
+};
+
+const SEVERITY_LABEL: Record<Severity, string> = {
+  warning: "Warnung",
+  info: "Hinweis",
+};
 
 const iconMap: Record<AlertKind, LucideIcon> = {
   vacant: Home,
@@ -86,7 +92,18 @@ export function AlertsList() {
     return result;
   }, [activeProperty?.id]);
 
-  if (!alerts || alerts.length === 0) {
+  if (alerts === undefined) {
+    return (
+      <Card title="Heute zu tun">
+        <div className="space-y-2">
+          <Skeleton variant="text" width="70%" />
+          <Skeleton variant="text" width="55%" />
+        </div>
+      </Card>
+    );
+  }
+
+  if (alerts.length === 0) {
     return (
       <Card title="Heute zu tun">
         <p className="text-sm text-fg-muted">Alles erledigt — keine offenen Hinweise.</p>
@@ -112,7 +129,10 @@ export function AlertsList() {
                 className={`mt-0.5 shrink-0 ${iconColor}`}
                 aria-hidden="true"
               />
-              <span className="min-w-0">{alert.message}</span>
+              <span className="min-w-0">
+                <span className="sr-only">{SEVERITY_LABEL[alert.severity]}: </span>
+                {alert.message}
+              </span>
             </li>
           );
         })}

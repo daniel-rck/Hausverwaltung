@@ -8,15 +8,15 @@ import {
 import { syncService } from "../../lib/sync/service";
 import { useSyncStatus } from "../../lib/sync/useSyncStatus";
 import { Card } from "../../lib/ui/shared/Card";
-import { ConfirmDialog } from "../../lib/ui/shared/ConfirmDialog";
+import { Button, FormField, Input, useConfirm, useToast } from "../../lib/ui/ui";
+import { Download, LinkIcon, Upload } from "../../lib/ui/ui/icons";
 import { todayIso } from "../../lib/utils/dates";
 
 export function ExportImport() {
   const fileInput = useRef<HTMLInputElement>(null);
   const [importing, setImporting] = useState(false);
-  const [confirmOpen, setConfirmOpen] = useState(false);
-  const [pendingFile, setPendingFile] = useState<string | null>(null);
-  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const toast = useToast();
+  const confirm = useConfirm();
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const syncState = useSyncStatus();
   const syncActive = syncState.status !== "disconnected";
@@ -26,9 +26,10 @@ export function ExportImport() {
       const json = await exportDatabase();
       const date = todayIso();
       downloadJson(json, `hausverwaltung-backup-${date}.json`);
-      setMessage({ type: "success", text: "Backup erfolgreich heruntergeladen." });
-    } catch {
-      setMessage({ type: "error", text: "Export fehlgeschlagen." });
+      toast.success("Backup erfolgreich heruntergeladen.");
+    } catch (err) {
+      toast.error("Export fehlgeschlagen.");
+      console.error(err);
     }
   };
 
@@ -36,23 +37,31 @@ export function ExportImport() {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    let text: string;
     try {
-      const text = await file.text();
+      text = await file.text();
       JSON.parse(text); // Validate JSON
-      setPendingFile(text);
-      setConfirmOpen(true);
     } catch {
-      setMessage({ type: "error", text: "Ungültige JSON-Datei." });
+      toast.error("Ungültige JSON-Datei.");
+      e.target.value = "";
+      return;
     }
-
     e.target.value = "";
+
+    const ok = await confirm({
+      title: "Daten importieren?",
+      message: syncActive
+        ? "Alle vorhandenen Daten werden durch den Import überschrieben und der Multi-Device-Sync wird zurückgesetzt — sonst würden die alten Backup-Daten auf alle verknüpften Geräte gepusht. Du kannst dich danach wieder verknüpfen. Diese Aktion kann nicht rückgängig gemacht werden."
+        : "Alle vorhandenen Daten werden durch den Import überschrieben. Diese Aktion kann nicht rückgängig gemacht werden.",
+      confirmLabel: "Importieren",
+      danger: true,
+    });
+    if (!ok) return;
+    await runImport(text);
   };
 
-  const handleConfirmImport = async () => {
-    if (!pendingFile) return;
-
+  const runImport = async (pendingFile: string) => {
     setImporting(true);
-    setConfirmOpen(false);
 
     try {
       // Sync VOR dem Import abklemmen, sonst pusht der Debounce-Timer
@@ -62,19 +71,15 @@ export function ExportImport() {
         await syncService.disconnect();
       }
       await importDatabase(pendingFile);
-      setMessage({
-        type: "success",
-        text: "Daten erfolgreich importiert. Seite wird neu geladen...",
-      });
+      toast.success("Daten erfolgreich importiert. Seite wird neu geladen …");
       setTimeout(() => window.location.reload(), 1500);
     } catch (err) {
-      setMessage({
-        type: "error",
-        text: err instanceof Error ? err.message : "Import fehlgeschlagen.",
-      });
+      console.error(err);
+      toast.error(
+        "Import fehlgeschlagen. Bitte prüfen Sie, ob die Datei ein gültiger Hausverwaltung-Export ist.",
+      );
     } finally {
       setImporting(false);
-      setPendingFile(null);
     }
   };
 
@@ -83,91 +88,73 @@ export function ExportImport() {
       const url = await exportAsUrl();
       setShareUrl(url);
       await navigator.clipboard.writeText(url);
-      setMessage({ type: "success", text: "Transfer-Link in Zwischenablage kopiert." });
-    } catch {
-      setMessage({ type: "error", text: "Link-Erstellung fehlgeschlagen." });
+      toast.success("Transfer-Link in Zwischenablage kopiert.");
+    } catch (err) {
+      console.error(err);
+      toast.error(
+        "Link-Erstellung fehlgeschlagen. Bei großen Datenmengen bitte den JSON-Export verwenden.",
+      );
     }
   };
 
   return (
-    <>
-      <Card title="Daten-Backup">
-        <div className="flex flex-col sm:flex-row gap-3">
-          <button
-            type="button"
-            onClick={handleExport}
-            className="flex-1 px-4 py-2 text-sm bg-fg text-surface rounded-lg hover:opacity-90 transition-colors"
-          >
-            Export (JSON)
-          </button>
-          <button
-            type="button"
-            onClick={() => fileInput.current?.click()}
-            disabled={importing}
-            className="flex-1 px-4 py-2 text-sm border border-border text-fg rounded-lg hover:bg-surface-muted transition-colors disabled:opacity-50"
-          >
-            {importing ? "Importiert..." : "Import (JSON)"}
-          </button>
-          <input
-            ref={fileInput}
-            type="file"
-            accept=".json"
-            onChange={handleFileSelect}
-            className="hidden"
-          />
-        </div>
+    <Card title="Daten-Backup">
+      <div className="flex flex-col sm:flex-row gap-3">
+        <Button
+          variant="primary"
+          className="flex-1"
+          leftIcon={<Download size={14} />}
+          onClick={() => void handleExport()}
+        >
+          Export (JSON)
+        </Button>
+        <Button
+          variant="secondary"
+          className="flex-1"
+          leftIcon={<Upload size={14} />}
+          onClick={() => fileInput.current?.click()}
+          disabled={importing}
+          loading={importing}
+        >
+          {importing ? "Importiert …" : "Import (JSON)"}
+        </Button>
+        <input
+          ref={fileInput}
+          type="file"
+          accept=".json,application/json"
+          onChange={(e) => void handleFileSelect(e)}
+          className="hidden"
+          aria-label="Backup-Datei auswählen"
+          tabIndex={-1}
+        />
+      </div>
 
-        <div className="mt-3 pt-3 border-t border-border">
-          <button
-            type="button"
-            onClick={handleShareUrl}
-            className="w-full px-4 py-2 text-sm border border-border text-fg rounded-lg hover:bg-surface-muted transition-colors"
-          >
-            Transfer-Link erstellen (zum Teilen per URL)
-          </button>
-          {shareUrl && (
-            <div className="mt-2">
-              <input
-                type="text"
+      <div className="mt-3 pt-3 border-t border-border">
+        <Button
+          variant="secondary"
+          fullWidth
+          leftIcon={<LinkIcon size={14} />}
+          onClick={() => void handleShareUrl()}
+        >
+          Transfer-Link erstellen (zum Teilen per URL)
+        </Button>
+        {shareUrl && (
+          <div className="mt-2">
+            <FormField
+              label="Transfer-Link"
+              description="Link auf dem anderen Gerät im Browser öffnen, um die Daten zu importieren."
+            >
+              <Input
                 readOnly
                 value={shareUrl}
-                className="w-full border border-border rounded-lg px-3 py-1.5 text-xs font-mono bg-surface-muted text-fg-muted"
-                onClick={(e) => (e.target as HTMLInputElement).select()}
+                className="text-xs font-mono"
+                onFocus={(e) => e.currentTarget.select()}
+                onClick={(e) => e.currentTarget.select()}
               />
-              <p className="text-xs text-fg-subtle mt-1">
-                Link auf dem anderen Gerät im Browser öffnen, um die Daten zu importieren.
-              </p>
-            </div>
-          )}
-        </div>
-
-        {message && (
-          <p
-            className={`mt-3 text-sm ${
-              message.type === "success" ? "text-green-600" : "text-red-600"
-            }`}
-          >
-            {message.text}
-          </p>
+            </FormField>
+          </div>
         )}
-      </Card>
-
-      <ConfirmDialog
-        open={confirmOpen}
-        title="Daten importieren?"
-        message={
-          syncActive
-            ? "Alle vorhandenen Daten werden durch den Import überschrieben und der Multi-Device-Sync wird zurückgesetzt — sonst würden die alten Backup-Daten auf alle verknüpften Geräte gepusht. Du kannst dich danach wieder verknüpfen. Diese Aktion kann nicht rückgängig gemacht werden."
-            : "Alle vorhandenen Daten werden durch den Import überschrieben. Diese Aktion kann nicht rückgängig gemacht werden."
-        }
-        confirmLabel="Importieren"
-        onConfirm={handleConfirmImport}
-        onCancel={() => {
-          setConfirmOpen(false);
-          setPendingFile(null);
-        }}
-        danger
-      />
-    </>
+      </div>
+    </Card>
   );
 }

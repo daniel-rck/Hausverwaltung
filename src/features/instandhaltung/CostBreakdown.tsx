@@ -8,6 +8,7 @@ import { DonutChart } from "../../lib/ui/charts/DonutChart";
 import { Card } from "../../lib/ui/shared/Card";
 import { type Column, DataTable } from "../../lib/ui/shared/DataTable";
 import { EmptyState } from "../../lib/ui/shared/EmptyState";
+import { Select, Skeleton } from "../../lib/ui/ui";
 import { BarChart3 } from "../../lib/ui/ui/icons";
 import { formatEuro } from "../../lib/utils/format";
 
@@ -42,11 +43,14 @@ export function CostBreakdown() {
     [activeProperty?.id],
   );
 
-  const unitIds = useMemo(() => (units ?? []).map((u) => u.id!), [units]);
+  const unitIds = useMemo(
+    () => (units ?? []).flatMap((u) => (u.id === undefined ? [] : [u.id])),
+    [units],
+  );
   const unitMap = useMemo(() => {
     const map = new Map<number, Unit>();
     for (const u of units ?? []) {
-      map.set(u.id!, u);
+      if (u.id !== undefined) map.set(u.id, u);
     }
     return map;
   }, [units]);
@@ -80,7 +84,7 @@ export function CostBreakdown() {
     const sortedYears = Array.from(yearMap.keys()).sort((a, b) => a - b);
     return {
       labels: sortedYears.map(String),
-      data: sortedYears.map((y) => yearMap.get(y)!),
+      data: sortedYears.map((y) => yearMap.get(y) ?? 0),
     };
   }, [items]);
 
@@ -194,7 +198,15 @@ export function CostBreakdown() {
     },
   ];
 
-  if (!items || items.length === 0) {
+  if (items === undefined) {
+    return (
+      <Card title="Kostenauswertung">
+        <Skeleton height="10rem" />
+      </Card>
+    );
+  }
+
+  if (items.length === 0) {
     return (
       <Card title="Kostenauswertung">
         <EmptyState
@@ -212,17 +224,18 @@ export function CostBreakdown() {
       <Card
         title="Kostenauswertung"
         action={
-          <select
+          <Select
+            aria-label="Jahr auswählen"
             value={effectiveYear ?? ""}
             onChange={(e) => setSelectedYear(parseInt(e.target.value, 10))}
-            className="text-sm border border-border rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-accent-500"
+            className="w-auto"
           >
             {availableYears.map((y) => (
               <option key={y} value={y}>
                 {y}
               </option>
             ))}
-          </select>
+          </Select>
         }
       >
         <p className="text-sm text-fg-muted">
@@ -240,6 +253,7 @@ export function CostBreakdown() {
                 labels={costsByYear.labels}
                 datasets={[{ label: "Kosten", data: costsByYear.data, color: "#78716c" }]}
                 height={250}
+                valueFormat="euro"
               />
             </div>
           ) : (
@@ -255,6 +269,7 @@ export function CostBreakdown() {
                 data={costsByCategory.data}
                 colors={costsByCategory.colors}
                 height={250}
+                valueFormat="euro"
               />
             </div>
           ) : (

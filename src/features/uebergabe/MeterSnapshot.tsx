@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { db, useLiveQuery } from "../../lib/db";
 import { Card } from "../../lib/ui/shared/Card";
 import { NumInput } from "../../lib/ui/shared/NumInput";
+import { Skeleton } from "../../lib/ui/ui";
 
 interface MeterReading {
   meterId: number;
@@ -30,17 +31,19 @@ export function MeterSnapshot({ unitId, readings, onChange }: MeterSnapshotProps
     const results: MeterSnapshot[] = [];
 
     for (const meter of meters) {
+      const meterId = meter.id;
+      if (meterId === undefined) continue;
       const meterType = await db.meterTypes.get(meter.meterTypeId);
       const allReadings = await db.meterReadings
         .where("[meterId+date]")
-        .between([meter.id!, ""], [meter.id!, "\uffff"])
+        .between([meterId, ""], [meterId, "\uffff"])
         .toArray();
 
       const sorted = allReadings.sort((a, b) => b.date.localeCompare(a.date));
       const lastReading = sorted[0]?.value ?? null;
 
       results.push({
-        meterId: meter.id!,
+        meterId,
         meterTypeId: meter.meterTypeId,
         typeName: meterType?.name ?? "Unbekannt",
         typeUnit: meterType?.unit ?? "",
@@ -81,7 +84,7 @@ export function MeterSnapshot({ unitId, readings, onChange }: MeterSnapshotProps
   if (!snapshots) {
     return (
       <Card>
-        <p className="text-sm text-fg-muted">Zähler werden geladen...</p>
+        <Skeleton height="4rem" />
       </Card>
     );
   }

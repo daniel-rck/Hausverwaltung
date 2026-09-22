@@ -1,15 +1,17 @@
 /* eslint-disable react-refresh/only-export-components */
 import { Card } from "../../lib/ui/shared/Card";
+import { Button, IconButton, Input } from "../../lib/ui/ui";
+import { Plus, X } from "../../lib/ui/ui/icons";
 
-interface KeyEntry {
+type KeyEntry = {
   type: string;
   count: number;
-}
+};
 
-interface KeyHandoverProps {
+type KeyHandoverProps = {
   keys: KeyEntry[];
   onChange: (keys: KeyEntry[]) => void;
-}
+};
 
 const DEFAULT_KEY_TYPES = ["Haustür", "Wohnungstür", "Briefkasten", "Keller"];
 
@@ -35,7 +37,10 @@ export function KeyHandover({ keys, onChange }: KeyHandoverProps) {
     <Card title="Schlüsselübergabe">
       <div className="space-y-2">
         {/* Header */}
-        <div className="grid grid-cols-[1fr_80px_40px] gap-2 text-xs font-medium text-fg-muted px-1">
+        <div
+          aria-hidden="true"
+          className="grid grid-cols-[1fr_80px_40px] gap-2 text-xs font-medium text-fg-muted px-1"
+        >
           <span>Schlüsselart</span>
           <span className="text-center">Anzahl</span>
           <span />
@@ -45,39 +50,42 @@ export function KeyHandover({ keys, onChange }: KeyHandoverProps) {
         {keys.map((key, index) => (
           // biome-ignore lint/suspicious/noArrayIndexKey: editierbare Positionsliste ohne stabile ID (stabile IDs folgen mit dem Schema-Umbau in Phase 4)
           <div key={index} className="grid grid-cols-[1fr_80px_40px] gap-2 items-center">
-            <input
-              type="text"
+            <Input
               value={key.type}
               onChange={(e) => updateKey(index, { type: e.target.value })}
-              placeholder="Schlüsselart"
-              className="border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
+              placeholder="z. B. Garage"
+              aria-label={`Schlüsselart ${index + 1}`}
             />
-            <input
+            <Input
               type="number"
-              min="0"
+              inputMode="numeric"
+              min={0}
+              step={1}
               value={key.count || ""}
               onChange={(e) => updateKey(index, { count: parseInt(e.target.value, 10) || 0 })}
-              className="border border-border rounded-lg px-3 py-1.5 text-sm text-center font-mono focus:outline-none focus:ring-2 focus:ring-accent-500"
+              aria-label={`Anzahl ${key.type || `Schlüssel ${index + 1}`}`}
+              className="text-center font-mono"
             />
-            <button
-              type="button"
+            <IconButton
+              aria-label="Schlüssel entfernen"
+              title="Schlüssel entfernen"
+              size="sm"
+              icon={<X size={16} />}
               onClick={() => removeKey(index)}
-              className="text-red-400 hover:text-red-600 text-lg leading-none"
-              title="Entfernen"
-            >
-              &times;
-            </button>
+            />
           </div>
         ))}
 
         {/* Add button */}
-        <button
-          type="button"
+        <Button
+          variant="outline"
+          fullWidth
+          leftIcon={<Plus size={14} />}
           onClick={addKey}
-          className="text-sm text-fg-muted hover:text-fg px-3 py-1.5 border border-dashed border-border rounded-lg hover:bg-surface-muted transition-colors w-full"
+          className="border-dashed"
         >
-          + Weiteren Schlüssel hinzufügen
-        </button>
+          Weiteren Schlüssel hinzufügen
+        </Button>
       </div>
     </Card>
   );

@@ -7,6 +7,7 @@ import { Card } from "../../lib/ui/shared/Card";
 import { type Column, DataTable } from "../../lib/ui/shared/DataTable";
 import { EmptyState } from "../../lib/ui/shared/EmptyState";
 import { StatusBadge } from "../../lib/ui/shared/StatusBadge";
+import { Skeleton } from "../../lib/ui/ui";
 import { ClipboardList } from "../../lib/ui/ui/icons";
 import { todayIso } from "../../lib/utils/dates";
 import { formatDate, formatEuro } from "../../lib/utils/format";
@@ -20,12 +21,13 @@ const CATEGORY_LABELS: Record<MaintenanceItem["category"], string> = {
 
 type DueStatus = "green" | "yellow" | "red";
 
-interface DueRow {
+type DueRow = {
   item: MaintenanceItem;
+  nextDue: string;
   unitName: string;
   daysUntilDue: number;
   status: DueStatus;
-}
+};
 
 function getDueStatus(nextDue: string, today: string): { daysUntilDue: number; status: DueStatus } {
   const dueDate = new Date(nextDue);
@@ -55,11 +57,14 @@ export function UpcomingDue() {
     [activeProperty?.id],
   );
 
-  const unitIds = useMemo(() => (units ?? []).map((u) => u.id!), [units]);
+  const unitIds = useMemo(
+    () => (units ?? []).flatMap((u) => (u.id === undefined ? [] : [u.id])),
+    [units],
+  );
   const unitMap = useMemo(() => {
     const map = new Map<number, Unit>();
     for (const u of units ?? []) {
-      map.set(u.id!, u);
+      if (u.id !== undefined) map.set(u.id, u);
     }
     return map;
   }, [units]);
@@ -81,15 +86,22 @@ export function UpcomingDue() {
   const rows: DueRow[] = useMemo(() => {
     if (!items) return [];
     return items
-      .map((item) => {
-        const { daysUntilDue, status } = getDueStatus(item.nextDue!, today);
-        return {
-          item,
-          unitName:
-            item.unitId === null ? "Gemeinschaft" : (unitMap.get(item.unitId)?.name ?? "Unbekannt"),
-          daysUntilDue,
-          status,
-        };
+      .flatMap((item): DueRow[] => {
+        const nextDue = item.nextDue;
+        if (!nextDue) return [];
+        const { daysUntilDue, status } = getDueStatus(nextDue, today);
+        return [
+          {
+            item,
+            nextDue,
+            unitName:
+              item.unitId === null
+                ? "Gemeinschaft"
+                : (unitMap.get(item.unitId)?.name ?? "Unbekannt"),
+            daysUntilDue,
+            status,
+          },
+        ];
       })
       .filter((r) => r.status === "red" || r.status === "yellow")
       .sort((a, b) => a.daysUntilDue - b.daysUntilDue);
@@ -106,11 +118,11 @@ export function UpcomingDue() {
       key: "nextDue",
       header: "Fällig am",
       render: (r) => (
-        <span className={r.status === "red" ? "text-red-600 font-semibold" : ""}>
-          {formatDate(r.item.nextDue!)}
+        <span className={r.status === "red" ? "text-danger-fg font-semibold" : ""}>
+          {formatDate(r.nextDue)}
         </span>
       ),
-      sortValue: (r) => r.item.nextDue!,
+      sortValue: (r) => r.nextDue,
     },
     {
       key: "days",
@@ -118,16 +130,16 @@ export function UpcomingDue() {
       render: (r) => {
         if (r.daysUntilDue < 0) {
           return (
-            <span className="text-red-600 font-medium">
+            <span className="text-danger-fg font-medium">
               {Math.abs(r.daysUntilDue)} Tage überfällig
             </span>
           );
         }
         if (r.daysUntilDue === 0) {
-          return <span className="text-amber-600 font-medium">Heute fällig</span>;
+          return <span className="text-warning-fg font-medium">Heute fällig</span>;
         }
         return (
-          <span className="text-amber-600">
+          <span className="text-warning-fg">
             noch {r.daysUntilDue} Tag{r.daysUntilDue !== 1 ? "e" : ""}
           </span>
         );
@@ -166,7 +178,9 @@ export function UpcomingDue() {
 
   return (
     <Card title="Fällige Aufgaben">
-      {rows.length === 0 ? (
+      {items === undefined ? (
+        <Skeleton height="8rem" />
+      ) : rows.length === 0 ? (
         <EmptyState
           icon={<ClipboardList size={24} strokeWidth={1.75} />}
           title="Keine fälligen Aufgaben"
@@ -179,7 +193,7 @@ export function UpcomingDue() {
             <span className="text-fg-subtle">|</span>
             <span>{rows.filter((r) => r.status === "yellow").length} in den nächsten 30 Tagen</span>
           </div>
-          <DataTable columns={columns} data={rows} keyFn={(r) => r.item.id!} />
+          <DataTable columns={columns} data={rows} keyFn={(r) => r.item.id ?? r.item.title} />
         </>
       )}
     </Card>
