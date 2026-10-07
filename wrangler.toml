@@ -5,6 +5,10 @@ compatibility_date = "2026-04-01"
 [assets]
 directory = "./dist"
 binding = "ASSETS"
+# Navigationen ohne passende Datei bekommen index.html (SPA-Modus). Mit dem
+# HashRouter landen Client-Routen ohnehin nie beim Server; der Modus schadet
+# nicht und deckt sich mit web-base. Kein run_worker_first: worker/base.ts
+# sieht so auch veraltete /assets/*-Pfade und antwortet mit 404.
 not_found_handling = "single-page-application"
 
 # Bindings hier in wrangler.toml deklariert (statt nur im Dashboard),

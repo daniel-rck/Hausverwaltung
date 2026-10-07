@@ -9,7 +9,6 @@ import { Building2, Search } from "../ui/icons";
 import { ShortcutsModal } from "../ui/ShortcutsModal";
 import { BottomNav, SidebarNav } from "./Nav";
 import { PropertySelector } from "./PropertySelector";
-import { UpdatePrompt } from "./UpdatePrompt";
 
 const buildDate = new Date(__BUILD_DATE__).toLocaleDateString("de-DE");
 
@@ -29,7 +28,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="h-14 flex items-center justify-between gap-2">
           <Link
             to="/"
-            className="flex items-center gap-2 min-w-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 rounded-md px-1"
+            className="flex items-center gap-2 min-w-0 focus-visible:outline-2 focus-visible:outline-accent-500 rounded-md px-1"
           >
             <span
               aria-hidden="true"
@@ -68,7 +67,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <main
           id="main"
           tabIndex={-1}
-          className="flex-1 p-3 md:p-5 pb-24 md:pb-5 overflow-x-hidden focus:outline-none"
+          className="flex-1 p-3 md:p-5 pb-24 md:pb-5 overflow-x-hidden focus:outline-hidden"
         >
           {children}
         </main>
@@ -94,7 +93,6 @@ export function AppShell({ children }: { children: ReactNode }) {
         </a>
       </footer>
 
-      <UpdatePrompt />
       <ShortcutsModal open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
     </div>
   );

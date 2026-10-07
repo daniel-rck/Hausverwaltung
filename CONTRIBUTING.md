@@ -28,7 +28,7 @@ cd Hausverwaltung
 bun install
 
 bun dev                  # SPA auf http://localhost:5173
-bun dev:cf               # Worker + SPA gemeinsam (für Sync-Tests)
+bun run worker:dev       # Worker + SPA gemeinsam (für Sync-Tests)
 bun test                 # Vitest im Watch-Modus
 bun run lint
 bun run typecheck

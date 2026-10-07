@@ -1,4 +1,5 @@
-import { fireWrite, getDB, isSyncable } from "./idb";
+import { getDB, isSyncable } from "./db.ts";
+import { fireWrite } from "./idb";
 
 /**
  * Schlanke, Dexie-kompatible Query-Oberfläche über `idb`. Stellt genau die im
