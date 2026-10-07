@@ -15,6 +15,11 @@ Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - Issue- und PR-Templates unter `.github/`.
 - `Callout`-Primitive, Button-Variante `dangerGhost`, Status-Text-Tokens
   (`text-success-fg` …), Chart-Wertformat `valueFormat="euro"` (de-DE).
+- Eigene Fehlerseiten: „Seite nicht gefunden" für unbekannte Adressen und
+  „Etwas ist schiefgelaufen" bzw. „Neue Version verfügbar – neu laden", wenn
+  ein Modul nach einem Update nicht mehr lädt. Navigation bleibt dabei nutzbar.
+- Sicherheits-Header (Content-Security-Policy, HSTS, `X-Frame-Options` …) für
+  alle ausgelieferten Dateien.
 
 ### Behoben
 
@@ -34,6 +39,20 @@ Versionierung folgt [SemVer](https://semver.org/lang/de/).
 
 ### Geändert
 
+- Neue Akzentfarbe Indigo (Farbton 280 statt 250, deutlich vom Info-Blau
+  abgesetzt); Browser-Leiste und installierte App in `#524bc2`. Akzent- und
+  Status-Farben kommen aus den kontraststärkeren web-base-Tokens (WCAG AA).
+- Updates warten auf den Nutzer: eine neue Version lädt erst nach „Jetzt laden"
+  im Hinweis, statt sich unter offenen Seiten zu aktivieren (verlorene
+  Modul-Dateien nach einem Deploy). Offene Tabs prüfen stündlich auf Updates.
+- Tastatur-Fokus als echte Umrandung statt Schatten-Ring — bleibt im
+  Windows-Kontrastmodus sichtbar.
+- Ein neueres Datenbank-Schema in einem anderen Tab blockiert nicht mehr: der
+  alte Tab schließt seine Verbindung und lädt neu.
+- Unbekannte Adressen leiten nicht mehr still auf die Übersicht um, sondern
+  zeigen „Seite nicht gefunden".
+- Entwicklung: Lint/Format mit oxlint + oxfmt statt Biome; Basis
+  [web-base](https://github.com/daniel-rck/web-base) 0.6.0.
 - Alle Module auf Design-Tokens und Primitives migriert (Dark Mode),
   Rückfragen vor jedem Löschen, Formularvalidierung mit Fehlermeldungen,
   Modals, Skeletons, beschriftete Controls, „Dashboard" → „Übersicht".
