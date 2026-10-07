@@ -19,7 +19,7 @@
   --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
 
-  /* Marken-Akzent leitet sich aus den web-base-Akzent-Tokens (--accent-h: 250) ab. */
+  /* Marken-Akzent leitet sich aus den web-base-Akzent-Tokens (--accent-h: 280) ab. */
   --color-accent: var(--color-accent-600);
   --color-accent-hover: var(--color-accent-700);
   --color-accent-soft: var(--color-accent-100);
@@ -94,30 +94,9 @@
   --header-height: 56px;
   --bottom-nav-height: 56px;
 
-  /* Lesbare Status-Textfarben. Die web-base-Semantik (--color-success/…)
-   * ist als Fläche/Icon gedacht; als Text auf hellem Grund ist v. a. warning
-   * zu kontrastarm. Die *-fg-Varianten sind für Text (WCAG AA) und werden
-   * im Dark-Mode unten aufgehellt. Flächen: bg-success/10, border-success/30. */
-  --color-success-fg: oklch(0.48 0.13 150);
-  --color-warning-fg: oklch(0.52 0.12 70);
-  --color-danger-fg: oklch(0.5 0.19 25);
-  --color-info-fg: oklch(0.48 0.12 240);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --color-success-fg: oklch(0.8 0.14 150);
-    --color-warning-fg: oklch(0.83 0.13 80);
-    --color-danger-fg: oklch(0.76 0.15 25);
-    --color-info-fg: oklch(0.8 0.1 240);
-  }
-}
-
-:root[data-theme="dark"] {
-  --color-success-fg: oklch(0.8 0.14 150);
-  --color-warning-fg: oklch(0.83 0.13 80);
-  --color-danger-fg: oklch(0.76 0.15 25);
-  --color-info-fg: oklch(0.8 0.1 240);
+  /* Status-Textfarben (--color-{success,warning,danger,info}-fg, hell und
+   * dunkel, WCAG AA) kommen seit web-base 0.6.0 aus tokens.css.
+   * Flächen: bg-success/10, border-success/30; Text darauf: text-success-fg. */
 }
 
 body {
@@ -151,17 +130,7 @@ body {
   outline-offset: 2px;
 }
 
-/* Reduzierte Animation respektieren */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-}
+/* prefers-reduced-motion: der Reset (ohne den Spinner) steht in tokens.css. */
 
 /* Print styles */
 @media print {

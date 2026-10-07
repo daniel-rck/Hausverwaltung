@@ -18,7 +18,7 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
         className={[
           "h-4 w-4 rounded border-border",
           "text-fg",
-          "focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-surface",
+          "focus-visible:outline-2 focus-visible:outline-accent-500 focus-visible:outline-offset-2",
           "disabled:opacity-50 disabled:cursor-not-allowed",
           className,
         ].join(" ")}

@@ -97,7 +97,7 @@ export function NumInput({
           aria-label={label ? undefined : ariaLabel}
           aria-invalid={invalid || undefined}
           aria-describedby={ariaDescribedBy}
-          className={`w-full border rounded-lg px-3 py-1.5 text-sm text-right font-mono bg-surface text-fg focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 disabled:bg-surface-sunken disabled:text-fg-subtle ${
+          className={`w-full border rounded-lg px-3 py-1.5 text-sm text-right font-mono bg-surface text-fg focus-visible:outline-2 focus-visible:outline-accent-500 disabled:bg-surface-sunken disabled:text-fg-subtle ${
             invalid ? "border-danger" : "border-border"
           } ${suffix ? "pr-10" : ""}`}
         />

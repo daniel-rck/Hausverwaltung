@@ -362,7 +362,7 @@ export function UebergabePage() {
                   <button
                     type="button"
                     onClick={() => setPreviewId(id)}
-                    className="flex-1 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 rounded-lg"
+                    className="flex-1 text-left focus-visible:outline-2 focus-visible:outline-accent-500 rounded-lg"
                   >
                     <p className="text-sm font-medium text-fg">
                       {p.type === "move-in" ? "Einzug" : "Auszug"} – {p.unitName}

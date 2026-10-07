@@ -366,7 +366,7 @@ export function MonthOverview({ year }: MonthOverviewProps) {
                             onClick={() => openEditor(cell)}
                             disabled={cell.status === "gray"}
                             aria-label={ariaLabel}
-                            className={`w-full rounded-md py-1.5 px-0.5 text-xs font-mono transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 ${STATUS_CLASSES[cell.status]}`}
+                            className={`w-full rounded-md py-1.5 px-0.5 text-xs font-mono transition-colors focus-visible:outline-2 focus-visible:outline-accent-500 ${STATUS_CLASSES[cell.status]}`}
                             title={
                               cell.status === "gray"
                                 ? "Kein Mietverhältnis"

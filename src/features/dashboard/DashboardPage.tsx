@@ -143,7 +143,7 @@ export function DashboardPage() {
               <Link
                 key={m.path}
                 to={m.path}
-                className="group block bg-surface rounded-lg border border-border p-4 transition-colors hover:border-border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-accent/40 focus-visible:ring-offset-surface"
+                className="group block bg-surface rounded-lg border border-border p-4 transition-colors hover:border-border focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500"
               >
                 <span
                   aria-hidden="true"
