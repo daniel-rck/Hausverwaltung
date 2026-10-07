@@ -156,7 +156,9 @@ export function PrepaymentInput({ propertyId, year }: PrepaymentInputProps) {
               <th className="py-2 px-3 text-center font-medium text-fg-muted">Monate</th>
               <th className="py-2 px-3 text-right font-medium text-fg-muted">Automatisch</th>
               <th className="py-2 px-3 text-right font-medium text-fg-muted">Vorauszahlung</th>
-              <th className="py-2 px-3 text-center font-medium text-fg-muted" />
+              <th className="py-2 px-3 text-center font-medium text-fg-muted">
+                <span className="sr-only">Aktionen</span>
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -211,7 +213,7 @@ export function PrepaymentInput({ propertyId, year }: PrepaymentInputProps) {
               <td className="py-2 px-3 text-right font-mono font-tabular font-semibold text-fg">
                 {formatEuro(totalPrepayments)}
               </td>
-              <td />
+              <td aria-hidden="true" />
             </tr>
           </tfoot>
         </table>

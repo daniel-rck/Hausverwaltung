@@ -18,8 +18,8 @@ fährt den Drift-Guard `web-base-check`, wer eine *owned* Datei anfasst, bricht 
 Vor jedem Commit grün halten:
 
 ```bash
-bun run lint        # Biome (check)
-bun run format      # Biome (format --write)
+bun run lint        # oxlint + oxfmt --check
+bun run format      # oxfmt (formatiert)
 bun run typecheck   # tsc -b (App + Node + SW + Worker)
 bun run test        # Vitest (run, kein Watch)
 bun run build       # SPA + Worker-Dry-Run via CI
@@ -28,9 +28,11 @@ bun run build       # SPA + Worker-Dry-Run via CI
 ## Konventionen (gemäß web-base)
 
 - **Bun** als Runtime & Package-Manager (kein npm/yarn-Lockfile).
-- **Biome** für Lint + Format (ersetzt ESLint/Prettier). `biome.base.json` kommt
-  aus web-base und wird bei `update` überschrieben; app-eigene Regeln gehören in
-  `biome.json` (`extends`). CSS wird mitgelintet (Tailwind-Direktiven parsen).
+- **oxlint + oxfmt** für Lint + Format. `oxlint.base.json` und `.oxfmtrc.json`
+  kommen aus web-base und werden bei `update` überschrieben — nicht anfassen;
+  app-eigene Regeln gehören in `.oxlintrc.json` (`overrides`), Format-Ausnahmen
+  in `.prettierignore`. Einzelne Stellen mit
+  `// oxlint-disable-next-line <regel> -- <grund>` begründen.
 - **TypeScript strict**; `verbatimModuleSyntax` (→ `import type`), `any` vermeiden
   (lieber `unknown`), Non-Null-Assertions nur mit Begründung.
 - `type`-Deklarationen statt `interface`, außer Declaration-Merging nötig.
@@ -52,7 +54,7 @@ Query-Schicht), `useLiveQuery.ts` (reaktiver Hook). Cloudflare Worker (`worker/`
 `/api/*` an die Sync-Handler und liefert sonst die statischen Assets. Sync ist clientseitig
 verschlüsselt; Konflikte werden via R2-ETag (`If-Match`) aufgelöst.
 
-> Migrationsstand auf web-base: **Tooling/Biome ✓, Struktur (`src/lib`+`src/features`) ✓,
+> Migrationsstand auf web-base: **Tooling/oxc ✓, Struktur (`src/lib`+`src/features`) ✓,
 > Storage→idb ✓, PWA injectManifest ✓, reusable CI ✓, Theme-System (Tokens, `--accent-h: 250`,
 > `data-theme`-Theming, `ThemeToggle`/`InstallButton`/`primitives`) ✓.**
 >
@@ -76,8 +78,12 @@ verschlüsselt; Konflikte werden via R2-ETag (`If-Match`) aufgelöst.
 ## Offene Konventions-Lücken
 
 - `noUncheckedIndexedAccess` ist in allen tsconfigs (App, Node, SW, Worker) aktiv.
-- Rund 190 `noNonNullAssertion`-Warnungen (Kanon: `warn`) — Altbestand, beim
-  Anfassen einer Datei jeweils mitaufräumen.
+- Rund 70 oxlint-Warnungen (Kanon: `warn`), v. a. `typescript/no-non-null-assertion`
+  (27, außerhalb der Tests) und `unicorn/no-array-sort` — Altbestand, beim Anfassen
+  einer Datei jeweils mitaufräumen. `bun run lint` muss mit Exit 0 enden.
+- `src/lib/db/useLiveQuery.ts` ist `webBase.unmanaged` (Dexie-kompatible
+  Signatur) und bleibt unangetastet; `.oxlintrc.json` schaltet dort
+  `react/refs` und `react/exhaustive-deps` ab, statt die Datei zu ändern.
 - `compatibility_date` in `wrangler.toml` und `nodejs_compat` sind bewusst
   **nicht** flottenweit angeglichen worden: beide ändern Workers-Runtime-Semantik
   und die App deployt bei Merge auf `main` automatisch. Einzeln bumpen, mit

@@ -33,6 +33,7 @@ const TAB_ITEMS: TabItem<Tab>[] = [
 
 export function NebenkostenPage() {
   const { activeProperty, addProperty } = useProperty();
+  // oxlint-disable-next-line react/purity -- the current year is read per render on purpose so it rolls over at New Year
   const currentYear = new Date().getFullYear();
   const [year, setYear] = useState(currentYear - 1);
   const [activeTab, setActiveTab] = useState<Tab>("kosten");

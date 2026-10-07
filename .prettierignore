@@ -1,0 +1,3 @@
+# Per-app formatter exclusions. `.oxfmtrc.json` is owned by web-base and
+# `update` overwrites it — put app-specific paths here instead (gitignore
+# syntax; oxfmt reads this file next to .gitignore).

@@ -190,6 +190,7 @@ export function MeterList() {
     meter: Meter,
   ): { status: "green" | "yellow" | "red" | "gray"; label: string } => {
     if (!meter.calibrationDue) return { status: "gray", label: "Keine Eichfrist" };
+    // oxlint-disable-next-line react/purity -- calibration status is relative to today on purpose
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const due = new Date(`${meter.calibrationDue}T00:00:00`);

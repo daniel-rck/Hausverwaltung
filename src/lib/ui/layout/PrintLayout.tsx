@@ -7,6 +7,8 @@ interface PrintLayoutProps {
 }
 
 export function PrintLayout({ title, subtitle, children }: PrintLayoutProps) {
+  // oxlint-disable-next-line react/purity -- the print footer shows the date the page is rendered/printed
+  const printedOn = new Date().toLocaleDateString("de-DE");
   return (
     <div className="print-container">
       <div className="print-only mb-6">
@@ -16,7 +18,7 @@ export function PrintLayout({ title, subtitle, children }: PrintLayoutProps) {
       </div>
       {children}
       <div className="print-only mt-8 text-xs text-fg-subtle">
-        Erstellt am {new Date().toLocaleDateString("de-DE")} | Hausverwaltung
+        Erstellt am {printedOn} | Hausverwaltung
       </div>
     </div>
   );

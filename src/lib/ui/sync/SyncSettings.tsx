@@ -201,6 +201,7 @@ export function SyncSettings() {
               inputMode="numeric"
               pattern="[0-9]*"
               autoComplete="one-time-code"
+              // oxlint-disable-next-line jsx-a11y/no-autofocus -- the OTP field appears only after the user chose to pair; it is the step's only input
               autoFocus
               maxLength={6}
               value={otpInput}

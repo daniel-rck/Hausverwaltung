@@ -210,7 +210,7 @@ export function GesamtrechnungCard({ propertyId, year }: GesamtrechnungCardProps
             </div>
             {s.purchases.map((purchase, i) => (
               <div
-                // biome-ignore lint/suspicious/noArrayIndexKey: Zeilen haben keine stabile Identität
+                // oxlint-disable-next-line react/no-array-index-key -- Zeilen haben keine stabile Identität
                 key={i}
                 className="grid grid-cols-[1fr_8rem_8rem_2rem] gap-2 items-center"
               >
@@ -420,7 +420,7 @@ function PositionList({
       <p className="text-sm font-medium text-fg mb-2">{title}</p>
       <div className="space-y-2">
         {positions.map((position, i) => (
-          // biome-ignore lint/suspicious/noArrayIndexKey: Zeilen haben keine stabile Identität
+          // oxlint-disable-next-line react/no-array-index-key -- Zeilen haben keine stabile Identität
           <div key={i} className="grid grid-cols-[1fr_8rem_2rem] gap-2 items-center">
             <TextCell
               value={position.label}

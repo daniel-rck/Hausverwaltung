@@ -13,7 +13,9 @@ describe("pair-crypto", () => {
   it("rejects unwrap with the wrong OTP (AEAD failure)", async () => {
     const secret = "some-32-byte-base32-secret-string";
     const wrapped = await wrapSecretForPairing(secret, "111111");
-    await expect(unwrapSecretFromPairing("222222", wrapped)).rejects.toThrow();
+    await expect(unwrapSecretFromPairing("222222", wrapped)).rejects.toMatchObject({
+      name: "OperationError",
+    });
   });
 
   it("rejects unwrap when the ciphertext was tampered with", async () => {
@@ -25,7 +27,9 @@ describe("pair-crypto", () => {
     const flipped =
       decoded.slice(0, 0) + String.fromCharCode(decoded.charCodeAt(0) ^ 0x01) + decoded.slice(1);
     const tampered = { ...wrapped, wrappedSecret: btoa(flipped) };
-    await expect(unwrapSecretFromPairing(otp, tampered)).rejects.toThrow();
+    await expect(unwrapSecretFromPairing(otp, tampered)).rejects.toMatchObject({
+      name: "OperationError",
+    });
   });
 
   it("rejects unwrap when the AAD nonce was changed", async () => {
@@ -36,7 +40,7 @@ describe("pair-crypto", () => {
     const corruptedNonce = btoa("xxxxxxxx");
     await expect(
       unwrapSecretFromPairing(otp, { ...wrapped, nonce: corruptedNonce }),
-    ).rejects.toThrow();
+    ).rejects.toMatchObject({ name: "OperationError" });
   });
 
   it("produces different ciphertext for the same secret on repeated calls", async () => {

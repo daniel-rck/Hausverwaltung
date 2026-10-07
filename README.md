@@ -51,7 +51,8 @@ Cloudflare Workers + R2 + KV · Bun 1.3 · Vitest
 | `bun dev` | Dev-Server (Vite) auf :5173 |
 | `bun dev:cf` | Worker + SPA via Wrangler |
 | `bun run build` | Production-Build (`dist/`) |
-| `bun run lint` | ESLint |
+| `bun run lint` | oxlint + oxfmt (Format-Check) |
+| `bun run format` | oxfmt (formatiert) |
 | `bun run typecheck` | TypeScript-Check (App + Worker) |
 | `bun run test` | Vitest (watch) |
 | `bun run test:run` | Vitest (single run, CI) |

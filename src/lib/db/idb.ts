@@ -180,7 +180,7 @@ export function isSyncable(store: string): boolean {
   return !NON_SYNCABLE.has(store);
 }
 
-// biome-ignore lint/suspicious/noExplicitAny: idb-Versions-Transaktion ist generisch
+// oxlint-disable-next-line typescript/no-explicit-any -- the idb versionchange transaction is generic over the schema
 type UpgradeTx = IDBPTransaction<unknown, any, "versionchange">;
 
 async function dedupeUnique(

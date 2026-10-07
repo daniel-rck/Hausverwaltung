@@ -1,0 +1,25 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "extends": ["./oxlint.base.json"],
+  "overrides": [
+    {
+      "files": ["scripts/**"],
+      "rules": {
+        "no-console": "off"
+      }
+    },
+    {
+      "files": ["**/__tests__/**", "**/*.test.ts", "**/*.test.tsx"],
+      "rules": {
+        "typescript/no-non-null-assertion": "off"
+      }
+    },
+    {
+      "files": ["src/lib/db/useLiveQuery.ts"],
+      "rules": {
+        "react/refs": "off",
+        "react/exhaustive-deps": "off"
+      }
+    }
+  ]
+}

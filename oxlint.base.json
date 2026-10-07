@@ -1,0 +1,22 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "unicorn", "oxc", "import", "react", "jsx-a11y", "vitest"],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "warn"
+  },
+  "env": { "builtin": true, "browser": true, "es2024": true },
+  "ignorePatterns": ["dist/**", ".wrangler/**", "dev-dist/**"],
+  "rules": {
+    "react/rules-of-hooks": "error",
+    "react/exhaustive-deps": "warn",
+    "react/react-in-jsx-scope": "off",
+    "typescript/no-explicit-any": "warn",
+    "typescript/no-non-null-assertion": "warn",
+    "no-console": ["warn", { "allow": ["error", "warn"] }],
+    "no-underscore-dangle": "off",
+    "unicorn/require-post-message-target-origin": "off",
+    "jsx-a11y/prefer-tag-over-role": "off",
+    "import/no-unassigned-import": ["warn", { "allow": ["**/*.css"] }]
+  }
+}

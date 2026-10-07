@@ -258,6 +258,7 @@ export function DataTable<T>({
                     ))}
                   </dl>
                   {actionCols.length > 0 && (
+                    // oxlint-disable-next-line jsx-a11y/interactive-supports-focus -- the toolbar only groups the row's own focusable buttons and keeps their clicks from opening the row
                     <div
                       role="toolbar"
                       aria-label="Aktionen"

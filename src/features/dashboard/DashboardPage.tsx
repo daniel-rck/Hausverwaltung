@@ -342,6 +342,7 @@ function WelcomeModal({ open, onClose, onCreate }: WelcomeModalProps) {
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
             placeholder="z. B. Hauptstr. 12"
+            // oxlint-disable-next-line jsx-a11y/no-autofocus -- first field of a modal dialog the user opened
             autoFocus
           />
         </FormField>

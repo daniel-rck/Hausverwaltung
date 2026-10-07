@@ -16,12 +16,12 @@ vi.mock("./cf-client", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./cf-client")>();
   return {
     ...actual,
-    isEnabled: vi.fn(() => false),
-    getSyncId: vi.fn(() => "test-id"),
-    enableAsOwner: vi.fn(async () => ({ id: "test-id" })),
-    disable: vi.fn(),
-    downloadSyncFile: vi.fn(async () => null),
-    uploadSyncFile: vi.fn(async () => "etag-1"),
+    isEnabled: vi.fn<typeof actual.isEnabled>(() => false),
+    getSyncId: vi.fn<typeof actual.getSyncId>(() => "test-id"),
+    enableAsOwner: vi.fn<typeof actual.enableAsOwner>(async () => ({ id: "test-id" })),
+    disable: vi.fn<typeof actual.disable>(),
+    downloadSyncFile: vi.fn<typeof actual.downloadSyncFile>(async () => null),
+    uploadSyncFile: vi.fn<typeof actual.uploadSyncFile>(async () => "etag-1"),
   };
 });
 

@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   # Wiederverwendbarer Workflow der web-base-Foundation:
-  # lint (Biome) → typecheck (App + SW + Worker) → test (Vitest) → build (SPA + SW).
+  # lint (oxlint + oxfmt) → typecheck (App + SW + Worker) → test (Vitest) → build (SPA + SW).
   # Worker-Deploy/Dry-Run übernimmt Cloudflare Workers Builds (Git-Integration).
   ci:
     uses: daniel-rck/web-base/.github/workflows/web-app-ci.yml@main
