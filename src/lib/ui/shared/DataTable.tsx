@@ -142,7 +142,7 @@ export function DataTable<T>({
                     setPage(0);
                   }}
                   placeholder={searchPlaceholder}
-                  className="h-8 w-full rounded-md border border-border bg-surface text-sm pl-8 pr-3 placeholder:text-fg-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:border-accent"
+                  className="h-8 w-full rounded-md border border-border bg-surface text-sm pl-8 pr-3 placeholder:text-fg-subtle focus-visible:outline-2 focus-visible:outline-accent-500 focus-visible:border-accent"
                 />
               </div>
             ) : (
@@ -258,6 +258,7 @@ export function DataTable<T>({
                     ))}
                   </dl>
                   {actionCols.length > 0 && (
+                    // oxlint-disable-next-line jsx-a11y/interactive-supports-focus -- the toolbar only groups the row's own focusable buttons and keeps their clicks from opening the row
                     <div
                       role="toolbar"
                       aria-label="Aktionen"

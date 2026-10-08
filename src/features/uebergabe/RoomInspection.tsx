@@ -88,7 +88,7 @@ export function RoomInspection({ rooms, onChange }: RoomInspectionProps) {
   return (
     <div className="space-y-4">
       {rooms.map((room, index) => (
-        // biome-ignore lint/suspicious/noArrayIndexKey: editierbare Positionsliste ohne stabile ID (stabile IDs folgen mit dem Schema-Umbau in Phase 4)
+        // oxlint-disable-next-line react/no-array-index-key -- editierbare Positionsliste ohne stabile ID (stabile IDs folgen mit dem Schema-Umbau in Phase 4)
         <Card key={index}>
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-semibold text-fg">{room.name}</h3>

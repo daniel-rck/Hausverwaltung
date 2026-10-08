@@ -135,6 +135,7 @@ function AddPropertyModal({ open, onClose, onCreate }: AddPropertyModalProps) {
             onChange={(e) => setForm({ ...form, name: e.target.value })}
             onBlur={() => validateField("name", form)}
             placeholder="z. B. Hauptstr. 12"
+            // oxlint-disable-next-line jsx-a11y/no-autofocus -- first field of a modal dialog the user opened
             autoFocus
           />
         </FormField>

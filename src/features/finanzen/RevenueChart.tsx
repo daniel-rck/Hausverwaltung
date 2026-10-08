@@ -36,8 +36,8 @@ export function RevenueChart({ year }: RevenueChartProps) {
 
     const { occupancies, allPayments, rentChanges } = data;
     const rentAt = buildRentLookup(rentChanges);
-    const expected: number[] = new Array(12).fill(0) as number[];
-    const received: number[] = new Array(12).fill(0) as number[];
+    const expected: number[] = Array.from({ length: 12 }, () => 0);
+    const received: number[] = Array.from({ length: 12 }, () => 0);
 
     const yearStart = `${year}-01`;
     const yearEnd = `${year}-12`;

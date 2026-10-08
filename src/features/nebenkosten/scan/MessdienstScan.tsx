@@ -255,6 +255,7 @@ export function MessdienstScan({ propertyId, year }: MessdienstScanProps) {
                 className="!h-9 max-w-[120px]"
               >
                 {buildYearOptions({
+                  // oxlint-disable-next-line react/purity -- the current year only widens the option list; reading it per render is intended
                   currentYear: Math.max(new Date().getFullYear(), reviewYear),
                 }).map((y) => (
                   <option key={y} value={y}>

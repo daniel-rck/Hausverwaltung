@@ -1,14 +1,17 @@
 import { Download, Share } from "lucide-react";
-import { useEffect, useRef } from "react";
-import { Button } from "./primitives.tsx";
+import { useCallback, useId, useRef } from "react";
+import { Button } from "./Button.tsx";
 import { useInstallPrompt } from "./useInstallPrompt.ts";
 
 export function InstallButton() {
   const { canInstall, isIOS, isStandalone, promptInstall } = useInstallPrompt();
   const dialogRef = useRef<HTMLDialogElement | null>(null);
+  const titleId = useId();
 
-  useEffect(() => {
-    const dialog = dialogRef.current;
+  // A click on the backdrop lands on the <dialog> itself: close it. Wired via a
+  // ref callback (React 19 runs its cleanup) so it follows the element.
+  const attachDialog = useCallback((dialog: HTMLDialogElement | null) => {
+    dialogRef.current = dialog;
     if (!dialog) return;
     const onClick = (event: MouseEvent) => {
       if (event.target === dialog) dialog.close();
@@ -20,29 +23,35 @@ export function InstallButton() {
   if (isStandalone) return null;
   if (!isIOS && !canInstall) return null;
 
-  const handleClick = async () => {
-    if (isIOS) {
-      dialogRef.current?.showModal();
-      return;
-    }
-    await promptInstall();
+  const handleClick = () => {
+    if (isIOS) dialogRef.current?.showModal();
+    else void promptInstall();
   };
 
   return (
     <>
-      <Button variant="ghost" size="sm" onClick={handleClick} aria-label="App installieren">
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={handleClick}
+        aria-label="App installieren"
+        aria-haspopup={isIOS ? "dialog" : undefined}
+      >
         <Download className="h-4 w-4" aria-hidden="true" />
         <span className="hidden sm:inline">Installieren</span>
       </Button>
       {isIOS ? (
         <dialog
-          ref={dialogRef}
+          ref={attachDialog}
+          aria-labelledby={titleId}
           className="rounded-lg border border-border bg-surface p-0 text-fg backdrop:bg-black/40 max-w-sm w-[min(90vw,24rem)]"
         >
           <div className="p-5">
             <div className="flex items-center gap-2 mb-3">
               <Share className="h-5 w-5 text-accent-600" aria-hidden="true" />
-              <h2 className="text-base font-semibold">Zum Home-Bildschirm hinzufügen</h2>
+              <h2 id={titleId} className="text-base font-semibold">
+                Zum Home-Bildschirm hinzufügen
+              </h2>
             </div>
             <p className="text-sm text-fg-muted mb-3">
               Auf iPhone und iPad installierst du die App so:

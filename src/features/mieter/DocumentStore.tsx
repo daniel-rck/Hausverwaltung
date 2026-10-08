@@ -219,7 +219,9 @@ export function DocumentStore({ entityType, entityId, title = "Dokumente" }: Doc
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-border">
-                    <th className="text-left py-2 px-2 text-xs font-medium text-fg-muted w-8" />
+                    <th className="text-left py-2 px-2 text-xs font-medium text-fg-muted w-8">
+                      <span className="sr-only">Typ</span>
+                    </th>
                     <th className="text-left py-2 px-2 text-xs font-medium text-fg-muted">Name</th>
                     <th className="text-right py-2 px-2 text-xs font-medium text-fg-muted">
                       Größe

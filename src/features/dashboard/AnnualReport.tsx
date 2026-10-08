@@ -16,6 +16,7 @@ type AnnualReportProps = {
 };
 
 export function AnnualReport({ propertyId }: AnnualReportProps) {
+  // oxlint-disable-next-line react/purity -- the current year is read per render on purpose so it rolls over at New Year
   const currentYear = new Date().getFullYear();
   const [year, setYear] = useState(currentYear);
   const yearId = useId();

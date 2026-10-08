@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 
 export type Theme = "light" | "dark" | "system";
 
@@ -9,11 +9,12 @@ export type UseThemeResult = {
 };
 
 const STORAGE_KEY = "theme";
+const DARK_QUERY = "(prefers-color-scheme: dark)";
 
 /**
  * The anti-flash snippet, as a string. Prefer the shipped `public/theme-init.js`
- * and a `<script src="/theme-init.js">` tag: an external file lets a Worker CSP
- * stay `script-src 'self'` instead of pinning a `sha256-` hash that breaks
+ * and a `<script src="/theme-init.js">` tag: an external file lets a CSP stay
+ * `script-src 'self'` instead of pinning a `sha256-` hash that breaks
  * silently whenever the snippet changes. This export exists for apps that must
  * inline it anyway. Keep the two in sync.
  */
@@ -33,50 +34,77 @@ function readStoredTheme(): Theme {
   return "system";
 }
 
-function systemPrefersDark(): boolean {
-  if (typeof window === "undefined") return false;
-  return window.matchMedia?.("(prefers-color-scheme: dark)").matches ?? false;
-}
-
 function applyTheme(theme: Theme): void {
   if (typeof document === "undefined") return;
-  if (theme === "system") {
-    document.documentElement.removeAttribute("data-theme");
-  } else {
-    document.documentElement.setAttribute("data-theme", theme);
+  if (theme === "system") document.documentElement.removeAttribute("data-theme");
+  else document.documentElement.setAttribute("data-theme", theme);
+}
+
+// One store for the whole page: every useTheme() call — the header toggle, a
+// chart reading resolvedTheme — sees the same value, and other tabs follow
+// through the `storage` event.
+let current: Theme | undefined;
+const listeners = new Set<() => void>();
+
+function getTheme(): Theme {
+  current ??= readStoredTheme();
+  return current;
+}
+
+function emit(): void {
+  for (const listener of listeners) listener();
+}
+
+function onStorage(event: StorageEvent): void {
+  // `key === null` is localStorage.clear() in another tab ("Alle Daten löschen").
+  if (event.key !== null && event.key !== STORAGE_KEY) return;
+  current = readStoredTheme();
+  applyTheme(current);
+  emit();
+}
+
+function subscribeTheme(listener: () => void): () => void {
+  if (listeners.size === 0) {
+    window.addEventListener("storage", onStorage);
+    // Reconcile the DOM (which theme-init.js may have set) with the store.
+    applyTheme(getTheme());
   }
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+    if (listeners.size === 0) window.removeEventListener("storage", onStorage);
+  };
+}
+
+export function setTheme(next: Theme): void {
+  current = next;
+  try {
+    localStorage.setItem(STORAGE_KEY, next);
+  } catch {
+    // Persistence is best-effort; the choice still applies for this session.
+  }
+  applyTheme(next);
+  emit();
+}
+
+// jsdom (and old browsers) have no matchMedia: follow "light" there.
+const hasMatchMedia = () =>
+  typeof window !== "undefined" && typeof window.matchMedia === "function";
+
+function systemPrefersDark(): boolean {
+  return hasMatchMedia() && window.matchMedia(DARK_QUERY).matches;
+}
+
+function subscribeSystem(listener: () => void): () => void {
+  if (!hasMatchMedia()) return () => {};
+  const mql = window.matchMedia(DARK_QUERY);
+  mql.addEventListener("change", listener);
+  return () => mql.removeEventListener("change", listener);
 }
 
 export function useTheme(): UseThemeResult {
-  const [theme, setThemeState] = useState<Theme>(() => readStoredTheme());
-  const [systemDark, setSystemDark] = useState<boolean>(() => systemPrefersDark());
-
-  const setTheme = useCallback((next: Theme) => {
-    setThemeState(next);
-    if (typeof window === "undefined") return;
-    try {
-      localStorage.setItem(STORAGE_KEY, next);
-    } catch {
-      // Persistence is best-effort; the choice still applies for this session.
-    }
-    applyTheme(next);
-  }, []);
-
-  // Reconcile the DOM (which the inline init script may have set) with state.
-  useEffect(() => {
-    applyTheme(theme);
-  }, [theme]);
-
-  // Keep resolvedTheme live when following the system in "system" mode.
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const mql = window.matchMedia("(prefers-color-scheme: dark)");
-    const onChange = (event: MediaQueryListEvent) => setSystemDark(event.matches);
-    mql.addEventListener("change", onChange);
-    return () => mql.removeEventListener("change", onChange);
-  }, []);
-
+  const theme = useSyncExternalStore(subscribeTheme, getTheme, () => "system" as const);
+  const systemDark = useSyncExternalStore(subscribeSystem, systemPrefersDark, () => false);
   const resolvedTheme = theme === "system" ? (systemDark ? "dark" : "light") : theme;
-
   return { theme, resolvedTheme, setTheme };
 }

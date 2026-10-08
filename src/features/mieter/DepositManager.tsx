@@ -95,6 +95,7 @@ export function DepositManager({ occupancy }: DepositManagerProps) {
     const [y = 0, m = 1] = occupancy.to.split("-").map(Number);
     const deadline = new Date(Date.UTC(y, m - 1 + 6, 1));
 
+    // oxlint-disable-next-line react/purity -- the move-out deadline is compared against today on purpose
     const now = new Date();
     if (now > deadline) {
       const dd = String(deadline.getUTCDate()).padStart(2, "0");

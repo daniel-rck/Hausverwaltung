@@ -14,16 +14,17 @@ concurrency:
 
 jobs:
   # Wiederverwendbarer Workflow der web-base-Foundation:
-  # lint (Biome) → typecheck (App + SW + Worker) → test (Vitest) → build (SPA + SW).
+  # lint (oxlint + oxfmt) → typecheck (App + SW + Worker) → test (Vitest) → build (SPA + SW).
+  # Bun kommt aus `packageManager` in package.json.
   # Worker-Deploy/Dry-Run übernimmt Cloudflare Workers Builds (Git-Integration).
   ci:
-    uses: daniel-rck/web-base/.github/workflows/web-app-ci.yml@main
-    with:
-      bun-version: "1.3.11"
+    uses: daniel-rck/web-base/.github/workflows/web-app-ci.yml@v0.6.0
 
   # Bricht den Build, wenn ein *owned* web-base-Baustein von der Basis
-  # abgewichen ist. Scaffold-Nähte (theme.css-Akzent, DB-Schema, Routen,
-  # Worker-Handler) bleiben unangetastet. Pin auf @main statt auf einen
-  # Version-Tag, bis v0.3.0 auf web-bases main getaggt ist; danach @v0.3.0.
+  # abgewichen ist, ein core-Baustein fehlt oder ein Altbestand übrig ist.
+  # Scaffold-Nähte (theme.css-Akzent, DB-Schema, Routen, Worker-Handler)
+  # bleiben unangetastet. Die CLI läuft in der Version aus `webBase.version`.
   web-base-check:
-    uses: daniel-rck/web-base/.github/workflows/web-base-check.yml@main
+    uses: daniel-rck/web-base/.github/workflows/web-base-check.yml@v0.6.0
+    with:
+      strict: true

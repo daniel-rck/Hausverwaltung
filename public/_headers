@@ -1,0 +1,30 @@
+# Security and caching headers for static-asset responses: index.html (also as
+# the SPA fallback), /assets/*, icons, the manifest, the service worker.
+# Cloudflare applies this file to static assets only, never to responses the
+# Worker generates — worker/base.ts sets the headers on those.
+#
+# CSP and Permissions-Policy are per app: widen them deliberately (connect-src
+# for an external API, camera=(self) for a scanner) and say why in the commit.
+# - script-src 'self' needs no hashes: public/theme-init.js is an external file
+#   and Vite's module scripts are same-origin.
+# - React `style` props go through the CSSOM, which style-src doesn't restrict.
+# - No upgrade-insecure-requests: it breaks `wrangler dev` on http://localhost.
+# Hausverwaltung:
+# - connect-src: the optional bill scan calls the Gemini API straight from the
+#   browser with the user's own key (src/lib/gemini/extract.ts).
+# - object-src 'self' blob:: stored PDFs open as blob: URLs in a new tab
+#   (DocumentStore), and a blob: document inherits this policy — keep the
+#   browser's PDF viewer allowed there instead of 'none'.
+# - img-src data: blob:: documents and photos are stored as data: URLs.
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://generativelanguage.googleapis.com; worker-src 'self'; manifest-src 'self'; object-src 'self' blob:; base-uri 'self'; form-action 'self'; frame-ancestors 'none'
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), browsing-topics=()
+  Cross-Origin-Opener-Policy: same-origin
+
+# Vite's build output is content-hashed: a name never gets new content.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable

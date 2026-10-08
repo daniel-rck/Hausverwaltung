@@ -4,7 +4,7 @@
 [![Lizenz: MIT](https://img.shields.io/badge/Lizenz-MIT-blue.svg)](./LICENSE)
 [![Live Demo](https://img.shields.io/badge/Live-Demo-22c55e)](https://hausverwaltung.daniel-rck.workers.dev/)
 ![React 19](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)
-![TypeScript](https://img.shields.io/badge/TypeScript-6-3178C6?logo=typescript&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-7-3178C6?logo=typescript&logoColor=white)
 ![Cloudflare Workers](https://img.shields.io/badge/Cloudflare-Workers-F38020?logo=cloudflare&logoColor=white)
 ![Bun](https://img.shields.io/badge/Bun-1.3-000?logo=bun&logoColor=white)
 ![PWA](https://img.shields.io/badge/PWA-ready-5A0FC8)
@@ -36,12 +36,12 @@ bun dev                  # SPA auf http://localhost:5173
 Für lokales Sync-Backend (Worker + R2 + KV via Miniflare):
 
 ```bash
-bun dev:cf               # Worker + SPA gemeinsam
+bun run worker:dev       # Worker + SPA gemeinsam
 ```
 
 ## Stack
 
-React 19 · TypeScript 6 · Vite 8 · Tailwind 4 · Dexie (IndexedDB) ·
+React 19 · TypeScript 7 · Vite 8 · Tailwind 4 · idb (IndexedDB) ·
 Cloudflare Workers + R2 + KV · Bun 1.3 · Vitest
 
 ## Scripts
@@ -49,19 +49,22 @@ Cloudflare Workers + R2 + KV · Bun 1.3 · Vitest
 | Script | Zweck |
 |---|---|
 | `bun dev` | Dev-Server (Vite) auf :5173 |
-| `bun dev:cf` | Worker + SPA via Wrangler |
+| `bun run worker:dev` | Worker + SPA via Wrangler |
 | `bun run build` | Production-Build (`dist/`) |
-| `bun run lint` | ESLint |
+| `bun run lint` | oxlint + oxfmt (Format-Check) |
+| `bun run format` | oxfmt (formatiert) |
 | `bun run typecheck` | TypeScript-Check (App + Worker) |
-| `bun run test` | Vitest (watch) |
+| `bun run test` | Vitest (single run) |
 | `bun run test:run` | Vitest (single run, CI) |
-| `bun run deploy:cf` | Manuelles Deploy via Wrangler |
+| `bun run worker:deploy` | Manuelles Deploy via Wrangler |
 
 ## Architektur
 
-SPA (`src/`) — 11 Module unter `src/modules/`, Dexie-Schema in `src/db/`,
-Sync-Client in `src/sync/`. Cloudflare Worker (`worker/`) routet `/api/*`
-an die Sync-Handler und liefert sonst die statischen Assets. Sync ist
+SPA (`src/`) auf der Foundation [web-base](https://github.com/daniel-rck/web-base):
+Module unter `src/features/`, IndexedDB-Schema in `src/lib/db/`, Sync-Client in
+`src/lib/sync/`, Routen (Hash-Router) in `src/lib/router.tsx`. Cloudflare Worker
+(`worker/`) routet `/api/*` an die Sync-Handler und liefert sonst die statischen
+Assets. Sync ist
 clientseitig verschlüsselt; konflikt-resolved via R2-ETag (`If-Match`).
 
 Deploy-Setup & Free-Tier-Bindings: **[SETUP.md](./SETUP.md)**

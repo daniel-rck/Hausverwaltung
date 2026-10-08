@@ -1,0 +1,180 @@
+/*
+ * Design tokens for daniel-rck web apps. OWNED by web-base: `web-base update`
+ * overwrites this file, so never edit it in an app. The per-app seam is
+ * theme.css, which imports this file and sets the accent hue.
+ */
+
+@import "tailwindcss";
+
+/*
+ * Make Tailwind's `dark:` variant follow the manual theme choice, not just the
+ * OS. It triggers when the OS prefers dark AND the user hasn't forced light, or
+ * when the user has forced dark — mirroring the token logic below so utilities
+ * like `dark:bg-accent-900/40` stay in sync with the surface tokens. Only the
+ * root carries `data-theme`, so both alternatives are anchored to `:root`.
+ */
+@custom-variant dark {
+  @media (prefers-color-scheme: dark) {
+    &:where(:root:not([data-theme="light"]), :root:not([data-theme="light"]) *) {
+      @slot;
+    }
+  }
+  &:where([data-theme="dark"], [data-theme="dark"] *) {
+    @slot;
+  }
+}
+
+@theme {
+  /* ── Accent ───────────────────────────────────────────── */
+  /* Fallback only — theme.css sets the app's hue. */
+  --accent-h: 355;
+
+  --color-accent-50: oklch(0.97 0.02 var(--accent-h));
+  --color-accent-100: oklch(0.94 0.04 var(--accent-h));
+  --color-accent-200: oklch(0.88 0.08 var(--accent-h));
+  --color-accent-300: oklch(0.8 0.12 var(--accent-h));
+  --color-accent-400: oklch(0.7 0.16 var(--accent-h));
+  --color-accent-500: oklch(0.6 0.18 var(--accent-h));
+  --color-accent-600: oklch(0.49 0.18 var(--accent-h));
+  --color-accent-700: oklch(0.43 0.16 var(--accent-h));
+  --color-accent-800: oklch(0.37 0.13 var(--accent-h));
+  --color-accent-900: oklch(0.28 0.1 var(--accent-h));
+
+  /* ── Surfaces ──────────────────────────────────────────── */
+  --color-surface: oklch(1 0 0);
+  --color-surface-muted: oklch(0.97 0 0);
+  --color-surface-sunken: oklch(0.94 0 0);
+  --color-border: oklch(0.88 0 0);
+  --color-fg: oklch(0.18 0 0);
+  --color-fg-muted: oklch(0.45 0 0);
+  --color-fg-subtle: oklch(0.54 0 0);
+
+  /* Foreground for text sitting on a saturated fill (accent/danger buttons,
+   * the active chip). `--color-fg` is near-black in light mode, so it is the
+   * wrong token there — this one stays light in both themes. */
+  --color-fg-on-accent: oklch(0.99 0 0);
+
+  /* ── Semantic ──────────────────────────────────────────── */
+  /* Reserved hues: danger 25, warning 80, success 150, info 230. App accents
+   * keep ≥25° away (04-layout-system.md). The fills are for icons, borders and
+   * tints; text on a tint uses the matching `-fg` token. */
+  --color-success: oklch(0.65 0.17 150);
+  --color-warning: oklch(0.75 0.15 80);
+  --color-danger: oklch(0.55 0.2 25);
+  --color-danger-strong: oklch(0.48 0.19 25);
+  --color-info: oklch(0.65 0.15 230);
+
+  --color-success-fg: oklch(0.48 0.13 150);
+  --color-warning-fg: oklch(0.5 0.11 80);
+  --color-danger-fg: oklch(0.5 0.19 25);
+  --color-info-fg: oklch(0.48 0.13 230);
+
+  /* ── Typography ────────────────────────────────────────── */
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+
+  /* ── Radii ─────────────────────────────────────────────── */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+
+  /* ── Shadows ───────────────────────────────────────────── */
+  --shadow-sm: 0 1px 2px 0 oklch(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px oklch(0 0 0 / 0.1), 0 2px 4px -2px oklch(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px oklch(0 0 0 / 0.1), 0 4px 6px -4px oklch(0 0 0 / 0.1);
+
+  /* ── Animation ─────────────────────────────────────────── */
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --duration-fast: 150ms;
+  --duration-base: 250ms;
+  --duration-slow: 400ms;
+
+  --animate-fade-in: fade-in var(--duration-base) var(--ease-out-quart) both;
+  --animate-slide-up: slide-up var(--duration-base) var(--ease-out-quart) both;
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+  }
+  @keyframes slide-up {
+    from {
+      opacity: 0;
+      transform: translateY(0.5rem);
+    }
+  }
+}
+
+/*
+ * Dark tokens. `@theme` only works at top level, so dark values are plain
+ * custom-property overrides on `:root` (utilities read them via `var()`).
+ * Three states: no `data-theme` = follow the OS; `data-theme="dark"` / `"light"`
+ * = forced. The dark token list appears twice — once in the media query (system)
+ * and once on the forced selector — because CSS can't share one declaration
+ * block across a media query and a plain selector. A test keeps them identical.
+ */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-surface: oklch(0.18 0 0);
+    --color-surface-muted: oklch(0.22 0 0);
+    --color-surface-sunken: oklch(0.14 0 0);
+    --color-border: oklch(0.3 0 0);
+    --color-fg: oklch(0.95 0 0);
+    --color-fg-muted: oklch(0.7 0 0);
+    --color-fg-subtle: oklch(0.62 0 0);
+    --color-success-fg: oklch(0.8 0.14 150);
+    --color-warning-fg: oklch(0.85 0.13 80);
+    --color-danger-fg: oklch(0.78 0.13 25);
+    --color-info-fg: oklch(0.8 0.11 230);
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --color-surface: oklch(0.18 0 0);
+  --color-surface-muted: oklch(0.22 0 0);
+  --color-surface-sunken: oklch(0.14 0 0);
+  --color-border: oklch(0.3 0 0);
+  --color-fg: oklch(0.95 0 0);
+  --color-fg-muted: oklch(0.7 0 0);
+  --color-fg-subtle: oklch(0.62 0 0);
+  --color-success-fg: oklch(0.8 0.14 150);
+  --color-warning-fg: oklch(0.85 0.13 80);
+  --color-danger-fg: oklch(0.78 0.13 25);
+  --color-info-fg: oklch(0.8 0.11 230);
+  color-scheme: dark;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+/*
+ * Reduced motion: collapse animations and transitions to an instant for users
+ * who ask for it. The spinner keeps turning — it is the only signal that work
+ * is in progress, not decoration.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *:not(.animate-spin),
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+html {
+  color-scheme: light dark;
+}
+body {
+  background-color: var(--color-surface);
+  color: var(--color-fg);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}

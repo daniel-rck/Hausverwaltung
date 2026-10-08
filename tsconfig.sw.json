@@ -6,10 +6,16 @@
     "lib": ["ES2022", "WebWorker"],
     "strict": true,
     "noUncheckedIndexedAccess": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "skipLibCheck": true,
     "noEmit": true,
     "isolatedModules": true,
+    "moduleDetection": "force",
     "verbatimModuleSyntax": true,
+    "erasableSyntaxOnly": true,
+    "allowImportingTsExtensions": true,
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.sw.tsbuildinfo",
     "types": ["vite-plugin-pwa/client"]
   },
   "include": ["src/sw/**/*.ts"]

@@ -8,7 +8,11 @@ export default defineConfig({
         test: {
           name: "unit",
           include: ["src/**/*.test.ts", "src/**/*.test.tsx"],
-          environment: "node",
+          // jsdom + web-base's shared setup (fake-indexeddb, jest-dom matchers,
+          // Testing Library cleanup, a matchMedia stub). The setup touches
+          // `window`, so the unit project can't run in the node environment.
+          environment: "jsdom",
+          setupFiles: ["./src/test/setup.ts"],
         },
       },
       {

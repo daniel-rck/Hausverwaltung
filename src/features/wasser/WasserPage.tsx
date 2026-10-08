@@ -14,8 +14,8 @@ import { AnomalyAlerts } from "./AnomalyAlerts";
 import { DifferenzAnalyse } from "./DifferenzAnalyse";
 import { ProKopfChart } from "./ProKopfChart";
 import { SupplierBatchInput } from "./SupplierBatchInput";
-import { SupplierInput } from "./SupplierInput";
 import type { SupplierType } from "./supplierConfig";
+import { SupplierInput } from "./SupplierInput";
 import { WarmKaltRatio } from "./WarmKaltRatio";
 
 type EntryMode = "single" | "batch";

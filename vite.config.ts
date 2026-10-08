@@ -30,7 +30,8 @@ export default defineConfig({
       strategies: "injectManifest",
       srcDir: "src/sw",
       filename: "index.ts",
-      registerType: "autoUpdate",
+      // A new version waits for the user's go (UpdatePrompt); see src/sw/base.ts.
+      registerType: "prompt",
       injectRegister: false,
       manifest: false, // using public/manifest.json
       injectManifest: {
@@ -44,9 +45,9 @@ export default defineConfig({
     rollupOptions: {
       output: {
         // Selten ändernde Vendor-Libs vom App-Code trennen, damit sie bei
-        // App-Updates im Service-Worker-Cache (registerType: 'autoUpdate')
-        // erhalten bleiben. Reihenfolge beachten: react-router vor react,
-        // da dessen Pfad ebenfalls "react" enthält.
+        // App-Updates im Service-Worker-Precache unverändert bleiben.
+        // Reihenfolge beachten: react-router vor react, da dessen Pfad
+        // ebenfalls "react" enthält.
         manualChunks(id) {
           if (!id.includes("node_modules")) return;
           if (id.includes("react-router") || id.includes("/@remix-run/")) {

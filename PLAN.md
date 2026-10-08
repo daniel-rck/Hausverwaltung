@@ -113,4 +113,4 @@ Cross-Origin-Deployments und stabile Keys für RoomInspection/KeyHandover.
 
 ## Bewusst nicht umgesetzt (auch in Phase 2)
 - CORS headers if cross-origin `VITE_SYNC_API_URL` ever becomes a supported deployment; document the variable then. (Unsupported Deployment-Variante; Gold-Plating.)
-- Stable IDs for RoomInspection/KeyHandover rows (`key={index}`): Räume/Schlüssel haben keine natürliche Identität; persistente UI-IDs im Protokoll-JSON wären Schema-Rauschen. Bleibt beim dokumentierten biome-ignore, bis das Schema ohnehin angefasst wird.
+- Stable IDs for RoomInspection/KeyHandover rows (`key={index}`): Räume/Schlüssel haben keine natürliche Identität; persistente UI-IDs im Protokoll-JSON wären Schema-Rauschen. Bleibt beim dokumentierten `oxlint-disable-next-line`, bis das Schema ohnehin angefasst wird.

@@ -48,7 +48,7 @@ export function KeyHandover({ keys, onChange }: KeyHandoverProps) {
 
         {/* Rows */}
         {keys.map((key, index) => (
-          // biome-ignore lint/suspicious/noArrayIndexKey: editierbare Positionsliste ohne stabile ID (stabile IDs folgen mit dem Schema-Umbau in Phase 4)
+          // oxlint-disable-next-line react/no-array-index-key -- editierbare Positionsliste ohne stabile ID (stabile IDs folgen mit dem Schema-Umbau in Phase 4)
           <div key={index} className="grid grid-cols-[1fr_80px_40px] gap-2 items-center">
             <Input
               value={key.type}

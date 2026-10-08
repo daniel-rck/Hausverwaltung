@@ -28,7 +28,7 @@ cd Hausverwaltung
 bun install
 
 bun dev                  # SPA auf http://localhost:5173
-bun dev:cf               # Worker + SPA gemeinsam (für Sync-Tests)
+bun run worker:dev       # Worker + SPA gemeinsam (für Sync-Tests)
 bun test                 # Vitest im Watch-Modus
 bun run lint
 bun run typecheck
@@ -39,7 +39,8 @@ Voraussetzung: [Bun 1.3+](https://bun.sh).
 ## Code-Style
 
 - **TypeScript strict** — keine `any` ohne Begründung.
-- **Biome** entscheidet (Lint + Format) — `bun run lint` muss grün sein.
+- **oxlint + oxfmt** entscheiden (Lint + Format) — `bun run lint` muss grün sein,
+  `bun run format` formatiert.
 - Feature-Komponenten landen unter `src/features/<modul>/`, geteilte UI unter
   `src/lib/ui/`.
 - Bei neuen DB-Tabellen / Schema-Änderungen: Store/Indizes in `src/lib/db/idb.ts`
